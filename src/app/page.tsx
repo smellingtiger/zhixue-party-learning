@@ -36,22 +36,53 @@ import {
   Eye,
   Menu,
   Volume2,
-  VolumeX
+  VolumeX,
+  Quote,
+  BarChart3,
+  Headphones,
+  Save,
+  Instagram,
+  RefreshCw,
+  ArrowUp,
+  BookmarkCheck,
+  Highlighter,
+  PenTool,
+  Share,
+  Volume1,
+  RotateCcw,
+  PauseCircle,
+  PlayCircle,
+  Mic,
+  AlignLeft,
+  LayoutList,
+  ImagePlus,
+  Check,
+  Copy,
+  Download
 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 
 // 内容类型
-type ContentType = 'video' | 'image' | 'article';
+type ContentType = 'quote' | 'card' | 'infographic' | 'audio' | 'article';
+
+// 知识点
+interface KnowledgePoint {
+  text: string;
+  highlight?: boolean;
+}
 
 // 内容项
 interface ContentItem {
@@ -67,362 +98,334 @@ interface ContentItem {
   tags: string[];
   description: string;
   content?: string;
+  knowledgePoints: KnowledgePoint[];
+  keyPoint?: string; // 金句
+  stats?: { label: string; value: string }[]; // 数据统计
   likeCount: number;
   commentCount: number;
   isLiked: boolean;
   isBookmarked: boolean;
   isCompleted: boolean;
   progress?: number;
-  knowledgePoints?: string[];
   relatedCourseId?: number;
   createdAt: string;
 }
 
-// 课程章节
-interface CourseItem {
-  id: number;
-  title: string;
-  duration: string;
-  isCompleted: boolean;
-  isLocked: boolean;
-  progress?: number;
-}
-
-// 各频道内容数据
+// 各频道内容数据 - 纯文字流
 const channelContents: Record<string, ContentItem[]> = {
   recommend: [
+    // 金句海报
     {
       id: 1,
-      type: 'video',
-      title: '3分钟读懂新质生产力',
-      subtitle: '2024年最重要的经济概念',
-      source: '学习强国',
-      author: '权威解读',
-      duration: '3:24',
-      category: '时政',
+      type: 'quote',
+      title: '江山就是人民，人民就是江山',
+      subtitle: '习近平谈治国理政',
+      source: '人民日报',
+      author: '人民日报',
+      duration: '3秒海报',
+      category: '金句',
       channel: 'recommend',
-      tags: ['新质生产力', '经济', '高质量发展'],
-      description: '新质生产力是由技术革命性突破、生产要素创新性配置、产业深度转型升级而催生的先进生产力。',
-      likeCount: 12580,
-      commentCount: 856,
+      tags: ['人民至上', '治国理政', '核心理念'],
+      description: '党的二十大报告指出，人民是全面建设社会主义现代化国家的力量源泉。',
+      keyPoint: '江山就是人民，人民就是江山。这是一切工作的出发点和落脚点。',
+      knowledgePoints: [
+        { text: '人民至上 — 把人民利益放在最高位置', highlight: true },
+        { text: '江山 — 比喻国家政权和领土完整', highlight: false },
+        { text: '党的一切工作都是为了人民的根本利益', highlight: true },
+      ],
+      likeCount: 125800,
+      commentCount: 8560,
       isLiked: false,
       isBookmarked: false,
       isCompleted: false,
-      knowledgePoints: [
-        '新质生产力：由技术革命性突破催生的先进生产力',
-        '核心要素：高科技、高效能、高质量',
-      ],
-      relatedCourseId: 101,
       createdAt: '2小时前',
     },
+    // 卡片式摘要
     {
       id: 2,
-      type: 'image',
-      title: '二十大报告金句',
-      subtitle: '收藏！二十大报告中的经典论述',
-      source: '人民日报',
-      author: '人民日报',
-      duration: '3秒',
-      category: '时政',
+      type: 'card',
+      title: '2024年政府工作报告：十大关键数字',
+      subtitle: '一图读懂全年发展目标',
+      source: '新华社',
+      author: '新华社',
+      duration: '3分钟阅读',
+      category: '政策解读',
       channel: 'recommend',
-      tags: ['二十大', '金句', '重要论述'],
-      description: '二十大报告中这些金句，字字珠玑，值得收藏转发！',
+      tags: ['两会', '政府工作报告', '经济目标'],
+      description: 'GDP增长5%左右、城镇新增就业1200万人以上、居民消费价格涨幅3%左右...',
+      knowledgePoints: [
+        { text: 'GDP目标：5%左右 — 体现稳中求进', highlight: true },
+        { text: '就业目标：1200万+ — 民生之本', highlight: true },
+        { text: 'CPI目标：3%左右 — 物价稳定', highlight: false },
+      ],
       likeCount: 45600,
       commentCount: 2340,
       isLiked: true,
       isBookmarked: true,
       isCompleted: false,
-      knowledgePoints: [
-        '"江山就是人民，人民就是江山"',
-        '"以中国式现代化全面推进中华民族伟大复兴"'
-      ],
       createdAt: '4小时前',
     },
+    // 信息图表
     {
       id: 3,
-      type: 'article',
-      title: '深刻理解"两个确立"的决定性意义',
-      subtitle: '学习贯彻党的二十大精神专题',
-      source: '求是网',
-      author: '求是杂志',
-      duration: '8分钟阅读',
-      category: '理论',
+      type: 'infographic',
+      title: '2023年经济社会发展成就',
+      subtitle: '用数据说话',
+      source: '国家统计局',
+      author: '国家统计局',
+      duration: '2分钟浏览',
+      category: '数据图表',
       channel: 'recommend',
-      tags: ['两个确立', '二十大', '理论学习'],
-      description: '党的二十大报告指出，"两个确立"是党在新时代取得的重大政治成果，是推动党和国家事业取得历史性成就、发生历史性变革的决定性因素。',
-      content: `党的二十大报告指出，"两个确立"是党在新时代取得的重大政治成果，是推动党和国家事业取得历史性成就、发生历史性变革的决定性因素。
+      tags: ['经济成就', '数据可视化', '年度回顾'],
+      description: 'GDP突破126万亿元、粮食产量创新高、研发投入增长...',
+      stats: [
+        { label: 'GDP总量', value: '126万亿元' },
+        { label: '粮食产量', value: '13908亿斤' },
+        { label: '研发投入', value: '3.21万亿元' },
+        { label: '居民收入', value: '+6.1%' },
+      ],
+      knowledgePoints: [
+        { text: 'GDP总量突破126万亿 — 经济实力再上新台阶', highlight: true },
+        { text: '粮食产量创历史新高 — 端牢中国饭碗', highlight: true },
+        { text: '研发投入增长 — 创新驱动发展战略深入实施', highlight: false },
+      ],
+      likeCount: 67800,
+      commentCount: 3450,
+      isLiked: false,
+      isBookmarked: true,
+      isCompleted: false,
+      createdAt: '6小时前',
+    },
+    // 听书流
+    {
+      id: 4,
+      type: 'audio',
+      title: '党章诵读：第一章 党员',
+      subtitle: '逐字稿 + 音频伴读',
+      source: '有声党课',
+      author: '党员教育',
+      duration: '5分钟',
+      category: '党章学习',
+      channel: 'recommend',
+      tags: ['党章', '党员标准', '有声学习'],
+      description: '年满十八岁的中国工人、农民、军人、知识分子和其他社会阶层的先进分子...',
+      content: `年满十八岁的中国工人、农民、军人、知识分子和其他社会阶层的先进分子，承认党的纲领和章程，愿意参加党的一个组织并在其中积极工作、执行党的决议和按期交纳党费的，可以申请加入中国共产党。
 
-**一、"两个确立"的丰富内涵**
-
-"两个确立"，即确立习近平同志党中央的核心、全党的核心地位，确立习近平新时代中国特色社会主义思想的指导地位。
-
-**二、"两个确立"的决定性意义**
-
-1. **政治意义**：这是新时代最重大的政治成果
-2. **历史意义**：这是推动历史性变革的决定性因素
-3. **实践意义**：这是推进中国式现代化的根本保证
-
-**三、坚决做到"两个维护"**
-
-要把增强"四个意识"、坚定"四个自信"、做到"两个维护"作为最高政治原则和根本政治规矩。`,
+中国共产党党员永远是劳动人民的普通一员。除了法律和政策规定范围内的个人利益和工作职权以外，所有共产党员都不得谋求任何私利和特权。`,
+      knowledgePoints: [
+        { text: '入党条件：年满18岁、承认党章、愿意参加组织', highlight: true },
+        { text: '党员标准：永远是劳动人民的普通一员', highlight: true },
+        { text: '党员义务：不得谋求私利和特权', highlight: true },
+      ],
       likeCount: 28900,
       commentCount: 1567,
       isLiked: false,
       isBookmarked: true,
       isCompleted: false,
-      knowledgePoints: [
-        '两个确立：核心地位 + 指导地位',
-        '四个意识：政治、大局、核心、看齐',
-        '四个自信：道路、理论、制度、文化'
-      ],
-      createdAt: '6小时前',
-    },
-    {
-      id: 4,
-      type: 'video',
-      title: '中国共产党纪律处分条例解读',
-      subtitle: '第1集：总则与六大纪律',
-      source: '中央纪委',
-      author: '中央纪委',
-      duration: '12:35',
-      category: '党纪',
-      channel: 'recommend',
-      tags: ['党纪', '条例', '纪律建设'],
-      description: '新修订的《中国共产党纪律处分条例》深入解读...',
-      likeCount: 8900,
-      commentCount: 567,
-      isLiked: false,
-      isBookmarked: true,
-      isCompleted: false,
-      progress: 65,
-      knowledgePoints: [
-        '六大纪律：政治、组织、廉洁、群众、工作、生活纪律',
-      ],
-      relatedCourseId: 102,
       createdAt: '1天前',
     },
+    // 长文卡片
     {
       id: 5,
-      type: 'article',
-      title: '如何开好主题党日活动',
-      subtitle: '基层党务工作实务指南',
-      source: '党建工作实务',
-      author: '党务专家',
-      duration: '5分钟阅读',
-      category: '实务',
+      type: 'card',
+      title: '深刻理解"两个确立"的决定性意义',
+      subtitle: '学习贯彻党的二十大精神专题',
+      source: '求是网',
+      author: '求是杂志',
+      duration: '8分钟阅读',
+      category: '理论学习',
       channel: 'recommend',
-      tags: ['主题党日', '基层党建', '实务'],
-      description: '主题党日是党的组织生活的重要形式，如何把主题党日活动开展得既有意义又生动活泼？',
-      content: `主题党日是党的组织生活的重要形式，是加强党员教育管理、增强党组织凝聚力的有效载体。
+      tags: ['两个确立', '二十大', '理论武装'],
+      description: '"两个确立"是党在新时代取得的重大政治成果，是推动党和国家事业取得历史性成就、发生历史性变革的决定性因素。',
+      content: `党的二十大报告指出，"两个确立"是党在新时代取得的重大政治成果。
 
-**一、主题党日的基本要求**
+**一、"两个确立"的丰富内涵**
 
-1. 时间固定：每月至少一次
-2. 人员参与：全体党员参加
-3. 内容充实：紧扣中心工作
+"两个确立"，即确立习近平同志党中央的核心、全党的核心地位，确立习近平新时代中国特色社会主义思想的指导地位。
 
-**二、活动形式创新**
+**二、做到"两个维护"**
 
-- 集中学习与交流研讨相结合
-- 室内学习与实地参观相结合
-- 传统方式与新媒体手段相结合
-
-**三、注意事项**
-
-- 防止形式主义
-- 注重实际效果
-- 做好记录归档`,
-      likeCount: 6780,
-      commentCount: 456,
+要把增强"四个意识"、坚定"四个自信"、做到"两个维护"作为最高政治原则。`,
+      knowledgePoints: [
+        { text: '两个确立：核心地位 + 指导地位', highlight: true },
+        { text: '四个意识：政治、大局、核心、看齐', highlight: true },
+        { text: '两个维护：维护核心、维护权威', highlight: true },
+      ],
+      likeCount: 56700,
+      commentCount: 3450,
       isLiked: false,
       isBookmarked: false,
       isCompleted: false,
-      knowledgePoints: [
-        '主题党日：每月至少一次',
-        '参会人员：全体党员',
-        '活动形式：集中学习、实地参观、志愿服务等'
-      ],
       createdAt: '2天前',
     },
   ],
   politics: [
+    // 金句
     {
       id: 101,
-      type: 'article',
-      title: '政府工作报告要点速览',
-      subtitle: '2024年经济社会发展主要目标任务',
-      source: '新华社',
-      author: '新华社',
-      duration: '6分钟阅读',
+      type: 'quote',
+      title: '新发展理念',
+      subtitle: '创新、协调、绿色、开放、共享',
+      source: '党的十九届五中全会',
+      author: '中央党校',
+      duration: '海报',
       category: '时政',
       channel: 'politics',
-      tags: ['两会', '政府工作报告', '经济发展'],
-      description: '2024年政府工作报告中，这些要点值得关注...',
-      content: `2024年政府工作报告提出了经济社会发展的主要预期目标：
-
-**经济发展目标**
-- 国内生产总值增长5%左右
-- 城镇新增就业1200万人以上
-- 居民消费价格涨幅3%左右
-
-**重点工作部署**
-1. 大力推进现代化产业体系建设
-2. 加快发展新质生产力
-3. 扩大高水平对外开放
-4. 切实保障和改善民生`,
-      likeCount: 34500,
-      commentCount: 2340,
-      isLiked: false,
-      isBookmarked: false,
-      isCompleted: false,
+      tags: ['新发展理念', '五大理念', '发展指南'],
+      description: '坚持创新、协调、绿色、开放、共享的新发展理念，是我国经济发展的根本遵循。',
+      keyPoint: '创新是第一动力，协调是内生特点，绿色是普遍形态，开放是必由之路，共享是根本目的。',
       knowledgePoints: [
-        'GDP增长目标：5%左右',
-        '新质生产力：创新驱动发展',
-        '扩大开放：高质量引进来走出去'
+        { text: '创新 — 发展第一动力', highlight: true },
+        { text: '协调 — 解决发展不平衡', highlight: false },
+        { text: '绿色 — 人与自然和谐共生', highlight: false },
       ],
-      createdAt: '1小时前',
-    },
-    {
-      id: 102,
-      type: 'video',
-      title: '新质生产力一分钟解读',
-      subtitle: '什么是新质生产力？',
-      source: '人民日报',
-      author: '人民日报',
-      duration: '1:30',
-      category: '时政',
-      channel: 'politics',
-      tags: ['新质生产力', '经济', '创新'],
-      description: '一分钟带你了解什么是新质生产力',
       likeCount: 89000,
       commentCount: 5600,
       isLiked: true,
       isBookmarked: true,
       isCompleted: false,
-      knowledgePoints: [
-        '新质生产力：高科技、高效能、高质量',
-        '区别于传统生产力：创新驱动'
-      ],
-      createdAt: '3小时前',
+      createdAt: '1小时前',
     },
+    // 卡片
     {
-      id: 103,
-      type: 'image',
-      title: '2024年重点工作一览',
-      subtitle: '十大重点任务',
-      source: '中国政府网',
-      author: '中国政府网',
-      duration: '停留阅读',
+      id: 102,
+      type: 'card',
+      title: '政府工作报告要点速览',
+      subtitle: '2024年经济社会发展主要目标',
+      source: '新华社',
+      author: '新华社',
+      duration: '5分钟阅读',
       category: '时政',
       channel: 'politics',
-      tags: ['重点工作', '任务', '图解'],
-      description: '一张图读懂2024年十大重点任务',
-      likeCount: 23400,
-      commentCount: 890,
+      tags: ['两会', '政府工作报告', '经济'],
+      description: '2024年政府工作报告中，这些要点值得关注...',
+      knowledgePoints: [
+        { text: 'GDP增长5%左右 — 稳中求进', highlight: true },
+        { text: '新质生产力 — 创新驱动发展', highlight: true },
+        { text: '高质量发展 — 主旋律', highlight: false },
+      ],
+      likeCount: 34500,
+      commentCount: 2340,
+      isLiked: false,
+      isBookmarked: false,
+      isCompleted: false,
+      createdAt: '3小时前',
+    },
+    // 信息图表
+    {
+      id: 103,
+      type: 'infographic',
+      title: '新质生产力：一图读懂',
+      subtitle: '什么是新质生产力？如何发展？',
+      source: '人民日报',
+      author: '人民日报',
+      duration: '图表',
+      category: '时政',
+      channel: 'politics',
+      tags: ['新质生产力', '经济', '创新'],
+      description: '新质生产力是由技术革命性突破、生产要素创新性配置、产业深度转型升级而催生的先进生产力。',
+      stats: [
+        { label: '高科技', value: '核心标志' },
+        { label: '高效能', value: '内在要求' },
+        { label: '高质量', value: '最终目标' },
+      ],
+      knowledgePoints: [
+        { text: '新质生产力：高科技 + 高效能 + 高质量', highlight: true },
+        { text: '区别于传统生产力：创新驱动而非要素驱动', highlight: true },
+        { text: '发展路径：科技创新 + 产业升级', highlight: false },
+      ],
+      likeCount: 45600,
+      commentCount: 2890,
       isLiked: false,
       isBookmarked: true,
       isCompleted: false,
-      knowledgePoints: [
-        '科技创新引领现代化产业体系建设',
-        '深化重点领域改革',
-        '扩大高水平对外开放'
-      ],
       createdAt: '5小时前',
     },
   ],
   party: [
     {
       id: 201,
-      type: 'video',
-      title: '中国共产党百年奋斗史',
-      subtitle: '完整版讲座节选',
-      source: '中央党校',
-      author: '中央党校教授',
-      duration: '15:00',
-      category: '党史',
-      channel: 'party',
-      tags: ['党史', '党课', '百年奋斗'],
-      description: '系统讲述中国共产党百年奋斗的光辉历程...',
-      likeCount: 45600,
-      commentCount: 2340,
-      isLiked: true,
-      isBookmarked: true,
-      isCompleted: false,
-      knowledgePoints: [
-        '四个历史时期：站起来、富起来、强起来',
-        '伟大建党精神：坚持真理、坚守理想',
-      ],
-      relatedCourseId: 201,
-      createdAt: '1天前',
-    },
-    {
-      id: 202,
-      type: 'article',
+      type: 'card',
       title: '延安精神永放光芒',
       subtitle: '传承红色基因 赓续红色血脉',
       source: '求是网',
       author: '理论学习',
-      duration: '10分钟阅读',
+      duration: '6分钟阅读',
       category: '党史',
       channel: 'party',
       tags: ['延安精神', '红色基因', '革命精神'],
       description: '延安精神是中国共产党人取之不尽、用之不竭的宝贵精神财富...',
-      content: `延安精神的主要内容是：坚定正确的政治方向，解放思想、实事求是的思想路线，全心全意为人民服务的根本宗旨，自力更生、艰苦奋斗的创业精神。
-
-**一、坚定正确的政治方向**
-
-坚持正确的政治方向，是延安精神的灵魂。
-
-**二、解放思想、实事求是的思想路线**
-
-坚持一切从实际出发，理论联系实际。
-
-**三、全心全意为人民服务的根本宗旨**
-
-始终把人民利益放在第一位。
-
-**四、自力更生、艰苦奋斗的创业精神**
-
-艰苦创业是延安精神的显著特征。`,
+      knowledgePoints: [
+        { text: '坚定正确的政治方向 — 灵魂', highlight: true },
+        { text: '解放思想、实事求是 — 精髓', highlight: true },
+        { text: '全心全意为人民服务 — 宗旨', highlight: true },
+        { text: '自力更生、艰苦奋斗 — 本质特征', highlight: true },
+      ],
       likeCount: 18900,
       commentCount: 1230,
       isLiked: false,
       isBookmarked: false,
       isCompleted: false,
+      createdAt: '1天前',
+    },
+    {
+      id: 202,
+      type: 'quote',
+      title: '伟大建党精神',
+      subtitle: '中国共产党的精神之源',
+      source: '党史学习教育',
+      author: '党史办',
+      duration: '海报',
+      category: '党史',
+      channel: 'party',
+      tags: ['伟大建党精神', '精神谱系', '建党精神'],
+      description: '一百年前，中国共产党的先驱们创建了中国共产党，形成了坚持真理、坚守理想，践行初心、担当使命，不怕牺牲、英勇斗争，对党忠诚、不负人民的伟大建党精神。',
+      keyPoint: '坚持真理、坚守理想，践行初心、担当使命，不怕牺牲、英勇斗争，对党忠诚、不负人民。',
       knowledgePoints: [
-        '延安精神四要点：政治方向、思想路线、服务宗旨、创业精神',
-        '自力更生、艰苦奋斗'
+        { text: '坚持真理、坚守理想 — 思想基础', highlight: true },
+        { text: '践行初心、担当使命 — 政治品格', highlight: true },
+        { text: "不怕牺牲、英勇斗争 — 革命意志", highlight: true },
+        { text: '对党忠诚、不负人民 — 政治本色', highlight: true },
       ],
+      likeCount: 45600,
+      commentCount: 2890,
+      isLiked: true,
+      isBookmarked: true,
+      isCompleted: false,
       createdAt: '2天前',
     },
     {
       id: 203,
-      type: 'image',
-      title: '党史上的今天',
-      subtitle: '重要历史事件回顾',
-      source: '党史学习教育',
-      author: '党史办',
-      duration: '停留阅读',
+      type: 'audio',
+      title: '井冈山精神诵读',
+      subtitle: '音频伴读 + 逐字稿',
+      source: '有声党课',
+      author: '党员教育',
+      duration: '4分钟',
       category: '党史',
       channel: 'party',
-      tags: ['党史', '历史', '今天'],
-      description: '回顾党史上的今天，铭记光辉历程',
-      likeCount: 12300,
-      commentCount: 678,
-      isLiked: false,
-      isBookmarked: true,
-      isCompleted: false,
+      tags: ['井冈山精神', '革命精神', '有声学习'],
+      description: '井冈山精神是中国革命精神的重要源头...',
+      content: `井冈山精神的核心是：坚定信念、艰苦奋斗，实事求是、敢闯新路，依靠群众、勇于胜利。
+
+井冈山是中国革命的摇篮。1927年，毛泽东等老一辈革命家在这里创建了中国第一个农村革命根据地，开辟了农村包围城市、武装夺取政权的正确革命道路。`,
       knowledgePoints: [
-        '学习党史是为了更好地走向未来',
-        '以史为鉴、开创未来'
+        { text: '坚定信念、艰苦奋斗 — 精神内核', highlight: true },
+        { text: '实事求是、敢闯新路 — 方法论', highlight: true },
+        { text: '农村包围城市 — 革命道路创新', highlight: false },
       ],
+      likeCount: 23400,
+      commentCount: 1560,
+      isLiked: false,
+      isBookmarked: false,
+      isCompleted: false,
       createdAt: '3天前',
     },
   ],
   practice: [
     {
       id: 301,
-      type: 'article',
+      type: 'card',
       title: '基层党建工作实务20讲',
       subtitle: '第1讲：三会一课规范流程',
       source: '党建工作实务',
@@ -431,157 +434,108 @@ const channelContents: Record<string, ContentItem[]> = {
       category: '实务',
       channel: 'practice',
       tags: ['三会一课', '基层党建', '实务'],
-      description: '详细讲解三会一课的规范流程和注意事项...',
-      content: `三会一课是党的组织生活的基本制度，是加强党员教育管理的重要途径。
-
-**一、支部委员会（支委会）**
-
-- 时间：每月至少召开一次
-- 主持：党支部书记
-- 内容：研究党建工作、重点工作、队伍建设等
-
-**二、党员大会**
-
-- 时间：每季度至少召开一次
-- 主持：党支部书记
-- 内容：讨论决定重要事项、选举等
-
-**三、党小组会**
-
-- 时间：每月至少召开一次
-- 内容：组织学习、讨论等
-
-**四、党课**
-
-- 时间：每季度至少一次
-- 参加人员：全体党员`,
+      description: '三会一课是党的组织生活的基本制度，是加强党员教育管理的重要途径。',
+      knowledgePoints: [
+        { text: '三会：支委会(每月)+党员大会(每季)+党小组会(每月)', highlight: true },
+        { text: '一课：党课(每季度至少一次)', highlight: true },
+        { text: '记录归档：三会一课要有完整记录', highlight: false },
+      ],
       likeCount: 23400,
       commentCount: 1560,
       isLiked: true,
       isBookmarked: true,
       isCompleted: false,
-      knowledgePoints: [
-        '三会：支委会、党员大会、党小组会',
-        '一课：党课',
-        '支委会：每月至少一次'
-      ],
       relatedCourseId: 301,
       createdAt: '1天前',
     },
     {
       id: 302,
-      type: 'video',
-      title: '如何写好党建工作总结',
-      subtitle: '实用写作技巧分享',
-      source: '公文写作',
-      author: '写作专家',
-      duration: '10:25',
-      category: '实务',
-      channel: 'practice',
-      tags: ['党建', '总结', '写作'],
-      description: '党建工作总结的写作要点和技巧...',
-      likeCount: 15600,
-      commentCount: 890,
-      isLiked: false,
-      isBookmarked: false,
-      isCompleted: false,
-      knowledgePoints: [
-        '总结结构：工作回顾、存在问题、下一步计划',
-        '写作要点：数据说话、亮点突出'
-      ],
-      createdAt: '2天前',
-    },
-    {
-      id: 303,
-      type: 'article',
+      type: 'card',
       title: '发展党员工作流程详解',
-      subtitle: '从申请到转正全流程',
+      subtitle: '从申请到转正全流程25个步骤',
       source: '组织工作',
       author: '组织部',
-      duration: '12分钟阅读',
+      duration: '10分钟阅读',
       category: '实务',
       channel: 'practice',
       tags: ['党员发展', '组织工作', '流程'],
       description: '发展党员工作的25个步骤详解...',
-      content: `发展党员工作是党组织的一项经常性重要工作。
-
-**一、申请入党**
-
-1. 年满18岁的先进分子
-2. 书面申请
-3. 党组织派人谈话
-
-**二、入党积极分子确定**
-
-4. 推荐入党积极分子
-5. 支委会研究确定
-6. 上级党委备案
-
-**三、发展对象确定**
-
-7. 培养联系人提出意见
-8. 支委会讨论同意
-9. 上级党委备案
-10. 确定入党介绍人
-
-**四、预备党员接收**
-
-11-20. 各环节工作
-21. 支部大会讨论
-22. 上级党委审批
-
-**五、预备党员转正**
-
-23-24. 教育和考察
-25. 转正手续`,
+      knowledgePoints: [
+        { text: '五个阶段：申请→积极分子→发展对象→预备党员→转正', highlight: true },
+        { text: '25个步骤：严格程序、保证质量', highlight: true },
+        { text: '两个"主要"：控制总量、优化结构', highlight: false },
+      ],
       likeCount: 34500,
       commentCount: 2340,
       isLiked: false,
       isBookmarked: true,
       isCompleted: false,
-      knowledgePoints: [
-        '五个阶段：申请→积极分子→发展对象→预备党员→转正',
-        '25个步骤'
+      createdAt: '2天前',
+    },
+    {
+      id: 303,
+      type: 'infographic',
+      title: '主题党日活动 checklist',
+      subtitle: '办好主题党日的10个要点',
+      source: '党建工作实务',
+      author: '党务专家',
+      duration: '图表',
+      category: '实务',
+      channel: 'practice',
+      tags: ['主题党日', '组织生活', '实务'],
+      description: '主题党日是党的组织生活的重要形式...',
+      stats: [
+        { label: '时间', value: '每月固定' },
+        { label: '参与', value: '全体党员' },
+        { label: '内容', value: '政治性+时效性' },
+        { label: '形式', value: '创新+多样' },
       ],
+      knowledgePoints: [
+        { text: '时间固定：每月至少一次', highlight: true },
+        { text: '全员参与：覆盖全体党员', highlight: true },
+        { text: '内容充实：紧扣中心工作', highlight: false },
+        { text: '形式创新：室内+室外结合', highlight: false },
+      ],
+      likeCount: 15600,
+      commentCount: 890,
+      isLiked: false,
+      isBookmarked: false,
+      isCompleted: false,
       createdAt: '3天前',
     },
   ],
   mycourse: [
     {
       id: 401,
-      type: 'video',
-      title: '继续学习：党纪处分条例',
+      type: 'card',
+      title: '继续学习：党纪处分条例解读',
       subtitle: '上次学到：第三讲 组织纪律',
       source: '中央纪委',
       author: '中央纪委',
-      duration: '18:00',
-      category: '学习中',
+      duration: '学习中',
+      category: '系统课程',
       channel: 'mycourse',
       tags: ['党纪', '继续学习', '进度65%'],
       description: '您上次学到第三讲组织纪律，继续完成学习吧',
-      likeCount: 8900,
-      commentCount: 567,
-      isLiked: false,
-      isBookmarked: true,
-      isCompleted: false,
       progress: 65,
       knowledgePoints: [
-        '组织纪律：四个服从、请示报告等'
+        { text: '六大纪律：政治、组织、廉洁、群众、工作、生活', highlight: true },
+        { text: '组织纪律：四个服从、请示报告等', highlight: true },
       ],
       relatedCourseId: 401,
       createdAt: '学习中',
     },
     {
       id: 402,
-      type: 'article',
-      title: '我的笔记：两个确立',
-      subtitle: '学习心得摘录',
+      type: 'audio',
+      title: '我的笔记朗读：两个确立',
+      subtitle: '学习心得音频版',
       source: '我的收藏',
       author: '我',
-      duration: '笔记',
+      duration: '3分钟',
       category: '我的笔记',
       channel: 'mycourse',
-      tags: ['笔记', '两个确立', '心得'],
+      tags: ['笔记', '两个确立', '音频'],
       description: '"两个确立"是新时代最重要的政治成果...',
       content: `学习心得：
 
@@ -594,6 +548,10 @@ const channelContents: Record<string, ContentItem[]> = {
 4. 始终坚定"四个自信"
 
 要把学习成果转化为推动工作的实际成效。`,
+      knowledgePoints: [
+        { text: '两个确立：政治成果', highlight: true },
+        { text: '两个维护：最高政治原则', highlight: true },
+      ],
       likeCount: 0,
       commentCount: 0,
       isLiked: false,
@@ -603,8 +561,8 @@ const channelContents: Record<string, ContentItem[]> = {
     },
     {
       id: 403,
-      type: 'image',
-      title: '收藏：金句摘录',
+      type: 'quote',
+      title: '我的收藏金句',
       subtitle: '二十大报告经典论述',
       source: '人民日报',
       author: '人民日报',
@@ -613,28 +571,303 @@ const channelContents: Record<string, ContentItem[]> = {
       channel: 'mycourse',
       tags: ['收藏', '金句', '二十大'],
       description: '二十大报告中的经典论述，值得反复学习',
+      keyPoint: '踔厉奋发、勇毅前行，全面建设社会主义现代化国家。',
+      knowledgePoints: [
+        { text: '踔厉奋发 — 精神状态', highlight: true },
+        { text: '勇毅前行 — 行动姿态', highlight: true },
+      ],
       likeCount: 45600,
       commentCount: 2340,
       isLiked: true,
       isBookmarked: true,
       isCompleted: false,
-      knowledgePoints: [
-        '"江山就是人民，人民就是江山"',
-        '"踔厉奋发、勇毅前行"'
-      ],
       createdAt: '1周前',
     },
   ],
 };
 
-// 全屏内容卡片组件
-function ContentCard({ 
-  item, 
-  onLike, 
-  onBookmark, 
-  onShare,
-  isActive 
-}: { 
+// 金句海报组件
+function QuoteCard({ item, onLike, onBookmark, onShare }: { 
+  item: ContentItem; 
+  onLike: () => void;
+  onBookmark: () => void;
+  onShare: () => void;
+}) {
+  return (
+    <div className="relative w-full h-full bg-gradient-to-br from-red-700 via-red-600 to-orange-500 flex items-center justify-center overflow-hidden">
+      {/* 背景纹理 */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 25% 25%, rgba(255,255,255,0.3) 2px, transparent 2px), radial-gradient(circle at 75% 75%, rgba(255,255,255,0.3) 2px, transparent 2px)`,
+          backgroundSize: '50px 50px'
+        }} />
+      </div>
+      
+      {/* 主内容 */}
+      <div className="relative z-10 max-w-2xl mx-auto px-8 text-center">
+        <Quote className="h-16 w-16 text-white/30 mx-auto mb-6" />
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
+          {item.keyPoint || item.title}
+        </h1>
+        <div className="w-24 h-1 bg-white/50 mx-auto mb-6" />
+        <p className="text-white/80 text-lg mb-8">{item.source}</p>
+        
+        {/* 标签 */}
+        <div className="flex flex-wrap justify-center gap-2 mb-8">
+          {item.tags.slice(0, 3).map((tag) => (
+            <Badge key={tag} className="bg-white/20 text-white border-white/30 backdrop-blur">
+              #{tag}
+            </Badge>
+          ))}
+        </div>
+        
+        {/* 底部说明 */}
+        <div className="bg-white/10 backdrop-blur rounded-xl p-4 mt-4">
+          <p className="text-white/90 text-sm leading-relaxed">{item.description}</p>
+        </div>
+      </div>
+      
+      {/* 知识胶囊 */}
+      <div className="absolute left-4 top-1/4 bg-white/95 backdrop-blur rounded-xl p-4 max-w-xs shadow-2xl">
+        <div className="flex items-center gap-2 mb-3">
+          <Lightbulb className="h-4 w-4 text-amber-500" />
+          <span className="font-semibold text-sm">知识点</span>
+        </div>
+        <ul className="space-y-2">
+          {item.knowledgePoints.filter(k => k.highlight).slice(0, 2).map((point, idx) => (
+            <li key={idx} className="flex items-start gap-2 text-sm">
+              <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+              <span className="text-gray-700">{point.text}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+// 卡片式摘要组件
+function CardContentItem({ item, onLike, onBookmark, onShare, isActive }: { 
+  item: ContentItem; 
+  onLike: () => void;
+  onBookmark: () => void;
+  onShare: () => void;
+  isActive: boolean;
+}) {
+  const [isReading, setIsReading] = useState(false);
+  
+  return (
+    <div className={`relative w-full h-full bg-gradient-to-b from-slate-900 to-slate-800 transition-all duration-300 ${isActive ? 'block' : 'hidden'}`}>
+      {!isReading ? (
+        // 卡片预览
+        <div className="h-full flex flex-col">
+          <div className="flex-1 flex items-center justify-center p-8">
+            <Card className="w-full max-w-lg bg-white/95 backdrop-blur shadow-2xl">
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant="outline" className="text-xs">
+                    <AlignLeft className="h-3 w-3 mr-1" />
+                    {item.category}
+                  </Badge>
+                  <Badge variant="secondary" className="text-xs bg-red-50 text-red-600">
+                    {item.duration}
+                  </Badge>
+                </div>
+                <CardTitle className="text-xl leading-tight">{item.title}</CardTitle>
+                {item.subtitle && (
+                  <p className="text-muted-foreground text-sm mt-1">{item.subtitle}</p>
+                )}
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground text-sm mb-4 line-clamp-3">{item.description}</p>
+                
+                {/* 知识点标签 */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {item.knowledgePoints.filter(k => k.highlight).slice(0, 3).map((point, idx) => (
+                    <Badge key={idx} variant="secondary" className="text-xs bg-red-50 text-red-700 border-red-200">
+                      <Highlighter className="h-3 w-3 mr-1 text-red-500" />
+                      {point.text.split('：')[0]}
+                    </Badge>
+                  ))}
+                </div>
+                
+                <Button 
+                  className="w-full bg-gradient-to-r from-red-600 to-orange-500"
+                  onClick={() => setIsReading(true)}
+                >
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  沉浸式阅读
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* 底部信息 */}
+          <div className="p-4 bg-black/30">
+            <div className="flex items-center justify-between text-white/80 text-sm">
+              <div className="flex items-center gap-2">
+                <Avatar className="h-6 w-6">
+                  <AvatarFallback className="bg-red-600 text-white text-xs">{item.author.slice(0, 2)}</AvatarFallback>
+                </Avatar>
+                <span>{item.source}</span>
+              </div>
+              <span>{item.createdAt}</span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        // 沉浸式阅读
+        <div className="h-full overflow-y-auto">
+          <div className="sticky top-0 bg-slate-900/95 backdrop-blur p-4 flex items-center justify-between z-10">
+            <Button variant="ghost" size="sm" onClick={() => setIsReading(false)} className="text-white">
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              返回
+            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon" className="text-white" onClick={onBookmark}>
+                <Bookmark className={`h-5 w-5 ${item.isBookmarked ? 'fill-current' : ''}`} />
+              </Button>
+              <Button variant="ghost" size="icon" className="text-white" onClick={onShare}>
+                <Share2 className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+          
+          <div className="max-w-2xl mx-auto p-8 pt-4">
+            <Badge className="mb-4 bg-red-600 text-white">
+              <FileText className="h-3 w-3 mr-1" />
+              {item.duration}阅读
+            </Badge>
+            <h1 className="text-3xl font-bold text-white mb-2">{item.title}</h1>
+            {item.subtitle && <p className="text-white/60 text-lg mb-6">{item.subtitle}</p>}
+            
+            {/* 知识胶囊悬浮卡 */}
+            <Card className="mb-6 bg-amber-50 border-amber-200">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Lightbulb className="h-4 w-4 text-amber-600" />
+                  <span className="font-semibold text-sm text-amber-800">核心知识点</span>
+                </div>
+                <ul className="space-y-2">
+                  {item.knowledgePoints.filter(k => k.highlight).map((point, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700 font-medium">{point.text}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+            
+            {/* 文章正文 */}
+            <div className="prose prose-invert prose-lg max-w-none">
+              <div className="text-white/90 leading-relaxed whitespace-pre-wrap">
+                {item.content || item.description}
+              </div>
+            </div>
+            
+            {/* 标签 */}
+            <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t border-white/10">
+              {item.tags.map((tag) => (
+                <Badge key={tag} variant="outline" className="bg-white/10 text-white border-white/20">
+                  #{tag}
+                </Badge>
+              ))}
+            </div>
+            
+            {/* 笔记入口 */}
+            <Card className="mt-6 bg-white/5 border-white/10">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <PenTool className="h-5 w-5 text-white/60" />
+                  <span className="text-white/80 text-sm">记录学习心得</span>
+                </div>
+                <Button size="sm" variant="secondary">
+                  <Highlighter className="h-3 w-3 mr-1" />
+                  做笔记
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 信息图表组件
+function InfographicCard({ item, onLike, onBookmark, onShare }: { 
+  item: ContentItem; 
+  onLike: () => void;
+  onBookmark: () => void;
+  onShare: () => void;
+}) {
+  return (
+    <div className="relative w-full h-full bg-gradient-to-br from-slate-900 via-red-900/30 to-slate-900 overflow-y-auto">
+      <div className="min-h-full flex flex-col">
+        {/* 顶部 */}
+        <div className="p-6 pt-20 text-center">
+          <Badge className="mb-4 bg-red-600 text-white">
+            <BarChart3 className="h-3 w-3 mr-1" />
+            数据图表
+          </Badge>
+          <h1 className="text-3xl font-bold text-white mb-2">{item.title}</h1>
+          {item.subtitle && <p className="text-white/60">{item.subtitle}</p>}
+        </div>
+        
+        {/* 数据展示 */}
+        {item.stats && (
+          <div className="flex-1 px-6 pb-6">
+            <div className="grid grid-cols-2 gap-4 max-w-md mx-auto">
+              {item.stats.map((stat, idx) => (
+                <Card key={idx} className="bg-white/10 backdrop-blur border-white/20 overflow-hidden">
+                  <CardContent className="p-4 text-center">
+                    <p className="text-3xl font-bold text-white mb-1">{stat.value}</p>
+                    <p className="text-sm text-white/60">{stat.label}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* 底部知识卡片 */}
+        <div className="p-6">
+          <Card className="bg-amber-50/95 backdrop-blur border-amber-200">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Lightbulb className="h-4 w-4 text-amber-600" />
+                <span className="font-semibold text-sm text-amber-800">知识点</span>
+              </div>
+              <ul className="space-y-2">
+                {item.knowledgePoints.filter(k => k.highlight).map((point, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-sm">
+                    <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{point.text}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+          
+          <div className="flex justify-center gap-4 mt-4">
+            <Button variant="secondary" className="bg-white/10 text-white border-white/20">
+              <Bookmark className="h-4 w-4 mr-1" />
+              收藏
+            </Button>
+            <Button variant="secondary" className="bg-white/10 text-white border-white/20">
+              <Download className="h-4 w-4 mr-1" />
+              下载图表
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 听书流组件
+function AudioCard({ item, onLike, onBookmark, onShare, isActive }: { 
   item: ContentItem; 
   onLike: () => void;
   onBookmark: () => void;
@@ -642,210 +875,191 @@ function ContentCard({
   isActive: boolean;
 }) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [showKnowledgeCard, setShowKnowledgeCard] = useState(false);
-
-  // 自动播放
+  const [currentTime, setCurrentTime] = useState(0);
+  
   useEffect(() => {
-    if (isActive && item.type === 'video') {
-      const timer = setTimeout(() => setIsPlaying(true), 500);
-      return () => clearTimeout(timer);
-    } else {
-      setIsPlaying(false);
+    if (isActive && isPlaying) {
+      const timer = setInterval(() => {
+        setCurrentTime(prev => {
+          if (prev >= 100) {
+            setIsPlaying(false);
+            return 0;
+          }
+          return prev + 1;
+        });
+      }, 500);
+      return () => clearInterval(timer);
     }
-  }, [isActive, item.type]);
-
-  // 知识胶囊
-  useEffect(() => {
-    if (isActive && item.knowledgePoints && item.knowledgePoints.length > 0) {
-      const timer = setTimeout(() => setShowKnowledgeCard(true), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [isActive, item.id]);
-
+  }, [isActive, isPlaying]);
+  
+  const lines = item.content?.split('\n\n').filter(l => l.trim()) || [];
+  const currentLineIndex = Math.floor((currentTime / 100) * lines.length);
+  
   return (
-    <div className={`relative w-full h-full bg-black ${isActive ? 'block' : 'hidden'}`}>
-      {/* 视频内容 */}
-      {item.type === 'video' && (
-        <div className="absolute inset-0 bg-gradient-to-br from-red-900 to-orange-900 flex items-center justify-center">
-          <div className="text-center text-white p-8 max-w-2xl">
-            <Badge className="mb-4 bg-white/20 text-white">
-              <Video className="h-3 w-3 mr-1" />
-              微课 · {item.duration}
-            </Badge>
-            <h1 className="text-3xl font-bold mb-2">{item.title}</h1>
-            {item.subtitle && <p className="text-white/80 text-lg mb-4">{item.subtitle}</p>}
-            
-            <button 
-              onClick={() => setIsPlaying(!isPlaying)}
-              className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors mx-auto"
-            >
-              {isPlaying ? (
-                <Pause className="h-8 w-8 text-white" />
-              ) : (
-                <Play className="h-8 w-8 text-white ml-1" />
-              )}
-            </button>
-            
-            {item.progress !== undefined && item.progress > 0 && (
-              <div className="mt-6 max-w-md mx-auto">
-                <Progress value={item.progress} className="h-1 bg-white/20 [&>div]:bg-white" />
-                <p className="text-sm text-white/60 mt-1">已观看 {item.progress}%</p>
-              </div>
-            )}
-          </div>
+    <div className={`relative w-full h-full bg-gradient-to-b from-slate-900 to-slate-800 transition-all duration-300 ${isActive ? 'block' : 'hidden'}`}>
+      <div className="h-full flex flex-col">
+        {/* 顶部信息 */}
+        <div className="p-4 pt-20 text-center">
+          <Badge className="mb-4 bg-red-600 text-white">
+            <Headphones className="h-3 w-3 mr-1" />
+            音频伴读
+          </Badge>
+          <h2 className="text-2xl font-bold text-white mb-2">{item.title}</h2>
+          {item.subtitle && <p className="text-white/60">{item.subtitle}</p>}
         </div>
-      )}
-
-      {/* 图文内容 - 金句 */}
-      {item.type === 'image' && (
-        <div className="absolute inset-0 bg-gradient-to-br from-red-600 via-orange-500 to-amber-400 flex items-center justify-center p-8">
-          <div className="text-center text-white max-w-2xl">
-            <Badge className="mb-4 bg-white/30 text-white">
-              <ImageIcon className="h-3 w-3 mr-1" />
-              金句 · {item.duration || '停留即可'}
-            </Badge>
-            <h1 className="text-4xl font-bold mb-6 leading-tight">{item.title}</h1>
-            {item.subtitle && <p className="text-xl text-white/90 mb-8">{item.subtitle}</p>}
-            
-            <div className="flex justify-center gap-4 mb-8">
-              {item.tags.slice(0, 3).map((tag) => (
-                <Badge key={tag} variant="outline" className="bg-white/20 text-white border-white/40">
-                  #{tag}
+        
+        {/* 音频播放器 */}
+        <div className="px-6 mb-4">
+          <Card className="bg-white/10 backdrop-blur border-white/20">
+            <CardContent className="p-6">
+              {/* 进度条 */}
+              <div className="mb-4">
+                <Progress value={currentTime} className="h-1 bg-white/20 [&>div]:bg-gradient-to-r [&>div]:from-red-500 [&>div]:to-orange-500" />
+                <div className="flex justify-between text-xs text-white/60 mt-1">
+                  <span>{Math.floor(currentTime * 0.3)}:{String(Math.floor((currentTime * 1.8) % 60)).padStart(2, '0')}</span>
+                  <span>{item.duration}</span>
+                </div>
+              </div>
+              
+              {/* 控制按钮 */}
+              <div className="flex items-center justify-center gap-6">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-white hover:bg-white/20"
+                  onClick={() => setCurrentTime(Math.max(0, currentTime - 5))}
+                >
+                  <RotateCcw className="h-5 w-5" />
+                </Button>
+                
+                <Button 
+                  size="icon" 
+                  className="w-16 h-16 rounded-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600"
+                  onClick={() => setIsPlaying(!isPlaying)}
+                >
+                  {isPlaying ? (
+                    <PauseCircle className="h-8 w-8" />
+                  ) : (
+                    <PlayCircle className="h-8 w-8" />
+                  )}
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="text-white hover:bg-white/20"
+                  onClick={() => setCurrentTime(Math.min(100, currentTime + 15))}
+                >
+                  <SkipForward className="h-5 w-5" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* 逐字稿 */}
+        <div className="flex-1 overflow-y-auto px-6 pb-6">
+          <Card className="bg-white/95 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <AlignLeft className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">逐字稿</span>
+                <Badge variant="outline" className="ml-auto text-xs">
+                  <Mic className="h-3 w-3 mr-1" />
+                  朗读中
                 </Badge>
-              ))}
-            </div>
-            
-            <div className="bg-white/10 backdrop-blur rounded-xl p-4">
-              <p className="text-lg leading-relaxed">{item.description}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 文章内容 */}
-      {item.type === 'article' && (
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-900 to-slate-800 overflow-y-auto">
-          <div className="max-w-2xl mx-auto p-8 pt-20 pb-32">
-            <Badge className="mb-4 bg-red-600 text-white">
-              <FileText className="h-3 w-3 mr-1" />
-              文章 · {item.duration}
-            </Badge>
-            <h1 className="text-3xl font-bold text-white mb-2">{item.title}</h1>
-            {item.subtitle && <p className="text-white/70 text-lg mb-6">{item.subtitle}</p>}
-            
-            {/* 文章信息 */}
-            <div className="flex items-center gap-4 mb-6 pb-6 border-b border-white/10">
-              <Avatar className="h-10 w-10">
-                <AvatarFallback className="bg-red-600 text-white">{item.author.slice(0, 2)}</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="text-white font-medium">{item.author}</p>
-                <p className="text-white/50 text-sm">{item.source} · {item.createdAt}</p>
               </div>
-            </div>
-            
-            {/* 文章正文 */}
-            <div className="prose prose-invert prose-lg max-w-none">
-              <div className="text-white/90 leading-relaxed whitespace-pre-wrap">
-                {item.content}
+              <ScrollArea className="h-48">
+                <div className="space-y-3">
+                  {lines.map((line, idx) => (
+                    <p 
+                      key={idx} 
+                      className={`text-sm leading-relaxed transition-all ${
+                        idx === currentLineIndex 
+                          ? 'text-red-600 font-medium bg-red-50 p-2 rounded' 
+                          : idx < currentLineIndex 
+                            ? 'text-muted-foreground' 
+                            : 'text-foreground'
+                      }`}
+                    >
+                      {line}
+                    </p>
+                  ))}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+          
+          {/* 知识点 */}
+          <Card className="mt-4 bg-amber-50 border-amber-200">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Lightbulb className="h-4 w-4 text-amber-600" />
+                <span className="font-semibold text-sm text-amber-800">知识点</span>
               </div>
-            </div>
-            
-            {/* 标签 */}
-            <div className="flex flex-wrap gap-2 mt-8">
-              {item.tags.map((tag) => (
-                <Badge key={tag} variant="outline" className="bg-white/10 text-white border-white/20">
-                  #{tag}
-                </Badge>
-              ))}
-            </div>
-          </div>
+              <ul className="space-y-2">
+                {item.knowledgePoints.filter(k => k.highlight).map((point, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-sm">
+                    <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{point.text}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
         </div>
-      )}
-
-      {/* 右侧交互栏 */}
-      <div className="absolute right-4 bottom-32 flex flex-col items-center gap-4">
-        <button onClick={onLike} className="flex flex-col items-center">
-          <div className={`w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center ${item.isLiked ? 'text-red-500' : 'text-white'}`}>
-            <Heart className={`h-6 w-6 ${item.isLiked ? 'fill-current' : ''}`} />
-          </div>
-          <span className="text-white text-xs mt-1">{item.likeCount >= 1000 ? `${(item.likeCount/1000).toFixed(1)}w` : item.likeCount}</span>
-        </button>
-
-        <button onClick={onBookmark} className="flex flex-col items-center">
-          <div className={`w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center ${item.isBookmarked ? 'text-amber-400' : 'text-white'}`}>
-            <Bookmark className={`h-6 w-6 ${item.isBookmarked ? 'fill-current' : ''}`} />
-          </div>
-          <span className="text-white text-xs mt-1">收藏</span>
-        </button>
-
-        <button onClick={onShare} className="flex flex-col items-center">
-          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white">
-            <Share2 className="h-6 w-6" />
-          </div>
-          <span className="text-white text-xs mt-1">分享</span>
-        </button>
-
-        <button className="flex flex-col items-center">
-          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white">
-            <MessageCircle className="h-6 w-6" />
-          </div>
-          <span className="text-white text-xs mt-1">{item.commentCount >= 1000 ? `${(item.commentCount/1000).toFixed(1)}w` : item.commentCount}</span>
-        </button>
       </div>
+    </div>
+  );
+}
 
-      {/* 底部信息 - 非文章类型 */}
-      {item.type !== 'article' && (
-        <div className="absolute bottom-20 left-4 right-20">
-          <div className="flex items-center gap-3 mb-2">
-            <Avatar className="h-10 w-10 border-2 border-white">
-              <AvatarFallback className="bg-red-600 text-white">{item.author.slice(0, 2)}</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-white font-semibold">{item.author}</p>
-              <p className="text-white/60 text-sm">{item.source} · {item.createdAt}</p>
-            </div>
-          </div>
-          <p className="text-white/80 text-sm line-clamp-2">{item.description}</p>
-          <div className="flex flex-wrap gap-2 mt-2">
-            {item.tags.map((tag) => (
-              <Badge key={tag} variant="outline" className="bg-white/10 text-white border-white/20 text-xs">
-                #{tag}
-              </Badge>
-            ))}
-          </div>
+// 右侧交互栏
+function InteractionBar({ item, onLike, onBookmark, onShare }: { 
+  item: ContentItem; 
+  onLike: () => void;
+  onBookmark: () => void;
+  onShare: () => void;
+}) {
+  return (
+    <div className="absolute right-4 bottom-32 flex flex-col items-center gap-4">
+      <button onClick={onLike} className="flex flex-col items-center">
+        <div className={`w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center transition-colors ${item.isLiked ? 'text-red-500' : 'text-white hover:text-red-400'}`}>
+          <Heart className={`h-6 w-6 ${item.isLiked ? 'fill-current' : ''}`} />
         </div>
-      )}
+        <span className="text-white text-xs mt-1">{item.likeCount >= 1000 ? `${(item.likeCount/1000).toFixed(1)}w` : item.likeCount}</span>
+      </button>
 
-      {/* 知识胶囊 */}
-      {showKnowledgeCard && item.knowledgePoints && (
-        <div className="absolute left-4 top-1/4 bg-white/95 backdrop-blur rounded-xl p-4 max-w-xs shadow-2xl">
-          <div className="flex items-center gap-2 mb-3">
-            <Lightbulb className="h-4 w-4 text-amber-500" />
-            <span className="font-semibold text-sm">知识点</span>
-          </div>
-          <ul className="space-y-2">
-            {item.knowledgePoints.slice(0, 3).map((point, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-sm">
-                <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                <span className="text-gray-700">{point}</span>
-              </li>
-            ))}
-          </ul>
-          {item.knowledgePoints.length > 3 && (
-            <Button variant="link" size="sm" className="text-red-600 mt-2 p-0 h-auto">
-              查看全部 {item.knowledgePoints.length} 个知识点
-            </Button>
+      <button onClick={onBookmark} className="flex flex-col items-center">
+        <div className={`w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center transition-colors ${item.isBookmarked ? 'text-amber-400' : 'text-white hover:text-amber-400'}`}>
+          {item.isBookmarked ? (
+            <BookmarkCheck className="h-6 w-6" />
+          ) : (
+            <Bookmark className="h-6 w-6" />
           )}
         </div>
-      )}
+        <span className="text-white text-xs mt-1">收藏</span>
+      </button>
 
-      {/* 上滑提示 */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col items-center text-white/60">
-        <ChevronDown className="h-6 w-6 animate-bounce" />
-        <span className="text-xs">上滑切换下一个</span>
-      </div>
+      <button onClick={onShare} className="flex flex-col items-center">
+        <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:text-green-400 transition-colors">
+          <Share className="h-6 w-6" />
+        </div>
+        <span className="text-white text-xs mt-1">分享</span>
+      </button>
+
+      <button className="flex flex-col items-center">
+        <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:text-blue-400 transition-colors">
+          <Highlighter className="h-6 w-6" />
+        </div>
+        <span className="text-white text-xs mt-1">笔记</span>
+      </button>
+
+      <button className="flex flex-col items-center">
+        <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:text-purple-400 transition-colors">
+          <MessageCircle className="h-6 w-6" />
+        </div>
+        <span className="text-white text-xs mt-1">{item.commentCount >= 1000 ? `${(item.commentCount/1000).toFixed(1)}w` : item.commentCount}</span>
+      </button>
     </div>
   );
 }
@@ -860,7 +1074,7 @@ function CourseDrawer({
   isOpen: boolean; 
   onClose: () => void;
   courseTitle: string;
-  chapters: CourseItem[];
+  chapters: { id: number; title: string; duration: string; isCompleted: boolean; isLocked: boolean; progress?: number }[];
 }) {
   const completedCount = chapters.filter(c => c.isCompleted).length;
   
@@ -928,7 +1142,7 @@ function CourseDrawer({
         
         <div className="p-4 border-t sticky bottom-0 bg-white">
           <Button className="w-full bg-gradient-to-r from-red-600 to-orange-500">
-            <BookOpen className="h-4 w-4 mr-2" />
+            <Play className="h-4 w-4 mr-2" />
             进入系统学习模式
           </Button>
         </div>
@@ -1072,18 +1286,61 @@ export default function HomePage() {
 
       {/* 主内容区 */}
       <main className="flex-1 relative">
-        {contents.length > 0 ? (
-          contents.map((item, idx) => (
-            <ContentCard
-              key={item.id}
-              item={item}
-              isActive={idx === currentIndex}
+        {contents.length > 0 && currentContent && (
+          <>
+            {/* 金句海报 */}
+            {currentContent.type === 'quote' && (
+              <QuoteCard 
+                item={currentContent}
+                onLike={handleLike}
+                onBookmark={handleBookmark}
+                onShare={handleShare}
+              />
+            )}
+
+            {/* 卡片式摘要 */}
+            {(currentContent.type === 'card' || currentContent.type === 'article') && (
+              <CardContentItem
+                item={currentContent}
+                isActive={true}
+                onLike={handleLike}
+                onBookmark={handleBookmark}
+                onShare={handleShare}
+              />
+            )}
+
+            {/* 信息图表 */}
+            {currentContent.type === 'infographic' && (
+              <InfographicCard
+                item={currentContent}
+                onLike={handleLike}
+                onBookmark={handleBookmark}
+                onShare={handleShare}
+              />
+            )}
+
+            {/* 听书流 */}
+            {currentContent.type === 'audio' && (
+              <AudioCard
+                item={currentContent}
+                isActive={true}
+                onLike={handleLike}
+                onBookmark={handleBookmark}
+                onShare={handleShare}
+              />
+            )}
+
+            {/* 右侧交互栏 */}
+            <InteractionBar
+              item={currentContent}
               onLike={handleLike}
               onBookmark={handleBookmark}
               onShare={handleShare}
             />
-          ))
-        ) : (
+          </>
+        )}
+
+        {contents.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center text-white">
             <div className="text-center">
               <BookOpen className="h-16 w-16 mx-auto mb-4 opacity-50" />
@@ -1098,13 +1355,16 @@ export default function HomePage() {
           <Card className="absolute bottom-28 left-4 right-4 bg-white/95 backdrop-blur shadow-2xl">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-2">
-                <Badge variant="outline" className="text-xs">关联课程</Badge>
+                <Badge variant="outline" className="text-xs">
+                  <Video className="h-3 w-3 mr-1" />
+                  系统课程
+                </Badge>
                 <Button variant="ghost" size="sm" className="h-6 text-xs">
                   <ChevronRight className="h-3 w-3" />
                 </Button>
               </div>
               <h3 className="font-semibold mb-1">{currentContent.title}</h3>
-              <p className="text-sm text-muted-foreground">点击解锁完整学习</p>
+              <p className="text-sm text-muted-foreground">点击进入完整课程学习</p>
               <Button 
                 size="sm" 
                 className="mt-2 w-full bg-gradient-to-r from-red-600 to-orange-500"
@@ -1163,11 +1423,11 @@ export default function HomePage() {
             <CardContent className="p-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded bg-red-100 flex items-center justify-center">
-                  <Play className="h-5 w-5 text-red-600" />
+                  <Bookmark className="h-5 w-5 text-red-600" />
                 </div>
                 <div>
                   <p className="text-sm font-medium">继续学习</p>
-                  <p className="text-xs text-muted-foreground">{currentContent?.title}</p>
+                  <p className="text-xs text-muted-foreground line-clamp-1">{currentContent?.title}</p>
                 </div>
               </div>
               <Button 
@@ -1213,6 +1473,14 @@ export default function HomePage() {
           />
         ))}
       </div>
+
+      {/* 上滑提示 */}
+      {currentIndex === 0 && (
+        <div className="absolute bottom-32 left-1/2 -translate-x-1/2 flex flex-col items-center text-white/60 animate-bounce">
+          <ArrowUp className="h-5 w-5" />
+          <span className="text-xs">上滑切换</span>
+        </div>
+      )}
     </div>
   );
 }
