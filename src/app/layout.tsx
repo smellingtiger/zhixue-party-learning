@@ -37,7 +37,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-CN" suppressHydrationWarning className={notoSerifSC.variable}>
-      <body className="antialiased bg-black">
+      <body className="antialiased">
         <MainNav />
         <main>{children}</main>
         <Toaster />
