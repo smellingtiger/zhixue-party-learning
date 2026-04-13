@@ -48,6 +48,7 @@ import {
   LayoutList,
   ImagePlus,
   Download,
+  Save,
   RefreshCw,
   ArrowUp,
   ArrowDown,
