@@ -1012,7 +1012,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black/20 via-gray-100 to-gray-50">
+    <div className="min-h-screen bg-gray-50">
       {/* 主内容区 */}
       <div className="flex h-[calc(100vh-64px)]">
         {/* 左侧栏：课程树 */}
