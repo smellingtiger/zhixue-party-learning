@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { OnboardingFlow } from '@/components/onboarding-flow';
+import { NavBar } from '@/components/nav-bar';
 import { 
   Play,
   Pause,
@@ -1047,49 +1048,13 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-orange-50 to-white">
-      {/* 顶部横幅区域 */}
-      <div className="relative overflow-hidden">
-        {/* 渐变背景 */}
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-100 via-orange-50 to-pink-50" />
-        
-        {/* 内容层 */}
-        <div className="relative z-10 max-w-4xl mx-auto px-6 py-12 flex flex-col items-center text-center">
-          {/* 欢迎角色 */}
-          <img 
-            src="/welcome-character.png" 
-            alt="欢迎" 
-            className="h-32 w-auto object-contain mb-4"
-          />
-          
-          {/* 欢迎文字 */}
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">欢迎来到全省统一战线网络学院</h1>
-          <p className="text-gray-600 text-lg mb-6">开启您的党建学习之旅</p>
-          
-          {/* 搜索框 - 参考样式 */}
-          <div className="relative w-full max-w-xl flex items-center">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2">
-              <Search className="h-5 w-5 text-orange-500" />
-            </div>
-            <input 
-              type="text"
-              placeholder="需要我帮您查点什么..."
-              className="w-full pl-12 pr-24 py-4 rounded-full border-2 border-orange-400 bg-white text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-100 shadow-lg transition-all"
-            />
-            <button className="absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 to-orange-400 flex items-center justify-center text-white shadow-md hover:shadow-lg hover:from-orange-600 hover:to-orange-500 transition-all">
-              <Play className="h-5 w-5 ml-0.5" fill="currentColor" />
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      {/* 内容区域 */}
-      <div className="flex h-[calc(100vh-64px)]">
+    <>
+      <NavBar activeTab="home">
         {/* 左侧栏：课程树 */}
         <aside className="w-64 bg-white border-r border-gray-200 overflow-hidden">
           <CourseTreeSidebar />
         </aside>
-	
+      
         {/* 中间栏：内容流 */}
         <main className="flex-1 overflow-y-auto p-6">
           {/* 分类筛选 */}
@@ -1160,7 +1125,7 @@ export default function HomePage() {
         <aside className="w-80 bg-white border-l border-gray-200 overflow-hidden">
           <DashboardSidebar />
         </aside>
-      </div>
+      </NavBar>
 
       {/* 阅读弹窗 */}
       <ReadingModal 
@@ -1168,6 +1133,6 @@ export default function HomePage() {
         isOpen={isReadingModalOpen} 
         onClose={() => setIsReadingModalOpen(false)} 
       />
-    </div>
+    </>
   );
 }
