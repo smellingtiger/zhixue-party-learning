@@ -22,7 +22,10 @@ import {
   LogOut,
   User,
   Loader2,
-  CheckCircle2
+  CheckCircle2,
+  BookOpen,
+  Target,
+  Lightbulb
 } from 'lucide-react';
 
 interface CurrentUser {
@@ -153,9 +156,9 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-red-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-white">
       {/* 顶部导航 */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-orange-100">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <motion.div 
@@ -163,31 +166,29 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               whileHover={{ scale: 1.02 }}
               onClick={() => setCurrentView('home')}
             >
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-600 to-blue-600 flex items-center justify-center">
-                <BrainCircuit className="w-7 h-7 text-white" />
-              </div>
+              <img src="/icon.png" alt="logo" className="w-12 h-12 object-contain" />
               <div>
-                <h1 className="text-xl font-bold text-slate-900">智慧党建学习平台</h1>
-                <p className="text-xs text-slate-500">AI驱动的个性化学习路径</p>
+                <h1 className="text-xl font-bold text-gray-800">全省统一战线网络学院</h1>
+                <p className="text-xs text-gray-500">智慧党建学习平台</p>
               </div>
             </motion.div>
             
             <div className="flex items-center gap-4">
               {currentUser && (
-                <div className="flex items-center gap-3 px-3 py-1.5 bg-slate-100 rounded-full">
+                <div className="flex items-center gap-3 px-3 py-1.5 bg-orange-50 rounded-full">
                   <Avatar className="h-7 w-7">
                     <AvatarImage src={currentUser.avatar_url || undefined} />
-                    <AvatarFallback className="bg-red-100 text-red-600 text-sm">
+                    <AvatarFallback className="bg-orange-100 text-orange-600 text-sm">
                       {currentUser.display_name?.[0] || currentUser.username[0].toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-sm font-medium text-slate-700">
+                  <span className="text-sm font-medium text-gray-700">
                     {currentUser.display_name || currentUser.username}
                   </span>
                 </div>
               )}
 
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-slate-500">
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-gray-500">
                 <LogOut className="w-4 h-4" />
               </Button>
             </div>
@@ -207,86 +208,94 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-8"
             >
-              {/* Hero区域 */}
-              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-red-600 via-blue-600 to-purple-600 p-8 md:p-12">
-                <div className="relative z-10 max-w-2xl">
+              {/* Hero区域 - 新用户欢迎页 */}
+              <div className="relative overflow-hidden rounded-3xl" style={{ backgroundImage: 'url(/welcome-bg.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                {/* 柔和遮罩确保文字可读 */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/70 via-white/50 to-orange-50/70" />
+                
+                <div className="relative z-10 max-w-2xl mx-auto text-center py-16 px-6">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="mb-6"
+                  >
+                    <img src="/ai-assistant.png" alt="AI助手" className="h-20 w-auto mx-auto" />
+                  </motion.div>
+                  
                   <motion.h2 
-                    className="text-3xl md:text-4xl font-bold text-white mb-4"
+                    className="text-3xl md:text-4xl font-bold text-gray-800 mb-4"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                   >
-                    欢迎，{currentUser?.display_name || currentUser?.username || '用户'}！
+                    欢迎，{currentUser?.display_name || currentUser?.username || '新学员'}！
                   </motion.h2>
                   <motion.p 
-                    className="text-white/80 text-lg mb-6"
+                    className="text-gray-600 text-lg mb-8"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
                   >
-                    通过AI智能分析，为您量身定制学习路径，让党建知识学习更加高效有趣
+                    开启您的党建学习之旅，通过AI智能分析为您量身定制学习路径
                   </motion.p>
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="flex flex-wrap gap-4"
+                    className="flex flex-wrap justify-center gap-4"
                   >
                     <Button 
                       size="lg"
                       onClick={() => setCurrentView('diagnostic')}
-                      className="bg-white text-red-600 hover:bg-white/90"
+                      className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-lg"
                     >
                       <Sparkles className="w-5 h-5 mr-2" />
-                      开始智能诊断
+                      开始学习诊断
                     </Button>
                     <Button 
                       size="lg"
                       onClick={() => setCurrentView('mindmap')}
                       variant="outline"
-                      className="bg-transparent border-2 border-white text-white hover:bg-white/10"
+                      className="border-2 border-orange-300 text-orange-600 hover:bg-orange-50"
                     >
                       <Map className="w-5 h-5 mr-2" />
-                      查看知识图谱
+                      先看看知识图谱
                     </Button>
                   </motion.div>
                 </div>
-                
-                {/* 背景装饰 */}
-                <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-white/5 rounded-full translate-y-1/2" />
               </div>
 
-              {/* 快捷入口卡片 */}
+              {/* 平台特色介绍 - 适合新用户 */}
               <div className="grid md:grid-cols-3 gap-6">
                 <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer overflow-hidden group">
-                  <div className="h-2 bg-gradient-to-r from-red-500 to-orange-500" />
+                  <div className="h-2 bg-gradient-to-r from-orange-500 to-amber-500" />
                   <CardContent className="p-6">
-                    <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <GraduationCap className="w-6 h-6 text-red-600" />
+                    <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Target className="w-6 h-6 text-orange-600" />
                     </div>
-                    <h3 className="text-lg font-bold text-slate-900 mb-2">智能诊断</h3>
-                    <p className="text-slate-500 text-sm mb-4">通过AI分析您的学习需求，生成个性化学习路径</p>
+                    <h3 className="text-lg font-bold text-gray-800 mb-2">个性化诊断</h3>
+                    <p className="text-gray-500 text-sm mb-4">通过智能诊断了解您的学习基础，为您精准匹配学习内容</p>
                     <Button 
                       onClick={() => setCurrentView('diagnostic')}
-                      className="w-full bg-red-600 hover:bg-red-700"
+                      className="w-full bg-orange-500 hover:bg-orange-600"
                     >
-                      立即开始
+                      立即诊断
                     </Button>
                   </CardContent>
                 </Card>
 
                 <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer overflow-hidden group">
-                  <div className="h-2 bg-gradient-to-r from-blue-500 to-cyan-500" />
+                  <div className="h-2 bg-gradient-to-r from-amber-500 to-yellow-500" />
                   <CardContent className="p-6">
-                    <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <Map className="w-6 h-6 text-blue-600" />
+                    <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Map className="w-6 h-6 text-amber-600" />
                     </div>
-                    <h3 className="text-lg font-bold text-slate-900 mb-2">知识图谱</h3>
-                    <p className="text-slate-500 text-sm mb-4">可视化展示党建知识体系，构建系统认知</p>
+                    <h3 className="text-lg font-bold text-gray-800 mb-2">知识图谱</h3>
+                    <p className="text-gray-500 text-sm mb-4">可视化展示党建知识体系，清晰了解学习内容结构</p>
                     <Button 
                       onClick={() => setCurrentView('mindmap')}
-                      className="w-full bg-blue-600 hover:bg-blue-700"
+                      className="w-full bg-amber-500 hover:bg-amber-600"
                     >
                       探索图谱
                     </Button>
@@ -294,41 +303,34 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 </Card>
 
                 <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer overflow-hidden group">
-                  <div className="h-2 bg-gradient-to-r from-purple-500 to-pink-500" />
+                  <div className="h-2 bg-gradient-to-r from-orange-400 to-red-400" />
                   <CardContent className="p-6">
-                    <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <MessageSquare className="w-6 h-6 text-purple-600" />
+                    <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Lightbulb className="w-6 h-6 text-orange-500" />
                     </div>
-                    <h3 className="text-lg font-bold text-slate-900 mb-2">AI助手</h3>
-                    <p className="text-slate-500 text-sm mb-4">用自然语言描述需求，智能推荐学习内容</p>
+                    <h3 className="text-lg font-bold text-gray-800 mb-2">AI学习助手</h3>
+                    <p className="text-gray-500 text-sm mb-4">随时提问，即时解答，让学习更加轻松高效</p>
                     <Button 
                       onClick={() => setCurrentView('ai')}
-                      className="w-full bg-purple-600 hover:bg-purple-700"
+                      className="w-full bg-gradient-to-r from-orange-400 to-red-400 hover:from-orange-500 hover:to-red-500"
                     >
-                      提问咨询
+                      向AI提问
                     </Button>
                   </CardContent>
                 </Card>
               </div>
 
-              {/* 学习进度展示 */}
-              <Card className="border-0 shadow-lg">
+              {/* 快速开始提示 */}
+              <Card className="border-0 shadow-lg bg-gradient-to-r from-orange-50 to-amber-50">
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-slate-900">您的学习进度</h3>
-                    <span className="text-2xl font-bold text-red-600">{progressPercent}%</span>
-                  </div>
-                  <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${progressPercent}%` }}
-                      transition={{ duration: 1, delay: 0.5 }}
-                      className="h-full bg-gradient-to-r from-red-500 to-blue-500 rounded-full"
-                    />
-                  </div>
-                  <div className="flex justify-between mt-2 text-sm text-slate-500">
-                    <span>已完成 {completedCount} 个模块</span>
-                    <span>共 {totalNodes} 个模块</span>
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-amber-400 flex items-center justify-center shrink-0">
+                      <BookOpen className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-gray-800 mb-1">建议您这样开始</h3>
+                      <p className="text-gray-600 text-sm">先完成学习诊断，了解自己的学习基础，然后根据AI为您定制的学习路径开始系统学习</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -349,7 +351,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   <Button
                     variant="outline"
                     onClick={handleFinish}
-                    className="px-8"
+                    className="px-8 border-2 border-orange-300 text-orange-600 hover:bg-orange-50"
                   >
                     <Home className="w-4 h-4 mr-2" />
                     进入主站
@@ -357,7 +359,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   {!hasCompletedDiagnostic && (
                     <Button
                       onClick={() => setCurrentView('diagnostic')}
-                      className="bg-red-600 hover:bg-red-700 px-8"
+                      className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 px-8"
                     >
                       <GraduationCap className="w-4 h-4 mr-2" />
                       完成诊断
