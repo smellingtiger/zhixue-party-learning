@@ -110,6 +110,9 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   useEffect(() => {
     const randomMsg = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
     setWelcomeMessage(randomMsg);
+    setShowWelcome(false);
+    setTypewriterText('');
+    
     // 短暂延迟后开始打字
     const timer = setTimeout(() => {
       setShowWelcome(true);
@@ -122,7 +125,9 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           clearInterval(typeInterval);
         }
       }, 50);
+      return () => clearInterval(typeInterval);
     }, 500);
+    
     return () => clearTimeout(timer);
   }, []);
 
@@ -246,7 +251,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                     transition={{ delay: 0.1 }}
                     className="mb-6"
                   >
-                    <img src="/tx_homeAILogo.png" alt="欢迎" className="h-24 w-auto mx-auto" />
+                    <img src="/welcome-character.png" alt="欢迎" className="h-24 w-auto mx-auto" />
                   </motion.div>
                   
                   <motion.h2 
