@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { OnboardingFlow } from '@/components/onboarding-flow';
-import { motion } from 'framer-motion';
 import { 
   Play,
   Pause,
@@ -1047,72 +1046,35 @@ export default function HomePage() {
     ));
   };
 
-  // 随机欢迎语
-  const welcomeMessages = [
-    "开启您的党建学习之旅",
-    "今天想学点什么知识呢？",
-    "让学习成为习惯，让党建融入生活",
-    "知识就是力量，一起加油吧！",
-    "每天进步一点点，成为更好的自己",
-  ];
-  
-  // 打字机特效
-  const [displayedText, setDisplayedText] = useState('');
-  const [currentMessageIndex] = useState(() => Math.floor(Math.random() * welcomeMessages.length));
-  const currentMessage = welcomeMessages[currentMessageIndex];
-  
-  useEffect(() => {
-    let index = 0;
-    const timer = setInterval(() => {
-      if (index <= currentMessage.length) {
-        setDisplayedText(currentMessage.slice(0, index));
-        index++;
-      } else {
-        clearInterval(timer);
-      }
-    }, 80);
-    return () => clearInterval(timer);
-  }, [currentMessage]);
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 via-orange-50 to-white">
       {/* 顶部横幅区域 */}
       <div className="relative overflow-hidden">
-        {/* 背景图 */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: 'url(/welcome-bg.png)' }}
-        />
-        {/* 半透明遮罩 */}
-        <div className="absolute inset-0 bg-white/60 backdrop-blur-sm" />
+        {/* 渐变背景 */}
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-100 via-orange-50 to-pink-50" />
         
         {/* 内容层 */}
-        <div className="relative z-10 max-w-4xl mx-auto px-6 py-16 flex flex-col items-center text-center">
+        <div className="relative z-10 max-w-4xl mx-auto px-6 py-12 flex flex-col items-center text-center">
           {/* 欢迎角色 */}
           <img 
             src="/welcome-character.png" 
             alt="欢迎" 
-            className="h-40 w-auto object-contain mb-6"
+            className="h-32 w-auto object-contain mb-4"
           />
           
-          {/* 欢迎文字 - 打字机特效 */}
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
-            欢迎来到全省统一战线网络学院
-          </h1>
-          <p className="text-gray-600 text-lg h-8">
-            {displayedText}
-            <span className="animate-pulse">|</span>
-          </p>
+          {/* 欢迎文字 */}
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">欢迎来到全省统一战线网络学院</h1>
+          <p className="text-gray-600 text-lg mb-6">开启您的党建学习之旅</p>
           
           {/* 搜索框 */}
-          <div className="relative w-full max-w-xl mt-8 flex items-center">
+          <div className="relative w-full max-w-xl flex items-center">
             <div className="absolute left-4 top-1/2 -translate-y-1/2">
               <Search className="h-5 w-5 text-orange-400" />
             </div>
             <input 
               type="text"
               placeholder="需要我帮您查点什么..."
-              className="w-full pl-12 pr-20 py-4 rounded-full border-2 border-orange-300 bg-white/90 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100 shadow-lg"
+              className="w-full pl-12 pr-20 py-4 rounded-full border-2 border-orange-300 bg-white text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100 shadow-lg"
             />
             <button className="absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-r from-orange-400 to-amber-400 flex items-center justify-center text-white shadow-md hover:shadow-lg transition-shadow">
               <Play className="h-5 w-5 ml-0.5" fill="currentColor" />
