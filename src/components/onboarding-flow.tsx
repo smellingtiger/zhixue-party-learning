@@ -246,7 +246,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                     transition={{ delay: 0.1 }}
                     className="mb-6"
                   >
-                    <img src="/welcome-character.png" alt="欢迎" className="h-24 w-auto mx-auto" />
+                    <img src="/tx_homeAILogo.png" alt="欢迎" className="h-24 w-auto mx-auto" />
                   </motion.div>
                   
                   <motion.h2 
