@@ -1046,8 +1046,36 @@ export default function HomePage() {
     ));
   };
 
+  const [bannerClosed, setBannerClosed] = useState(false);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 via-orange-50 to-white">
+      {/* 顶部活动横幅 - 可关闭 */}
+      {!bannerClosed && (
+        <div className="relative bg-gradient-to-r from-red-600 via-red-500 to-orange-500 overflow-hidden">
+          <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <img src="/welcome-character.png" alt="活动" className="h-12 w-auto" />
+              <div className="text-white">
+                <p className="font-bold text-lg">学习二十大精神专题</p>
+                <p className="text-sm text-red-100">点击参与学习答题，赢取精美礼品！</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button className="px-4 py-1.5 bg-white text-red-600 rounded-full font-medium hover:bg-red-50 transition-colors text-sm">
+                立即参与
+              </button>
+              <button 
+                onClick={() => setBannerClosed(true)}
+                className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 顶部横幅区域 */}
       <div className="relative overflow-hidden">
         {/* 渐变背景 */}
