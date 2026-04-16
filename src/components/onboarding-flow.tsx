@@ -222,33 +222,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-white">
-      {/* 顶部导航 */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-orange-100">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-end">
-            <div className="flex items-center gap-4">
-              {currentUser && (
-                <div className="flex items-center gap-3 px-3 py-1.5 bg-orange-50 rounded-full">
-                  <Avatar className="h-7 w-7">
-                    <AvatarImage src={currentUser.avatar_url || undefined} />
-                    <AvatarFallback className="bg-orange-100 text-orange-600 text-sm">
-                      {currentUser.display_name?.[0] || currentUser.username[0].toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm font-medium text-gray-700">
-                    {currentUser.display_name || currentUser.username}
-                  </span>
-                </div>
-              )}
-
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-gray-500">
-                <LogOut className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* 主内容区域 */}
       <main className="max-w-7xl mx-auto px-4 py-8">
         <AnimatePresence mode="wait">
