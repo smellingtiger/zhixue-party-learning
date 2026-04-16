@@ -221,7 +221,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50">
       {/* 主内容区域 */}
       <main className="max-w-7xl mx-auto px-4 py-8">
         <AnimatePresence mode="wait">
@@ -237,7 +237,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               {/* Hero区域 - 新用户欢迎页 */}
               <div className="relative overflow-hidden rounded-3xl" style={{ backgroundImage: 'url(/welcome-bg.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
                 {/* 柔和遮罩确保文字可读 */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/70 via-white/50 to-rose-50/70" />
+                <div className="absolute inset-0 bg-gradient-to-br from-white/70 via-white/50 to-red-50/70" />
                 
                 <div className="relative z-10 max-w-2xl mx-auto text-center py-12 px-6">
                   <motion.div
@@ -265,7 +265,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                     transition={{ delay: 0.3 }}
                     className="mb-6"
                   >
-                    <p className="text-xl text-rose-600 font-medium">
+                    <p className="text-xl text-red-600 font-medium">
                       {showWelcome ? typewriterText : ''}
                       <span className="animate-pulse">|</span>
                     </p>
@@ -288,7 +288,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                     <Button 
                       size="lg"
                       onClick={() => setCurrentView('diagnostic')}
-                      className="bg-gradient-to-r from-rose-500 to-rose-500 hover:from-rose-600 hover:to-rose-600 text-white shadow-lg"
+                      className="bg-gradient-to-r from-red-500 to-red-500 hover:from-red-600 hover:to-red-600 text-white shadow-lg"
                     >
                       <Sparkles className="w-5 h-5 mr-2" />
                       开始学习诊断
@@ -297,7 +297,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                       size="lg"
                       onClick={() => setCurrentView('mindmap')}
                       variant="outline"
-                      className="border-2 border-rose-300 text-rose-600 hover:bg-rose-50"
+                      className="border-2 border-red-300 text-red-600 hover:bg-red-50"
                     >
                       <Map className="w-5 h-5 mr-2" />
                       先看看知识图谱
@@ -309,16 +309,16 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               {/* 平台特色介绍 - 适合新用户 */}
               <div className="grid md:grid-cols-3 gap-6">
                 <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer overflow-hidden group">
-                  <div className="h-2 bg-gradient-to-r from-rose-500 to-rose-500" />
+                  <div className="h-2 bg-gradient-to-r from-red-500 to-red-500" />
                   <CardContent className="p-6">
-                    <div className="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <Target className="w-6 h-6 text-rose-600" />
+                    <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Target className="w-6 h-6 text-red-600" />
                     </div>
                     <h3 className="text-lg font-bold text-gray-800 mb-2">个性化诊断</h3>
                     <p className="text-gray-500 text-sm mb-4">通过智能诊断了解您的学习基础，为您精准匹配学习内容</p>
                     <Button 
                       onClick={() => setCurrentView('diagnostic')}
-                      className="w-full bg-rose-500 hover:bg-rose-600"
+                      className="w-full bg-red-500 hover:bg-red-600"
                     >
                       立即诊断
                     </Button>
@@ -326,16 +326,16 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 </Card>
 
                 <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer overflow-hidden group">
-                  <div className="h-2 bg-gradient-to-r from-rose-500 to-yellow-500" />
+                  <div className="h-2 bg-gradient-to-r from-red-500 to-yellow-500" />
                   <CardContent className="p-6">
-                    <div className="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <Map className="w-6 h-6 text-rose-600" />
+                    <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Map className="w-6 h-6 text-red-600" />
                     </div>
                     <h3 className="text-lg font-bold text-gray-800 mb-2">知识图谱</h3>
                     <p className="text-gray-500 text-sm mb-4">可视化展示党建知识体系，清晰了解学习内容结构</p>
                     <Button 
                       onClick={() => setCurrentView('mindmap')}
-                      className="w-full bg-rose-500 hover:bg-rose-600"
+                      className="w-full bg-red-500 hover:bg-red-600"
                     >
                       探索图谱
                     </Button>
@@ -343,16 +343,16 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 </Card>
 
                 <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer overflow-hidden group">
-                  <div className="h-2 bg-gradient-to-r from-rose-400 to-red-400" />
+                  <div className="h-2 bg-gradient-to-r from-red-400 to-red-400" />
                   <CardContent className="p-6">
-                    <div className="w-12 h-12 rounded-xl bg-rose-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <Lightbulb className="w-6 h-6 text-rose-500" />
+                    <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Lightbulb className="w-6 h-6 text-red-500" />
                     </div>
                     <h3 className="text-lg font-bold text-gray-800 mb-2">AI学习助手</h3>
                     <p className="text-gray-500 text-sm mb-4">随时提问，即时解答，让学习更加轻松高效</p>
                     <Button 
                       onClick={() => setCurrentView('ai')}
-                      className="w-full bg-gradient-to-r from-rose-400 to-red-400 hover:from-rose-500 hover:to-red-500"
+                      className="w-full bg-gradient-to-r from-red-400 to-red-400 hover:from-red-500 hover:to-red-500"
                     >
                       向AI提问
                     </Button>
@@ -361,10 +361,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               </div>
 
               {/* 快速开始提示 */}
-              <Card className="border-0 shadow-lg bg-gradient-to-r from-rose-50 to-rose-50">
+              <Card className="border-0 shadow-lg bg-gradient-to-r from-red-50 to-red-50">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-rose-400 to-rose-400 flex items-center justify-center shrink-0">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-red-400 to-red-400 flex items-center justify-center shrink-0">
                       <BookOpen className="w-8 h-8 text-white" />
                     </div>
                     <div className="flex-1">
@@ -391,7 +391,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   <Button
                     variant="outline"
                     onClick={handleFinish}
-                    className="px-8 border-2 border-rose-300 text-rose-600 hover:bg-rose-50"
+                    className="px-8 border-2 border-red-300 text-red-600 hover:bg-red-50"
                   >
                     <Home className="w-4 h-4 mr-2" />
                     进入主站
@@ -399,7 +399,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   {!hasCompletedDiagnostic && (
                     <Button
                       onClick={() => setCurrentView('diagnostic')}
-                      className="bg-gradient-to-r from-rose-500 to-rose-500 hover:from-rose-600 hover:to-rose-600 px-8"
+                      className="bg-gradient-to-r from-red-500 to-red-500 hover:from-red-600 hover:to-red-600 px-8"
                     >
                       <GraduationCap className="w-4 h-4 mr-2" />
                       完成诊断
