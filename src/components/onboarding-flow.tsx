@@ -225,16 +225,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       {/* 顶部导航 */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-orange-100">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <motion.div 
-              className="flex items-center gap-3 cursor-pointer"
-              whileHover={{ scale: 1.02 }}
-              onClick={() => setCurrentView('home')}
-            >
-              <img src="/icon.png" alt="logo" className="w-10 h-10 object-contain" />
-              <h1 className="text-lg font-bold text-gray-800">全省统一战线网络学院</h1>
-            </motion.div>
-            
+          <div className="flex items-center justify-end">
             <div className="flex items-center gap-4">
               {currentUser && (
                 <div className="flex items-center gap-3 px-3 py-1.5 bg-orange-50 rounded-full">
