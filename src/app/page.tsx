@@ -971,8 +971,15 @@ function ReadingModal({ item, isOpen, onClose }: { item: ContentItem | null; isO
 }
 
 export default function HomePage() {
-  // 首次访问检测
+  // 首次访问检测 - 必须在顶部调用
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean | null>(null);
+  
+  // 主站状态 - 必须在顶部调用（Hooks不能在条件返回之后调用）
+  const [contents, setContents] = useState<ContentItem[]>(allContents);
+  const [featuredContent, setFeaturedContent] = useState<ContentItem | null>(allContents[0]);
+  const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
+  const [isReadingModalOpen, setIsReadingModalOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState('all');
   
   // 检查是否已完成引导
   useEffect(() => {
@@ -1004,12 +1011,6 @@ export default function HomePage() {
   }
   
   // 已完成引导：显示主站首页
-  const [contents, setContents] = useState<ContentItem[]>(allContents);
-  const [featuredContent, setFeaturedContent] = useState<ContentItem | null>(allContents[0]);
-  const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
-  const [isReadingModalOpen, setIsReadingModalOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState('all');
-  
   const categories = [
     { id: 'all', name: '全部', icon: Layers3 },
     { id: 'theory', name: '理论', icon: BookOpen },
