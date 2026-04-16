@@ -1047,34 +1047,27 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 via-pink-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-orange-50 to-white">
       {/* 顶部横幅区域 */}
-      <div className="relative min-h-[280px] flex flex-col items-center justify-center px-6 pb-16">
-        {/* 背景图 */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-90"
-          style={{ backgroundImage: 'url(/home-banner.png)' }}
-        />
-        {/* 半透明遮罩 */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/40 to-white/90" />
+      <div className="relative overflow-hidden">
+        {/* 渐变背景 */}
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-100 via-orange-50 to-pink-50" />
         
         {/* 内容层 */}
-        <div className="relative z-10 w-full max-w-2xl mx-auto flex flex-col items-center">
-          {/* AI助手形象 */}
-          <div className="bg-gradient-to-r from-orange-400 to-orange-500 rounded-2xl px-6 py-4 flex items-center gap-4 mb-6 shadow-lg">
-            <img 
-              src="/ai-assistant.png" 
-              alt="AI助手" 
-              className="h-16 w-auto object-contain"
-            />
-            <div className="text-white">
-              <p className="font-bold text-lg">HI, 早上好</p>
-              <p className="text-sm opacity-90">我是你的专属AI服务小助手</p>
-            </div>
-          </div>
+        <div className="relative z-10 max-w-4xl mx-auto px-6 py-12 flex flex-col items-center text-center">
+          {/* 欢迎角色 */}
+          <img 
+            src="/welcome-character.png" 
+            alt="欢迎" 
+            className="h-32 w-auto object-contain mb-4"
+          />
+          
+          {/* 欢迎文字 */}
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">欢迎来到全省统一战线网络学院</h1>
+          <p className="text-gray-600 text-lg mb-6">开启您的党建学习之旅</p>
           
           {/* 搜索框 */}
-          <div className="relative w-full flex items-center">
+          <div className="relative w-full max-w-xl flex items-center">
             <div className="absolute left-4 top-1/2 -translate-y-1/2">
               <Search className="h-5 w-5 text-orange-400" />
             </div>
@@ -1083,7 +1076,7 @@ export default function HomePage() {
               placeholder="需要我帮您查点什么..."
               className="w-full pl-12 pr-20 py-4 rounded-full border-2 border-orange-300 bg-white text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100 shadow-lg"
             />
-            <button className="absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-r from-orange-400 to-orange-500 flex items-center justify-center text-white shadow-md hover:shadow-lg transition-shadow">
+            <button className="absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-r from-orange-400 to-amber-400 flex items-center justify-center text-white shadow-md hover:shadow-lg transition-shadow">
               <Play className="h-5 w-5 ml-0.5" fill="currentColor" />
             </button>
           </div>

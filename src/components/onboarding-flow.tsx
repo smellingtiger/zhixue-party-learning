@@ -211,16 +211,16 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               {/* Hero区域 - 新用户欢迎页 */}
               <div className="relative overflow-hidden rounded-3xl" style={{ backgroundImage: 'url(/welcome-bg.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
                 {/* 柔和遮罩确保文字可读 */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/70 via-white/50 to-orange-50/70" />
+                <div className="absolute inset-0 bg-gradient-to-br from-white/70 via-white/50 to-amber-50/70" />
                 
-                <div className="relative z-10 max-w-2xl mx-auto text-center py-16 px-6">
+                <div className="relative z-10 max-w-2xl mx-auto text-center py-12 px-6">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                     className="mb-6"
                   >
-                    <img src="/ai-assistant.png" alt="AI助手" className="h-20 w-auto mx-auto" />
+                    <img src="/welcome-character.png" alt="欢迎" className="h-24 w-auto mx-auto" />
                   </motion.div>
                   
                   <motion.h2 
@@ -229,7 +229,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                   >
-                    欢迎，{currentUser?.display_name || currentUser?.username || '新学员'}！
+                    欢迎来到全省统一战线网络学院
                   </motion.h2>
                   <motion.p 
                     className="text-gray-600 text-lg mb-8"
