@@ -980,6 +980,7 @@ export default function HomePage() {
   const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
   const [isReadingModalOpen, setIsReadingModalOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
+  const [bannerClosed, setBannerClosed] = useState(false);
   
   // 检查是否已完成引导
   useEffect(() => {
@@ -1045,8 +1046,6 @@ export default function HomePage() {
       item.id === id ? { ...item, isBookmarked: !item.isBookmarked } : item
     ));
   };
-
-  const [bannerClosed, setBannerClosed] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 via-orange-50 to-white">
