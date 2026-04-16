@@ -1066,17 +1066,17 @@ export default function HomePage() {
           <h1 className="text-3xl font-bold text-gray-800 mb-2">欢迎来到全省统一战线网络学院</h1>
           <p className="text-gray-600 text-lg mb-6">开启您的党建学习之旅</p>
           
-          {/* 搜索框 */}
+          {/* 搜索框 - 参考样式 */}
           <div className="relative w-full max-w-xl flex items-center">
             <div className="absolute left-4 top-1/2 -translate-y-1/2">
-              <Search className="h-5 w-5 text-orange-400" />
+              <Search className="h-5 w-5 text-orange-500" />
             </div>
             <input 
               type="text"
               placeholder="需要我帮您查点什么..."
-              className="w-full pl-12 pr-20 py-4 rounded-full border-2 border-orange-300 bg-white text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100 shadow-lg"
+              className="w-full pl-12 pr-24 py-4 rounded-full border-2 border-orange-400 bg-white text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-100 shadow-lg transition-all"
             />
-            <button className="absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-r from-orange-400 to-amber-400 flex items-center justify-center text-white shadow-md hover:shadow-lg transition-shadow">
+            <button className="absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 to-orange-400 flex items-center justify-center text-white shadow-md hover:shadow-lg hover:from-orange-600 hover:to-orange-500 transition-all">
               <Play className="h-5 w-5 ml-0.5" fill="currentColor" />
             </button>
           </div>
