@@ -45,9 +45,11 @@ export function MainNav() {
     setHasCompletedOnboarding(completed === 'true');
   }, []);
 
-  // 路由切换时立即收起导航栏
+  // 路由切换时收起/展开导航栏
   useEffect(() => {
-    if (isExpanded) {
+    if (isHomePage) {
+      setIsExpanded(true);
+    } else {
       setIsExpanded(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
