@@ -241,8 +241,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             >
               {/* Hero区域 - 新用户欢迎页 */}
               <div className="relative overflow-hidden rounded-3xl" style={{ backgroundImage: 'url(/welcome-bg.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
-                {/* 柔和遮罩确保文字可读，红色系 */}
-                <div className="absolute inset-0 bg-gradient-to-br from-red-200/70 via-red-100/50 to-orange-100/70" />
                 
                 <div className="relative z-10 max-w-2xl mx-auto text-center py-12 px-6">
                   <motion.h2 
