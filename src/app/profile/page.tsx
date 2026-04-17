@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { NavBar } from '@/components/nav-bar';
 import { 
   BookOpen,
   Search,
@@ -109,10 +108,9 @@ export default function ProfilePage() {
   const [soundEffects, setSoundEffects] = useState(true);
 
   return (
-    <NavBar activeTab="profile">
-      <div className="flex-1 overflow-y-auto">
-        {/* 顶部个人信息卡片 */}
-        <div className="bg-gradient-to-br from-red-700 via-red-600 to-orange-500">
+    <div className="flex-1 overflow-y-auto">
+      {/* 顶部个人信息卡片 */}
+      <div className="bg-gradient-to-br from-red-700 via-red-600 to-orange-500">
           <div className="max-w-7xl mx-auto px-6 py-8">
             <div className="flex items-center gap-6">
               <Avatar className="h-24 w-24 border-4 border-white/30">
@@ -136,7 +134,7 @@ export default function ProfilePage() {
             {/* 等级进度 */}
             <div className="mt-6 bg-white/10 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-white/90 text-sm">距离"学习专家"还需</span>
+                <span className="text-white/90 text-sm">距离「学习专家」还需</span>
                 <span className="text-white font-medium">750 学习积分</span>
               </div>
               <Progress value={userData.levelProgress} className="h-2 bg-white/20 [&>div]:bg-white" />
@@ -345,7 +343,6 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
-      </div>
-    </NavBar>
+    </div>
   );
 }

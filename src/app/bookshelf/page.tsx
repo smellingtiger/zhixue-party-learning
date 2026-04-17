@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { NavBar } from '@/components/nav-bar';
 import { 
   BookOpen,
   Search,
@@ -167,7 +166,7 @@ export default function BookshelfPage() {
   );
 
   return (
-    <NavBar activeTab="bookshelf">
+    <>
       {/* 统计卡片 */}
       <div className="max-w-7xl mx-auto px-6 py-6 flex-1 overflow-y-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -373,6 +372,6 @@ export default function BookshelfPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </NavBar>
+    </>
   );
 }

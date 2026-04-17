@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { NavBar } from '@/components/nav-bar';
 import { 
   BookOpen,
   Search,
@@ -156,7 +155,7 @@ export default function NotesPage() {
   };
 
   return (
-    <NavBar activeTab="notes">
+    <div className="flex flex-1 overflow-hidden">
       {/* 左侧笔记列表 */}
       <div className="w-96 bg-white border-r flex flex-col">
         {/* 搜索和筛选 */}
@@ -362,6 +361,6 @@ export default function NotesPage() {
           </div>
         )}
       </div>
-    </NavBar>
+    </div>
   );
 }

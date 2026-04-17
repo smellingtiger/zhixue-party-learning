@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { OnboardingFlow } from '@/components/onboarding-flow';
-import { NavBar } from '@/components/nav-bar';
 import { 
   Play,
   Pause,
@@ -1049,14 +1048,15 @@ export default function HomePage() {
 
   return (
     <>
-      <NavBar activeTab="home">
+      {/* 三栏布局 */}
+      <div className="flex flex-1 overflow-hidden">
         {/* 左侧栏：课程树 */}
         <aside className="w-64 bg-white border-r border-gray-200 overflow-hidden">
           <CourseTreeSidebar />
         </aside>
-      
+
         {/* 中间栏：内容流 */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-orange-50/50 to-white">
           {/* 分类筛选 */}
           <div className="flex items-center gap-2 mb-6">
             {categories.map((cat) => {
@@ -1125,7 +1125,7 @@ export default function HomePage() {
         <aside className="w-80 bg-white border-l border-gray-200 overflow-hidden">
           <DashboardSidebar />
         </aside>
-      </NavBar>
+      </div>
 
       {/* 阅读弹窗 */}
       <ReadingModal 
