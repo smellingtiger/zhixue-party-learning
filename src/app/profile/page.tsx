@@ -110,64 +110,64 @@ export default function ProfilePage() {
 
   return (
     <NavBar activeTab="profile">
-      <div>
+      {/* 顶部个人信息卡片 */}
+      <div className="flex-1 overflow-y-auto">
         {/* 统计卡片 */}
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="w-10 h-10 rounded-full bg-red-100 mx-auto mb-2 flex items-center justify-center">
-                  <Calendar className="h-5 w-5 text-red-600" />
-                </div>
-                <p className="text-2xl font-bold">{userData.totalDays}</p>
-                <p className="text-xs text-muted-foreground">学习天数</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="w-10 h-10 rounded-full bg-orange-100 mx-auto mb-2 flex items-center justify-center">
-                  <Clock className="h-5 w-5 text-orange-600" />
-                </div>
-                <p className="text-2xl font-bold">{userData.totalHours}</p>
-                <p className="text-xs text-muted-foreground">累计学习(小时)</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="w-10 h-10 rounded-full bg-amber-100 mx-auto mb-2 flex items-center justify-center">
-                  <BookOpen className="h-5 w-5 text-amber-600" />
-                </div>
-                <p className="text-2xl font-bold">{userData.totalCourses}</p>
-                <p className="text-xs text-muted-foreground">完成课程</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="w-10 h-10 rounded-full bg-green-100 mx-auto mb-2 flex items-center justify-center">
-                  <Edit3 className="h-5 w-5 text-green-600" />
-                </div>
-                <p className="text-2xl font-bold">{userData.totalNotes}</p>
-                <p className="text-xs text-muted-foreground">学习笔记</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="w-10 h-10 rounded-full bg-blue-100 mx-auto mb-2 flex items-center justify-center">
-                  <Flame className="h-5 w-5 text-blue-600" />
-                </div>
-                <p className="text-2xl font-bold">{userData.streak}</p>
-                <p className="text-xs text-muted-foreground">连续学习(天)</p>
-              </CardContent>
-            </Card>
-          </div>
+        <div className="max-w-7xl mx-auto px-6 py-6 -mt-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="w-10 h-10 rounded-full bg-red-100 mx-auto mb-2 flex items-center justify-center">
+                <Calendar className="h-5 w-5 text-red-600" />
+              </div>
+              <p className="text-2xl font-bold">{userData.totalDays}</p>
+              <p className="text-xs text-muted-foreground">学习天数</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="w-10 h-10 rounded-full bg-orange-100 mx-auto mb-2 flex items-center justify-center">
+                <Clock className="h-5 w-5 text-orange-600" />
+              </div>
+              <p className="text-2xl font-bold">{userData.totalHours}</p>
+              <p className="text-xs text-muted-foreground">累计学习(小时)</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="w-10 h-10 rounded-full bg-amber-100 mx-auto mb-2 flex items-center justify-center">
+                <BookOpen className="h-5 w-5 text-amber-600" />
+              </div>
+              <p className="text-2xl font-bold">{userData.totalCourses}</p>
+              <p className="text-xs text-muted-foreground">完成课程</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="w-10 h-10 rounded-full bg-green-100 mx-auto mb-2 flex items-center justify-center">
+                <Edit3 className="h-5 w-5 text-green-600" />
+              </div>
+              <p className="text-2xl font-bold">{userData.totalNotes}</p>
+              <p className="text-xs text-muted-foreground">学习笔记</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="w-10 h-10 rounded-full bg-blue-100 mx-auto mb-2 flex items-center justify-center">
+                <Flame className="h-5 w-5 text-blue-600" />
+              </div>
+              <p className="text-2xl font-bold">{userData.streak}</p>
+              <p className="text-xs text-muted-foreground">连续学习(天)</p>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
-        {/* 主体内容 */}
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* 左侧 */}
-            <div className="lg:col-span-2 space-y-6">
+      {/* 主体内容 */}
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* 左侧 */}
+          <div className="lg:col-span-2 space-y-6">
             {/* 学习日历 */}
             <Card>
               <CardHeader>
