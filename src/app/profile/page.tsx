@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { MainNav } from '@/components/main-nav';
 import { 
   BookOpen,
   Search,
@@ -109,9 +108,7 @@ export default function ProfilePage() {
   const [soundEffects, setSoundEffects] = useState(true);
 
   return (
-    <>
-      <MainNav />
-      <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto">
       {/* 顶部个人信息卡片 */}
       <div className="bg-gradient-to-br from-red-700 via-red-600 to-orange-500">
           <div className="max-w-7xl mx-auto px-6 py-8">
@@ -347,6 +344,5 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
-    </>
   );
 }

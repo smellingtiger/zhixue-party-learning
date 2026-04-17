@@ -29,7 +29,6 @@ import {
   Layers3
 } from 'lucide-react';
 import Link from 'next/link';
-import { MainNav } from '@/components/main-nav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -168,11 +167,8 @@ export default function BookshelfPage() {
   );
 
   return (
-    <>
-      <MainNav />
-      {/* 统计卡片 */}
-      <div className="max-w-7xl mx-auto px-6 py-6 flex-1 overflow-y-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div className="max-w-7xl mx-auto px-6 py-6 flex-1 overflow-y-auto">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <Card>
             <CardContent className="p-4 flex items-center gap-4">
               <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center">
@@ -374,7 +370,6 @@ export default function BookshelfPage() {
             </div>
           </TabsContent>
         </Tabs>
-      </div>
-    </>
+    </div>
   );
 }

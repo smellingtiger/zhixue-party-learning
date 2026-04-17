@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { MainNav } from '@/components/main-nav';
 import { 
   BookOpen,
   Search,
@@ -156,11 +155,9 @@ export default function NotesPage() {
   };
 
   return (
-    <>
-      <MainNav />
-      <div className="flex flex-1 overflow-hidden">
-        {/* 左侧笔记列表 */}
-        <div className="w-96 bg-white border-r flex flex-col">
+    <div className="flex flex-1 overflow-hidden">
+      {/* 左侧笔记列表 */}
+      <div className="w-96 bg-white border-r flex flex-col">
         {/* 搜索和筛选 */}
         <div className="p-4 border-b">
           <div className="relative mb-3">
@@ -364,7 +361,6 @@ export default function NotesPage() {
           </div>
         )}
       </div>
-      </div>
-    </>
+    </div>
   );
 }

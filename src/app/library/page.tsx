@@ -2,20 +2,16 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { MainNav } from '@/components/main-nav';
 import { 
   BookOpen, 
   Search,
   Clock,
-  TrendingUp,
-  Star,
-  ArrowRight,
   Video,
   Image as ImageIcon,
-  FileText,
   ChevronRight,
   Play,
-  Eye
+  Eye,
+  Star
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,10 +29,10 @@ const categories = [
 ];
 
 const courses = [
-  { id: 1, title: '党的二十大精神解读', level: '必修', progress: 75, duration: '45分钟', lessons: 12, completed: 9 },
-  { id: 2, title: '中国共产党党史', level: '必修', progress: 30, duration: '60分钟', lessons: 15, completed: 5 },
-  { id: 3, title: '党章党规学习', level: '选修', progress: 0, duration: '30分钟', lessons: 8, completed: 0 },
-  { id: 4, title: '基层党务工作实务', level: '必修', progress: 50, duration: '40分钟', lessons: 10, completed: 5 },
+  { id: 1, title: '党的二十大精神解读', level: '必修', progress: 75, duration: '45分钟', lessons: 12 },
+  { id: 2, title: '中国共产党党史', level: '必修', progress: 30, duration: '60分钟', lessons: 15 },
+  { id: 3, title: '党章党规学习', level: '选修', progress: 0, duration: '30分钟', lessons: 8 },
+  { id: 4, title: '基层党务工作实务', level: '必修', progress: 50, duration: '40分钟', lessons: 10 },
 ];
 
 const featuredContents = [
@@ -50,10 +46,8 @@ export default function LibraryPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
-    <>
-      <MainNav />
-      <div className="container mx-auto px-4 py-8 flex-1 overflow-y-auto">
-        <Card className="mb-8 border-orange-100">
+    <div className="container mx-auto px-4 py-8 flex-1 overflow-y-auto">
+      <Card className="mb-8 border-orange-100">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -135,7 +129,7 @@ export default function LibraryPage() {
                 <Card key={course.id} className="border-red-100">
                   <CardContent className="p-4">
                     <div className="flex gap-4">
-                      <div className="w-24 h-16 rounded-lg bg-gradient-to-br from-red-600 to-orange-500 flex items-center justify-center flex-shrink-0 relative">
+                      <div className="w-24 h-16 rounded-lg bg-gradient-to-br from-red-600 to-orange-500 flex items-center justify-center relative">
                         {course.level === '必修' && (
                           <Badge className="absolute -top-2 -left-2 bg-red-600 text-xs">必修</Badge>
                         )}
@@ -207,8 +201,7 @@ export default function LibraryPage() {
             ))}
           </div>
         </TabsContent>
-        </Tabs>
-      </div>
-    </>
+      </Tabs>
+    </div>
   );
 }

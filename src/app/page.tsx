@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { OnboardingFlow } from '@/components/onboarding-flow';
-import { MainNav } from '@/components/main-nav';
 import { 
   Play,
   Pause,
@@ -1048,92 +1047,89 @@ export default function HomePage() {
   };
 
   return (
-    <>
-      <MainNav />
-      <div className="flex flex-1 overflow-hidden">
-        {/* 左侧栏：课程树 */}
-        <aside className="w-64 bg-white border-r border-gray-200 overflow-hidden">
-          <CourseTreeSidebar />
-        </aside>
+    <div className="flex flex-1 overflow-hidden">
+      {/* 左侧栏：课程树 */}
+      <aside className="w-64 bg-white border-r border-gray-200 overflow-hidden">
+        <CourseTreeSidebar />
+      </aside>
 
-        {/* 中间栏：内容流 */}
-        <main className="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-orange-50/50 to-white">
+      {/* 中间栏：内容流 */}
+      <main className="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-orange-50/50 to-white">
           {/* 分类筛选 */}
           <div className="flex items-center gap-2 mb-6">
-            {categories.map((cat) => {
-              const Icon = cat.icon;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => setActiveCategory(cat.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    activeCategory === cat.id 
-                      ? 'bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-md' 
-                      : 'bg-white text-gray-600 hover:bg-orange-50 border border-gray-200 hover:border-orange-200'
-                  }`}
+          {categories.map((cat) => {
+            const Icon = cat.icon;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  activeCategory === cat.id 
+                    ? 'bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-md' 
+                    : 'bg-white text-gray-600 hover:bg-orange-50 border border-gray-200 hover:border-orange-200'
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {cat.name}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* 精选头条 */}
+        {featuredContent && activeCategory === 'all' && (
+          <div className="mb-6">
+            <FeaturedCard item={featuredContent} onClick={() => handleReadContent(featuredContent)} />
+          </div>
+        )}
+
+        {/* 内容列表 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredContents.map((item) => (
+            <div key={item.id} className="relative">
+              <ContentCard item={item} onClick={() => handleReadContent(item)} />
+              <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button 
+                  size="icon" 
+                  variant="secondary" 
+                  className="h-8 w-8 bg-white/90 hover:bg-white"
+                  onClick={(e) => { e.stopPropagation(); handleLike(item.id); }}
                 >
-                  <Icon className="h-4 w-4" />
-                  {cat.name}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* 精选头条 */}
-          {featuredContent && activeCategory === 'all' && (
-            <div className="mb-6">
-              <FeaturedCard item={featuredContent} onClick={() => handleReadContent(featuredContent)} />
-            </div>
-          )}
-
-          {/* 内容列表 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredContents.map((item) => (
-              <div key={item.id} className="relative">
-                <ContentCard item={item} onClick={() => handleReadContent(item)} />
-                <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button 
-                    size="icon" 
-                    variant="secondary" 
-                    className="h-8 w-8 bg-white/90 hover:bg-white"
-                    onClick={(e) => { e.stopPropagation(); handleLike(item.id); }}
-                  >
-                    <Heart className={`h-4 w-4 ${item.isLiked ? 'fill-orange-500 text-orange-500' : ''}`} />
-                  </Button>
-                  <Button 
-                    size="icon" 
-                    variant="secondary" 
-                    className="h-8 w-8 bg-white/90 hover:bg-white"
-                    onClick={(e) => { e.stopPropagation(); handleBookmark(item.id); }}
-                  >
-                    <Bookmark className={`h-4 w-4 ${item.isBookmarked ? 'fill-amber-500 text-amber-500' : ''}`} />
-                  </Button>
-                </div>
+                  <Heart className={`h-4 w-4 ${item.isLiked ? 'fill-orange-500 text-orange-500' : ''}`} />
+                </Button>
+                <Button 
+                  size="icon" 
+                  variant="secondary" 
+                  className="h-8 w-8 bg-white/90 hover:bg-white"
+                  onClick={(e) => { e.stopPropagation(); handleBookmark(item.id); }}
+                >
+                  <Bookmark className={`h-4 w-4 ${item.isBookmarked ? 'fill-amber-500 text-amber-500' : ''}`} />
+                </Button>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
+        </div>
 
-          {/* 加载更多 */}
-          <div className="flex justify-center mt-8">
-            <Button variant="outline" className="border-orange-200 text-orange-600 hover:bg-orange-50">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              加载更多
-            </Button>
-          </div>
-        </main>
+        {/* 加载更多 */}
+        <div className="flex justify-center mt-8">
+          <Button variant="outline" className="border-orange-200 text-orange-600 hover:bg-orange-50">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            加载更多
+          </Button>
+        </div>
+      </main>
 
-        {/* 右侧栏：数据仪表盘 */}
-        <aside className="w-80 bg-white border-l border-gray-200 overflow-hidden">
-          <DashboardSidebar />
-        </aside>
-      </div>
-
+      {/* 右侧栏：数据仪表盘 */}
+      <aside className="w-80 bg-white border-l border-gray-200 overflow-hidden">
+        <DashboardSidebar />
+      </aside>
+      
       {/* 阅读弹窗 */}
       <ReadingModal 
         item={selectedContent} 
         isOpen={isReadingModalOpen} 
         onClose={() => setIsReadingModalOpen(false)} 
       />
-    </>
+    </div>
   );
 }
