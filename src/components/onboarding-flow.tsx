@@ -226,7 +226,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50">
+    <div className="min-h-screen bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100">
       {/* 主内容区域 */}
       <main className="max-w-7xl mx-auto px-4 py-8">
         <AnimatePresence mode="wait">
@@ -241,12 +241,12 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             >
               {/* Hero区域 - 新用户欢迎页 */}
               <div className="relative overflow-hidden rounded-3xl" style={{ backgroundImage: 'url(/welcome-bg.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
-                {/* 柔和遮罩确保文字可读 */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/70 via-white/50 to-red-50/70" />
+                {/* 柔和遮罩确保文字可读，红色系 */}
+                <div className="absolute inset-0 bg-gradient-to-br from-red-200/70 via-red-100/50 to-orange-100/70" />
                 
                 <div className="relative z-10 max-w-2xl mx-auto text-center py-12 px-6">
                   <motion.h2 
-                    className="text-3xl md:text-4xl font-bold text-gray-800 mb-4"
+                    className="text-3xl md:text-4xl font-bold text-red-800 mb-4"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
@@ -269,7 +269,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   </motion.div>
                   
                   <motion.p 
-                    className="text-gray-600 text-lg mb-8"
+                    className="text-red-700 text-lg mb-8"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
@@ -311,8 +311,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                     <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <Target className="w-6 h-6 text-red-600" />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-800 mb-2">个性化诊断</h3>
-                    <p className="text-gray-500 text-sm mb-4">通过智能诊断了解您的学习基础，为您精准匹配学习内容</p>
+                    <h3 className="text-lg font-bold text-red-800 mb-2">个性化诊断</h3>
+                    <p className="text-red-600 text-sm mb-4">通过智能诊断了解您的学习基础，为您精准匹配学习内容</p>
                     <Button 
                       onClick={() => setCurrentView('diagnostic')}
                       className="w-full bg-red-500 hover:bg-red-600"
@@ -328,8 +328,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                     <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <Map className="w-6 h-6 text-red-600" />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-800 mb-2">知识图谱</h3>
-                    <p className="text-gray-500 text-sm mb-4">可视化展示党建知识体系，清晰了解学习内容结构</p>
+                    <h3 className="text-lg font-bold text-red-800 mb-2">知识图谱</h3>
+                    <p className="text-red-600 text-sm mb-4">可视化展示党建知识体系，清晰了解学习内容结构</p>
                     <Button 
                       onClick={() => setCurrentView('mindmap')}
                       className="w-full bg-red-500 hover:bg-red-600"
@@ -345,8 +345,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                     <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <Lightbulb className="w-6 h-6 text-red-500" />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-800 mb-2">AI学习助手</h3>
-                    <p className="text-gray-500 text-sm mb-4">随时提问，即时解答，让学习更加轻松高效</p>
+                    <h3 className="text-lg font-bold text-red-800 mb-2">AI学习助手</h3>
+                    <p className="text-red-600 text-sm mb-4">随时提问，即时解答，让学习更加轻松高效</p>
                     <Button 
                       onClick={() => setCurrentView('ai')}
                       className="w-full bg-gradient-to-r from-red-400 to-red-400 hover:from-red-500 hover:to-red-500"
@@ -365,8 +365,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                       <BookOpen className="w-8 h-8 text-white" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-800 mb-1">建议您这样开始</h3>
-                      <p className="text-gray-600 text-sm">先完成学习诊断，了解自己的学习基础，然后根据AI为您定制的学习路径开始系统学习</p>
+                      <h3 className="text-lg font-bold text-red-800 mb-1">建议您这样开始</h3>
+                      <p className="text-red-700 text-sm">先完成学习诊断，了解自己的学习基础，然后根据AI为您定制的学习路径开始系统学习</p>
                     </div>
                   </div>
                 </CardContent>
