@@ -118,9 +118,6 @@ export default function ProfilePage() {
           backgroundPosition: 'center',
         }}
       >
-        {/* 渐变遮罩 */}
-        <div className="absolute inset-0 bg-gradient-to-br from-red-900/80 via-red-800/75 to-orange-600/70 backdrop-blur-sm" />
-        
         {/* 内容 */}
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center gap-6">
