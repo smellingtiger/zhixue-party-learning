@@ -135,6 +135,7 @@
 
 body {
   @apply font-sans;
+  @apply min-h-screen flex flex-col;
 }
 
 /* 党政红韵主题 */

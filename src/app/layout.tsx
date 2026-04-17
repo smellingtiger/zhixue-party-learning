@@ -45,7 +45,7 @@ export default function RootLayout({
       <body className="antialiased">
         <NavProvider>
           <MainNav />
-          <main>{children}</main>
+          <main className="flex-1 flex flex-col">{children}</main>
         </NavProvider>
         <Toaster />
       </body>
