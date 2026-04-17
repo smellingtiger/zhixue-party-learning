@@ -118,8 +118,8 @@ export default function ProfilePage() {
           backgroundPosition: 'center',
         }}
       >
-        {/* 半透明遮罩 - 增加文字对比度 */}
-        <div className="absolute inset-0 bg-gradient-to-br from-red-600/70 via-red-500/50 to-orange-400/30" />
+        {/* 半透明遮罩 - 增加文字对比度，与导航栏颜色协调 */}
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-400/30 via-red-500/50 to-red-600/70" />
         
         {/* 内容 */}
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
