@@ -63,7 +63,7 @@ export function MainNav() {
       className={cn(
         "w-full z-50 sticky top-0 transition-all duration-500 ease-in-out overflow-hidden",
         baseHeaderStyle,
-        isExpanded && showExpandedContent ? "h-48" : "h-16"
+        isExpanded && showExpandedContent ? "h-56" : "h-16"
       )}
       style={{
         backgroundImage: showExpandedContent && isExpanded 
@@ -198,7 +198,7 @@ export function MainNav() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.4, ease: "easeInOut" }}
-              className="flex-1 flex flex-col items-center justify-center px-6 pb-4"
+              className="flex-1 flex flex-col items-center justify-center px-6 pb-6"
             >
               {/* 欢迎文字 */}
               <h1 className="text-2xl font-bold text-white mb-2 drop-shadow-lg">
