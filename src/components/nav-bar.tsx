@@ -67,30 +67,7 @@ export function NavBar({ activeTab = 'home', children }: NavBarProps) {
         {children}
       </div>
       
-      {/* 底部导航栏 */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
-        <div className="flex justify-around items-center py-2 max-w-md mx-auto">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentTab === item.id;
-            
-            return (
-              <Link
-                key={item.id}
-                href={item.path}
-                className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors ${
-                  isActive 
-                    ? 'text-orange-500' 
-                    : 'text-gray-400 hover:text-orange-400'
-                }`}
-              >
-                <Icon className={`h-5 w-5 ${isActive ? 'stroke-2' : ''}`} />
-                <span className="text-xs font-medium">{item.label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
+      </div>
     </div>
   );
 }
