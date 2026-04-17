@@ -110,9 +110,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   useEffect(() => {
     const randomMsg = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
     setWelcomeMessage(randomMsg);
-    setShowWelcome(false);
-    setTypewriterText('');
-    
     // 短暂延迟后开始打字
     const timer = setTimeout(() => {
       setShowWelcome(true);
@@ -125,9 +122,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           clearInterval(typeInterval);
         }
       }, 50);
-      return () => clearInterval(typeInterval);
     }, 500);
-    
     return () => clearTimeout(timer);
   }, []);
 
@@ -245,6 +240,15 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 <div className="absolute inset-0 bg-gradient-to-br from-white/70 via-white/50 to-red-50/70" />
                 
                 <div className="relative z-10 max-w-2xl mx-auto text-center py-12 px-6">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="mb-6"
+                  >
+                    <img src="/tx_homeAILogo.png" alt="欢迎" className="h-24 w-auto mx-auto" />
+                  </motion.div>
+                  
                   <motion.h2 
                     className="text-3xl md:text-4xl font-bold text-gray-800 mb-4"
                     initial={{ opacity: 0, y: 20 }}
@@ -254,14 +258,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                     欢迎来到全省统一战线网络学院
                   </motion.h2>
                   
-                  {/* AI形象 + 随机欢迎语 */}
+                  {/* 随机欢迎语 + 打字机特效 */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="mb-6 flex items-center justify-center gap-3"
+                    className="mb-6"
                   >
-                    <img src="/welcome-character.png" alt="AI助手" className="h-16 w-auto" />
                     <p className="text-xl text-red-600 font-medium">
                       {showWelcome ? typewriterText : ''}
                       <span className="animate-pulse">|</span>

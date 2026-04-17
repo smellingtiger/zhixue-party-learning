@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { NavBar } from '@/components/nav-bar';
 import { 
   BookOpen,
   Search,
@@ -167,14 +166,22 @@ export default function BookshelfPage() {
   );
 
   return (
-    <NavBar activeTab="bookshelf">
+    <div className="min-h-screen bg-gray-50">
+      {/* 页面标题 */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <h1 className="text-2xl font-bold mb-2">我的书架</h1>
+          <p className="text-muted-foreground">管理您的收藏内容和学习历史</p>
+        </div>
+      </div>
+
       {/* 统计卡片 */}
-      <div className="max-w-7xl mx-auto px-6 py-6 flex-1 overflow-y-auto">
+      <div className="max-w-7xl mx-auto px-6 py-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <Card>
             <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center">
-                <Bookmark className="h-6 w-6 text-orange-600" />
+              <div className="w-12 h-12 rounded-lg bg-red-100 flex items-center justify-center">
+                <Bookmark className="h-6 w-6 text-red-600" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{bookshelfItems.length}</p>
@@ -373,6 +380,6 @@ export default function BookshelfPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </NavBar>
+    </div>
   );
 }

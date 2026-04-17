@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { NavBar } from '@/components/nav-bar';
 import { 
   BookOpen, 
   Search,
@@ -130,17 +129,39 @@ export default function LibraryPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
-    <NavBar activeTab="library">
-      <div className="container mx-auto px-4 py-8 flex-1 overflow-y-auto">
+    <div className="min-h-screen bg-gradient-to-b from-red-50 to-white">
+      {/* 顶部Banner */}
+      <div className="bg-gradient-to-r from-red-600 to-orange-500 text-white">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: 'Noto Serif SC, serif' }}>
+                知识库
+              </h1>
+              <p className="text-white/80">
+                系统学习，深入理解
+              </p>
+            </div>
+            <Link href="/">
+              <Button variant="secondary" className="bg-white/20 text-white hover:bg-white/30 border-0">
+                <Home className="h-4 w-4 mr-2" />
+                返回刷课
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8">
         {/* 搜索栏 */}
-        <Card className="mb-8 border-orange-100">
+        <Card className="mb-8 border-red-100">
           <CardContent className="p-4">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input 
                   placeholder="搜索课程、知识点..." 
-                  className="pl-10 border-orange-100"
+                  className="pl-10 border-red-100"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -334,7 +355,17 @@ export default function LibraryPage() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* 返回刷课 */}
+        <div className="text-center mt-8">
+          <Link href="/">
+            <Button size="lg" className="bg-gradient-to-r from-red-600 to-orange-500">
+              <Sparkles className="h-4 w-4 mr-2" />
+              返回首页刷课
+            </Button>
+          </Link>
+        </div>
       </div>
-    </NavBar>
+    </div>
   );
 }
