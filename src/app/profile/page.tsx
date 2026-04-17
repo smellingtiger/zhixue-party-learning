@@ -119,7 +119,7 @@ export default function ProfilePage() {
         }}
       >
         {/* 半透明遮罩 - 增加文字对比度 */}
-        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-br from-red-600/70 via-red-500/50 to-orange-400/30" />
         
         {/* 内容 */}
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
