@@ -118,6 +118,9 @@ export default function ProfilePage() {
           backgroundPosition: 'center',
         }}
       >
+        {/* 半透明遮罩 - 增加文字对比度 */}
+        <div className="absolute inset-0 bg-black/30" />
+        
         {/* 内容 */}
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center gap-6">
