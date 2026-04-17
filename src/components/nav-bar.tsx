@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, Play, Library, Bookmark, PenTool, User } from 'lucide-react';
+import { Search, Play, Library, Bookmark, PenTool, User, Layers } from 'lucide-react';
 import { ReactNode } from 'react';
 
 type NavTab = 'home' | 'library' | 'bookshelf' | 'notes' | 'profile';
@@ -16,6 +16,7 @@ const navItems = [
   { id: 'library' as NavTab, label: '知识库', icon: Library, path: '/library' },
   { id: 'bookshelf' as NavTab, label: '书架', icon: Bookmark, path: '/bookshelf' },
   { id: 'notes' as NavTab, label: '笔记', icon: PenTool, path: '/notes' },
+  { id: 'governance' as NavTab, label: '数据治理', icon: Layers, path: '/governance' },
   { id: 'profile' as NavTab, label: '我的', icon: User, path: '/profile' },
 ];
 
