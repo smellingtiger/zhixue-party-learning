@@ -1,7 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { OnboardingFlow } from '@/components/onboarding-flow';
+import { partyKnowledgeGraph } from '@/lib/knowledge-graph';
+import type { KnowledgeNode, LearningProgress } from '@/lib/types';
 import { 
   Play,
   Pause,
@@ -21,6 +24,7 @@ import {
   ChevronLeft,
   X,
   CheckCircle2,
+  CheckCircle,
   Check,
   Sparkles,
   Lightbulb,
@@ -62,7 +66,9 @@ import {
   Clock3,
   Flame,
   StarHalf,
-  Layers3
+  Layers3,
+  Circle,
+  ChevronRight as ChevronRightIcon,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -431,54 +437,165 @@ const hotContents: HotItem[] = [
   { id: 5, title: '党章第一章', type: '党章', rank: 5 },
 ];
 
-// 课程树数据
-const courseTree = [
-  {
-    id: 1,
-    title: '党的二十大精神',
-    icon: Sparkles,
-    progress: 75,
-    chapters: [
-      { id: 1, title: '大会主题与重要意义', completed: true },
-      { id: 2, title: '两个确立', completed: true },
-      { id: 3, title: '中国式现代化', completed: true },
-      { id: 4, title: '高质量发展', completed: false },
-      { id: 5, title: '全面从严治党', completed: false },
-    ]
-  },
-  {
-    id: 2,
-    title: '党章学习专题',
-    icon: BookOpen,
-    progress: 40,
-    chapters: [
-      { id: 6, title: '党员条件', completed: true },
-      { id: 7, title: '党员义务', completed: true },
-      { id: 8, title: '组织制度', completed: false },
-    ]
-  },
-  {
-    id: 3,
-    title: '基层党务实务',
-    icon: Layers3,
-    progress: 20,
-    chapters: [
-      { id: 9, title: '三会一课', completed: true },
-      { id: 10, title: '发展党员', completed: false },
-      { id: 11, title: '组织生活会', completed: false },
-    ]
-  },
-  {
-    id: 4,
-    title: '党纪党规',
-    icon: Target,
-    progress: 15,
-    chapters: [
-      { id: 12, title: '纪律处分条例', completed: false },
-      { id: 13, title: '廉洁自律准则', completed: false },
-    ]
-  },
-];
+// 知识树大纲组件
+function KnowledgeTreeOutline({
+  currentNodeId,
+  onNodeClick,
+  progress = [],
+}: {
+  currentNodeId?: string;
+  onNodeClick: (node: KnowledgeNode) => void;
+  progress?: LearningProgress[];
+}) {
+  const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({});
+
+  const getNodeStatus = (nodeId: string) => {
+    const prog = progress.find(p => p.nodeId === nodeId);
+    return prog?.status || 'locked';
+  };
+
+  const toggleNode = (nodeId: string) => {
+    setExpandedNodes(prev => ({
+      ...prev,
+      [nodeId]: !prev[nodeId]
+    }));
+  };
+
+  const renderNode = (node: KnowledgeNode, level: number = 0) => {
+    const isCurrent = node.id === currentNodeId;
+    const status = getNodeStatus(node.id);
+    const hasChildren = node.children && node.children.length > 0;
+    const isExpanded = expandedNodes[node.id];
+    const isLeafNode = !hasChildren;
+    const hasContent = isLeafNode && node.content;
+    const isLeafExpanded = expandedNodes[`${node.id}-content`];
+
+    return (
+      <div key={node.id} className="select-none">
+        <div
+          onClick={() => {
+            if (hasChildren) {
+              toggleNode(node.id);
+            } else if (hasContent) {
+              if (isLeafExpanded) {
+                // 已展开，点击跳转
+                onNodeClick(node);
+              } else {
+                // 未展开，先展开内容
+                toggleNode(`${node.id}-content`);
+              }
+            }
+          }}
+          className={`
+            flex items-center gap-2 py-2 px-3 rounded-lg cursor-pointer transition-all
+            ${isCurrent
+              ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-md'
+              : 'hover:bg-slate-100 text-slate-700'
+            }
+            ${level > 0 ? 'ml-4' : ''}
+          `}
+        >
+          {/* 状态图标 */}
+          <div className="flex-shrink-0">
+            {status === 'completed' ? (
+              <CheckCircle className={`w-4 h-4 ${isCurrent ? 'text-white' : 'text-green-500'}`} />
+            ) : status === 'in_progress' ? (
+              <Clock className={`w-4 h-4 ${isCurrent ? 'text-white' : 'text-amber-500'}`} />
+            ) : (
+              <Circle className={`w-4 h-4 ${isCurrent ? 'text-white/70' : 'text-slate-300'}`} />
+            )}
+          </div>
+
+          {/* 节点内容 */}
+          <div className="flex-1 min-w-0">
+            <div className={`text-sm font-medium truncate ${isCurrent ? 'text-white' : ''}`}>
+              {node.name}
+            </div>
+            {node.description && (
+              <div className={`text-xs truncate ${isCurrent ? 'text-white/80' : 'text-slate-400'}`}>
+                {node.description}
+              </div>
+            )}
+          </div>
+
+          {/* 展开/折叠图标 */}
+          {(hasChildren || hasContent) && (
+            <div className={`flex-shrink-0 transition-transform ${(isExpanded || isLeafExpanded) ? 'rotate-90' : ''}`}>
+              <ChevronRightIcon className={`w-4 h-4 ${isCurrent ? 'text-white' : 'text-slate-400'}`} />
+            </div>
+          )}
+
+          {/* 时长 */}
+          {node.content?.duration && (
+            <div className={`text-xs flex-shrink-0 ${isCurrent ? 'text-white/80' : 'text-slate-400'}`}>
+              {node.content.duration}分钟
+            </div>
+          )}
+        </div>
+
+        {/* 内容卡片 - 叶子节点下显示 */}
+        {hasContent && isLeafExpanded && (
+          <div className="ml-4 mt-1 border-l-2 border-slate-200 pl-2">
+            <div className="select-none">
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onNodeClick(node);
+                }}
+                className="flex items-center gap-2 py-1.5 px-3 rounded-lg cursor-pointer transition-all text-sm hover:bg-slate-50 text-slate-600"
+              >
+                <Play className="w-3 h-3 flex-shrink-0 text-slate-400" />
+                <div className="flex-1 min-w-0">
+                  <div className="truncate">{node.content!.title}</div>
+                </div>
+                <span className="text-xs flex-shrink-0 text-slate-400">
+                  {node.content!.duration}分钟
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 递归渲染子节点 */}
+        {hasChildren && isExpanded && (
+          <div className="mt-1">
+            {node.children!.map(child => renderNode(child, level + 1))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-1">
+      {partyKnowledgeGraph.children?.map(child => renderNode(child))}
+    </div>
+  );
+}
+
+// 左侧栏：知识树大纲
+function CourseTreeSidebar({ onNodeClick }: { onNodeClick: (node: KnowledgeNode) => void }) {
+  return (
+    <div className="h-full flex flex-col">
+      <div className="p-4 border-b border-gray-200">
+        <h2 className="font-bold text-lg flex items-center gap-2">
+          <BookOpen className="h-5 w-5 text-orange-500" />
+          知识树大纲
+        </h2>
+        <p className="text-xs text-muted-foreground mt-1">
+          点击节点切换课程，完成学习解锁后续内容
+        </p>
+      </div>
+      <ScrollArea className="flex-1">
+        <div className="p-2">
+          <KnowledgeTreeOutline
+            onNodeClick={onNodeClick}
+          />
+        </div>
+      </ScrollArea>
+    </div>
+  );
+}
 
 // 精选头条组件
 function FeaturedCard({ item, onClick }: { item: ContentItem; onClick: () => void }) {
@@ -624,72 +741,6 @@ function ContentCard({ item, onClick }: { item: ContentItem; onClick: () => void
         )}
       </CardContent>
     </Card>
-  );
-}
-
-// 左侧栏：课程树
-function CourseTreeSidebar() {
-  const [expandedId, setExpandedId] = useState<number | null>(1);
-  
-  return (
-    <div className="h-full flex flex-col">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="font-bold text-lg flex items-center gap-2">
-          <BookOpen className="h-5 w-5 text-orange-500" />
-          学习体系
-        </h2>
-      </div>
-      <ScrollArea className="flex-1">
-        <div className="p-2">
-          {courseTree.map((course) => {
-            const Icon = course.icon;
-            const isExpanded = expandedId === course.id;
-            return (
-              <div key={course.id} className="mb-2">
-                <button
-                  onClick={() => setExpandedId(isExpanded ? null : course.id)}
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                    isExpanded ? 'bg-orange-50 text-orange-700' : 'hover:bg-gray-50'
-                  }`}
-                >
-                  <Icon className={`h-5 w-5 ${isExpanded ? 'text-orange-500' : 'text-gray-400'}`} />
-                  <div className="flex-1 text-left">
-                    <p className="font-medium text-sm">{course.title}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Progress value={course.progress} className="flex-1 h-1 [&>div]:bg-orange-500" />
-                      <span className="text-xs text-muted-foreground">{course.progress}%</span>
-                    </div>
-                  </div>
-                  <ChevronRight className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                </button>
-                
-                {isExpanded && (
-                  <div className="ml-6 mt-1 space-y-1 border-l-2 border-orange-100 pl-3">
-                    {course.chapters.map((chapter) => (
-                      <div
-                        key={chapter.id}
-                        className={`flex items-center gap-2 p-2 rounded text-sm ${
-                          chapter.completed 
-                            ? 'text-green-600' 
-                            : 'text-gray-600 hover:bg-gray-50'
-                        }`}
-                      >
-                        {chapter.completed ? (
-                          <CheckCircle2 className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <div className="h-4 w-4 rounded-full border-2 border-gray-300" />
-                        )}
-                        <span className={chapter.completed ? 'line-through' : ''}>{chapter.title}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </ScrollArea>
-    </div>
   );
 }
 
@@ -980,6 +1031,8 @@ export default function HomePage() {
   const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
   const [isReadingModalOpen, setIsReadingModalOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
+  const [currentNodeId, setCurrentNodeId] = useState<string | undefined>(undefined);
+  const router = useRouter();
   
   // 检查是否已完成引导
   useEffect(() => {
@@ -1046,11 +1099,16 @@ export default function HomePage() {
     ));
   };
 
+  const handleNodeClick = (node: KnowledgeNode) => {
+    setCurrentNodeId(node.id);
+    router.push(`/course/${node.id}`);
+  };
+
   return (
     <div className="flex flex-1 overflow-hidden">
-      {/* 左侧栏：课程树 */}
-      <aside className="w-64 bg-white border-r border-gray-200 overflow-hidden">
-        <CourseTreeSidebar />
+      {/* 左侧栏：知识树大纲 */}
+      <aside className="w-80 bg-white border-r border-gray-200 overflow-hidden flex-shrink-0">
+        <CourseTreeSidebar onNodeClick={handleNodeClick} />
       </aside>
 
       {/* 中间栏：内容流 */}
