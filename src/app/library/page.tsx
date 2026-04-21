@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { NavBar } from '@/components/nav-bar';
+import { MainNav } from '@/components/main-nav';
 import { 
   BookOpen, 
   Search,
@@ -317,8 +317,8 @@ export default function LibraryPage() {
   };
 
   return (
-    <NavBar activeTab="library">
-      <div className="container mx-auto px-4 py-8 flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto">
+      <div className="container mx-auto px-4 py-8">
         {/* 搜索栏 */}
         <Card className="mb-8 border-orange-100">
           <CardContent className="p-4">
@@ -804,6 +804,6 @@ export default function LibraryPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </NavBar>
+    </div>
   );
 }
