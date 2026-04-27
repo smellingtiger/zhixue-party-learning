@@ -497,7 +497,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                       <div className="h-2 bg-gradient-to-r from-red-500 to-red-400" />
                       <CardContent className="p-6 relative z-10">
                         <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mb-6">
-                          <img src="/zzll-ico.png" alt="AI助手" className="w-14 h-14" />
+                          <img src="/kxfz-ico.png" alt="AI助手" className="w-14 h-14" />
                         </div>
                         <h3 className="text-xl font-bold text-slate-900 mb-4">AI助手</h3>
                         <p className="text-slate-700 text-sm mb-6">智能学习助手，随时解答您的疑问，提供个性化学习建议</p>
