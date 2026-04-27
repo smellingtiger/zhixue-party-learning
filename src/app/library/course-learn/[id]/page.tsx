@@ -48,6 +48,27 @@ function getCourseVideoUrl(courseId: string): string | null {
   return null;
 }
 
+// 辅助函数：获取课程配图
+// 图片命名规则: X-X-X.jpg (课程代号-章节代号-页码)
+function getCourseImageUrl(courseCode: string, chapterIndex: number, pageIndex: number): string | null {
+  const imageName = `${courseCode}-${chapterIndex}-${pageIndex}`;
+  const knownImages = [
+    '1-1-1', '1-1-2', '1-3-1', '1-3-2', '1-4-2', '1-5-1', '1-5-2', '1-5-3',
+    '1-6-1', '1-6-2', '1-6-3', '1-7-1', '1-7-2', '1-8-1', '1-8-2',
+    '2-1-1', '2-2-1', '2-3-1', '2-3-2', '2-4-1', '2-4-2', '2-5-1',
+    '2-6-1', '2-7-1', '2-8-1', '2-9-1', '2-10-1',
+    '3-1-1', '3-2-1', '3-3-1', '3-4-1', '3-5-1', '3-6-1', '3-6-2',
+    '3-7-1', '3-8-1',
+  ];
+  if (knownImages.includes(imageName)) {
+    return `/${imageName}.jpg`;
+  }
+  if (courseCode === '2' || courseCode === '3') {
+    return `/${imageName}.jpg`;
+  }
+  return null;
+}
+
 // AI能力标签类型
 type AITagType = '知识点' | '重点' | '延伸思考' | 'AI提醒';
 
@@ -81,7 +102,7 @@ const mockCourseData = {
   id: 1,
   name: '乡村振兴战略核心知识点',
   description: '深入学习乡村振兴战略的政策要点、实践路径与创新思维',
-  totalHours: 8,
+  totalHours: 0.8,
   chapters: [
     {
       id: 1,
@@ -246,49 +267,66 @@ function getCourseData(courseId?: string): any {
     const saved = localStorage.getItem('current_ai_course');
     if (saved) {
       const parsed = JSON.parse(saved);
-      // 将生成的课程转换为学习页格式
+      
+      // 根据课程名称确定课程代号
+      let courseCode = '1';
+      const courseName = parsed.courseName || '';
+      if (courseName.includes('统一战线') || courseName.includes('统战')) courseCode = '2';
+      else if (courseName.includes('廉政') || courseName.includes('党风')) courseCode = '3';
+      else if (courseName.includes('党章')) courseCode = '4';
+      else if (courseName.includes('基层') || courseName.includes('党务')) courseCode = '5';
+      
       return {
         id: parsed.chapters?.[0]?.id || 1,
         name: parsed.courseName || 'AI生成课程',
         description: parsed.description || '',
         totalHours: parsed.totalHours || 8,
-        chapters: (parsed.chapters || []).map((ch: any, idx: number) => {
-          // 尝试从映射中获取视频URL
+        chapters: (parsed.chapters || []).map((ch: any, chIdx: number) => {
           const videoUrl = getCourseVideoUrl(ch.id?.toString() || courseId || '');
+          const chapterContent = ch.content || '';
+          const slides = [];
           
-          return {
-            id: ch.id,
-            title: ch.title,
-            totalSlides: 3,
-            aiSummary: `第${idx + 1}讲：${ch.title}。AI根据课程主题自动生成核心知识点，帮助您快速掌握本讲要点。`,
-            keyPoints: [ch.title.replace(/第.*讲：/, '')],
-            videoUrl: videoUrl, // 章节视频URL
-            slides: [
-              // 第一页：视频播放
-              ...(videoUrl ? [{
-                type: 'video',
-                content: '',
-                videoUrl: videoUrl,
-              }] : []),
-              // 第二页：文本内容
-              {
-                type: 'text',
-                content: ch.title + '。本讲内容涵盖相关核心知识点，帮助您全面理解和掌握。',
-                aiTags: [
-                  { text: ch.title.replace(/第.*讲：/, ''), type: '知识点', explanation: '本讲核心知识点' },
-                ],
-              },
-              // 第三页：图文混合
-              {
-                type: 'mixed',
-                content: `${ch.title}的详细解读。AI根据知识图谱为您整理关键要点和深入分析，帮助您快速理解和应用。`,
-                imageCaption: `${ch.title}知识图谱`,
-                aiTags: [
-                  { text: '核心要点', type: '重点', explanation: '本讲最重要的知识点' },
-                ],
-              },
-            ],
-          };
+          if (videoUrl) {
+            slides.push({ type: 'video', content: '', videoUrl });
+          }
+          
+          if (chapterContent) {
+            const paragraphs = chapterContent.split('\n\n').filter((p: string) => p.trim());
+            const paragraphsPerPage = 3;
+            let imgPageIndex = 0;
+            const forceImageSlide = courseCode === '2' || courseCode === '3';
+            for (let i = 0; i < paragraphs.length; i += paragraphsPerPage) {
+              const pageParagraphs = paragraphs.slice(i, i + paragraphsPerPage);
+              const pageContent = pageParagraphs.join('\n\n');
+              imgPageIndex++;
+              
+              const hasImage = pageContent.includes('案例') || pageContent.includes('【') || pageContent.includes('目标');
+              const imageUrl = getCourseImageUrl(courseCode, chIdx + 1, imgPageIndex);
+              
+              if (forceImageSlide || hasImage || imageUrl) {
+                slides.push({
+                  type: 'mixed',
+                  content: pageContent,
+                  imageUrl: imageUrl || undefined,
+                  imageCaption: imageUrl ? `${ch.title} 知识图谱` : undefined,
+                  aiTags: [{ text: ch.title.replace(/第.*讲[：:]/, '').replace(/课程概述/, '概述').substring(0, 15), type: '知识点', explanation: '本讲核心知识点' }],
+                });
+              } else {
+                slides.push({
+                  type: 'text',
+                  content: pageContent,
+                  aiTags: [{ text: ch.title.replace(/第.*讲[：:]/, '').replace(/课程概述/, '概述').substring(0, 15), type: '知识点', explanation: '本讲核心知识点' }],
+                });
+              }
+            }
+          } else {
+            slides.push({ type: 'text', content: ch.title + '。本讲内容涵盖相关核心知识点，帮助您全面理解和掌握。', aiTags: [{ text: ch.title.replace(/第.*讲[：:]/, ''), type: '知识点', explanation: '本讲核心知识点' }] });
+            slides.push({ type: 'mixed', content: `${ch.title}的详细解读。AI根据知识图谱为您整理关键要点和深入分析，帮助您快速理解和应用。`, imageCaption: `${ch.title}知识图谱`, aiTags: [{ text: '核心要点', type: '重点', explanation: '本讲最重要的知识点' }] });
+          }
+          
+          slides.push({ type: 'text', content: `【本讲总结】\n${ch.title}学习完成。请回顾本讲核心内容，思考如何在实际工作中运用所学知识。\n\n【延伸思考】\n结合本讲内容，思考以下问题：\n1. 本讲的核心要义是什么？\n2. 如何在实际工作中应用？\n3. 还有哪些需要深入学习的方面？`, aiTags: [{ text: '总结思考', type: '延伸思考', explanation: '对本讲内容进行回顾与反思' }] });
+          
+          return { id: ch.id, title: ch.title, totalSlides: slides.length, aiSummary: `第${chIdx + 1}讲：${ch.title.replace(/第.*讲[：:]/, '')}。本讲深入讲解核心要义，帮助您全面掌握相关知识点和实践方法。`, keyPoints: [ch.title.replace(/第.*讲[：:]/, '').substring(0, 10)], videoUrl, slides };
         }),
       };
     }
@@ -303,7 +341,7 @@ function getCourseData(courseId?: string): any {
       id: courseId,
       name: `课程 ${courseId}`,
       description: 'AI推荐课程',
-      totalHours: 2,
+      totalHours: 0.2,
       chapters: [
         {
           id: courseId,
@@ -615,7 +653,13 @@ export default function CourseLearnPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white relative" style={{
+      backgroundImage: 'url(/tx_homeBanner.png)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center top',
+      backgroundAttachment: 'fixed',
+      backgroundRepeat: 'no-repeat'
+    }}>
       {/* 顶部导航栏 */}
       <header className="bg-white border-b-2 border-black sticky top-0 z-50" style={{ boxShadow: '0 2px 0 0 #000' }}>
         <div className="container mx-auto px-4 py-3">
@@ -810,14 +854,41 @@ export default function CourseLearnPage() {
                           </p>
                         </div>
                         <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
-                          <div className="aspect-square bg-gradient-to-br from-purple-100 to-blue-50 flex items-center justify-center">
-                            <div className="text-center p-4">
-                              <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center">
-                                <span className="text-2xl">📈</span>
+                          {block.imageUrl ? (
+                            <>
+                            <img
+                              src={block.imageUrl}
+                              alt={block.imageCaption || '课程配图'}
+                              className="w-full h-auto object-cover"
+                              onError={(e) => {
+                                const target = e.currentTarget;
+                                target.style.display = 'none';
+                                const placeholder = target.nextElementSibling;
+                                if (placeholder) {
+                                  (placeholder as HTMLElement).style.display = 'flex';
+                                }
+                              }}
+                            />
+                            <div className="aspect-square bg-gradient-to-br from-orange-100 to-red-50 flex items-center justify-center" style={{ display: 'none' }}>
+                              <div className="text-center p-4">
+                                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
+                                  <span className="text-2xl">📊</span>
+                                </div>
+                                <p className="text-sm text-gray-600 font-medium">{block.imageCaption || '课程配图'}</p>
+                                <p className="text-xs text-gray-400 mt-1">图片加载中，请稍后</p>
                               </div>
-                              <p className="text-sm text-gray-600 font-medium">{block.imageCaption}</p>
                             </div>
-                          </div>
+                            </>
+                          ) : (
+                            <div className="aspect-square bg-gradient-to-br from-purple-100 to-blue-50 flex items-center justify-center">
+                              <div className="text-center p-4">
+                                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center">
+                                  <span className="text-2xl">📈</span>
+                                </div>
+                                <p className="text-sm text-gray-600 font-medium">{block.imageCaption}</p>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
