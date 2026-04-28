@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { 
   ArrowLeft, 
   ChevronLeft, 
@@ -51,20 +53,37 @@ function getCourseVideoUrl(courseId: string): string | null {
 // 辅助函数：获取课程配图
 // 图片命名规则: X-X-X.jpg (课程代号-章节代号-页码)
 function getCourseImageUrl(courseCode: string, chapterIndex: number, pageIndex: number): string | null {
-  const imageName = `${courseCode}-${chapterIndex}-${pageIndex}`;
-  const knownImages = [
-    '1-1-1', '1-1-2', '1-3-1', '1-3-2', '1-4-2', '1-5-1', '1-5-2', '1-5-3',
-    '1-6-1', '1-6-2', '1-6-3', '1-7-1', '1-7-2', '1-8-1', '1-8-2',
-    '2-1-1', '2-2-1', '2-3-1', '2-3-2', '2-4-1', '2-4-2', '2-5-1',
-    '2-6-1', '2-7-1', '2-8-1', '2-9-1', '2-10-1',
-    '3-1-1', '3-2-1', '3-3-1', '3-4-1', '3-5-1', '3-6-1', '3-6-2',
-    '3-7-1', '3-8-1',
-  ];
-  if (knownImages.includes(imageName)) {
-    return `/${imageName}.jpg`;
+  const imageKey = `${courseCode}-${chapterIndex}-${pageIndex}`;
+  const knownImageMap: Record<string, string> = {
+    '4-1-1': '/4-1-1.jpg',
+    '4-1-2': '/4-1-2.png',
+    '4-1-3': '/4-1-3.jpg',
+    '4-1-4': '/4-1-4.png',
+    '4-2-1': '/4-2-1.png',
+    '4-2-2': '/4-2-2.jpg',
+    '4-2-3': '/4-2-3.jpg',
+    '4-2-4': '/4-2-4.jpg',
+    '4-2-5': '/4-2-5.jpg',
+    '4-2-6': '/4-2-6.jpg',
+    '4-4-1': '/4-4-1.jpg',
+    '4-4-2': '/4-4-2.png',
+    '4-4-3': '/4-4-3.png',
+    '4-4-4': '/4-4-4.jpg',
+    '4-4-5': '/4-4-5.png',
+    '4-6-1': '/4-6-1.jpg',
+    '4-6-2': '/4-6-2.png',
+    '4-6-3': '/4-6-3.png',
+    '4-6-4': '/4-6-4.png',
+    '4-8-1': '/4-8-1.png',
+    '4-8-2': '/4-8-2.png',
+    '4-8-3': '/4-8-3.png',
+    '4-8-4': '/4-8-4.png',
+  };
+  if (knownImageMap[imageKey]) {
+    return knownImageMap[imageKey];
   }
   if (courseCode === '2' || courseCode === '3') {
-    return `/${imageName}.jpg`;
+    return `/${imageKey}.jpg`;
   }
   return null;
 }
@@ -79,12 +98,13 @@ interface AITag {
 }
 
 interface ContentBlock {
-  type: 'text' | 'image' | 'mixed' | 'video';
+  type: 'text' | 'image' | 'mixed' | 'video' | 'learning_objective';
   content: string;
   imageUrl?: string;
   imageCaption?: string;
   videoUrl?: string;
   aiTags?: AITag[];
+  chapterTitle?: string;
 }
 
 interface ChapterData {
@@ -273,8 +293,9 @@ function getCourseData(courseId?: string): any {
       const courseName = parsed.courseName || '';
       if (courseName.includes('统一战线') || courseName.includes('统战')) courseCode = '2';
       else if (courseName.includes('廉政') || courseName.includes('党风')) courseCode = '3';
-      else if (courseName.includes('党章')) courseCode = '4';
-      else if (courseName.includes('基层') || courseName.includes('党务')) courseCode = '5';
+      else if (courseName.includes('具身智能')) courseCode = '4';
+      else if (courseName.includes('党章')) courseCode = '5';
+      else if (courseName.includes('基层') || courseName.includes('党务')) courseCode = '6';
       
       return {
         id: parsed.chapters?.[0]?.id || 1,
@@ -291,40 +312,84 @@ function getCourseData(courseId?: string): any {
           }
           
           if (chapterContent) {
-            const paragraphs = chapterContent.split('\n\n').filter((p: string) => p.trim());
-            const paragraphsPerPage = 3;
-            let imgPageIndex = 0;
-            const forceImageSlide = courseCode === '2' || courseCode === '3';
-            for (let i = 0; i < paragraphs.length; i += paragraphsPerPage) {
-              const pageParagraphs = paragraphs.slice(i, i + paragraphsPerPage);
-              const pageContent = pageParagraphs.join('\n\n');
-              imgPageIndex++;
-              
-              const hasImage = pageContent.includes('案例') || pageContent.includes('【') || pageContent.includes('目标');
-              const imageUrl = getCourseImageUrl(courseCode, chIdx + 1, imgPageIndex);
-              
-              if (forceImageSlide || hasImage || imageUrl) {
-                slides.push({
-                  type: 'mixed',
-                  content: pageContent,
-                  imageUrl: imageUrl || undefined,
-                  imageCaption: imageUrl ? `${ch.title} 知识图谱` : undefined,
-                  aiTags: [{ text: ch.title.replace(/第.*讲[：:]/, '').replace(/课程概述/, '概述').substring(0, 15), type: '知识点', explanation: '本讲核心知识点' }],
-                });
-              } else {
+            if (chapterContent.includes('---PAGE---')) {
+              const pageSections = chapterContent.split('---PAGE---').filter((p: string) => p.trim());
+              let pIndex = 0;
+              const chapterNumMatch = ch.title.match(/第(\d+)章/);
+              const chapterImageNum = chapterNumMatch ? parseInt(chapterNumMatch[1]) : 0;
+              for (const section of pageSections) {
+                const trimmed = section.trim();
+                const isLearningObjective = trimmed.startsWith('【学习目标】') || /^##\s*第\s*\d+\s*章·学习目标/.test(trimmed) || /^##\s*学习目标/.test(trimmed);
+                const isPSection = /【P\d+/.test(trimmed) || /^##\s*第\s*\d+\s*章｜P\d+/.test(trimmed);
+                
+                if (isLearningObjective) {
+                  const objectiveContent = trimmed.startsWith('【学习目标】') 
+                    ? trimmed.replace('【学习目标】', '').trim()
+                    : trimmed.replace(/^##\s*第\s*\d+\s*章·学习目标\s*\n*/, '').replace(/^##\s*学习目标\s*\n*/, '').trim();
+                  slides.push({
+                    type: 'learning_objective',
+                    content: objectiveContent,
+                    chapterTitle: ch.title,
+                  });
+                } else if (isPSection) {
+                  pIndex++;
+                  const imageUrl = chapterImageNum > 0 ? getCourseImageUrl(courseCode, chapterImageNum, pIndex) : null;
+                  slides.push({
+                    type: 'mixed',
+                    content: trimmed,
+                    imageUrl: imageUrl || undefined,
+                    imageCaption: imageUrl ? `${ch.title} - P${pIndex}` : `${ch.title} - P${pIndex} 配图`,
+                    aiTags: [{ text: `P${pIndex}`, type: '知识点', explanation: '核心知识点' }],
+                  });
+                } else {
+                  slides.push({
+                    type: 'text',
+                    content: trimmed,
+                  });
+                }
+              }
+            } else {
+              if (ch.title.startsWith('前言')) {
                 slides.push({
                   type: 'text',
-                  content: pageContent,
-                  aiTags: [{ text: ch.title.replace(/第.*讲[：:]/, '').replace(/课程概述/, '概述').substring(0, 15), type: '知识点', explanation: '本讲核心知识点' }],
+                  content: chapterContent,
+                  chapterTitle: ch.title,
                 });
+              } else {
+              const paragraphs = chapterContent.split('\n\n').filter((p: string) => p.trim());
+              const paragraphsPerPage = 3;
+              let imgPageIndex = 0;
+              const forceImageSlide = courseCode === '2' || courseCode === '3';
+              for (let i = 0; i < paragraphs.length; i += paragraphsPerPage) {
+                const pageParagraphs = paragraphs.slice(i, i + paragraphsPerPage);
+                const pageContent = pageParagraphs.join('\n\n');
+                imgPageIndex++;
+                
+                const hasImage = pageContent.includes('案例') || pageContent.includes('【') || pageContent.includes('目标');
+                const imageUrl = getCourseImageUrl(courseCode, chIdx + 1, imgPageIndex);
+                
+                if (forceImageSlide || hasImage || imageUrl) {
+                  slides.push({
+                    type: 'mixed',
+                    content: pageContent,
+                    imageUrl: imageUrl || undefined,
+                    imageCaption: imageUrl ? `${ch.title} 知识图谱` : undefined,
+                    aiTags: [{ text: ch.title.replace(/第.*讲[：:]/, '').replace(/课程概述/, '概述').substring(0, 15), type: '知识点', explanation: '本讲核心知识点' }],
+                  });
+                } else {
+                  slides.push({
+                    type: 'text',
+                    content: pageContent,
+                    aiTags: [{ text: ch.title.replace(/第.*讲[：:]/, '').replace(/课程概述/, '概述').substring(0, 15), type: '知识点', explanation: '本讲核心知识点' }],
+                  });
+                }
+              }
               }
             }
           } else {
             slides.push({ type: 'text', content: ch.title + '。本讲内容涵盖相关核心知识点，帮助您全面理解和掌握。', aiTags: [{ text: ch.title.replace(/第.*讲[：:]/, ''), type: '知识点', explanation: '本讲核心知识点' }] });
             slides.push({ type: 'mixed', content: `${ch.title}的详细解读。AI根据知识图谱为您整理关键要点和深入分析，帮助您快速理解和应用。`, imageCaption: `${ch.title}知识图谱`, aiTags: [{ text: '核心要点', type: '重点', explanation: '本讲最重要的知识点' }] });
           }
-          
-          slides.push({ type: 'text', content: `【本讲总结】\n${ch.title}学习完成。请回顾本讲核心内容，思考如何在实际工作中运用所学知识。\n\n【延伸思考】\n结合本讲内容，思考以下问题：\n1. 本讲的核心要义是什么？\n2. 如何在实际工作中应用？\n3. 还有哪些需要深入学习的方面？`, aiTags: [{ text: '总结思考', type: '延伸思考', explanation: '对本讲内容进行回顾与反思' }] });
           
           return { id: ch.id, title: ch.title, totalSlides: slides.length, aiSummary: `第${chIdx + 1}讲：${ch.title.replace(/第.*讲[：:]/, '')}。本讲深入讲解核心要义，帮助您全面掌握相关知识点和实践方法。`, keyPoints: [ch.title.replace(/第.*讲[：:]/, '').substring(0, 10)], videoUrl, slides };
         }),
@@ -817,12 +882,37 @@ export default function CourseLearnPage() {
               <div className="space-y-6">
                 {currentSlideData.map((block: ContentBlock, blockIdx: number) => (
                   <div key={blockIdx}>
+                    {/* 学习目标页面 - 紧凑居中 */}
+                    {block.type === 'learning_objective' && (
+                      <div className="flex flex-col items-center text-center px-6 py-6">
+                        <div className="max-w-xl mx-auto">
+                          {block.chapterTitle && (
+                            <h2 className="text-2xl font-bold text-gray-900 mb-3 pb-2 border-b-2 border-red-400">{block.chapterTitle}</h2>
+                          )}
+                          <div className="mb-4">
+                            <span className="inline-block px-3 py-1 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold rounded-full tracking-wider">
+                              学习目标
+                            </span>
+                          </div>
+                          <div className="prose prose-gray max-w-none [&_li]:text-base [&_li]:font-medium [&_li]:text-gray-800 [&_li]:leading-relaxed [&_ul]:space-y-1.5 [&_ul]:list-none [&_ul]:pl-0">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {block.content.replace('【学习目标】', '').trim()}
+                            </ReactMarkdown>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     {/* 纯文本 */}
                     {block.type === 'text' && (
-                      <div className="relative">
-                        <p className="text-base text-gray-800 leading-relaxed">
-                          {renderTextWithAITags(block.content, block.aiTags, showAITag, setShowAITag)}
-                        </p>
+                      <div>
+                        {block.chapterTitle && (
+                          <h2 className="text-2xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-red-400">{block.chapterTitle}</h2>
+                        )}
+                        <div className="prose prose-gray max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-0 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b-2 prose-h2:border-red-400 prose-h2:text-gray-900 prose-h3:text-lg prose-h3:mt-4 prose-h3:mb-2 prose-p:text-base prose-p:text-gray-800 prose-p:leading-relaxed prose-li:text-gray-800 prose-strong:text-gray-900 prose-a:text-blue-600 prose-a:underline [&_a]:text-blue-600 [&_a]:underline prose-table:text-sm prose-table:border-collapse prose-table:border prose-table:border-gray-300 [&_th]:bg-gray-100 [&_th]:p-2 [&_th]:border [&_th]:border-gray-300 [&_td]:p-2 [&_td]:border [&_td]:border-gray-300">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {block.content}
+                          </ReactMarkdown>
+                        </div>
                       </div>
                     )}
 
@@ -845,17 +935,16 @@ export default function CourseLearnPage() {
                       </div>
                     )}
 
-                    {/* 图文混合 */}
+                    {/* 图文混合 - 全文宽Markdown + 图片下方排列 */}
                     {block.type === 'mixed' && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                        <div className="relative">
-                          <p className="text-base text-gray-800 leading-relaxed">
-                            {renderTextWithAITags(block.content, block.aiTags, showAITag, setShowAITag)}
-                          </p>
+                      <div>
+                        <div className="prose prose-gray max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-0 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b-2 prose-h2:border-red-400 prose-h2:text-gray-900 prose-h3:text-xl prose-h3:mt-4 prose-h3:mb-3 prose-p:text-base prose-p:text-gray-800 prose-p:leading-relaxed prose-li:text-gray-800 prose-strong:text-gray-900 prose-a:text-blue-600 prose-a:underline [&_a]:text-blue-600 [&_a]:underline prose-table:text-sm prose-table:border-collapse prose-table:border prose-table:border-gray-300 [&_th]:bg-gray-100 [&_th]:p-2 [&_th]:border [&_th]:border-gray-300 [&_td]:p-2 [&_td]:border [&_td]:border-gray-300">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {block.content}
+                          </ReactMarkdown>
                         </div>
-                        <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
-                          {block.imageUrl ? (
-                            <>
+                        {block.imageUrl && (
+                          <div className="mt-4 border border-gray-200 rounded-lg overflow-hidden max-w-lg mx-auto">
                             <img
                               src={block.imageUrl}
                               alt={block.imageCaption || '课程配图'}
@@ -869,27 +958,29 @@ export default function CourseLearnPage() {
                                 }
                               }}
                             />
-                            <div className="aspect-square bg-gradient-to-br from-orange-100 to-red-50 flex items-center justify-center" style={{ display: 'none' }}>
+                            <div className="aspect-video bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center" style={{ display: 'none' }}>
                               <div className="text-center p-4">
-                                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
-                                  <span className="text-2xl">📊</span>
+                                <div className="w-14 h-14 mx-auto mb-2 rounded-full bg-gradient-to-br from-orange-300 to-red-400 flex items-center justify-center">
+                                  <span className="text-xl">📊</span>
                                 </div>
                                 <p className="text-sm text-gray-600 font-medium">{block.imageCaption || '课程配图'}</p>
-                                <p className="text-xs text-gray-400 mt-1">图片加载中，请稍后</p>
                               </div>
                             </div>
-                            </>
-                          ) : (
-                            <div className="aspect-square bg-gradient-to-br from-purple-100 to-blue-50 flex items-center justify-center">
-                              <div className="text-center p-4">
-                                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center">
-                                  <span className="text-2xl">📈</span>
-                                </div>
-                                <p className="text-sm text-gray-600 font-medium">{block.imageCaption}</p>
+                            {block.imageCaption && (
+                              <div className="p-2 bg-gray-50 text-xs text-gray-500 text-center border-t">
+                                ▲ {block.imageCaption}
                               </div>
+                            )}
+                          </div>
+                        )}
+                        {!block.imageUrl && block.imageCaption && (
+                          <div className="mt-4 border border-dashed border-gray-300 rounded-lg p-4 max-w-sm mx-auto bg-gray-50/50">
+                            <div className="flex items-center justify-center gap-2 text-gray-400">
+                              <span className="text-lg">📷</span>
+                              <span className="text-sm">{block.imageCaption}</span>
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
                       </div>
                     )}
 
