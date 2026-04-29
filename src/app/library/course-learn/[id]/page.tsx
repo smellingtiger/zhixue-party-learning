@@ -1636,7 +1636,7 @@ export default function CourseLearnPage() {
                     
                     {showThinkingLogic && (
                       <div className="mt-3 space-y-4">
-                        {currentBlock.thinkingSteps.map((step, stepIdx) => (
+                        {currentBlock.thinkingSteps.map((step: ThinkingStep, stepIdx: number) => (
                           <div key={stepIdx} className="p-5 bg-white border-2 border-purple-200 rounded-lg relative">
                             <div className="flex items-start gap-4">
                               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center flex-shrink-0 text-white font-bold">
@@ -1660,7 +1660,7 @@ export default function CourseLearnPage() {
                                       <span className="text-sm font-bold text-blue-700">📚 参考资料</span>
                                     </div>
                                     <div className="space-y-2">
-                                      {step.references.map((ref, refIdx) => (
+                                      {step.references.map((ref: ReferenceItem, refIdx: number) => (
                                         <div key={refIdx} className="flex items-center gap-2 text-sm">
                                           <span className={`inline-block px-2 py-1 text-xs rounded-full ${
                                             ref.relevance === 'high' ? 'bg-green-100 text-green-700' :
@@ -1686,7 +1686,7 @@ export default function CourseLearnPage() {
                                       <span className="text-sm font-bold text-red-700">❌ 审核未通过</span>
                                     </div>
                                     <div className="space-y-3">
-                                      {step.rejectedContents.map((rej, rejIdx) => (
+                                      {step.rejectedContents.map((rej: RejectedContent, rejIdx: number) => (
                                         <div key={rejIdx} className="border border-red-200 rounded p-3">
                                           <div className="flex items-center gap-2 mb-2">
                                             <span className={`inline-block px-2 py-1 text-xs rounded-full ${

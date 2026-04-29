@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MainNav } from '@/components/main-nav';
@@ -16,6 +16,8 @@ import {
   Image as ImageIcon,
   FileText,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   Play,
   Lock,
   CheckCircle2,
@@ -187,8 +189,21 @@ export default function LibraryPage() {
   }, []);
   const [editMode, setEditMode] = useState(false);
   const [editedChapters, setEditedChapters] = useState<any[]>([]);
-  // 诊断数据
-  const [diagnosticData, setDiagnosticData] = useState<{ roles: string[]; topics: string[]; difficulty: string } | null>(null);
+  // 诊断数据（组件挂载时同步读取localStorage）
+  const [diagnosticData, setDiagnosticData] = useState<{ roles: string[]; topics: string[]; difficulty: string } | null>(() => {
+    try {
+      const saved = localStorage.getItem('user_diagnostic');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          roles: parsed.roles || [],
+          topics: parsed.topics || [],
+          difficulty: parsed.difficulty || 'intermediate',
+        };
+      }
+    } catch {}
+    return null;
+  });
   // 生成逻辑说明（动态）
   const [generationLogic, setGenerationLogic] = useState<any>(null);
 
@@ -226,16 +241,19 @@ export default function LibraryPage() {
   ];
 
   const router = useRouter();
+  const hasDiagnostic = diagnosticData && (diagnosticData.roles.length > 0 || diagnosticData.topics.length > 0);
 
-  const thinkingSteps = [
-    '正在读取您的知识图谱诊断结果...',
-    '正在分析课程需求与目标受众...',
-    '正在检索相关知识点与资料...',
-    '正在设计课程结构与章节安排...',
-    '正在生成课程内容与学习目标...',
-    '正在优化课程大纲与教学设计...',
-    '课程生成完成！',
-  ];
+  const thinkingSteps = useMemo(() => [
+    { title: '读取知识图谱诊断结果', detail: `正在加载学习诊断数据...\n\n• 身份角色：${hasDiagnostic ? diagnosticData.roles.join('、') : '未检测'}\n• 学习主题：${hasDiagnostic ? diagnosticData.topics.join('、') : '未选择'}\n• 难度等级：${hasDiagnostic ? (diagnosticData.difficulty === 'beginner' ? '入门级' : diagnosticData.difficulty === 'intermediate' ? '进阶级' : '深入级') : '未设定'}` },
+    { title: '分析课程需求与目标受众', detail: `基于具身智能专题分析：\n\n• 核心需求：机关干部对前沿技术的认知与治理能力\n• 知识缺口：具身智能从概念到国家战略的政策脉络、技术闭环机制、应用场景与项目论证\n• 受众定位：党政类在线学习平台成人用户（机关干部）\n• 课程深度：${hasDiagnostic ? (diagnosticData.difficulty === 'beginner' ? '入门级——侧重基础概念和认知框架' : diagnosticData.difficulty === 'intermediate' ? '进阶级——技术与治理并重' : '深入级——强化实操评估与调研方法') : '进阶级'}` },
+    { title: '检索相关知识点与资料', detail: `检索资源包括：\n\n• 具身智能专题：信通院发展报告、标准体系(2026版)、CEAI白皮书、ITU-T标准\n• 政策文献：2025/2026年政府工作报告、"十五五"规划纲要、国务院发展研究中心报告\n• 课程关联：前沿技术系列、数字政府建设、科技政策与产业治理\n• 权威来源：人民网经济·科技频道、新华网"人工智能+"、共产党员网、求是杂志、智源社区` },
+    { title: '进行内容合规审核', detail: `三级合规校验：\n\n• 政治方向：确保与《二十大报告》原文一致，核心表述准确\n• 政策解读：对照最新政策文件版本（如2024年修订版《纪律处分条例》）\n• 敏感筛查：不涉及未公开文件，所有链接均为官方权威来源` },
+    { title: '设计课程结构与章节安排', detail: `构建课程框架：\n\n• 章节结构：前言+5-8章（含核心概念、政策法规、实务操作、案例剖析等）\n• 章节时长：${hasDiagnostic ? (diagnosticData.difficulty === 'beginner' ? '入门级约50分钟' : diagnosticData.difficulty === 'intermediate' ? '进阶级约75分钟' : '深入级约100分钟') : '约75分钟'}\n• 学习目标：每章2-4条，可衡量\n• 互动设计：章节末尾设单选测试题` },
+    { title: '生成课程内容与学习目标', detail: `AI撰写各章节：\n\n• 生成方式：大语言模型 + 知识图谱驱动\n• 每章结构：学习目标→知识点讲解→政策引用→实务指南→案例分析→权威链接\n• 输出格式：Markdown文档，支持编辑` },
+    { title: '优化课程大纲与教学设计', detail: `教学化加工：\n\n• 复杂条文通俗化，添加"干部视角"解读\n• 选取与岗位角色相关的典型案例\n• 每章设置情境分析题，附详细解析\n• 根据内容密度校准时长` },
+    { title: '课程生成完成', detail: `✅ 课程已全部生成！\n\n• 章节数：8章+前言\n• 预计时长：约20分钟\n• 内容来源：信通院具身智能发展报告、人形机器人与具身智能标准体系(2026版)、国务院发展研究中心报告等权威文献\n\n课程已保存，可随时查看或重新生成。` },
+  ], [diagnosticData, hasDiagnostic]);
+  const [expandedStep, setExpandedStep] = useState<number | null>(null);
 
   // 根据诊断结果动态生成课程生成逻辑说明
   const generateLogicExplanation = (topic: string, diagnostic: { roles: string[]; topics: string[]; difficulty: string } | null) => {
@@ -800,18 +818,33 @@ export default function LibraryPage() {
                 </div>
                 <div className="mt-4">
                   <div className="text-6xl font-black mb-1" style={{ textShadow: '3px 3px 0 #000' }}>
-                    {isGenerating ? `${currentStep + 1}` : '5'}
+                    {isGenerating ? `${currentStep + 1}` : `${thinkingSteps.length}`}
                   </div>
                   <div className="text-sm font-bold mb-4">大步骤智能生成</div>
                   <div className="space-y-2 mb-5">
-                    {thinkingSteps.slice(0, isGenerating ? currentStep + 1 : 5).map((step, idx) => (
-                      <div key={idx} className="flex items-center gap-2 text-xs bg-white/20 px-3 py-1.5 border border-white/30">
-                        {idx < currentStep || !isGenerating ? (
-                          <CheckCircle2 className="h-3 w-3 text-amber-400 flex-shrink-0" />
-                        ) : (
-                          <span className="w-3 h-3 flex-shrink-0 animate-pulse text-amber-400">●</span>
+                    {thinkingSteps.slice(0, isGenerating ? currentStep + 1 : thinkingSteps.length).map((step, idx) => (
+                      <div key={idx}>
+                        <div
+                          className="flex items-center gap-2 text-sm font-medium bg-white/20 px-3 py-1.5 border border-white/30 cursor-pointer select-none"
+                          onClick={() => setExpandedStep(expandedStep === idx ? null : idx)}
+                        >
+                          {idx < currentStep || !isGenerating ? (
+                            <CheckCircle2 className="h-3 w-3 text-amber-400 flex-shrink-0" />
+                          ) : (
+                            <span className="w-3 h-3 flex-shrink-0 animate-pulse text-amber-400">●</span>
+                          )}
+                          <span className="truncate flex-1">{step.title}</span>
+                          {expandedStep === idx ? (
+                            <ChevronUp className="h-3 w-3 flex-shrink-0 text-white/60" />
+                          ) : (
+                            <ChevronDown className="h-3 w-3 flex-shrink-0 text-white/60" />
+                          )}
+                        </div>
+                        {expandedStep === idx && (
+                          <div className="mt-1 ml-4 text-[10px] text-amber-200/90 leading-relaxed bg-white/10 px-3 py-2 rounded border border-white/20">
+                            {step.detail}
+                          </div>
                         )}
-                        <span className="truncate">{step.replace('正在', '').replace('...', '')}</span>
                       </div>
                     ))}
                   </div>
@@ -840,7 +873,7 @@ export default function LibraryPage() {
                       ) : (
                         <span className="absolute left-0 text-gray-600">○</span>
                       )}
-                      <span className={idx <= currentStep ? 'text-white' : 'text-gray-600'}>{step}</span>
+                      <span className={idx <= currentStep ? 'text-white' : 'text-gray-600'}>{step.title}</span>
                     </div>
                   ))}
                 </div>
@@ -1034,7 +1067,7 @@ export default function LibraryPage() {
                                   chapter.type === 'mixed' ? 'bg-blue-100' :
                                   'bg-purple-100'
                                 }`}>
-                                    📑 图文课
+                                    {chapter.type === 'video' ? '🎬 视频课' : '📑 图文课'}
                                   </span>
                                 </div>
                               </>
