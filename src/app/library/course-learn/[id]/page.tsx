@@ -29,7 +29,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -915,7 +915,18 @@ function getCourseData(courseId?: string): any {
             });
           }
           
-          return { id: ch.id, title: ch.title, totalSlides: slides.length, aiSummary: `第${chIdx + 1}讲：${ch.title.replace(/第.*讲[：:]/, '')}。本讲深入讲解核心要义，帮助您全面掌握相关知识点和实践方法。`, keyPoints: [ch.title.replace(/第.*讲[：:]/, '').substring(0, 10)], videoUrl, slides };
+          const summaries: Record<string, string> = {
+            '前言：为什么机关干部要了解具身智能？': '具身智能已从实验室概念跃迁为国家战略高地。2025年首次写入《政府工作报告》，2030年市场规模预计达4000亿元。作为机关干部，需要建立可操作的理解框架——不是为了追逐概念，而是为了判断项目、评估风险、制定规则、组织试点。',
+            '第1章：什么是具身智能——从概念到国家战略': '具身智能是"有物理载体的智能体"，核心三要素为具身本体、智能内核、环境交互。区别于纯大模型（离身智能）和传统机器人（具身不智能），政务场景采购不应盲目追求"人形"。',
+            '第2章：核心机制与关键技术': '具身智能的核心是"五步闭环"（感知→认知→决策→执行→反馈）。关键技术包括多模态感知、模仿学习+强化学习、世界模型、运动与操作控制、安全围栏。世界模型是弥补端到端VLA泛化性短板的核心方向。',
+            '第3章：1分钟看懂"自动"与"自主"的差别': '通过楼道消防巡检的分屏对比，直观展示"自动"（按预设路线，遇障即停）与"自主"（感知障碍后绕行，识变-应变-求变）的本质差异。自主 = 五步闭环的完整运行。',
+            '第4章：面向公共治理的四大应用场景': '具身智能在政务领域聚焦四大板块：城市运行与设施养护、应急管理与安全生产、民生服务与无障碍辅助、生态环境与自然资源。每项场景配有代表性任务、本体形态和落地案例。',
+            '第5章：世界模型——一次关键跃迁': '世界模型是机器人脑中的"常识模拟器"，能在行动前预演物理后果。通过"预测—执行—修正"形成经验闭环，决定具身智能能否进入真实复杂场景，是走向自主的关键一跃。',
+            '第6章：项目论证与评估方法': '提供"六问"论证清单（场景可得性、闭环完整性、数据可持续性、评估方案、安全伦理、效益度量）和六维加权评分表，帮助机关干部快速识别"伪闭环"项目。',
+            '第7章："可解释、可评估、可监管"三要素': '具身智能治理的三要素：可解释（决策留痕可追溯）、可评估（指标先行数据说话）、可监管（权限分级日志不可篡改）。先治理后扩展，先试点再推广。',
+            '第8章：组织一次本地化具身智能应用小调研': '从调研目标、受访对象、10题短问卷到5页内评审材料模板，提供完整的本地化调研工具箱。帮助学员将调研结果落地为可操作的试点建议。',
+          };
+          return { id: ch.id, title: ch.title, totalSlides: slides.length, aiSummary: summaries[ch.title] || `${ch.title}。深入讲解核心要义，帮助您全面掌握相关知识点和实践方法。`, keyPoints: [ch.title.replace(/第.*章[：:]/, '').substring(0, 10)], videoUrl, slides };
         }),
       };
     }
@@ -1376,13 +1387,6 @@ export default function CourseLearnPage() {
                 <Sparkles className="h-5 w-5 text-purple-600 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm text-purple-800 leading-relaxed">{chapter.aiSummary}</p>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {chapter.keyPoints.map((point: string, idx: number) => (
-                      <Badge key={idx} variant="outline" className="text-xs border-purple-300 text-purple-700">
-                        {point}
-                      </Badge>
-                    ))}
-                  </div>
                 </div>
               </div>
             </div>
@@ -1394,17 +1398,17 @@ export default function CourseLearnPage() {
               {/* 页码指示 */}
               <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-gray-200">
                 <div className="flex items-center gap-2">
-                  <Badge className="bg-purple-600 text-white">
+                  <span className="bg-purple-600 text-white px-2 py-0.5 rounded text-xs font-medium">
                     第{currentSlide + 1}页
-                  </Badge>
+                  </span>
                   <span className="text-sm text-gray-500">共{totalSlides}页</span>
                 </div>
                 <div className="flex items-center gap-2">
                   {/* AI能力标识 */}
-                  <Badge variant="outline" className="border-amber-400 text-amber-700 bg-amber-50">
+                  <span className="border border-amber-400 text-amber-700 bg-amber-50 px-2 py-0.5 rounded text-xs font-medium flex items-center">
                     <Sparkles className="h-3 w-3 mr-1" />
                     AI图文混合
-                  </Badge>
+                  </span>
                 </div>
               </div>
 
@@ -1503,14 +1507,6 @@ export default function CourseLearnPage() {
                             )}
                           </div>
                         )}
-                        {!block.imageUrl && block.imageCaption && (
-                          <div className="mt-4 border border-dashed border-gray-300 rounded-lg p-4 max-w-sm mx-auto bg-gray-50/50">
-                            <div className="flex items-center justify-center gap-2 text-gray-400">
-                              <span className="text-lg">📷</span>
-                              <span className="text-sm">{block.imageCaption}</span>
-                            </div>
-                          </div>
-                        )}
                       </div>
                     )}
 
@@ -1593,13 +1589,13 @@ export default function CourseLearnPage() {
 
                         {/* AI视频标签 */}
                         <div className="absolute top-3 left-3 flex items-center gap-2">
-                          <Badge className="bg-purple-600 text-white border border-purple-400 shadow-lg">
+                          <span className="bg-purple-600 text-white border border-purple-400 shadow-lg px-2 py-0.5 rounded text-xs font-medium flex items-center">
                             <Video className="h-3 w-3 mr-1" />
                             AI视频课程
-                          </Badge>
-                          <Badge className="bg-black/70 text-white border border-white/30 text-xs">
+                          </span>
+                          <span className="bg-black/70 text-white border border-white/30 text-xs px-2 py-0.5 rounded">
                             {chapter.title}
-                          </Badge>
+                          </span>
                         </div>
                       </div>
                     )}
