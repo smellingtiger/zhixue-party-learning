@@ -25,6 +25,8 @@ import {
   Video,
   Maximize2,
   Minimize2,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -97,6 +99,28 @@ interface AITag {
   explanation: string;
 }
 
+interface ReferenceItem {
+  title: string;
+  url?: string;
+  source: string;
+  relevance: 'high' | 'medium' | 'low';
+}
+
+interface RejectedContent {
+  content: string;
+  reason: string;
+  type: 'too_radical' | 'no_meaning' | 'inaccurate' | 'redundant' | 'other';
+}
+
+interface ThinkingStep {
+  step: number;
+  title: string;
+  description: string;
+  references?: ReferenceItem[];
+  rejectedContents?: RejectedContent[];
+  output: string;
+}
+
 interface ContentBlock {
   type: 'text' | 'image' | 'mixed' | 'video' | 'learning_objective';
   content: string;
@@ -105,6 +129,7 @@ interface ContentBlock {
   videoUrl?: string;
   aiTags?: AITag[];
   chapterTitle?: string;
+  thinkingSteps?: ThinkingStep[];
 }
 
 interface ChapterData {
@@ -131,66 +156,366 @@ const mockCourseData = {
       aiSummary: '本讲从宏观角度梳理乡村振兴战略的历史背景、核心要义与时代价值。AI根据200+政策文件提炼出5大核心维度，帮助您快速建立知识框架。',
       keyPoints: ['战略背景', '核心要义', '五大振兴', '实施路径', '时代价值'],
       slides: [
-        [
-          {
-            type: 'text',
-            content: '乡村振兴战略是党的十九大提出的重大决策部署，是新时代"三农"工作的总抓手。',
-            aiTags: [
-              { text: '党的十九大', type: '知识点', explanation: '2017年10月召开，首次提出乡村振兴战略' },
-              { text: '总抓手', type: '重点', explanation: '意味着这是三农工作的核心和统领' },
-            ],
-          },
+          [
+            {
+              type: 'text',
+              content: '乡村振兴战略是党的十九大提出的重大决策部署，是新时代"三农"工作的总抓手。',
+              aiTags: [
+                { text: '党的十九大', type: '知识点', explanation: '2017年10月召开，首次提出乡村振兴战略' },
+                { text: '总抓手', type: '重点', explanation: '意味着这是三农工作的核心和统领' },
+              ],
+              thinkingSteps: [
+                {
+                  step: 1,
+                  title: '🤖 需求分析',
+                  description: '用户需要了解乡村振兴战略的基本定位，我需要先确定核心内容框架',
+                  output: '需要包含：提出时间、重要地位、核心定位',
+                },
+                {
+                  step: 2,
+                  title: '📚 知识检索',
+                  description: '从政策文件库中检索相关权威资料',
+                  references: [
+                    { title: '党的十九大报告', url: 'https://www.12371.cn/', source: '共产党员网', relevance: 'high' },
+                    { title: '乡村振兴战略规划(2018-2022年)', url: 'https://www.moa.gov.cn/', source: '农业农村部', relevance: 'high' },
+                    { title: '2018年中央一号文件', url: 'https://www.moa.gov.cn/', source: '农业农村部', relevance: 'medium' },
+                  ],
+                  output: '找到3个核心参考资料，其中2个高度相关',
+                },
+                {
+                  step: 3,
+                  title: '✂️ 内容筛选',
+                  description: '从检索结果中提取关键信息',
+                  rejectedContents: [
+                    {
+                      content: '乡村振兴就是让农民都进城',
+                      reason: '内容完全错误，与政策精神相悖',
+                      type: 'inaccurate',
+                    },
+                    {
+                      content: '乡村振兴战略是个很一般的政策，不重要',
+                      reason: '表述过于消极，不符合政策定位',
+                      type: 'too_radical',
+                    },
+                  ],
+                  output: '筛选出核心表述：十九大提出、总抓手、三农工作',
+                },
+                {
+                  step: 4,
+                  title: '✏️ 内容撰写',
+                  description: '整合信息，撰写准确表述',
+                  output: '乡村振兴战略是党的十九大提出的重大决策部署，是新时代"三农"工作的总抓手。',
+                },
+                {
+                  step: 5,
+                  title: '✅ 质量审核',
+                  description: '审核内容的准确性和合规性',
+                  rejectedContents: [
+                    {
+                      content: '乡村振兴战略是十九大最重要的决策，没有之一',
+                      reason: '表述过于绝对化，不符合客观表述要求',
+                      type: 'too_radical',
+                    },
+                    {
+                      content: '乡村振兴战略，大家都知道',
+                      reason: '内容空洞，没有实际信息价值',
+                      type: 'no_meaning',
+                    },
+                  ],
+                  output: '最终版本通过审核，表述准确、客观、完整',
+                },
+              ],
+            },
+          ],
+          [
+            {
+              type: 'mixed',
+              content: '乡村振兴的五大核心目标：产业振兴、人才振兴、文化振兴、生态振兴、组织振兴。这五大振兴相互关联、互为支撑，构成了乡村振兴的完整体系。',
+              imageUrl: '/placeholder-strategy.png',
+              imageCaption: '乡村振兴战略体系架构图',
+              aiTags: [
+                { text: '五大振兴', type: '知识点', explanation: '产业、人才、文化、生态、组织五个维度的全面振兴' },
+                { text: '相互关联', type: 'AI提醒', explanation: 'AI分析发现这五个维度在实际案例中常常协同推进' },
+              ],
+              thinkingSteps: [
+                {
+                  step: 1,
+                  title: '🤖 需求分析',
+                  description: '需要展示乡村振兴战略的完整框架，让用户理解五大振兴的关系',
+                  output: '核心任务：列出五个振兴、说明相互关系',
+                },
+                {
+                  step: 2,
+                  title: '📚 知识检索',
+                  description: '检索五大振兴的官方表述和理论框架',
+                  references: [
+                    { title: '乡村振兴战略规划(2018-2022年)', url: 'https://www.moa.gov.cn/', source: '农业农村部', relevance: 'high' },
+                    { title: '习近平关于"三农"工作的重要论述', url: 'https://www.12371.cn/', source: '共产党员网', relevance: 'high' },
+                    { title: '乡村振兴促进法', url: 'https://www.npc.gov.cn/', source: '中国人大网', relevance: 'medium' },
+                  ],
+                  output: '确认五大振兴的官方排序和表述',
+                },
+                {
+                  step: 3,
+                  title: '✂️ 内容筛选',
+                  description: '从多份文件中筛选最核心的表述',
+                  rejectedContents: [
+                    {
+                      content: '乡村振兴只要产业振兴就行，其他不重要',
+                      reason: '理解片面，忽视了五个振兴的系统性',
+                      type: 'inaccurate',
+                    },
+                    {
+                      content: '产业、人才、文化、生态、组织，随便排个序',
+                      reason: '表述过于随意，不严肃',
+                      type: 'no_meaning',
+                    },
+                  ],
+                  output: '确定官方排序：产业、人才、文化、生态、组织',
+                },
+                {
+                  step: 4,
+                  title: '🖼️ 配图选择',
+                  description: '选择合适的配图增强理解',
+                  references: [
+                    { title: '乡村振兴战略体系架构图', source: '内部设计资源', relevance: 'high' },
+                  ],
+                  output: '选择架构图，直观展示五个振兴关系',
+                },
+                {
+                  step: 5,
+                  title: '✏️ 内容撰写',
+                  description: '撰写完整表述，强调相互关系',
+                  rejectedContents: [
+                    {
+                      content: '五个振兴，一个比一个重要，产业最重要',
+                      reason: '表述过于强调单个方面，不符合五大振兴协同推进的精神',
+                      type: 'too_radical',
+                    },
+                  ],
+                  output: '乡村振兴的五大核心目标：产业振兴、人才振兴、文化振兴、生态振兴、组织振兴。这五大振兴相互关联、互为支撑，构成了乡村振兴的完整体系。',
+                },
+                {
+                  step: 6,
+                  title: '✅ 质量审核',
+                  description: '最后审核内容的完整性和准确性',
+                  output: '内容完整、表述准确、配图恰当，通过审核',
+                },
+              ],
+            },
+          ],
+          [
+            {
+              type: 'text',
+              content: '产业振兴是乡村振兴的物质基础。要推动乡村产业高质量发展，培育新产业新业态新模式，促进农村一二三产业融合发展。',
+              aiTags: [
+                { text: '产业融合', type: '延伸思考', explanation: '思考：您所在地区的一二三产业融合现状如何？' },
+              ],
+              thinkingSteps: [
+                {
+                  step: 1,
+                  title: '🤖 需求分析',
+                  description: '阐述产业振兴的重要地位和实现路径',
+                  output: '需要：重要性定位 + 具体路径',
+                },
+                {
+                  step: 2,
+                  title: '📚 知识检索',
+                  description: '检索产业振兴相关政策和成功案例',
+                  references: [
+                    { title: '全国乡村产业发展规划(2020-2025年)', url: 'https://www.moa.gov.cn/', source: '农业农村部', relevance: 'high' },
+                    { title: '农业现代化示范区建设案例', url: 'https://www.moa.gov.cn/', source: '农业农村部', relevance: 'high' },
+                    { title: '江苏华西村产业发展经验', source: '公开报道', relevance: 'medium' },
+                  ],
+                  output: '找到物质基础定位，确定高质量发展和产业融合为核心路径',
+                },
+                {
+                  step: 3,
+                  title: '✂️ 内容筛选',
+                  description: '从大量资料中提取最核心的表述',
+                  rejectedContents: [
+                    {
+                      content: '产业振兴就是让农村都搞工业',
+                      reason: '理解片面，不符合农村实际，过于激进',
+                      type: 'too_radical',
+                    },
+                    {
+                      content: '产业振兴嘛，就是发展农业',
+                      reason: '表述过于狭隘，没有体现融合发展',
+                      type: 'inaccurate',
+                    },
+                  ],
+                  output: '提取核心：物质基础、高质量发展、新产业新业态、三产融合',
+                },
+                {
+                  step: 4,
+                  title: '✏️ 内容撰写',
+                  description: '组织语言，撰写完整表述',
+                  rejectedContents: [
+                    {
+                      content: '产业振兴最重要，是基础中的基础，没有它一切都免谈',
+                      reason: '表述过于绝对化',
+                      type: 'too_radical',
+                    },
+                    {
+                      content: '产业振兴，嗯，很重要，大家都要重视',
+                      reason: '内容空洞，没有实质信息',
+                      type: 'no_meaning',
+                    },
+                  ],
+                  output: '产业振兴是乡村振兴的物质基础。要推动乡村产业高质量发展，培育新产业新业态新模式，促进农村一二三产业融合发展。',
+                },
+              ],
+            },
+          ],
+          [
+            {
+              type: 'image',
+              content: '',
+              imageUrl: '/placeholder-industry.png',
+              imageCaption: '乡村产业融合发展示意图——从单一农业到多元业态的转型升级',
+              thinkingSteps: [
+                {
+                  step: 1,
+                  title: '🤖 需求分析',
+                  description: '通过可视化方式展示产业融合的路径',
+                  output: '需要直观展示一、二、三产业融合的流程',
+                },
+                {
+                  step: 2,
+                  title: '🖼️ 配图选择',
+                  description: '选择最合适的示意图',
+                  references: [
+                    { title: '乡村产业融合发展示意图', source: '内部设计资源', relevance: 'high' },
+                    { title: '农村一二三产业融合案例图集', source: '农业农村部', relevance: 'medium' },
+                  ],
+                  output: '选择最直观的融合发展示意图',
+                },
+                {
+                  step: 3,
+                  title: '✏️ 图注撰写',
+                  description: '编写准确的图注说明',
+                  rejectedContents: [
+                    {
+                      content: '看图就懂，不用解释',
+                      reason: '内容空洞，没有实际说明价值',
+                      type: 'no_meaning',
+                    },
+                  ],
+                  output: '乡村产业融合发展示意图——从单一农业到多元业态的转型升级',
+                },
+              ],
+            },
+          ],
+          [
+            {
+              type: 'text',
+              content: '人才振兴是乡村振兴的关键因素。要培养造就一支懂农业、爱农村、爱农民的"三农"工作队伍，吸引各类人才在乡村振兴中建功立业。',
+              aiTags: [
+                { text: '懂农业、爱农村、爱农民', type: '重点', explanation: '这是人才队伍建设的核心标准' },
+              ],
+              thinkingSteps: [
+                {
+                  step: 1,
+                  title: '🤖 需求分析',
+                  description: '阐述人才振兴的重要性和具体要求',
+                  output: '需要：重要性定位 + 三支队伍 + 三爱标准',
+                },
+                {
+                  step: 2,
+                  title: '📚 知识检索',
+                  description: '检索人才振兴的官方表述',
+                  references: [
+                    { title: '关于加快推进乡村人才振兴的意见', url: 'https://www.moa.gov.cn/', source: '农业农村部', relevance: 'high' },
+                    { title: '乡村振兴促进法', url: 'https://www.npc.gov.cn/', source: '中国人大网', relevance: 'high' },
+                  ],
+                  output: '确认关键因素定位和三爱标准',
+                },
+                {
+                  step: 3,
+                  title: '✂️ 内容筛选',
+                  description: '提取核心表述',
+                  rejectedContents: [
+                    {
+                      content: '农村人太笨，需要城里人来教',
+                      reason: '表述带有偏见，不符合人才振兴的包容精神',
+                      type: 'too_radical',
+                    },
+                  ],
+                  output: '关键因素、懂农业爱农村爱农民、吸引各类人才',
+                },
+                {
+                  step: 4,
+                  title: '✏️ 内容撰写',
+                  description: '撰写完整表述',
+                  output: '人才振兴是乡村振兴的关键因素。要培养造就一支懂农业、爱农村、爱农民的"三农"工作队伍，吸引各类人才在乡村振兴中建功立业。',
+                },
+              ],
+            },
+          ],
+          [
+            {
+              type: 'mixed',
+              content: '文化振兴是乡村振兴的灵魂。要深入挖掘优秀传统农耕文化蕴含的思想观念、人文精神、道德规范，培育文明乡风、良好家风、淳朴民风。',
+              imageUrl: '/placeholder-culture.png',
+              imageCaption: '传统农耕文化与现代文明交融',
+              aiTags: [
+                { text: '文化振兴', type: '知识点', explanation: '包括乡风文明、家风建设、民风培育三个层面' },
+              ],
+              thinkingSteps: [
+                {
+                  step: 1,
+                  title: '🤖 需求分析',
+                  description: '阐述文化振兴的重要性和主要内容',
+                  output: '需要：灵魂定位 + 挖掘传统文化 + 培育三风',
+                },
+                {
+                  step: 2,
+                  title: '📚 知识检索',
+                  description: '检索文化振兴的相关表述',
+                  references: [
+                    { title: '关于加强和改进乡村治理的指导意见', source: '中央农办', relevance: 'high' },
+                    { title: '关于进一步推进移风易俗建设文明乡风的指导意见', source: '农业农村部', relevance: 'high' },
+                  ],
+                  output: '灵魂定位、思想观念人文精神道德规范、三风培育',
+                },
+                {
+                  step: 3,
+                  title: '✂️ 内容筛选',
+                  description: '筛选核心表述',
+                  rejectedContents: [
+                    {
+                      content: '农村文化都是落后的，都要改掉',
+                      reason: '对传统文化全盘否定，不符合文化传承精神',
+                      type: 'too_radical',
+                    },
+                    {
+                      content: '文化就是唱戏跳舞',
+                      reason: '理解过于狭隘，没有认识到文化的深层内涵',
+                      type: 'inaccurate',
+                    },
+                  ],
+                  output: '灵魂地位、挖掘优秀传统、培育三风',
+                },
+                {
+                  step: 4,
+                  title: '🖼️ 配图选择',
+                  description: '选择体现传统文化与现代交融的图片',
+                  references: [
+                    { title: '传统农耕文化与现代文明交融', source: '内部设计资源', relevance: 'high' },
+                  ],
+                  output: '选择体现传承与创新的配图',
+                },
+                {
+                  step: 5,
+                  title: '✏️ 内容撰写',
+                  description: '整合所有元素',
+                  output: '文化振兴是乡村振兴的灵魂。要深入挖掘优秀传统农耕文化蕴含的思想观念、人文精神、道德规范，培育文明乡风、良好家风、淳朴民风。',
+                },
+              ],
+            },
+          ],
         ],
-        [
-          {
-            type: 'mixed',
-            content: '乡村振兴的五大核心目标：产业振兴、人才振兴、文化振兴、生态振兴、组织振兴。这五大振兴相互关联、互为支撑，构成了乡村振兴的完整体系。',
-            imageUrl: '/placeholder-strategy.png',
-            imageCaption: '乡村振兴战略体系架构图',
-            aiTags: [
-              { text: '五大振兴', type: '知识点', explanation: '产业、人才、文化、生态、组织五个维度的全面振兴' },
-              { text: '相互关联', type: 'AI提醒', explanation: 'AI分析发现这五个维度在实际案例中常常协同推进' },
-            ],
-          },
-        ],
-        [
-          {
-            type: 'text',
-            content: '产业振兴是乡村振兴的物质基础。要推动乡村产业高质量发展，培育新产业新业态新模式，促进农村一二三产业融合发展。',
-            aiTags: [
-              { text: '产业融合', type: '延伸思考', explanation: '思考：您所在地区的一二三产业融合现状如何？' },
-            ],
-          },
-        ],
-        [
-          {
-            type: 'image',
-            content: '',
-            imageUrl: '/placeholder-industry.png',
-            imageCaption: '乡村产业融合发展示意图——从单一农业到多元业态的转型升级',
-          },
-        ],
-        [
-          {
-            type: 'text',
-            content: '人才振兴是乡村振兴的关键因素。要培养造就一支懂农业、爱农村、爱农民的"三农"工作队伍，吸引各类人才在乡村振兴中建功立业。',
-            aiTags: [
-              { text: '懂农业、爱农村、爱农民', type: '重点', explanation: '这是人才队伍建设的核心标准' },
-            ],
-          },
-        ],
-        [
-          {
-            type: 'mixed',
-            content: '文化振兴是乡村振兴的灵魂。要深入挖掘优秀传统农耕文化蕴含的思想观念、人文精神、道德规范，培育文明乡风、良好家风、淳朴民风。',
-            imageUrl: '/placeholder-culture.png',
-            imageCaption: '传统农耕文化与现代文明交融',
-            aiTags: [
-              { text: '文化振兴', type: '知识点', explanation: '包括乡风文明、家风建设、民风培育三个层面' },
-            ],
-          },
-        ],
-      ],
     },
     {
       id: 2,
@@ -322,38 +647,188 @@ function getCourseData(courseId?: string): any {
                 const isLearningObjective = trimmed.startsWith('【学习目标】') || /^##\s*第\s*\d+\s*章·学习目标/.test(trimmed) || /^##\s*学习目标/.test(trimmed);
                 const isPSection = /【P\d+/.test(trimmed) || /^##\s*第\s*\d+\s*章｜P\d+/.test(trimmed);
                 
-                if (isLearningObjective) {
-                  const objectiveContent = trimmed.startsWith('【学习目标】') 
-                    ? trimmed.replace('【学习目标】', '').trim()
-                    : trimmed.replace(/^##\s*第\s*\d+\s*章·学习目标\s*\n*/, '').replace(/^##\s*学习目标\s*\n*/, '').trim();
-                  slides.push({
-                    type: 'learning_objective',
-                    content: objectiveContent,
-                    chapterTitle: ch.title,
+                // 生成思考步骤的辅助函数
+              const generateThinkingSteps = (content: string, sectionType: string, title: string) => {
+                const steps: ThinkingStep[] = [
+                  {
+                    step: 1,
+                    title: '🤖 需求分析',
+                    description: `分析用户需要了解的内容，确定核心框架`,
+                    output: '明确核心要点和表达重点',
+                  },
+                  {
+                    step: 2,
+                    title: '📚 知识检索',
+                    description: '从知识库中检索相关权威资料',
+                    references: [
+                      { title: '相关政策文件', source: '中央政府网站', relevance: 'high' },
+                      { title: '权威解读文章', source: '共产党员网', relevance: 'high' },
+                    ],
+                    output: '找到相关参考资料，提取核心信息',
+                  },
+                ];
+
+                if (sectionType === 'learning_objective') {
+                  steps.push({
+                    step: 3,
+                    title: '✏️ 内容撰写',
+                    description: '整理学习目标，确保清晰明确可衡量',
+                    rejectedContents: [
+                      {
+                        content: '学完这章就懂了',
+                        reason: '目标太模糊，不可衡量',
+                        type: 'no_meaning',
+                      },
+                    ],
+                    output: content,
                   });
-                } else if (isPSection) {
-                  pIndex++;
-                  const imageUrl = chapterImageNum > 0 ? getCourseImageUrl(courseCode, chapterImageNum, pIndex) : null;
-                  slides.push({
-                    type: 'mixed',
-                    content: trimmed,
-                    imageUrl: imageUrl || undefined,
-                    imageCaption: imageUrl ? `${ch.title} - P${pIndex}` : `${ch.title} - P${pIndex} 配图`,
-                    aiTags: [{ text: `P${pIndex}`, type: '知识点', explanation: '核心知识点' }],
+                } else if (content.includes('重要') || content.includes('地位')) {
+                  steps.push({
+                    step: 3,
+                    title: '✂️ 内容筛选',
+                    description: '从多份资料中提取最核心的表述',
+                    rejectedContents: [
+                      {
+                        content: '这个是全世界最重要的',
+                        reason: '表述过于绝对化',
+                        type: 'too_radical',
+                      },
+                    ],
+                    output: '提取核心定位表述',
+                  });
+                  steps.push({
+                    step: 4,
+                    title: '✏️ 内容撰写',
+                    description: '组织语言，确保表述准确客观',
+                    output: content,
+                  });
+                } else if (content.includes('方法') || content.includes('路径')) {
+                  steps.push({
+                    step: 3,
+                    title: '✂️ 内容筛选',
+                    description: '筛选可操作的具体路径和方法',
+                    output: '确定核心举措和实施路径',
+                  });
+                  steps.push({
+                    step: 4,
+                    title: '✏️ 内容撰写',
+                    description: '撰写清晰的实施路径说明',
+                    output: content,
                   });
                 } else {
-                  slides.push({
-                    type: 'text',
-                    content: trimmed,
+                  steps.push({
+                    step: 3,
+                    title: '✂️ 内容筛选',
+                    description: '筛选最有价值的核心信息',
+                    output: '确定关键表述',
+                  });
+                  steps.push({
+                    step: 4,
+                    title: '✏️ 内容撰写',
+                    description: '整合信息，撰写完整表述',
+                    output: content,
                   });
                 }
+
+                steps.push({
+                  step: steps.length + 1,
+                  title: '✅ 质量审核',
+                  description: '最后审核内容的准确性和合规性',
+                  output: '内容审核通过，表述准确客观',
+                });
+
+                return steps;
+              };
+
+              if (isLearningObjective) {
+                const objectiveContent = trimmed.startsWith('【学习目标】') 
+                  ? trimmed.replace('【学习目标】', '').trim()
+                  : trimmed.replace(/^##\s*第\s*\d+\s*章·学习目标\s*\n*/, '').replace(/^##\s*学习目标\s*\n*/, '').trim();
+                slides.push({
+                  type: 'learning_objective',
+                  content: objectiveContent,
+                  chapterTitle: ch.title,
+                  thinkingSteps: generateThinkingSteps(objectiveContent, 'learning_objective', ch.title),
+                });
+              } else if (isPSection) {
+                pIndex++;
+                const imageUrl = chapterImageNum > 0 ? getCourseImageUrl(courseCode, chapterImageNum, pIndex) : null;
+                slides.push({
+                  type: 'mixed',
+                  content: trimmed,
+                  imageUrl: imageUrl || undefined,
+                  imageCaption: imageUrl ? `${ch.title} - P${pIndex}` : `${ch.title} - P${pIndex} 配图`,
+                  aiTags: [{ text: `P${pIndex}`, type: '知识点', explanation: '核心知识点' }],
+                  thinkingSteps: generateThinkingSteps(trimmed, 'mixed', ch.title),
+                });
+              } else {
+                slides.push({
+                  type: 'text',
+                  content: trimmed,
+                  thinkingSteps: generateThinkingSteps(trimmed, 'text', ch.title),
+                });
+              }
               }
             } else {
+              // 通用思考步骤生成函数
+              const generateGenericThinkingSteps = (content: string, title: string) => {
+                const steps: ThinkingStep[] = [
+                  {
+                    step: 1,
+                    title: '🤖 需求分析',
+                    description: `分析${title}的内容定位和表达重点`,
+                    output: '明确核心要点和表达框架',
+                  },
+                  {
+                    step: 2,
+                    title: '📚 知识检索',
+                    description: '从知识库中检索相关政策和理论资料',
+                    references: [
+                      { title: '相关政策文件', source: '中央政府网站', relevance: 'high' },
+                      { title: '权威解读', source: '共产党员网', relevance: 'medium' },
+                    ],
+                    output: '找到相关参考资料，完成初步信息收集',
+                  },
+                  {
+                    step: 3,
+                    title: '✂️ 内容筛选',
+                    description: '从大量信息中筛选核心表述',
+                    rejectedContents: [
+                      {
+                        content: '这个太重要了，不说不行',
+                        reason: '表述过于绝对化',
+                        type: 'too_radical',
+                      },
+                      {
+                        content: '大家都懂的',
+                        reason: '内容空洞无实际信息',
+                        type: 'no_meaning',
+                      },
+                    ],
+                    output: '提取核心表述，确定内容框架',
+                  },
+                  {
+                    step: 4,
+                    title: '✏️ 内容撰写',
+                    description: '整合信息，撰写完整表述',
+                    output: content,
+                  },
+                  {
+                    step: 5,
+                    title: '✅ 质量审核',
+                    description: '最后审核内容的准确性和合规性',
+                    output: '内容审核通过，表述准确客观',
+                  },
+                ];
+                return steps;
+              };
+
               if (ch.title.startsWith('前言')) {
                 slides.push({
                   type: 'text',
                   content: chapterContent,
                   chapterTitle: ch.title,
+                  thinkingSteps: generateGenericThinkingSteps(chapterContent, ch.title),
                 });
               } else {
               const paragraphs = chapterContent.split('\n\n').filter((p: string) => p.trim());
@@ -367,6 +842,7 @@ function getCourseData(courseId?: string): any {
                 
                 const hasImage = pageContent.includes('案例') || pageContent.includes('【') || pageContent.includes('目标');
                 const imageUrl = getCourseImageUrl(courseCode, chIdx + 1, imgPageIndex);
+                const thinkingSteps = generateGenericThinkingSteps(pageContent, ch.title);
                 
                 if (forceImageSlide || hasImage || imageUrl) {
                   slides.push({
@@ -375,20 +851,68 @@ function getCourseData(courseId?: string): any {
                     imageUrl: imageUrl || undefined,
                     imageCaption: imageUrl ? `${ch.title} 知识图谱` : undefined,
                     aiTags: [{ text: ch.title.replace(/第.*讲[：:]/, '').replace(/课程概述/, '概述').substring(0, 15), type: '知识点', explanation: '本讲核心知识点' }],
+                    thinkingSteps: thinkingSteps,
                   });
                 } else {
                   slides.push({
                     type: 'text',
                     content: pageContent,
                     aiTags: [{ text: ch.title.replace(/第.*讲[：:]/, '').replace(/课程概述/, '概述').substring(0, 15), type: '知识点', explanation: '本讲核心知识点' }],
+                    thinkingSteps: thinkingSteps,
                   });
                 }
               }
               }
             }
           } else {
-            slides.push({ type: 'text', content: ch.title + '。本讲内容涵盖相关核心知识点，帮助您全面理解和掌握。', aiTags: [{ text: ch.title.replace(/第.*讲[：:]/, ''), type: '知识点', explanation: '本讲核心知识点' }] });
-            slides.push({ type: 'mixed', content: `${ch.title}的详细解读。AI根据知识图谱为您整理关键要点和深入分析，帮助您快速理解和应用。`, imageCaption: `${ch.title}知识图谱`, aiTags: [{ text: '核心要点', type: '重点', explanation: '本讲最重要的知识点' }] });
+            slides.push({ 
+              type: 'text', 
+              content: ch.title + '。本讲内容涵盖相关核心知识点，帮助您全面理解和掌握。', 
+              aiTags: [{ text: ch.title.replace(/第.*讲[：:]/, ''), type: '知识点', explanation: '本讲核心知识点' }],
+              thinkingSteps: [
+                {
+                  step: 1,
+                  title: '🤖 需求分析',
+                  description: '设计本章的开篇内容，建立整体框架',
+                  output: '明确本章主题和内容概览',
+                },
+                {
+                  step: 2,
+                  title: '✏️ 内容撰写',
+                  description: '撰写开篇表述',
+                  output: ch.title + '。本讲内容涵盖相关核心知识点，帮助您全面理解和掌握。',
+                },
+              ],
+            });
+            slides.push({ 
+              type: 'mixed', 
+              content: `${ch.title}的详细解读。AI根据知识图谱为您整理关键要点和深入分析，帮助您快速理解和应用。`, 
+              imageCaption: `${ch.title}知识图谱`, 
+              aiTags: [{ text: '核心要点', type: '重点', explanation: '本讲最重要的知识点' }],
+              thinkingSteps: [
+                {
+                  step: 1,
+                  title: '🤖 需求分析',
+                  description: '通过知识图谱方式展示核心要点',
+                  output: '确定核心要点和展示方式',
+                },
+                {
+                  step: 2,
+                  title: '🖼️ 配图选择',
+                  description: '选择合适的知识图谱配图',
+                  references: [
+                    { title: `${ch.title}知识图谱`, source: '内部设计资源', relevance: 'high' },
+                  ],
+                  output: '选择直观的知识图谱配图',
+                },
+                {
+                  step: 3,
+                  title: '✏️ 内容撰写',
+                  description: '撰写详细解读内容',
+                  output: `${ch.title}的详细解读。AI根据知识图谱为您整理关键要点和深入分析，帮助您快速理解和应用。`,
+                },
+              ],
+            });
           }
           
           return { id: ch.id, title: ch.title, totalSlides: slides.length, aiSummary: `第${chIdx + 1}讲：${ch.title.replace(/第.*讲[：:]/, '')}。本讲深入讲解核心要义，帮助您全面掌握相关知识点和实践方法。`, keyPoints: [ch.title.replace(/第.*讲[：:]/, '').substring(0, 10)], videoUrl, slides };
@@ -470,6 +994,7 @@ export default function CourseLearnPage() {
   const [videoDuration, setVideoDuration] = useState(0);
   const [showVideoControls, setShowVideoControls] = useState(true);
   const [isSeeking, setIsSeeking] = useState(false); // 是否正在拖动进度条
+  const [showThinkingLogic, setShowThinkingLogic] = useState(false);
 
   const course = getCourseData(courseId);
   const chapter = course.chapters[currentChapter];
@@ -580,11 +1105,13 @@ export default function CourseLearnPage() {
     if (currentSlide > 0) {
       setCurrentSlide(currentSlide - 1);
       setShowAITag(null);
+      setShowThinkingLogic(false);
     } else if (currentChapter > 0) {
       setCurrentChapter(currentChapter - 1);
       const prevChapter = course.chapters[currentChapter - 1];
       setCurrentSlide(prevChapter.slides.length - 1);
       setShowAITag(null);
+      setShowThinkingLogic(false);
     }
   };
 
@@ -595,10 +1122,12 @@ export default function CourseLearnPage() {
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(currentSlide + 1);
       setShowAITag(null);
+      setShowThinkingLogic(false);
     } else if (currentChapter < course.chapters.length - 1) {
       setCurrentChapter(currentChapter + 1);
       setCurrentSlide(0);
       setShowAISummary(true);
+      setShowThinkingLogic(false);
     } else {
       // 最后一章的最后一页，标记完成后返回课程列表
       setCompletedSlides(prev => new Set(prev).add(`${currentChapter}-${currentSlide}`));
@@ -612,6 +1141,7 @@ export default function CourseLearnPage() {
     setCurrentChapter(index);
     setCurrentSlide(0);
     setShowAISummary(true);
+    setShowThinkingLogic(false);
     setExpandedChapters(prev => {
       const next = new Set(prev);
       next.add(index);
@@ -1076,6 +1606,138 @@ export default function CourseLearnPage() {
                   </div>
                 ))}
               </div>
+
+              {/* 思考步骤展示 */}
+              {(() => {
+                const currentBlock = currentSlideData[0];
+                if (!currentBlock?.thinkingSteps) return null;
+
+                return (
+                  <div className="mt-6">
+                    <button
+                      onClick={() => setShowThinkingLogic(!showThinkingLogic)}
+                      className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg hover:bg-gradient-to-r from-purple-100 to-blue-100 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+                          <BrainCircuit className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="text-left">
+                          <div className="text-sm font-bold text-gray-800">🤖 AI 思考过程</div>
+                          <div className="text-xs text-gray-500">点击查看智能体如何生成内容</div>
+                        </div>
+                      </div>
+                      {showThinkingLogic ? (
+                        <ChevronUp className="h-5 w-5 text-purple-600" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-purple-600" />
+                      )}
+                    </button>
+                    
+                    {showThinkingLogic && (
+                      <div className="mt-3 space-y-4">
+                        {currentBlock.thinkingSteps.map((step, stepIdx) => (
+                          <div key={stepIdx} className="p-5 bg-white border-2 border-purple-200 rounded-lg relative">
+                            <div className="flex items-start gap-4">
+                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center flex-shrink-0 text-white font-bold">
+                                {step.step}
+                              </div>
+                              <div className="flex-1">
+                                <div className="mb-3">
+                                  <span className="text-lg font-bold text-gray-900">
+                                    {step.title}
+                                  </span>
+                                </div>
+                                <p className="text-gray-700 leading-relaxed mb-4">
+                                  {step.description}
+                                </p>
+
+                                {/* 参考资料 */}
+                                {step.references && step.references.length > 0 && (
+                                  <div className="mb-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <Sparkles className="h-4 w-4 text-blue-600" />
+                                      <span className="text-sm font-bold text-blue-700">📚 参考资料</span>
+                                    </div>
+                                    <div className="space-y-2">
+                                      {step.references.map((ref, refIdx) => (
+                                        <div key={refIdx} className="flex items-center gap-2 text-sm">
+                                          <span className={`inline-block px-2 py-1 text-xs rounded-full ${
+                                            ref.relevance === 'high' ? 'bg-green-100 text-green-700' :
+                                            ref.relevance === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'
+                                          }`}>
+                                            {ref.relevance === 'high' ? '高' : ref.relevance === 'medium' ? '中' : '低'}
+                                          </span>
+                                          <span className="text-gray-700">
+                                            <strong>{ref.title}</strong>
+                                            {ref.source && <span className="text-gray-500"> - {ref.source}</span>}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* 未通过审核的内容 */}
+                                {step.rejectedContents && step.rejectedContents.length > 0 && (
+                                  <div className="mb-4 p-3 bg-red-50 rounded-lg border-l-4 border-red-400">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <Sparkles className="h-4 w-4 text-red-600" />
+                                      <span className="text-sm font-bold text-red-700">❌ 审核未通过</span>
+                                    </div>
+                                    <div className="space-y-3">
+                                      {step.rejectedContents.map((rej, rejIdx) => (
+                                        <div key={rejIdx} className="border border-red-200 rounded p-3">
+                                          <div className="flex items-center gap-2 mb-2">
+                                            <span className={`inline-block px-2 py-1 text-xs rounded-full ${
+                                              rej.type === 'too_radical' ? 'bg-orange-100 text-orange-700' :
+                                              rej.type === 'no_meaning' ? 'bg-purple-100 text-purple-700' :
+                                              rej.type === 'inaccurate' ? 'bg-red-100 text-red-700' :
+                                              rej.type === 'redundant' ? 'bg-gray-100 text-gray-700' : 'bg-blue-100 text-blue-700'
+                                            }`}>
+                                              {rej.type === 'too_radical' ? '表述过激' :
+                                               rej.type === 'no_meaning' ? '内容空洞' :
+                                               rej.type === 'inaccurate' ? '内容不实' :
+                                               rej.type === 'redundant' ? '内容冗余' : '其他原因'}
+                                            </span>
+                                          </div>
+                                          <p className="text-sm text-gray-600 mb-2">
+                                            <span className="line-through opacity-60">{rej.content}</span>
+                                          </p>
+                                          <p className="text-xs text-gray-500 italic">
+                                            原因：{rej.reason}
+                                          </p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* 输出结果 */}
+                                <div className="p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Sparkles className="h-4 w-4 text-green-600" />
+                                    <span className="text-sm font-bold text-green-700">✅ 本步输出</span>
+                                  </div>
+                                  <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
+                                    {step.output}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        
+                        <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200 text-center">
+                          <p className="text-sm text-gray-600 italic">
+                            💡 提示：这个思考过程展示了AI如何一步步生成最终内容。您可以参考这个思路来组织自己的学习笔记。
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* AI标签浮窗 */}
               {showAITag && (() => {
