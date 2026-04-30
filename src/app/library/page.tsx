@@ -434,12 +434,12 @@ export default function LibraryPage() {
   };
 
   // 进入课程学习
-  const handleStartLearn = (chapterId: number) => {
+  const handleStartLearn = (chapterIdx: number) => {
     // 保存当前课程到localStorage供学习页使用
     if (generatedCourse) {
       localStorage.setItem('current_ai_course', JSON.stringify(generatedCourse));
     }
-    router.push(`/library/course-learn/${chapterId}`);
+    router.push(`/library/course-learn/1?chapter=${chapterIdx}`);
   };
 
   return (
@@ -1077,7 +1077,7 @@ export default function LibraryPage() {
                             )}
                           </div>
                           {!editMode && (
-                            <Button size="sm" className="bg-amber-400 text-black font-bold border-2 border-black hover:bg-amber-500" style={{ borderRadius: '0', boxShadow: '2px 2px 0 0 #000' }} onClick={() => handleStartLearn(chapter.id)}>
+                            <Button size="sm" className="bg-amber-400 text-black font-bold border-2 border-black hover:bg-amber-500" style={{ borderRadius: '0', boxShadow: '2px 2px 0 0 #000' }} onClick={() => handleStartLearn(idx)}>
                               <Play className="h-4 w-4 mr-1" />
                               学习
                             </Button>
@@ -1132,6 +1132,11 @@ export default function LibraryPage() {
                       setActiveTab('courses');
                       localStorage.removeItem('ai_generated_course');
                       localStorage.removeItem('current_ai_course');
+                      // 清除学习进度（重新生成课程内容不同，旧进度无效）
+                      localStorage.removeItem('completed_slides_1');
+                      localStorage.removeItem('slide_notes_1');
+                      localStorage.removeItem('current_chapter_1');
+                      localStorage.removeItem('current_slide_1');
                     }}>
                       <Sparkles className="h-4 w-4 mr-2" />
                       重新生成

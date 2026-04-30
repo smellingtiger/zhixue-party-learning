@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { 
@@ -27,6 +27,9 @@ import {
   Minimize2,
   ChevronDown,
   ChevronUp,
+  Eye,
+  EyeOff,
+  FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -975,11 +978,35 @@ function getCourseData(courseId?: string): any {
 export default function CourseLearnPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const courseId = params?.id as string;
   const videoRef = useRef<HTMLVideoElement>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const startTimeRef = useRef(Date.now());
 
-  const [currentChapter, setCurrentChapter] = useState(0);
-  const [currentSlide, setCurrentSlide] = useState(0);
+  // 获取目标章节索引：优先使用URL参数，其次使用localStorage
+  const getInitialChapter = () => {
+    try {
+      const chapterParam = searchParams.get('chapter');
+      if (chapterParam !== null) {
+        return parseInt(chapterParam, 10);
+      }
+      const saved = localStorage.getItem(`current_chapter_${courseId}`);
+      return saved ? parseInt(saved, 10) : 0;
+    } catch {
+      return 0;
+    }
+  };
+
+  const [currentChapter, setCurrentChapter] = useState(getInitialChapter);
+  const [currentSlide, setCurrentSlide] = useState(() => {
+    try {
+      const saved = localStorage.getItem(`current_slide_${courseId}`);
+      return saved ? parseInt(saved, 10) : 0;
+    } catch {
+      return 0;
+    }
+  });
   const [isPlaying, setIsPlaying] = useState(false);
   const [showAITag, setShowAITag] = useState<string | null>(null);
   const [showChatPanel, setShowChatPanel] = useState(false);
@@ -999,13 +1026,32 @@ export default function CourseLearnPage() {
     }
     return new Set();
   });
-  const [showAISummary, setShowAISummary] = useState(false);
+  const [showAISummary, setShowAISummary] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ai_summary_preference');
+      return saved === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
   const [videoDuration, setVideoDuration] = useState(0);
   const [showVideoControls, setShowVideoControls] = useState(true);
-  const [isSeeking, setIsSeeking] = useState(false); // 是否正在拖动进度条
+  const [isSeeking, setIsSeeking] = useState(false);
   const [showThinkingLogic, setShowThinkingLogic] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
+  const [slideNotes, setSlideNotes] = useState<Record<string, string>>(() => {
+    try {
+      const saved = localStorage.getItem(`slide_notes_${courseId}`);
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+  const [showNoteEditor, setShowNoteEditor] = useState(false);
+  const [noteInput, setNoteInput] = useState('');
+  const [learningSeconds, setLearningSeconds] = useState(0);
 
   const course = getCourseData(courseId);
   const chapter = course.chapters[currentChapter];
@@ -1037,10 +1083,43 @@ export default function CourseLearnPage() {
     };
   }, [isPlaying]);
 
+  // 学习时长统计
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setLearningSeconds(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // AI摘要偏好保存
+  useEffect(() => {
+    localStorage.setItem('ai_summary_preference', String(showAISummary));
+  }, [showAISummary]);
+
+  // 笔记保存到localStorage
+  useEffect(() => {
+    localStorage.setItem(`slide_notes_${courseId}`, JSON.stringify(slideNotes));
+  }, [slideNotes, courseId]);
+
+  // 聊天消息自动滚动到底部
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
+
   // 保存完成进度到localStorage
   useEffect(() => {
     localStorage.setItem(`completed_slides_${courseId}`, JSON.stringify([...completedSlides]));
   }, [completedSlides, courseId]);
+
+  // 保存当前章节位置到localStorage
+  useEffect(() => {
+    localStorage.setItem(`current_chapter_${courseId}`, String(currentChapter));
+  }, [currentChapter, courseId]);
+
+  // 保存当前幻灯片位置到localStorage
+  useEffect(() => {
+    localStorage.setItem(`current_slide_${courseId}`, String(currentSlide));
+  }, [currentSlide, courseId]);
 
   // 返回时同步课程数据到 ai_generated_course
   useEffect(() => {
@@ -1098,7 +1177,7 @@ export default function CourseLearnPage() {
     switch (type) {
       case '知识点': return 'bg-blue-100 text-blue-700 border-blue-300';
       case '重点': return 'bg-red-100 text-red-700 border-red-300';
-      case '延伸思考': return 'bg-purple-100 text-purple-700 border-purple-300';
+      case '延伸思考': return 'bg-orange-100 text-orange-700 border-orange-300';
       case 'AI提醒': return 'bg-amber-100 text-amber-700 border-amber-300';
     }
   };
@@ -1107,12 +1186,12 @@ export default function CourseLearnPage() {
     switch (type) {
       case '知识点': return <Lightbulb className="h-3 w-3" />;
       case '重点': return <Target className="h-3 w-3" />;
-      case '延伸思考': return <BrainCircuit className="h-3 w-3" />;
-      case 'AI提醒': return <Zap className="h-3 w-3" />;
+      case '延伸思考': return <Zap className="h-3 w-3" />;
+      case 'AI提醒': return <BrainCircuit className="h-3 w-3" />;
     }
   };
 
-  const handlePrevSlide = () => {
+  const handlePrevSlide = useCallback(() => {
     if (currentSlide > 0) {
       setCurrentSlide(currentSlide - 1);
       setShowAITag(null);
@@ -1124,10 +1203,9 @@ export default function CourseLearnPage() {
       setShowAITag(null);
       setShowThinkingLogic(false);
     }
-  };
+  }, [currentSlide, currentChapter, course.chapters]);
 
-  const handleNextSlide = () => {
-    // 标记当前页为已完成
+  const handleNextSlide = useCallback(() => {
     setCompletedSlides(prev => new Set(prev).add(`${currentChapter}-${currentSlide}`));
     
     if (currentSlide < slides.length - 1) {
@@ -1140,11 +1218,30 @@ export default function CourseLearnPage() {
       setShowAISummary(true);
       setShowThinkingLogic(false);
     } else {
-      // 最后一章的最后一页，标记完成后返回课程列表
       setCompletedSlides(prev => new Set(prev).add(`${currentChapter}-${currentSlide}`));
       router.push('/library');
     }
-  };
+  }, [currentSlide, currentChapter, slides.length, course.chapters.length, router]);
+
+  // 键盘快捷键翻页
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handlePrevSlide();
+      } else if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        handleNextSlide();
+      } else if (e.key === 'f' || e.key === 'F') {
+        setFocusMode(prev => !prev);
+      } else if (e.key === 'n' || e.key === 'N') {
+        setShowNoteEditor(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handlePrevSlide, handleNextSlide]);
 
   const isLastSlide = currentChapter === course.chapters.length - 1 && currentSlide === slides.length - 1;
 
@@ -1258,34 +1355,137 @@ export default function CourseLearnPage() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // 格式化学习时长
+  const formatLearningTime = (totalSeconds: number) => {
+    const hours = Math.floor(totalSeconds / 3600);
+    const mins = Math.floor((totalSeconds % 3600) / 60);
+    if (hours > 0) return `${hours}小时${mins}分钟`;
+    return `${mins}分钟`;
+  };
+
+  // 获取当前页的笔记
+  const currentSlideKey = `${currentChapter}-${currentSlide}`;
+  const currentSlideNote = slideNotes[currentSlideKey] || '';
+
+  // 保存笔记
+  const handleSaveNote = () => {
+    setSlideNotes(prev => ({
+      ...prev,
+      [currentSlideKey]: noteInput.trim(),
+    }));
+    setShowNoteEditor(false);
+    setNoteInput(currentSlideNote);
+  };
+
+  // 打开笔记编辑器
+  const handleOpenNoteEditor = () => {
+    setNoteInput(currentSlideNote);
+    setShowNoteEditor(true);
+  };
+
+  // 检查章节是否全部完成
+  const isChapterCompleted = (chIdx: number) => {
+    const ch = course.chapters[chIdx];
+    if (!ch) return false;
+    return ch.slides.every((_: ContentBlock, slIdx: number) => completedSlides.has(`${chIdx}-${slIdx}`));
+  };
+
+  // 检查章节是否有部分完成
+  const isChapterPartiallyCompleted = (chIdx: number) => {
+    const ch = course.chapters[chIdx];
+    if (!ch) return false;
+    const completedCount = ch.slides.filter((_: ContentBlock, slIdx: number) => completedSlides.has(`${chIdx}-${slIdx}`)).length;
+    return completedCount > 0 && completedCount < ch.slides.length;
+  };
+
   return (
-    <div className="min-h-screen bg-white relative" style={{
-      backgroundImage: 'url(/tx_homeBanner.png)',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center top',
-      backgroundAttachment: 'fixed',
-      backgroundRepeat: 'no-repeat'
-    }}>
+    <div className="min-h-screen relative">
+      {/* 背景层 - 党政红橙渐变 */}
+      <div className="absolute inset-0 bg-gradient-to-br from-red-50 via-orange-50 to-white" style={{ opacity: 0.8 }} />
+      {/* 内容层 */}
+      <div className="relative z-10">
       {/* 顶部导航栏 */}
-      <header className="bg-white border-b-2 border-black sticky top-0 z-50" style={{ boxShadow: '0 2px 0 0 #000' }}>
-        <div className="container mx-auto px-4 py-3">
+      <div className="flex min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-white">
+        {/* 左侧章节侧边栏 - 固定宽度 */}
+        {!focusMode && (
+        <aside className="w-72 flex-shrink-0 bg-white border-r border-red-200 overflow-y-auto sticky top-0 h-screen">
+          <div className="p-4 bg-gradient-to-r from-red-600 to-orange-500 text-white">
+            <h3 className="font-bold text-sm flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-amber-200" />
+              课程章节
+            </h3>
+          </div>
+          <div>
+            {course.chapters.map((ch: ChapterData, idx: number) => {
+              const completed = isChapterCompleted(idx);
+              const partiallyCompleted = isChapterPartiallyCompleted(idx);
+              const isCurrent = idx === currentChapter;
+              
+              return (
+              <div key={ch.id}>
+                <button
+                  onClick={() => handleChapterSelect(idx)}
+                  className={`w-full text-left px-4 py-3 flex items-center gap-3 border-b border-gray-100 hover:bg-gray-50 transition-all ${
+                    isCurrent ? 'bg-red-50 border-l-4 border-l-red-500' : ''
+                  }`}
+                >
+                  <div className={`w-8 h-8 flex items-center justify-center rounded font-bold text-sm flex-shrink-0 ${
+                    completed ? 'bg-green-100 text-green-600 border border-green-300' :
+                    isCurrent ? 'bg-red-600 text-white' :
+                    partiallyCompleted ? 'bg-orange-100 text-orange-600 border border-orange-300' :
+                    'bg-gray-100 text-gray-400 border border-gray-200'
+                  }`}>
+                    {completed ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className={`text-sm font-semibold truncate ${
+                      completed ? 'text-gray-500 line-through' :
+                      isCurrent ? 'text-red-700' :
+                      partiallyCompleted ? 'text-orange-700' :
+                      'text-gray-600'
+                    }`}>
+                      {ch.title}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-0.5">
+                      {ch.slides.length}页 · {ch.keyPoints.length}个知识点
+                    </div>
+                  </div>
+                  {completed && (
+                    <span className="text-xs text-green-600 font-medium flex-shrink-0">已学</span>
+                  )}
+                </button>
+              </div>
+              );
+            })}
+          </div>
+        </aside>
+        )}
+
+        {/* 右侧主内容区 */}
+        <div className="flex-1 min-w-0">
+      <header className="bg-white/95 backdrop-blur-sm border-b border-red-200 sticky top-0 z-50 shadow-sm">
+        <div className="px-8 py-3">
           <div className="flex items-center justify-between">
             {/* 左侧：返回 + 课程信息 */}
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" className="border-2 border-black" style={{ borderRadius: '0' }} onClick={() => router.replace('/library')}>
+              <Button variant="ghost" size="sm" className="border border-red-300 text-red-700 hover:bg-red-50" onClick={() => router.replace('/library')}>
                 <ArrowLeft className="h-4 w-4 mr-1" />
                 返回
               </Button>
               <div>
-                <h1 className="text-lg font-black text-black">{course.name}</h1>
+                <h1 className="text-xl font-black text-gray-900">{course.name}</h1>
                 <div className="flex items-center gap-3 text-xs text-gray-500">
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     {course.totalHours}学时
                   </span>
                   <span>共{course.chapters.length}章</span>
-                  <span className="text-orange-600 font-bold">
+                  <span className="text-red-600 font-bold">
                     总进度 {getTotalProgress()}%
+                  </span>
+                  <span className="flex items-center gap-1 text-orange-600 font-medium">
+                    <Clock className="h-3 w-3" />
+                    {formatLearningTime(learningSeconds)}
                   </span>
                 </div>
               </div>
@@ -1296,116 +1496,167 @@ export default function CourseLearnPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-2 border-black font-bold text-xs"
-                style={{ borderRadius: '0' }}
+                className={`border font-bold text-xs transition-colors ${showAISummary ? 'bg-red-50 border-red-400 text-red-700' : 'border-gray-300 hover:bg-red-50'}`}
                 onClick={() => setShowAISummary(!showAISummary)}
               >
-                <Sparkles className="h-3 w-3 mr-1 text-purple-600" />
+                <Sparkles className="h-3 w-3 mr-1 text-red-600" />
                 AI摘要
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                className={`border-2 font-bold text-xs ${showChatPanel ? 'bg-purple-100 border-purple-600' : 'border-black'}`}
-                style={{ borderRadius: '0' }}
+                className={`border font-bold text-xs transition-colors ${showChatPanel ? 'bg-red-50 border-red-400 text-red-700' : 'border-gray-300 hover:bg-red-50'}`}
                 onClick={() => setShowChatPanel(!showChatPanel)}
               >
                 <Bot className="h-3 w-3 mr-1" />
                 AI问答
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className={`border font-bold text-xs transition-colors ${focusMode ? 'bg-red-100 border-red-500 text-red-700' : 'border-gray-300 hover:bg-red-50'}`}
+                onClick={() => setFocusMode(!focusMode)}
+                title="专注模式（按F键切换）"
+              >
+                {focusMode ? <EyeOff className="h-3 w-3 mr-1" /> : <Eye className="h-3 w-3 mr-1" />}
+                {focusMode ? '退出专注' : '专注'}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className={`border font-bold text-xs transition-colors ${showNoteEditor ? 'bg-red-50 border-red-400 text-red-700' : 'border-gray-300 hover:bg-red-50'}`}
+                onClick={handleOpenNoteEditor}
+                title="添加笔记（按N键切换）"
+              >
+                <FileText className="h-3 w-3 mr-1" />
+                笔记
+              </Button>
             </div>
           </div>
 
-          {/* 进度条 */}
-          <div className="mt-3">
-            <div className="flex items-center justify-between text-xs mb-1">
-              <span className="text-gray-600 font-bold">
-                第{currentChapter + 1}章 / 共{course.chapters.length}章 · {chapter.title}
-              </span>
-              <span className="text-purple-600 font-bold">
-                {currentSlide + 1} / {totalSlides}
-              </span>
+          {/* 进度条区域 - 双层进度展示 */}
+          <div className="mt-3 space-y-2">
+            {/* 总进度条 - 全课程 */}
+            <div>
+              <div className="flex items-center justify-between text-[10px] mb-1">
+                <span className="text-gray-500 font-medium">
+                  课程总进度
+                </span>
+                <span className="text-red-600 font-bold">
+                  {getTotalProgress()}% · 已完成 {course.chapters.reduce((acc: number, ch: ChapterData, chIdx: number) => acc + ch.slides.filter((_: ContentBlock, slIdx: number) => completedSlides.has(`${chIdx}-${slIdx}`)).length, 0)}/{course.chapters.reduce((acc: number, ch: ChapterData) => acc + ch.slides.length, 0)} 页
+                </span>
+              </div>
+              <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-red-500 to-orange-500 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${getTotalProgress()}%` }}
+                />
+              </div>
             </div>
-            <Progress value={progress} className="h-2" />
+            
+            {/* 当前章节进度条 */}
+            <div>
+              <div className="flex items-center justify-between text-xs mb-1">
+                <span className="text-gray-700 font-semibold">
+                  第{currentChapter + 1}章 / 共{course.chapters.length}章 · {chapter.title}
+                </span>
+                <span className="text-red-600 font-bold">
+                  {currentSlide + 1} / {totalSlides}
+                </span>
+              </div>
+              <Progress value={progress} className="h-2 bg-red-100" />
+            </div>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6 flex gap-6">
-        {/* 左侧章节导航 */}
-        <aside className="w-72 flex-shrink-0">
-          <div className="bg-white border-2 border-black sticky top-32" style={{ boxShadow: '3px 3px 0 0 #000' }}>
-            <div className="p-4 bg-black text-white">
-              <h3 className="font-black text-sm flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-amber-400" />
-                课程章节
-              </h3>
-            </div>
-            <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
-              {course.chapters.map((ch: ChapterData, idx: number) => (
-                <div key={ch.id}>
-                  <button
-                    onClick={() => handleChapterSelect(idx)}
-                    className={`w-full text-left px-4 py-3 flex items-center gap-3 border-b border-gray-200 hover:bg-gray-50 transition-colors ${
-                      idx === currentChapter ? 'bg-purple-50 border-l-4 border-l-purple-600' : ''
-                    }`}
-                  >
-                    <div className={`w-8 h-8 flex items-center justify-center rounded border-2 font-black text-sm ${
-                      idx === currentChapter 
-                        ? 'bg-purple-600 text-white border-purple-600' 
-                        : 'bg-gray-100 text-gray-600 border-gray-300'
-                    }`}>
-                      {idx + 1}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className={`text-sm font-bold truncate ${idx === currentChapter ? 'text-purple-700' : 'text-gray-700'}`}>
-                        {ch.title}
-                      </div>
-                      <div className="text-xs text-gray-400 mt-0.5">
-                        {ch.slides.length}页 · {ch.keyPoints.length}个知识点
-                      </div>
-                    </div>
-                    {ch.slides.every((_slide: ContentBlock, slIdx: number) => isSlideCompleted(idx, slIdx)) && (
-                      <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0" />
-                    )}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </aside>
-
         {/* 中间主要内容区 */}
-        <main className="flex-1 min-w-0">
+         <main className={`min-w-0 py-6 ${focusMode ? 'px-4' : 'px-8'}`}>
+          <div className={focusMode ? 'mx-auto max-w-[8xl]' : ''}>
           {/* AI摘要提示 */}
           {showAISummary && (
-            <div className="mb-4 border-2 border-purple-600 bg-purple-50 p-4 relative" style={{ boxShadow: '3px 3px 0 0 #000' }}>
-              <div className="absolute -top-2.5 left-2 bg-purple-600 text-white text-[10px] font-black px-2 py-0.5">
+            <div className="mb-4 border border-red-200 bg-gradient-to-r from-red-50 to-orange-50 p-4 relative rounded-lg shadow-sm">
+              <div className="absolute -top-2.5 left-2 bg-gradient-to-r from-red-500 to-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                 AI章节摘要
               </div>
               <div className="flex items-start gap-3 mt-1">
-                <Sparkles className="h-5 w-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                <Sparkles className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm text-purple-800 leading-relaxed">{chapter.aiSummary}</p>
+                  <p className="text-sm text-gray-800 leading-relaxed">{chapter.aiSummary}</p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* 内容展示区 - 图文混合 */}
-          <Card className="border-2 border-black mb-4 min-h-[500px]" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-            <CardContent className="p-8">
-              {/* 页码指示 */}
-              <div className="flex items-center justify-between mb-6 pb-4 border-b-2 border-gray-200">
+          {/* 笔记编辑器 */}
+          {showNoteEditor && (
+            <div className="mb-4 border border-orange-200 bg-orange-50 p-4 rounded-lg shadow-sm">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <span className="bg-purple-600 text-white px-2 py-0.5 rounded text-xs font-medium">
+                  <FileText className="h-4 w-4 text-orange-600" />
+                  <span className="text-sm font-bold text-gray-800">
+                    当前页笔记 - 第{currentChapter + 1}章 第{currentSlide + 1}页
+                  </span>
+                </div>
+                <button
+                  onClick={() => setShowNoteEditor(false)}
+                  className="text-gray-400 hover:text-gray-600 text-lg"
+                >
+                  ×
+                </button>
+              </div>
+              <textarea
+                value={noteInput}
+                onChange={(e) => setNoteInput(e.target.value)}
+                placeholder="输入您的学习笔记..."
+                className="w-full h-24 p-3 text-sm border border-orange-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-300 resize-none bg-white"
+              />
+              <div className="flex justify-end gap-2 mt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-300 text-xs"
+                  onClick={() => setShowNoteEditor(false)}
+                >
+                  取消
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white text-xs"
+                  onClick={handleSaveNote}
+                >
+                  保存笔记
+                </Button>
+              </div>
+              {currentSlideNote && (
+                <div className="mt-3 p-3 bg-white border border-orange-100 rounded-lg">
+                  <p className="text-xs text-gray-500 mb-1">当前笔记：</p>
+                  <p className="text-sm text-gray-700">{currentSlideNote}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 内容展示区 - 图文混合 */}
+          <Card className="border border-red-200 mb-4 min-h-[500px] shadow-sm rounded-lg bg-white/95 backdrop-blur-sm">
+            <CardContent className="p-10">
+              {/* 页码指示 */}
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-red-200">
+                <div className="flex items-center gap-2">
+                  <span className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm">
                     第{currentSlide + 1}页
                   </span>
                   <span className="text-sm text-gray-500">共{totalSlides}页</span>
+                  {currentSlideNote && (
+                    <span className="text-xs text-orange-600 flex items-center gap-1">
+                      <FileText className="h-3 w-3" />
+                      有笔记
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   {/* AI能力标识 */}
-                  <span className="border border-amber-400 text-amber-700 bg-amber-50 px-2 py-0.5 rounded text-xs font-medium flex items-center">
+                  <span className="border border-orange-300 text-orange-700 bg-orange-50 px-2 py-0.5 rounded-full text-xs font-medium flex items-center">
                     <Sparkles className="h-3 w-3 mr-1" />
                     AI图文混合
                   </span>
@@ -1413,22 +1664,27 @@ export default function CourseLearnPage() {
               </div>
 
               {/* 内容块渲染 */}
-              <div className="space-y-6">
+              <div className="space-y-8">
                 {currentSlideData.map((block: ContentBlock, blockIdx: number) => (
                   <div key={blockIdx}>
-                    {/* 学习目标页面 - 紧凑居中 */}
+                    {/* 学习目标页面 - 居中卡片式 */}
                     {block.type === 'learning_objective' && (
-                      <div className="flex flex-col items-center text-center px-6 py-6">
-                        <div className="max-w-xl mx-auto">
+                      <div className="flex flex-col items-center text-center px-8 py-10 bg-gradient-to-br from-red-50 via-orange-50 to-white rounded-xl border border-red-100">
+                        <div className="max-w-2xl mx-auto">
                           {block.chapterTitle && (
-                            <h2 className="text-2xl font-bold text-gray-900 mb-3 pb-2 border-b-2 border-red-400">{block.chapterTitle}</h2>
+                            <div className="mb-6">
+                              <div className="w-16 h-1 bg-gradient-to-r from-red-400 to-orange-400 rounded-full mx-auto mb-4" />
+                              <h2 className="text-2xl font-black text-gray-900">{block.chapterTitle}</h2>
+                              <div className="w-16 h-1 bg-gradient-to-r from-orange-400 to-red-400 rounded-full mx-auto mt-4" />
+                            </div>
                           )}
-                          <div className="mb-4">
-                            <span className="inline-block px-3 py-1 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold rounded-full tracking-wider">
+                          <div className="mb-6">
+                            <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-500 to-orange-500 text-white text-sm font-bold rounded-full shadow-lg">
+                              <Target className="h-4 w-4" />
                               学习目标
                             </span>
                           </div>
-                          <div className="prose prose-gray max-w-none [&_li]:text-base [&_li]:font-medium [&_li]:text-gray-800 [&_li]:leading-relaxed [&_ul]:space-y-1.5 [&_ul]:list-none [&_ul]:pl-0">
+                          <div className="prose prose-gray max-w-none [&_li]:text-lg [&_li]:font-medium [&_li]:text-gray-800 [&_li]:leading-loose [&_ul]:space-y-3 [&_ul]:list-none [&_ul]:pl-0 [&_li]:before:content-['✓'] [&_li]:before:text-red-500 [&_li]:before:font-bold [&_li]:before:mr-3">
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
                               {block.content.replace('【学习目标】', '').trim()}
                             </ReactMarkdown>
@@ -1436,14 +1692,190 @@ export default function CourseLearnPage() {
                         </div>
                       </div>
                     )}
-                    {/* 纯文本 */}
+                    {/* 纯文本 - 优化版 */}
                     {block.type === 'text' && (
-                      <div>
+                      <div className="max-w-none">
                         {block.chapterTitle && (
-                          <h2 className="text-2xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-red-400">{block.chapterTitle}</h2>
+                          <div className="mb-8">
+                            <div className="flex items-center gap-3 mb-3">
+                              <div className="w-1 h-8 bg-gradient-to-b from-red-500 to-orange-500 rounded-full" />
+                              <h2 className="text-2xl font-black text-gray-900">{block.chapterTitle}</h2>
+                            </div>
+                            <div className="h-px bg-gradient-to-r from-red-200 via-orange-200 to-transparent ml-4" />
+                          </div>
                         )}
-                        <div className="prose prose-gray max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-0 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b-2 prose-h2:border-red-400 prose-h2:text-gray-900 prose-h3:text-lg prose-h3:mt-4 prose-h3:mb-2 prose-p:text-base prose-p:text-gray-800 prose-p:leading-relaxed prose-li:text-gray-800 prose-strong:text-gray-900 prose-a:text-blue-600 prose-a:underline [&_a]:text-blue-600 [&_a]:underline prose-table:text-sm prose-table:border-collapse prose-table:border prose-table:border-gray-300 [&_th]:bg-gray-100 [&_th]:p-2 [&_th]:border [&_th]:border-gray-300 [&_td]:p-2 [&_td]:border [&_td]:border-gray-300">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        <div className="prose prose-gray max-w-none">
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              h1: ({ children }) => (
+                                <div className="mb-6">
+                                  <h1 className="text-2xl font-black text-gray-900 flex items-center gap-3">
+                                    <span className="w-1.5 h-7 bg-gradient-to-b from-red-500 to-orange-500 rounded-full inline-block flex-shrink-0" />
+                                    {children}
+                                  </h1>
+                                  <div className="w-full h-px bg-gradient-to-r from-red-200 via-orange-200 to-transparent mt-3" />
+                                </div>
+                              ),
+                              h2: ({ children }) => (
+                                <div className="mb-4 mt-7">
+                                  <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2 pl-4 relative">
+                                    <span className="absolute left-0 w-1 h-5 bg-gradient-to-b from-orange-400 to-red-400 rounded-full" />
+                                    {children}
+                                  </h2>
+                                </div>
+                              ),
+                              h3: ({ children }) => (
+                                <div className="mb-3 mt-5">
+                                  <h3 className="text-lg font-bold text-red-700 flex items-center gap-2">
+                                    <span className="w-2 h-2 bg-red-400 rounded-full inline-block flex-shrink-0" />
+                                    {children}
+                                  </h3>
+                                </div>
+                              ),
+                              strong: ({ children }) => (
+                                <strong className="font-bold text-red-800 bg-gradient-to-r from-red-50 to-orange-50 px-2 py-0.5 rounded border-l-2 border-red-400">
+                                  {children}
+                                </strong>
+                              ),
+                              a: ({ children, href }) => (
+                                <a
+                                  href={href}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 underline decoration-2 underline-offset-2 hover:text-red-600 hover:decoration-red-600 hover:bg-red-50 px-1 transition-colors rounded"
+                                >
+                                  {children}
+                                </a>
+                              ),
+                              p: ({ children }) => {
+                                const content = String(children);
+                                if (content.startsWith('权威阅读链接：') || content.startsWith('权威阅读链接:')) {
+                                  return (
+                                    <div className="my-6 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 border-l-4 border-l-blue-500 rounded-r-xl py-4 px-5 shadow-sm">
+                                      <div className="flex items-center gap-2 mb-3">
+                                        <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
+                                          <span className="text-white text-xs">📚</span>
+                                        </div>
+                                        <span className="font-bold text-blue-700 text-sm">权威阅读链接</span>
+                                      </div>
+                                      {typeof children === 'string' ? (
+                                        <div className="text-sm text-blue-600 leading-relaxed space-y-2">
+                                          {content
+                                            .replace(/^权威阅读链接[：:]/, '')
+                                            .split('\n')
+                                            .filter(line => line.trim())
+                                            .map((line, i) => (
+                                              <div key={i} className="flex items-start gap-3 group">
+                                                <span className="text-blue-400 mt-1 group-hover:text-blue-600 transition-colors">›</span>
+                                                <span className="group-hover:text-blue-800 transition-colors">{line.trim()}</span>
+                                              </div>
+                                            ))}
+                                        </div>
+                                      ) : (
+                                        children
+                                      )}
+                                    </div>
+                                  );
+                                }
+                                if (content.startsWith('核心要点：') || content.startsWith('核心要点:')) {
+                                  return (
+                                    <div className="my-6 p-5 bg-gradient-to-br from-red-50 to-pink-50 border border-red-200 border-l-4 border-l-red-500 rounded-r-xl shadow-sm">
+                                      <div className="flex items-center gap-2 mb-3">
+                                        <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center">
+                                          <Target className="h-3 w-3 text-white" />
+                                        </div>
+                                        <span className="font-bold text-red-700 text-sm">核心要点</span>
+                                      </div>
+                                      <p className="text-base text-gray-800 leading-loose">
+                                        {content.replace(/^核心要点[：:]/, '')}
+                                      </p>
+                                    </div>
+                                  );
+                                }
+                                if (content.startsWith('拓展思考：') || content.startsWith('拓展思考:')) {
+                                  return (
+                                    <div className="my-6 p-5 bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 border-l-4 border-l-purple-500 rounded-r-xl shadow-sm">
+                                      <div className="flex items-center gap-2 mb-3">
+                                        <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center">
+                                          <Zap className="h-3 w-3 text-white" />
+                                        </div>
+                                        <span className="font-bold text-purple-700 text-sm">拓展思考</span>
+                                      </div>
+                                      <p className="text-base text-gray-700 leading-loose italic">
+                                        {content.replace(/^拓展思考[：:]/, '')}
+                                      </p>
+                                    </div>
+                                  );
+                                }
+                                return (
+                                  <p className="text-base text-gray-800 leading-loose mb-6">
+                                    {children}
+                                  </p>
+                                );
+                              },
+                              li: ({ children }) => (
+                                <li className="text-base my-3 leading-loose pl-1">
+                                  {children}
+                                </li>
+                              ),
+                              ul: ({ children }) => (
+                                <ul className="space-y-3 mb-6 list-none pl-0 [&_li]:before:content-['•'] [&_li]:before:text-red-400 [&_li]:before:font-bold [&_li]:before:mr-3 [&_li]:before:inline-block [&_li]:before:text-lg">
+                                  {children}
+                                </ul>
+                              ),
+                              ol: ({ children }) => (
+                                <ol className="space-y-3 mb-6 list-decimal pl-8 marker:text-red-500 marker:font-bold marker:text-base">
+                                  {children}
+                                </ol>
+                              ),
+                              blockquote: ({ children }) => (
+                                <blockquote className="my-6 border-l-4 border-red-400 bg-gradient-to-r from-red-50 to-orange-50 py-4 px-6 rounded-r-xl relative shadow-sm">
+                                  <div className="absolute top-2 right-4 text-red-200 text-5xl font-serif leading-none select-none">"</div>
+                                  <p className="relative z-10 text-base text-gray-700 leading-loose">
+                                    {children}
+                                  </p>
+                                </blockquote>
+                              ),
+                              hr: () => (
+                                <div className="my-8">
+                                  <div className="h-px bg-gradient-to-r from-transparent via-red-300 to-transparent" />
+                                </div>
+                              ),
+                              code: ({ children }) => (
+                                <code className="bg-gray-100 px-2 py-0.5 rounded text-sm font-mono text-red-700 border border-gray-200">
+                                  {children}
+                                </code>
+                              ),
+                              table: ({ children }) => (
+                                <div className="my-6 overflow-x-auto rounded-xl border border-gray-300 shadow-sm">
+                                  <table className="w-full text-base border-collapse">
+                                    {children}
+                                  </table>
+                                </div>
+                              ),
+                              thead: ({ children }) => (
+                                <thead className="bg-gradient-to-r from-gray-100 to-gray-50">
+                                  {children}
+                                </thead>
+                              ),
+                              th: ({ children }) => (
+                                <th className="px-4 py-3 text-left font-bold text-gray-900 border border-gray-300 bg-gradient-to-b from-gray-50 to-gray-100">
+                                  {children}
+                                </th>
+                              ),
+                              td: ({ children }) => (
+                                <td className="px-4 py-3 leading-relaxed text-gray-800 border border-gray-300 hover:bg-red-50 transition-colors">
+                                  {children}
+                                </td>
+                              ),
+                              em: ({ children }) => (
+                                <em className="not-italic font-medium text-gray-700 bg-yellow-50 px-2 py-0.5 rounded border-l-2 border-yellow-400">
+                                  {children}
+                                </em>
+                              ),
+                            }}
+                          >
                             {block.content}
                           </ReactMarkdown>
                         </div>
@@ -1452,67 +1884,243 @@ export default function CourseLearnPage() {
 
                     {/* 纯图片 */}
                     {block.type === 'image' && (
-                      <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
-                        <div className="aspect-video bg-gradient-to-br from-orange-100 to-red-50 flex items-center justify-center">
+                      <div className="border border-red-200 rounded-xl overflow-hidden shadow-sm">
+                        <div className="aspect-video bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center">
                           <div className="text-center">
-                            <div className="w-20 h-20 mx-auto mb-3 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
+                            <div className="w-20 h-20 mx-auto mb-3 rounded-full bg-gradient-to-br from-red-400 to-orange-500 flex items-center justify-center">
                               <span className="text-3xl">📊</span>
                             </div>
                             <p className="text-sm text-gray-600 font-medium">{block.imageCaption}</p>
                           </div>
                         </div>
                         {block.imageCaption && (
-                          <div className="p-3 bg-gray-50 text-xs text-gray-500 text-center">
+                          <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 text-xs text-gray-500 text-center border-t border-red-100">
                             ▲ {block.imageCaption}
                           </div>
                         )}
                       </div>
                     )}
 
-                    {/* 图文混合 - 全文宽Markdown + 图片下方排列 */}
+                    {/* 图文混合 - 杂志风排版 */}
                     {block.type === 'mixed' && (
-                      <div>
-                        <div className="prose prose-gray max-w-none prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-0 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b-2 prose-h2:border-red-400 prose-h2:text-gray-900 prose-h3:text-xl prose-h3:mt-4 prose-h3:mb-3 prose-p:text-base prose-p:text-gray-800 prose-p:leading-relaxed prose-li:text-gray-800 prose-strong:text-gray-900 prose-a:text-blue-600 prose-a:underline [&_a]:text-blue-600 [&_a]:underline prose-table:text-sm prose-table:border-collapse prose-table:border prose-table:border-gray-300 [&_th]:bg-gray-100 [&_th]:p-2 [&_th]:border [&_th]:border-gray-300 [&_td]:p-2 [&_td]:border [&_td]:border-gray-300">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {block.content}
-                          </ReactMarkdown>
-                        </div>
-                        {block.imageUrl && (
-                          <div className="mt-4 border border-gray-200 rounded-lg overflow-hidden max-w-lg mx-auto">
-                            <img
-                              src={block.imageUrl}
-                              alt={block.imageCaption || '课程配图'}
-                              className="w-full h-auto object-cover"
-                              onError={(e) => {
-                                const target = e.currentTarget;
-                                target.style.display = 'none';
-                                const placeholder = target.nextElementSibling;
-                                if (placeholder) {
-                                  (placeholder as HTMLElement).style.display = 'flex';
-                                }
-                              }}
-                            />
-                            <div className="aspect-video bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center" style={{ display: 'none' }}>
-                              <div className="text-center p-4">
-                                <div className="w-14 h-14 mx-auto mb-2 rounded-full bg-gradient-to-br from-orange-300 to-red-400 flex items-center justify-center">
-                                  <span className="text-xl">📊</span>
+                      <div className="space-y-10">
+                        {/* 内容区域：左文右图或上图下文 */}
+                        <div className={block.imageUrl ? 'grid grid-cols-1 lg:grid-cols-5 gap-8 items-start' : ''}>
+                          {/* Markdown文本 */}
+                          <div className={`prose prose-gray max-w-none ${block.imageUrl ? 'lg:col-span-3' : ''}`}>
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            h1: ({ children }) => (
+                              <div className="mb-6">
+                                <h1 className="text-2xl font-black text-gray-900 flex items-center gap-3">
+                                  <span className="w-1.5 h-7 bg-gradient-to-b from-red-500 to-orange-500 rounded-full inline-block flex-shrink-0" />
+                                  {children}
+                                </h1>
+                                <div className="w-full h-px bg-gradient-to-r from-red-200 via-orange-200 to-transparent mt-3" />
+                              </div>
+                            ),
+                            h2: ({ children }) => (
+                              <div className="mb-4 mt-7">
+                                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2 pl-4 relative">
+                                  <span className="absolute left-0 w-1 h-5 bg-gradient-to-b from-orange-400 to-red-400 rounded-full" />
+                                  {children}
+                                </h2>
+                              </div>
+                            ),
+                            h3: ({ children }) => (
+                              <div className="mb-3 mt-5">
+                                <h3 className="text-lg font-bold text-red-700 flex items-center gap-2">
+                                  <span className="w-2 h-2 bg-red-400 rounded-full inline-block flex-shrink-0" />
+                                  {children}
+                                </h3>
+                              </div>
+                            ),
+                            strong: ({ children }) => (
+                              <strong className="font-bold text-red-800 bg-gradient-to-r from-red-50 to-orange-50 px-2 py-0.5 rounded border-l-2 border-red-400">
+                                {children}
+                              </strong>
+                            ),
+                            a: ({ children, href }) => (
+                              <a
+                                href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 underline decoration-2 underline-offset-2 hover:text-red-600 hover:decoration-red-600 hover:bg-red-50 px-1 transition-colors rounded"
+                              >
+                                {children}
+                              </a>
+                            ),
+                            p: ({ children }) => {
+                              const content = String(children);
+                              // 检测特殊标签
+                              if (content.startsWith('权威阅读链接：') || content.startsWith('权威阅读链接:')) {
+                                return (
+                                  <div className="my-6 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 border-l-4 border-l-blue-500 rounded-r-xl py-4 px-5 shadow-sm">
+                                    <div className="flex items-center gap-2 mb-3">
+                                      <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
+                                        <span className="text-white text-xs">📚</span>
+                                      </div>
+                                      <span className="font-bold text-blue-700 text-sm">权威阅读链接</span>
+                                    </div>
+                                    {typeof children === 'string' ? (
+                                      <div className="text-sm text-blue-600 leading-relaxed space-y-2">
+                                        {content
+                                          .replace(/^权威阅读链接[：:]/, '')
+                                          .split('\n')
+                                          .filter(line => line.trim())
+                                          .map((line, i) => (
+                                            <div key={i} className="flex items-start gap-3 group">
+                                              <span className="text-blue-400 mt-1 group-hover:text-blue-600 transition-colors">›</span>
+                                              <span className="group-hover:text-blue-800 transition-colors">{line.trim()}</span>
+                                            </div>
+                                          ))}
+                                      </div>
+                                    ) : (
+                                      children
+                                    )}
+                                  </div>
+                                );
+                              }
+                              if (content.startsWith('核心要点：') || content.startsWith('核心要点:')) {
+                                return (
+                                  <div className="my-6 p-5 bg-gradient-to-br from-red-50 to-pink-50 border border-red-200 border-l-4 border-l-red-500 rounded-r-xl shadow-sm">
+                                    <div className="flex items-center gap-2 mb-3">
+                                      <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center">
+                                        <Target className="h-3 w-3 text-white" />
+                                      </div>
+                                      <span className="font-bold text-red-700 text-sm">核心要点</span>
+                                    </div>
+                                    <p className="text-base text-gray-800 leading-loose">
+                                      {content.replace(/^核心要点[：:]/, '')}
+                                    </p>
+                                  </div>
+                                );
+                              }
+                              if (content.startsWith('拓展思考：') || content.startsWith('拓展思考:')) {
+                                return (
+                                  <div className="my-6 p-5 bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 border-l-4 border-l-purple-500 rounded-r-xl shadow-sm">
+                                    <div className="flex items-center gap-2 mb-3">
+                                      <div className="w-6 h-6 rounded-full bg-purple-500 flex items-center justify-center">
+                                        <Zap className="h-3 w-3 text-white" />
+                                      </div>
+                                      <span className="font-bold text-purple-700 text-sm">拓展思考</span>
+                                    </div>
+                                    <p className="text-base text-gray-700 leading-loose italic">
+                                      {content.replace(/^拓展思考[：:]/, '')}
+                                    </p>
+                                  </div>
+                                );
+                              }
+                              return (
+                                <p className="text-base text-gray-800 leading-loose mb-6">
+                                  {children}
+                                </p>
+                              );
+                            },
+                            li: ({ children }) => (
+                              <li className="text-base my-3 leading-loose pl-1">
+                                {children}
+                              </li>
+                            ),
+                            ul: ({ children }) => (
+                              <ul className="space-y-3 mb-6 list-none pl-0 [&_li]:before:content-['•'] [&_li]:before:text-red-400 [&_li]:before:font-bold [&_li]:before:mr-3 [&_li]:before:inline-block [&_li]:before:text-lg">
+                                {children}
+                              </ul>
+                            ),
+                            ol: ({ children }) => (
+                              <ol className="space-y-3 mb-6 list-decimal pl-8 marker:text-red-500 marker:font-bold marker:text-base">
+                                {children}
+                              </ol>
+                            ),
+                            blockquote: ({ children }) => (
+                              <blockquote className="my-6 border-l-4 border-red-400 bg-gradient-to-r from-red-50 to-orange-50 py-4 px-6 rounded-r-xl relative shadow-sm">
+                                <div className="absolute top-2 right-4 text-red-200 text-5xl font-serif leading-none select-none">"</div>
+                                <p className="relative z-10 text-base text-gray-700 leading-loose">
+                                  {children}
+                                </p>
+                              </blockquote>
+                            ),
+                            hr: () => (
+                              <div className="my-8">
+                                <div className="h-px bg-gradient-to-r from-transparent via-red-300 to-transparent" />
+                              </div>
+                            ),
+                            code: ({ children }) => (
+                              <code className="bg-gray-100 px-2 py-0.5 rounded text-sm font-mono text-red-700 border border-gray-200">
+                                {children}
+                              </code>
+                            ),
+                            table: ({ children }) => (
+                              <div className="my-6 overflow-x-auto rounded-xl border border-gray-300 shadow-sm">
+                                <table className="w-full text-base border-collapse">
+                                  {children}
+                                </table>
+                              </div>
+                            ),
+                            thead: ({ children }) => (
+                              <thead className="bg-gradient-to-r from-gray-100 to-gray-50">
+                                {children}
+                              </thead>
+                            ),
+                            th: ({ children }) => (
+                              <th className="px-4 py-3 text-left font-bold text-gray-900 border border-gray-300 bg-gradient-to-b from-gray-50 to-gray-100">
+                                {children}
+                              </th>
+                            ),
+                            td: ({ children }) => (
+                              <td className="px-4 py-3 leading-relaxed text-gray-800 border border-gray-300 hover:bg-red-50 transition-colors">
+                                {children}
+                              </td>
+                            ),
+                            em: ({ children }) => (
+                              <em className="not-italic font-medium text-gray-700 bg-yellow-50 px-2 py-0.5 rounded border-l-2 border-yellow-400">
+                                {children}
+                              </em>
+                            ),
+                          }}
+                        >
+                          {block.content}
+                        </ReactMarkdown>
+                      </div>
+
+                          {/* 图片侧边栏 */}
+                          {block.imageUrl && (
+                            <div className="lg:col-span-2">
+                              <figure className="sticky top-4">
+                                <div className="relative group overflow-hidden rounded-lg border border-red-200 shadow-sm">
+                                  <img
+                                    src={block.imageUrl}
+                                    alt={block.imageCaption || '课程配图'}
+                                    className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                                    onError={(e) => {
+                                      const target = e.currentTarget;
+                                      target.style.display = 'none';
+                                      const placeholder = target.parentElement;
+                                      if (placeholder) {
+                                        placeholder.innerHTML = `<div class="aspect-square bg-gradient-to-br from-red-100 to-orange-50 flex items-center justify-center"><div class="text-center p-4"><div class="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-red-400 to-orange-500 flex items-center justify-center"><span class="text-2xl">📊</span></div><p class="text-sm text-gray-600 font-medium">${block.imageCaption || '课程配图'}</p><p class="text-xs text-gray-400 mt-1">图片加载中</p></div></div>`;
+                                      }
+                                    }}
+                                  />
+                                  {/* 图片角标装饰 */}
+                                  <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-red-400" />
+                                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-red-400" />
                                 </div>
-                                <p className="text-sm text-gray-600 font-medium">{block.imageCaption || '课程配图'}</p>
-                              </div>
+                                {block.imageCaption && (
+                                  <figcaption className="mt-3 text-xs text-gray-500 leading-relaxed pl-2 border-l-2 border-red-300">
+                                    {block.imageCaption}
+                                  </figcaption>
+                                )}
+                              </figure>
                             </div>
-                            {block.imageCaption && (
-                              <div className="p-2 bg-gray-50 text-xs text-gray-500 text-center border-t">
-                                ▲ {block.imageCaption}
-                              </div>
-                            )}
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
                     )}
 
                     {/* 视频播放 */}
                     {block.type === 'video' && block.videoUrl && (
-                      <div className="border-2 border-black relative bg-black" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+                      <div className="border border-red-300 relative bg-black rounded-lg overflow-hidden shadow-md">
                         <video
                           ref={videoRef}
                           src={block.videoUrl}
@@ -1541,7 +2149,7 @@ export default function CourseLearnPage() {
                               onTouchEnd={handleVideoSeekEnd}
                               className="w-full h-1 bg-gray-600 rounded-full appearance-none cursor-pointer group-hover:h-2 transition-all"
                               style={{
-                                background: `linear-gradient(to right, #8b5cf6 ${videoDuration ? (videoProgress / videoDuration) * 100 : 0}%, #4b5563 ${videoDuration ? (videoProgress / videoDuration) * 100 : 0}%)`,
+                                background: `linear-gradient(to right, #dc2626 ${videoDuration ? (videoProgress / videoDuration) * 100 : 0}%, #4b5563 ${videoDuration ? (videoProgress / videoDuration) * 100 : 0}%)`,
                               }}
                             />
                             {/* 进度条滑块 */}
@@ -1562,9 +2170,9 @@ export default function CourseLearnPage() {
                                 className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
                               >
                                 {isPlaying ? (
-                                  <Pause className="h-5 w-5 text-black" />
+                                  <Pause className="h-5 w-5 text-red-600" />
                                 ) : (
-                                  <Play className="h-5 w-5 text-black ml-1" />
+                                  <Play className="h-5 w-5 text-red-600 ml-1" />
                                 )}
                               </button>
                               <span className="text-white text-sm font-mono">
@@ -1589,11 +2197,11 @@ export default function CourseLearnPage() {
 
                         {/* AI视频标签 */}
                         <div className="absolute top-3 left-3 flex items-center gap-2">
-                          <span className="bg-purple-600 text-white border border-purple-400 shadow-lg px-2 py-0.5 rounded text-xs font-medium flex items-center">
+                          <span className="bg-red-600 text-white border border-red-400 shadow-lg px-2 py-0.5 rounded-full text-xs font-medium flex items-center">
                             <Video className="h-3 w-3 mr-1" />
                             AI视频课程
                           </span>
-                          <span className="bg-black/70 text-white border border-white/30 text-xs px-2 py-0.5 rounded">
+                          <span className="bg-black/70 text-white border border-white/30 text-xs px-2 py-0.5 rounded-full">
                             {chapter.title}
                           </span>
                         </div>
@@ -1612,10 +2220,10 @@ export default function CourseLearnPage() {
                   <div className="mt-6">
                     <button
                       onClick={() => setShowThinkingLogic(!showThinkingLogic)}
-                      className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 rounded-lg hover:bg-gradient-to-r from-purple-100 to-blue-100 transition-colors"
+                      className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-lg hover:bg-gradient-to-r from-red-100 to-orange-100 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center">
                           <BrainCircuit className="h-5 w-5 text-white" />
                         </div>
                         <div className="text-left">
@@ -1624,18 +2232,18 @@ export default function CourseLearnPage() {
                         </div>
                       </div>
                       {showThinkingLogic ? (
-                        <ChevronUp className="h-5 w-5 text-purple-600" />
+                        <ChevronUp className="h-5 w-5 text-red-600" />
                       ) : (
-                        <ChevronDown className="h-5 w-5 text-purple-600" />
+                        <ChevronDown className="h-5 w-5 text-red-600" />
                       )}
                     </button>
                     
                     {showThinkingLogic && (
                       <div className="mt-3 space-y-4">
                         {currentBlock.thinkingSteps.map((step: ThinkingStep, stepIdx: number) => (
-                          <div key={stepIdx} className="p-5 bg-white border-2 border-purple-200 rounded-lg relative">
+                          <div key={stepIdx} className="p-5 bg-white border border-red-200 rounded-lg relative shadow-sm">
                             <div className="flex items-start gap-4">
-                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center flex-shrink-0 text-white font-bold">
+                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center flex-shrink-0 text-white font-bold">
                                 {step.step}
                               </div>
                               <div className="flex-1">
@@ -1724,7 +2332,7 @@ export default function CourseLearnPage() {
                           </div>
                         ))}
                         
-                        <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200 text-center">
+                        <div className="p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg border border-red-200 text-center">
                           <p className="text-sm text-gray-600 italic">
                             💡 提示：这个思考过程展示了AI如何一步步生成最终内容。您可以参考这个思路来组织自己的学习笔记。
                           </p>
@@ -1741,7 +2349,7 @@ export default function CourseLearnPage() {
                 const tag = allTags.find((t: AITag) => t.text === showAITag);
                 if (!tag) return null;
                 return (
-                  <div className="mt-4 p-4 border-2 border-amber-400 bg-amber-50 relative" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+                  <div className="mt-4 p-4 border border-orange-300 bg-orange-50 relative rounded-lg shadow-sm">
                     <button
                       onClick={() => setShowAITag(null)}
                       className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
@@ -1749,12 +2357,12 @@ export default function CourseLearnPage() {
                       ×
                     </button>
                     <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 bg-amber-400 rounded flex items-center justify-center flex-shrink-0">
-                        <Bot className="h-4 w-4 text-black" />
+                      <div className="w-8 h-8 bg-orange-400 rounded flex items-center justify-center flex-shrink-0">
+                        <Bot className="h-4 w-4 text-white" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-[10px] font-black px-2 py-0.5 border ${getTagColor(tag.type)}`}>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 border rounded-full ${getTagColor(tag.type)}`}>
                             {getTagIcon(tag.type)}
                             {tag.type}
                           </span>
@@ -1773,8 +2381,7 @@ export default function CourseLearnPage() {
           <div className="flex items-center justify-between">
             <Button
               variant="outline"
-              className="border-2 border-black font-bold"
-              style={{ borderRadius: '0' }}
+              className="border border-gray-300 font-bold hover:bg-red-50"
               onClick={handlePrevSlide}
               disabled={currentChapter === 0 && currentSlide === 0}
             >
@@ -1786,8 +2393,7 @@ export default function CourseLearnPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-2 border-black"
-                style={{ borderRadius: '0' }}
+                className="border border-gray-300 hover:bg-red-50"
                 onClick={() => setIsPlaying(!isPlaying)}
               >
                 {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
@@ -1798,8 +2404,7 @@ export default function CourseLearnPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-2 border-black"
-                style={{ borderRadius: '0' }}
+                className="border border-gray-300 hover:bg-red-50"
               >
                 <Volume2 className="h-4 w-4" />
               </Button>
@@ -1807,8 +2412,7 @@ export default function CourseLearnPage() {
 
             {isLastSlide ? (
               <Button
-                className="bg-green-600 hover:bg-green-700 text-white font-bold border-2 border-black"
-                style={{ borderRadius: '0', boxShadow: '2px 2px 0 0 #000' }}
+                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold border border-green-400 shadow-sm"
                 onClick={handleNextSlide}
               >
                 返回课程列表
@@ -1816,8 +2420,7 @@ export default function CourseLearnPage() {
               </Button>
             ) : (
               <Button
-                className="bg-purple-600 hover:bg-purple-700 text-white font-bold border-2 border-black"
-                style={{ borderRadius: '0', boxShadow: '2px 2px 0 0 #000' }}
+                className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-bold border border-red-400 shadow-sm"
                 onClick={handleNextSlide}
               >
                 下一页
@@ -1825,53 +2428,71 @@ export default function CourseLearnPage() {
               </Button>
             )}
           </div>
+
+          {/* 快捷键提示 */}
+          {!focusMode && (
+            <div className="mt-4 text-center text-xs text-gray-400">
+              <span className="inline-flex items-center gap-2">
+                <kbd className="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-[10px]">←</kbd>
+                <kbd className="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-[10px]">→</kbd>
+                <span>翻页</span>
+                <span className="mx-1">·</span>
+                <kbd className="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-[10px]">F</kbd>
+                <span>专注模式</span>
+                <span className="mx-1">·</span>
+                <kbd className="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-[10px]">N</kbd>
+                <span>笔记</span>
+              </span>
+            </div>
+          )}
+          </div>
         </main>
 
-        {/* 右侧AI问答面板 */}
-        {showChatPanel && (
+        {/* 右侧AI问答面板 - 专注模式下隐藏 */}
+        {showChatPanel && !focusMode && (
           <aside className="w-80 flex-shrink-0">
-            <div className="bg-white border-2 border-black sticky top-32" style={{ boxShadow: '3px 3px 0 0 #000' }}>
-              <div className="p-4 bg-purple-600 text-white">
-                <h3 className="font-black text-sm flex items-center gap-2">
+            <div className="bg-white border border-red-200 rounded-lg sticky top-24 shadow-sm overflow-hidden">
+              <div className="p-4 bg-gradient-to-r from-red-600 to-orange-500 text-white">
+                <h3 className="font-bold text-sm flex items-center gap-2">
                   <Bot className="h-4 w-4" />
                   AI学习助手
                 </h3>
-                <p className="text-xs text-white/70 mt-1">基于知识图谱 · 精准答疑</p>
+                <p className="text-xs text-white/80 mt-1">基于知识图谱 · 精准答疑</p>
               </div>
               
               {/* 消息列表 */}
-              <div className="h-80 overflow-y-auto p-4 space-y-3">
+              <div className="h-[500px] overflow-y-auto p-4 space-y-3">
                 {chatMessages.map((msg, idx) => (
                   <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[85%] p-3 text-sm rounded-lg ${
                       msg.role === 'user' 
-                        ? 'bg-purple-600 text-white' 
+                        ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white' 
                         : 'bg-gray-100 text-gray-800 border border-gray-200'
                     }`}>
                       {msg.role === 'ai' && (
                         <div className="flex items-center gap-1 mb-1">
-                          <Sparkles className="h-3 w-3 text-purple-600" />
-                          <span className="text-[10px] font-bold text-purple-600">AI助手</span>
+                          <Sparkles className="h-3 w-3 text-red-600" />
+                          <span className="text-[10px] font-bold text-red-600">AI助手</span>
                         </div>
                       )}
                       <p className="whitespace-pre-wrap text-xs leading-relaxed">{msg.content}</p>
                     </div>
                   </div>
                 ))}
+                <div ref={chatEndRef} />
               </div>
 
               {/* 输入框 */}
-              <form onSubmit={handleChatSubmit} className="p-3 border-t-2 border-gray-200">
+              <form onSubmit={handleChatSubmit} className="p-3 border-t border-gray-200">
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                     placeholder="输入您的问题..."
-                    className="flex-1 px-3 py-2 text-sm border-2 border-black"
-                    style={{ borderRadius: '0' }}
+                    className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300"
                   />
-                  <Button type="submit" size="sm" className="bg-purple-600 hover:bg-purple-700 text-white border-2 border-black" style={{ borderRadius: '0' }}>
+                  <Button type="submit" size="sm" className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white border border-red-400 rounded-lg">
                     <MessageSquare className="h-4 w-4" />
                   </Button>
                 </div>
@@ -1879,6 +2500,8 @@ export default function CourseLearnPage() {
             </div>
           </aside>
         )}
+      </div>
+      </div>
       </div>
     </div>
   );
