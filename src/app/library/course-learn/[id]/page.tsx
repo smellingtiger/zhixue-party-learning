@@ -101,7 +101,6 @@ interface AITag {
 
 interface ReferenceItem {
   title: string;
-  url?: string;
   source: string;
   relevance: 'high' | 'medium' | 'low';
 }
@@ -142,469 +141,96 @@ interface ChapterData {
   videoUrl?: string; // 章节视频 URL
 }
 
+// 多样化的参考来源库
+const REFERENCE_SOURCES = [
+  { title: '首个人形机器人与具身智能标准体系发布', source: '新华网', relevance: 'high' },
+  { title: '中国深化"人工智能+"打造增长新引擎', source: '新华网', relevance: 'high' },
+  { title: '"具身智能"如何走向未来？', source: '人民网科普', relevance: 'high' },
+  { title: '首入《政府工作报告》，具身智能何以竞速未来', source: '人民日报', relevance: 'high' },
+  { title: '具身智能迈向标准引领新阶段', source: '人民网经济·科技', relevance: 'high' },
+  { title: '具身智能新浪潮与落地要点', source: '人民网经济·科技', relevance: 'medium' },
+  { title: '具身世界模型报道', source: '人民网经济·科技', relevance: 'medium' },
+  { title: '产业侧共识：跑得快更要跑得稳', source: '人民网经济·科技', relevance: 'medium' },
+  { title: '具身智能走向更多生活场景', source: '人民网经济·科技', relevance: 'medium' },
+  { title: '规范与能力建设', source: '人民网教育', relevance: 'medium' },
+  { title: '以未来产业塑造产业未来', source: '人民网时评', relevance: 'medium' },
+  { title: '具身智能大有可为', source: '共产党员网', relevance: 'high' },
+  { title: '具身智能发展报告（2025年）', source: '中国信通院', relevance: 'high' },
+  { title: '2026中国具身智能大会官网', source: 'CEAI/CAAI', relevance: 'high' },
+  { title: '大会资料/白皮书 PDF', source: 'CEAI', relevance: 'high' },
+  { title: '术语与前沿论坛', source: '智源社区', relevance: 'medium' },
+  { title: '具身专题', source: 'GAITC 2025', relevance: 'medium' },
+  { title: '标准体系助推产业规范化', source: 'CCTV', relevance: 'high' },
+  { title: '标准体系（2026', source: '百度百科', relevance: 'medium' },
+  { title: '中国具身智能大会词条', source: '百度百科', relevance: 'medium' },
+  { title: '具身智能赋能应急管理产业', source: '赛迪顾问', relevance: 'high' },
+  { title: '相关政策解读', source: '人民日报', relevance: 'high' },
+  { title: '专题学习资料', source: '共产党员网', relevance: 'high' },
+  { title: '权威解读', source: '人民网', relevance: 'medium' },
+];
+
+// 随机选择N个不重复的参考来源
+function getRandomReferences(count: number, title: string): ReferenceItem[] {
+  // 打乱并选择指定数量的不重复来源
+  const shuffled = [...REFERENCE_SOURCES].sort(() => Math.random() - 0.5);
+  const selected = shuffled.slice(0, count);
+  
+  // 根据主题调整标题，如果需要的话
+  return selected.map(ref => {
+    // 如果标题太普通，结合主题
+    if ((ref.title === '相关政策解读' || ref.title === '权威解读') && title) {
+      return {
+        ...ref,
+        title: ref.title + '：' + title
+      };
+    }
+    return ref;
+  });
+}
+
+// 智能生成审核未通过内容
+function getRejectedContents(content: string, title: string): RejectedContent[] {
+  // 根据内容类型生成相关的审核未通过示例
+  let rejected: RejectedContent[] = [
+    { content: '具身智能是最重要的技术，没有之一', reason: '表述过于绝对化', type: 'too_radical' },
+    { content: '具身智能发展前途渺茫，没有实际价值', reason: '观点错误，不符合政策方向', type: 'inaccurate' },
+    { content: '具身智能一定要追求"人形"机器人', reason: '不够客观，人形只是载体之一', type: 'inaccurate' },
+    { content: '具身智能就是"人形机器人"', reason: '观点错误，理解片面', type: 'inaccurate' },
+    { content: '具身智能就是大模型的升级', reason: '观点错误，认知不全', type: 'inaccurate' },
+    { content: '传统机器人已经够了，不需要发展具身智能', reason: '观点错误，没有认识到具身智能的价值', type: 'inaccurate' },
+    { content: '具身智能就是AI加个外壳', reason: '理解片面，没有认识到闭环的重要性', type: 'inaccurate' },
+    { content: '这个方法肯定能解决所有问题', reason: '表述过于绝对化', type: 'too_radical' },
+    { content: '照搬其他地区的方法就行', reason: '不够具体，没有考虑本地实际', type: 'no_meaning' },
+    { content: '大家都懂的', reason: '内容空洞无实际信息', type: 'no_meaning' },
+  ];
+  
+  // 如果是关于方法或路径的内容，添加相关示例
+  if (content.includes('方法') || content.includes('路径') || content.includes('措施')) {
+    rejected.unshift({ content: '照搬其他地区的方法就行', reason: '不够具体，没有考虑本地实际', type: 'no_meaning' });
+    rejected.unshift({ content: '这个方法肯定成功', reason: '表述过于绝对化', type: 'too_radical' });
+  }
+  
+  // 如果是关于重要性或地位的内容
+  if (content.includes('重要') || content.includes('地位')) {
+    rejected.unshift({ content: '这个比什么都重要', reason: '表述过于绝对化', type: 'too_radical' });
+  }
+  
+  // 如果是关于机器人或载体的内容
+  if (content.includes('机器人') || content.includes('人形')) {
+    rejected.unshift({ content: '不是人形机器人就不算具身智能', reason: '理解片面，人形只是载体之一', type: 'inaccurate' });
+  }
+  
+  // 如果是关于大模型的内容
+  if (content.includes('模型') || content.includes('大模型')) {
+    rejected.unshift({ content: '具身智能就是大模型的升级', reason: '观点错误，认知不全', type: 'inaccurate' });
+  }
+  
+  // 打乱并返回2个
+  return rejected.sort(() => Math.random() - 0.5).slice(0, 2);
+}
+
 // 模拟课程数据（备用，当localStorage没有数据时使用）
-const mockCourseData = {
-  id: 1,
-  name: '乡村振兴战略核心知识点',
-  description: '深入学习乡村振兴战略的政策要点、实践路径与创新思维',
-  totalHours: 0.8,
-  chapters: [
-    {
-      id: 1,
-      title: '第一讲：乡村振兴战略概述',
-      totalSlides: 6,
-      aiSummary: '本讲从宏观角度梳理乡村振兴战略的历史背景、核心要义与时代价值。AI根据200+政策文件提炼出5大核心维度，帮助您快速建立知识框架。',
-      keyPoints: ['战略背景', '核心要义', '五大振兴', '实施路径', '时代价值'],
-      slides: [
-          [
-            {
-              type: 'text',
-              content: '乡村振兴战略是党的十九大提出的重大决策部署，是新时代"三农"工作的总抓手。',
-              aiTags: [
-                { text: '党的十九大', type: '知识点', explanation: '2017年10月召开，首次提出乡村振兴战略' },
-                { text: '总抓手', type: '重点', explanation: '意味着这是三农工作的核心和统领' },
-              ],
-              thinkingSteps: [
-                {
-                  step: 1,
-                  title: '🤖 需求分析',
-                  description: '用户需要了解乡村振兴战略的基本定位，我需要先确定核心内容框架',
-                  output: '需要包含：提出时间、重要地位、核心定位',
-                },
-                {
-                  step: 2,
-                  title: '📚 知识检索',
-                  description: '从政策文件库中检索相关权威资料',
-                  references: [
-                    { title: '党的十九大报告', url: 'https://www.12371.cn/', source: '共产党员网', relevance: 'high' },
-                    { title: '乡村振兴战略规划(2018-2022年)', url: 'https://www.moa.gov.cn/', source: '农业农村部', relevance: 'high' },
-                    { title: '2018年中央一号文件', url: 'https://www.moa.gov.cn/', source: '农业农村部', relevance: 'medium' },
-                  ],
-                  output: '找到3个核心参考资料，其中2个高度相关',
-                },
-                {
-                  step: 3,
-                  title: '✂️ 内容筛选',
-                  description: '从检索结果中提取关键信息',
-                  rejectedContents: [
-                    {
-                      content: '乡村振兴就是让农民都进城',
-                      reason: '内容完全错误，与政策精神相悖',
-                      type: 'inaccurate',
-                    },
-                    {
-                      content: '乡村振兴战略是个很一般的政策，不重要',
-                      reason: '表述过于消极，不符合政策定位',
-                      type: 'too_radical',
-                    },
-                  ],
-                  output: '筛选出核心表述：十九大提出、总抓手、三农工作',
-                },
-                {
-                  step: 4,
-                  title: '✏️ 内容撰写',
-                  description: '整合信息，撰写准确表述',
-                  output: '乡村振兴战略是党的十九大提出的重大决策部署，是新时代"三农"工作的总抓手。',
-                },
-                {
-                  step: 5,
-                  title: '✅ 质量审核',
-                  description: '审核内容的准确性和合规性',
-                  rejectedContents: [
-                    {
-                      content: '乡村振兴战略是十九大最重要的决策，没有之一',
-                      reason: '表述过于绝对化，不符合客观表述要求',
-                      type: 'too_radical',
-                    },
-                    {
-                      content: '乡村振兴战略，大家都知道',
-                      reason: '内容空洞，没有实际信息价值',
-                      type: 'no_meaning',
-                    },
-                  ],
-                  output: '最终版本通过审核，表述准确、客观、完整',
-                },
-              ],
-            },
-          ],
-          [
-            {
-              type: 'mixed',
-              content: '乡村振兴的五大核心目标：产业振兴、人才振兴、文化振兴、生态振兴、组织振兴。这五大振兴相互关联、互为支撑，构成了乡村振兴的完整体系。',
-              imageUrl: '/placeholder-strategy.png',
-              imageCaption: '乡村振兴战略体系架构图',
-              aiTags: [
-                { text: '五大振兴', type: '知识点', explanation: '产业、人才、文化、生态、组织五个维度的全面振兴' },
-                { text: '相互关联', type: 'AI提醒', explanation: 'AI分析发现这五个维度在实际案例中常常协同推进' },
-              ],
-              thinkingSteps: [
-                {
-                  step: 1,
-                  title: '🤖 需求分析',
-                  description: '需要展示乡村振兴战略的完整框架，让用户理解五大振兴的关系',
-                  output: '核心任务：列出五个振兴、说明相互关系',
-                },
-                {
-                  step: 2,
-                  title: '📚 知识检索',
-                  description: '检索五大振兴的官方表述和理论框架',
-                  references: [
-                    { title: '乡村振兴战略规划(2018-2022年)', url: 'https://www.moa.gov.cn/', source: '农业农村部', relevance: 'high' },
-                    { title: '习近平关于"三农"工作的重要论述', url: 'https://www.12371.cn/', source: '共产党员网', relevance: 'high' },
-                    { title: '乡村振兴促进法', url: 'https://www.npc.gov.cn/', source: '中国人大网', relevance: 'medium' },
-                  ],
-                  output: '确认五大振兴的官方排序和表述',
-                },
-                {
-                  step: 3,
-                  title: '✂️ 内容筛选',
-                  description: '从多份文件中筛选最核心的表述',
-                  rejectedContents: [
-                    {
-                      content: '乡村振兴只要产业振兴就行，其他不重要',
-                      reason: '理解片面，忽视了五个振兴的系统性',
-                      type: 'inaccurate',
-                    },
-                    {
-                      content: '产业、人才、文化、生态、组织，随便排个序',
-                      reason: '表述过于随意，不严肃',
-                      type: 'no_meaning',
-                    },
-                  ],
-                  output: '确定官方排序：产业、人才、文化、生态、组织',
-                },
-                {
-                  step: 4,
-                  title: '🖼️ 配图选择',
-                  description: '选择合适的配图增强理解',
-                  references: [
-                    { title: '乡村振兴战略体系架构图', source: '内部设计资源', relevance: 'high' },
-                  ],
-                  output: '选择架构图，直观展示五个振兴关系',
-                },
-                {
-                  step: 5,
-                  title: '✏️ 内容撰写',
-                  description: '撰写完整表述，强调相互关系',
-                  rejectedContents: [
-                    {
-                      content: '五个振兴，一个比一个重要，产业最重要',
-                      reason: '表述过于强调单个方面，不符合五大振兴协同推进的精神',
-                      type: 'too_radical',
-                    },
-                  ],
-                  output: '乡村振兴的五大核心目标：产业振兴、人才振兴、文化振兴、生态振兴、组织振兴。这五大振兴相互关联、互为支撑，构成了乡村振兴的完整体系。',
-                },
-                {
-                  step: 6,
-                  title: '✅ 质量审核',
-                  description: '最后审核内容的完整性和准确性',
-                  output: '内容完整、表述准确、配图恰当，通过审核',
-                },
-              ],
-            },
-          ],
-          [
-            {
-              type: 'text',
-              content: '产业振兴是乡村振兴的物质基础。要推动乡村产业高质量发展，培育新产业新业态新模式，促进农村一二三产业融合发展。',
-              aiTags: [
-                { text: '产业融合', type: '延伸思考', explanation: '思考：您所在地区的一二三产业融合现状如何？' },
-              ],
-              thinkingSteps: [
-                {
-                  step: 1,
-                  title: '🤖 需求分析',
-                  description: '阐述产业振兴的重要地位和实现路径',
-                  output: '需要：重要性定位 + 具体路径',
-                },
-                {
-                  step: 2,
-                  title: '📚 知识检索',
-                  description: '检索产业振兴相关政策和成功案例',
-                  references: [
-                    { title: '全国乡村产业发展规划(2020-2025年)', url: 'https://www.moa.gov.cn/', source: '农业农村部', relevance: 'high' },
-                    { title: '农业现代化示范区建设案例', url: 'https://www.moa.gov.cn/', source: '农业农村部', relevance: 'high' },
-                    { title: '江苏华西村产业发展经验', source: '公开报道', relevance: 'medium' },
-                  ],
-                  output: '找到物质基础定位，确定高质量发展和产业融合为核心路径',
-                },
-                {
-                  step: 3,
-                  title: '✂️ 内容筛选',
-                  description: '从大量资料中提取最核心的表述',
-                  rejectedContents: [
-                    {
-                      content: '产业振兴就是让农村都搞工业',
-                      reason: '理解片面，不符合农村实际，过于激进',
-                      type: 'too_radical',
-                    },
-                    {
-                      content: '产业振兴嘛，就是发展农业',
-                      reason: '表述过于狭隘，没有体现融合发展',
-                      type: 'inaccurate',
-                    },
-                  ],
-                  output: '提取核心：物质基础、高质量发展、新产业新业态、三产融合',
-                },
-                {
-                  step: 4,
-                  title: '✏️ 内容撰写',
-                  description: '组织语言，撰写完整表述',
-                  rejectedContents: [
-                    {
-                      content: '产业振兴最重要，是基础中的基础，没有它一切都免谈',
-                      reason: '表述过于绝对化',
-                      type: 'too_radical',
-                    },
-                    {
-                      content: '产业振兴，嗯，很重要，大家都要重视',
-                      reason: '内容空洞，没有实质信息',
-                      type: 'no_meaning',
-                    },
-                  ],
-                  output: '产业振兴是乡村振兴的物质基础。要推动乡村产业高质量发展，培育新产业新业态新模式，促进农村一二三产业融合发展。',
-                },
-              ],
-            },
-          ],
-          [
-            {
-              type: 'image',
-              content: '',
-              imageUrl: '/placeholder-industry.png',
-              imageCaption: '乡村产业融合发展示意图——从单一农业到多元业态的转型升级',
-              thinkingSteps: [
-                {
-                  step: 1,
-                  title: '🤖 需求分析',
-                  description: '通过可视化方式展示产业融合的路径',
-                  output: '需要直观展示一、二、三产业融合的流程',
-                },
-                {
-                  step: 2,
-                  title: '🖼️ 配图选择',
-                  description: '选择最合适的示意图',
-                  references: [
-                    { title: '乡村产业融合发展示意图', source: '内部设计资源', relevance: 'high' },
-                    { title: '农村一二三产业融合案例图集', source: '农业农村部', relevance: 'medium' },
-                  ],
-                  output: '选择最直观的融合发展示意图',
-                },
-                {
-                  step: 3,
-                  title: '✏️ 图注撰写',
-                  description: '编写准确的图注说明',
-                  rejectedContents: [
-                    {
-                      content: '看图就懂，不用解释',
-                      reason: '内容空洞，没有实际说明价值',
-                      type: 'no_meaning',
-                    },
-                  ],
-                  output: '乡村产业融合发展示意图——从单一农业到多元业态的转型升级',
-                },
-              ],
-            },
-          ],
-          [
-            {
-              type: 'text',
-              content: '人才振兴是乡村振兴的关键因素。要培养造就一支懂农业、爱农村、爱农民的"三农"工作队伍，吸引各类人才在乡村振兴中建功立业。',
-              aiTags: [
-                { text: '懂农业、爱农村、爱农民', type: '重点', explanation: '这是人才队伍建设的核心标准' },
-              ],
-              thinkingSteps: [
-                {
-                  step: 1,
-                  title: '🤖 需求分析',
-                  description: '阐述人才振兴的重要性和具体要求',
-                  output: '需要：重要性定位 + 三支队伍 + 三爱标准',
-                },
-                {
-                  step: 2,
-                  title: '📚 知识检索',
-                  description: '检索人才振兴的官方表述',
-                  references: [
-                    { title: '关于加快推进乡村人才振兴的意见', url: 'https://www.moa.gov.cn/', source: '农业农村部', relevance: 'high' },
-                    { title: '乡村振兴促进法', url: 'https://www.npc.gov.cn/', source: '中国人大网', relevance: 'high' },
-                  ],
-                  output: '确认关键因素定位和三爱标准',
-                },
-                {
-                  step: 3,
-                  title: '✂️ 内容筛选',
-                  description: '提取核心表述',
-                  rejectedContents: [
-                    {
-                      content: '农村人太笨，需要城里人来教',
-                      reason: '表述带有偏见，不符合人才振兴的包容精神',
-                      type: 'too_radical',
-                    },
-                  ],
-                  output: '关键因素、懂农业爱农村爱农民、吸引各类人才',
-                },
-                {
-                  step: 4,
-                  title: '✏️ 内容撰写',
-                  description: '撰写完整表述',
-                  output: '人才振兴是乡村振兴的关键因素。要培养造就一支懂农业、爱农村、爱农民的"三农"工作队伍，吸引各类人才在乡村振兴中建功立业。',
-                },
-              ],
-            },
-          ],
-          [
-            {
-              type: 'mixed',
-              content: '文化振兴是乡村振兴的灵魂。要深入挖掘优秀传统农耕文化蕴含的思想观念、人文精神、道德规范，培育文明乡风、良好家风、淳朴民风。',
-              imageUrl: '/placeholder-culture.png',
-              imageCaption: '传统农耕文化与现代文明交融',
-              aiTags: [
-                { text: '文化振兴', type: '知识点', explanation: '包括乡风文明、家风建设、民风培育三个层面' },
-              ],
-              thinkingSteps: [
-                {
-                  step: 1,
-                  title: '🤖 需求分析',
-                  description: '阐述文化振兴的重要性和主要内容',
-                  output: '需要：灵魂定位 + 挖掘传统文化 + 培育三风',
-                },
-                {
-                  step: 2,
-                  title: '📚 知识检索',
-                  description: '检索文化振兴的相关表述',
-                  references: [
-                    { title: '关于加强和改进乡村治理的指导意见', source: '中央农办', relevance: 'high' },
-                    { title: '关于进一步推进移风易俗建设文明乡风的指导意见', source: '农业农村部', relevance: 'high' },
-                  ],
-                  output: '灵魂定位、思想观念人文精神道德规范、三风培育',
-                },
-                {
-                  step: 3,
-                  title: '✂️ 内容筛选',
-                  description: '筛选核心表述',
-                  rejectedContents: [
-                    {
-                      content: '农村文化都是落后的，都要改掉',
-                      reason: '对传统文化全盘否定，不符合文化传承精神',
-                      type: 'too_radical',
-                    },
-                    {
-                      content: '文化就是唱戏跳舞',
-                      reason: '理解过于狭隘，没有认识到文化的深层内涵',
-                      type: 'inaccurate',
-                    },
-                  ],
-                  output: '灵魂地位、挖掘优秀传统、培育三风',
-                },
-                {
-                  step: 4,
-                  title: '🖼️ 配图选择',
-                  description: '选择体现传统文化与现代交融的图片',
-                  references: [
-                    { title: '传统农耕文化与现代文明交融', source: '内部设计资源', relevance: 'high' },
-                  ],
-                  output: '选择体现传承与创新的配图',
-                },
-                {
-                  step: 5,
-                  title: '✏️ 内容撰写',
-                  description: '整合所有元素',
-                  output: '文化振兴是乡村振兴的灵魂。要深入挖掘优秀传统农耕文化蕴含的思想观念、人文精神、道德规范，培育文明乡风、良好家风、淳朴民风。',
-                },
-              ],
-            },
-          ],
-        ],
-    },
-    {
-      id: 2,
-      title: '第二讲：产业振兴与融合发展',
-      totalSlides: 6,
-      aiSummary: '本讲聚焦产业振兴，AI整合了全国100+成功案例，提炼出"龙头企业+合作社+农户"等核心模式。',
-      keyPoints: ['产业定位', '融合发展', '龙头企业', '品牌建设', '数字农业'],
-      slides: [
-        [
-          {
-            type: 'text',
-            content: '产业振兴的关键在于找准定位、发挥特色。各地应结合自身资源禀赋，发展特色农业、乡村旅游、农村电商等新业态。',
-            aiTags: [
-              { text: '资源禀赋', type: '知识点', explanation: '指当地独特的自然资源和人文资源' },
-            ],
-          },
-        ],
-        [
-          {
-            type: 'mixed',
-            content: '"龙头企业+合作社+农户"是当前最成功的产业组织模式。龙头企业负责市场开拓和技术引领，合作社负责组织生产，农户参与具体生产环节。',
-            imageUrl: '/placeholder-model.png',
-            imageCaption: '产业组织模式架构图',
-          },
-        ],
-      ],
-    },
-    {
-      id: 3,
-      title: '第三讲：人才振兴与队伍建设',
-      totalSlides: 6,
-      aiSummary: 'AI通过分析3000+乡村人才案例，总结出引才、育才、留才三大策略体系。',
-      keyPoints: ['引才政策', '本土培育', '人才留用', '激励机制'],
-      slides: [
-        [
-          {
-            type: 'text',
-            content: '人才是第一资源。乡村振兴需要吸引城市人才下乡、鼓励本土人才创业、培养新型职业农民，形成多元化的人才支撑体系。',
-          },
-        ],
-      ],
-    },
-    {
-      id: 4,
-      title: '第四讲：文化振兴与乡风文明',
-      totalSlides: 6,
-      aiSummary: 'AI梳理了500+优秀村规民约案例，提炼出文化振兴的核心要素。',
-      keyPoints: ['村规民约', '文化传承', '文明实践', '精神家园'],
-      slides: [
-        [
-          {
-            type: 'text',
-            content: '文化振兴是乡村振兴的灵魂工程。要通过传承优秀农耕文化、培育文明乡风、建设文化阵地，筑牢乡村振兴的精神根基。',
-          },
-        ],
-      ],
-    },
-    {
-      id: 5,
-      title: '第五讲：生态振兴与绿色发展',
-      totalSlides: 6,
-      aiSummary: 'AI整合了"绿水青山就是金山银山"理念的100+实践案例。',
-      keyPoints: ['绿色发展', '人居环境', '生态保护', '低碳乡村'],
-      slides: [
-        [
-          {
-            type: 'text',
-            content: '生态振兴是乡村振兴的内在要求。要坚持绿色发展理念，推进农村人居环境整治，建设生态宜居的美丽乡村。',
-          },
-        ],
-      ],
-    },
-    {
-      id: 6,
-      title: '第六讲：组织振兴与基层治理',
-      totalSlides: 6,
-      aiSummary: 'AI分析了200+优秀基层党组织案例，总结出组织振兴的关键路径。',
-      keyPoints: ['基层党建', '自治法治德治', '集体经济', '治理创新'],
-      slides: [
-        [
-          {
-            type: 'text',
-            content: '组织振兴是乡村振兴的根本保证。要加强农村基层党组织建设，完善自治、法治、德治相结合的乡村治理体系。',
-          },
-        ],
-      ],
-    },
-  ],
-};
+const mockCourseData = {};
 
 // 从localStorage读取AI生成的课程数据
 function getCourseData(courseId?: string): any {
@@ -660,10 +286,7 @@ function getCourseData(courseId?: string): any {
                     step: 2,
                     title: '📚 知识检索',
                     description: '从知识库中检索相关权威资料',
-                    references: [
-                      { title: '相关政策文件', source: '中央政府网站', relevance: 'high' },
-                      { title: '权威解读文章', source: '共产党员网', relevance: 'high' },
-                    ],
+                    references: getRandomReferences(3, title),
                     output: '找到相关参考资料，提取核心信息',
                   },
                 ];
@@ -675,7 +298,7 @@ function getCourseData(courseId?: string): any {
                     description: '整理学习目标，确保清晰明确可衡量',
                     rejectedContents: [
                       {
-                        content: '学完这章就懂了',
+                        content: '学完这章就懂具身智能了',
                         reason: '目标太模糊，不可衡量',
                         type: 'no_meaning',
                       },
@@ -687,13 +310,7 @@ function getCourseData(courseId?: string): any {
                     step: 3,
                     title: '✂️ 内容筛选',
                     description: '从多份资料中提取最核心的表述',
-                    rejectedContents: [
-                      {
-                        content: '这个是全世界最重要的',
-                        reason: '表述过于绝对化',
-                        type: 'too_radical',
-                      },
-                    ],
+                    rejectedContents: getRejectedContents(content, title),
                     output: '提取核心定位表述',
                   });
                   steps.push({
@@ -783,28 +400,14 @@ function getCourseData(courseId?: string): any {
                     step: 2,
                     title: '📚 知识检索',
                     description: '从知识库中检索相关政策和理论资料',
-                    references: [
-                      { title: '相关政策文件', source: '中央政府网站', relevance: 'high' },
-                      { title: '权威解读', source: '共产党员网', relevance: 'medium' },
-                    ],
+                    references: getRandomReferences(3, title),
                     output: '找到相关参考资料，完成初步信息收集',
                   },
                   {
                     step: 3,
                     title: '✂️ 内容筛选',
                     description: '从大量信息中筛选核心表述',
-                    rejectedContents: [
-                      {
-                        content: '这个太重要了，不说不行',
-                        reason: '表述过于绝对化',
-                        type: 'too_radical',
-                      },
-                      {
-                        content: '大家都懂的',
-                        reason: '内容空洞无实际信息',
-                        type: 'no_meaning',
-                      },
-                    ],
+                    rejectedContents: getRejectedContents(content, title),
                     output: '提取核心表述，确定内容框架',
                   },
                   {
