@@ -32,9 +32,10 @@ import {
   FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import DigitalAvatar from '@/components/digital-avatar';
+import { loadCourseScript, getChapterSpeechContent, getChapterSections, type ChapterScript } from '@/lib/course-script';
 
 // 辅助函数：获取课程视频 URL
 function getCourseVideoUrl(courseId: string): string | null {
@@ -145,7 +146,7 @@ interface ChapterData {
 }
 
 // 多样化的参考来源库
-const REFERENCE_SOURCES = [
+const REFERENCE_SOURCES: ReferenceItem[] = [
   { title: '首个人形机器人与具身智能标准体系发布', source: '新华网', relevance: 'high' },
   { title: '中国深化"人工智能+"打造增长新引擎', source: '新华网', relevance: 'high' },
   { title: '"具身智能"如何走向未来？', source: '人民网科普', relevance: 'high' },
@@ -655,6 +656,16 @@ export default function CourseLearnPage() {
   const [showNoteEditor, setShowNoteEditor] = useState(false);
   const [noteInput, setNoteInput] = useState('');
   const [learningSeconds, setLearningSeconds] = useState(0);
+  const [speechContents, setSpeechContents] = useState<ChapterScript[]>([]);
+
+  // 加载课程语音播报文稿
+  useEffect(() => {
+    loadCourseScript().then(script => {
+      if (script) {
+        setSpeechContents(script.chapters);
+      }
+    });
+  }, []);
 
   const course = getCourseData(courseId);
   const chapter = course.chapters[currentChapter];
@@ -665,6 +676,14 @@ export default function CourseLearnPage() {
   
   // 获取当前章节或幻灯片的视频 URL
   const currentVideoUrl = chapter.videoUrl || currentSlideData.find((s: ContentBlock) => s.type === 'video')?.videoUrl || null;
+
+  // 获取当前章节的语音播报内容
+  const currentSpeechContent = speechContents[currentChapter];
+  const speechChapterContents = speechContents.map(ch => ({
+    title: ch.title,
+    content: getChapterSpeechContent(ch),
+    sections: getChapterSections(ch),
+  }));
 
   // 视频控制条自动隐藏
   useEffect(() => {
@@ -1980,6 +1999,32 @@ export default function CourseLearnPage() {
             </CardContent>
           </Card>
 
+          {/* AI数字人讲解区域 */}
+          {speechContents.length > 0 && (
+            <div className="mb-6">
+              <DigitalAvatar 
+                chapterContents={speechChapterContents}
+                currentChapterIndex={currentChapter}
+                onSpeechEnd={() => {
+                  console.log('[数字人] 语音播放完成');
+                }}
+                onSectionChange={(sectionIdx) => {
+                  // 语音小节索引映射到 PPT 幻灯片索引
+                  // 策略：section 索引直接映射到 slide 索引（跳过视频页）
+                  const chapterSlides = chapter?.slides || [];
+                  let targetSlide = sectionIdx;
+                  // 如果第一页是视频，小节索引需要 +1 偏移
+                  if (chapterSlides.length > 0 && chapterSlides[0].type === 'video') {
+                    targetSlide = Math.min(sectionIdx + 1, chapterSlides.length - 1);
+                  }
+                  if (targetSlide !== currentSlide && targetSlide >= 0 && targetSlide < chapterSlides.length) {
+                    setCurrentSlide(targetSlide);
+                  }
+                }}
+              />
+            </div>
+          )}
+
           {/* 翻页控制 */}
           <div className="flex items-center justify-between">
             <Button
@@ -1993,24 +2038,9 @@ export default function CourseLearnPage() {
             </Button>
 
             <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                className="border border-gray-300 hover:bg-red-50"
-                onClick={() => setIsPlaying(!isPlaying)}
-              >
-                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-              </Button>
               <span className="text-sm font-bold text-gray-700">
                 {currentSlide + 1} / {totalSlides}
               </span>
-              <Button
-                variant="outline"
-                size="sm"
-                className="border border-gray-300 hover:bg-red-50"
-              >
-                <Volume2 className="h-4 w-4" />
-              </Button>
             </div>
 
             {isLastSlide ? (
