@@ -1076,7 +1076,7 @@ export default function CourseLearnPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className={`text-sm font-semibold truncate ${
-                      completed ? 'text-gray-500 line-through' :
+                      completed ? 'text-gray-500' :
                       isCurrent ? 'text-red-700' :
                       partiallyCompleted ? 'text-orange-700' :
                       'text-gray-600'
@@ -1084,7 +1084,7 @@ export default function CourseLearnPage() {
                       {ch.title}
                     </div>
                     <div className="text-xs text-gray-400 mt-0.5">
-                      {ch.slides.length}页 · {ch.keyPoints.length}个知识点
+                      {ch.slides.length}页
                     </div>
                   </div>
                   {completed && (
