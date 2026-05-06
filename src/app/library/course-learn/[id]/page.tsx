@@ -173,10 +173,20 @@ const REFERENCE_SOURCES: ReferenceItem[] = [
   { title: '权威解读', source: '人民网', relevance: 'medium' },
 ];
 
-// 随机选择N个不重复的参考来源
-function getRandomReferences(count: number, title: string): ReferenceItem[] {
-  // 打乱并选择指定数量的不重复来源
-  const shuffled = [...REFERENCE_SOURCES].sort(() => Math.random() - 0.5);
+// 种子化的伪随机数生成器
+function seededRandom(seed: number): () => number {
+  return function() {
+    let x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+  };
+}
+
+// 随机选择N个不重复的参考来源 - 使用种子确保同一页结果固定
+function getRandomReferences(count: number, title: string, seed: number): ReferenceItem[] {
+  const random = seededRandom(seed);
+  
+  // 使用种子打乱数组
+  const shuffled = [...REFERENCE_SOURCES].sort(() => random() - 0.5);
   const selected = shuffled.slice(0, count);
   
   // 根据主题调整标题，如果需要的话
@@ -192,8 +202,10 @@ function getRandomReferences(count: number, title: string): ReferenceItem[] {
   });
 }
 
-// 智能生成审核未通过内容
-function getRejectedContents(content: string, title: string): RejectedContent[] {
+// 智能生成审核未通过内容 - 使用种子确保同一页结果固定
+function getRejectedContents(content: string, title: string, seed: number): RejectedContent[] {
+  const random = seededRandom(seed);
+  
   // 根据内容类型生成相关的审核未通过示例
   let rejected: RejectedContent[] = [
     { content: '具身智能是最重要的技术，没有之一', reason: '表述过于绝对化', type: 'too_radical' },
@@ -229,8 +241,8 @@ function getRejectedContents(content: string, title: string): RejectedContent[] 
     rejected.unshift({ content: '具身智能就是大模型的升级', reason: '观点错误，认知不全', type: 'inaccurate' });
   }
   
-  // 打乱并返回2个
-  return rejected.sort(() => Math.random() - 0.5).slice(0, 2);
+  // 使用种子打乱并返回2个
+  return rejected.sort(() => random() - 0.5).slice(0, 2);
 }
 
 // 模拟课程数据（备用，当localStorage没有数据时使用）
@@ -278,7 +290,7 @@ function getCourseData(courseId?: string): any {
                 const isPSection = /【P\d+/.test(trimmed) || /^##\s*第\s*\d+\s*章｜P\d+/.test(trimmed);
                 
                 // 生成思考步骤的辅助函数
-              const generateThinkingSteps = (content: string, sectionType: string, title: string) => {
+              const generateThinkingSteps = (content: string, sectionType: string, title: string, seed: number) => {
                 const steps: ThinkingStep[] = [
                   {
                     step: 1,
@@ -290,7 +302,7 @@ function getCourseData(courseId?: string): any {
                     step: 2,
                     title: '📚 知识检索',
                     description: '从知识库中检索相关权威资料',
-                    references: getRandomReferences(3, title),
+                    references: getRandomReferences(3, title, seed),
                     output: '找到相关参考资料，提取核心信息',
                   },
                 ];
@@ -314,7 +326,7 @@ function getCourseData(courseId?: string): any {
                     step: 3,
                     title: '✂️ 内容筛选',
                     description: '从多份资料中提取最核心的表述',
-                    rejectedContents: getRejectedContents(content, title),
+                    rejectedContents: getRejectedContents(content, title, seed),
                     output: '提取核心定位表述',
                   });
                   steps.push({
@@ -361,6 +373,8 @@ function getCourseData(courseId?: string): any {
                 return steps;
               };
 
+              const pageSeed = chIdx * 100 + pIndex;
+              
               if (isLearningObjective) {
                 const objectiveContent = trimmed.startsWith('【学习目标】') 
                   ? trimmed.replace('【学习目标】', '').trim()
@@ -369,7 +383,7 @@ function getCourseData(courseId?: string): any {
                   type: 'learning_objective',
                   content: objectiveContent,
                   chapterTitle: ch.title,
-                  thinkingSteps: generateThinkingSteps(objectiveContent, 'learning_objective', ch.title),
+                  thinkingSteps: generateThinkingSteps(objectiveContent, 'learning_objective', ch.title, pageSeed),
                 });
               } else if (isPSection) {
                 pIndex++;
@@ -380,19 +394,19 @@ function getCourseData(courseId?: string): any {
                   imageUrl: imageUrl || undefined,
                   imageCaption: imageUrl ? `${ch.title} - P${pIndex}` : `${ch.title} - P${pIndex} 配图`,
                   aiTags: [{ text: `P${pIndex}`, type: '知识点', explanation: '核心知识点' }],
-                  thinkingSteps: generateThinkingSteps(trimmed, 'mixed', ch.title),
+                  thinkingSteps: generateThinkingSteps(trimmed, 'mixed', ch.title, pageSeed),
                 });
               } else {
                 slides.push({
                   type: 'text',
                   content: trimmed,
-                  thinkingSteps: generateThinkingSteps(trimmed, 'text', ch.title),
+                  thinkingSteps: generateThinkingSteps(trimmed, 'text', ch.title, pageSeed),
                 });
               }
               }
             } else {
               // 通用思考步骤生成函数
-              const generateGenericThinkingSteps = (content: string, title: string) => {
+              const generateGenericThinkingSteps = (content: string, title: string, seed: number) => {
                 const steps: ThinkingStep[] = [
                   {
                     step: 1,
@@ -404,14 +418,14 @@ function getCourseData(courseId?: string): any {
                     step: 2,
                     title: '📚 知识检索',
                     description: '从知识库中检索相关政策和理论资料',
-                    references: getRandomReferences(3, title),
+                    references: getRandomReferences(3, title, seed),
                     output: '找到相关参考资料，完成初步信息收集',
                   },
                   {
                     step: 3,
                     title: '✂️ 内容筛选',
                     description: '从大量信息中筛选核心表述',
-                    rejectedContents: getRejectedContents(content, title),
+                    rejectedContents: getRejectedContents(content, title, seed),
                     output: '提取核心表述，确定内容框架',
                   },
                   {
@@ -435,7 +449,7 @@ function getCourseData(courseId?: string): any {
                   type: 'text',
                   content: chapterContent,
                   chapterTitle: ch.title,
-                  thinkingSteps: generateGenericThinkingSteps(chapterContent, ch.title),
+                  thinkingSteps: generateGenericThinkingSteps(chapterContent, ch.title, chIdx * 100),
                 });
               } else {
               const paragraphs = chapterContent.split('\n\n').filter((p: string) => p.trim());
@@ -449,7 +463,8 @@ function getCourseData(courseId?: string): any {
                 
                 const hasImage = pageContent.includes('案例') || pageContent.includes('【') || pageContent.includes('目标');
                 const imageUrl = getCourseImageUrl(courseCode, chIdx + 1, imgPageIndex);
-                const thinkingSteps = generateGenericThinkingSteps(pageContent, ch.title);
+                const pageSeed = chIdx * 100 + imgPageIndex;
+                const thinkingSteps = generateGenericThinkingSteps(pageContent, ch.title, pageSeed);
                 
                 if (forceImageSlide || hasImage || imageUrl) {
                   slides.push({
