@@ -273,6 +273,9 @@ function getCourseData(courseId?: string): any {
           const videoUrl = getCourseVideoUrl(ch.id?.toString() || courseId || '');
           const chapterContent = ch.content || '';
           const slides = [];
+          const isChapter3 = ch.title.includes('第3章') && ch.title.includes('自动') && ch.title.includes('自主');
+          const isChapter5 = ch.title.includes('第5章') && ch.title.includes('世界模型');
+          const isChapter7 = ch.title.includes('第7章') && ch.title.includes('可解释') && ch.title.includes('可评估') && ch.title.includes('可监管');
           
           if (videoUrl) {
             slides.push({ type: 'video', content: '', videoUrl });
@@ -396,6 +399,14 @@ function getCourseData(courseId?: string): any {
                   aiTags: [{ text: `P${pIndex}`, type: '知识点', explanation: '核心知识点' }],
                   thinkingSteps: generateThinkingSteps(trimmed, 'mixed', ch.title, pageSeed),
                 });
+                
+                if (isChapter3 && pIndex === 1) {
+                  slides.push({
+                    type: 'video',
+                    content: '',
+                    videoUrl: '/video/1分钟看懂_自动_与_自主_的差别.mp4',
+                  });
+                }
               } else {
                 slides.push({
                   type: 'text',
@@ -483,6 +494,14 @@ function getCourseData(courseId?: string): any {
                     thinkingSteps: thinkingSteps,
                   });
                 }
+                
+                if (isChapter3 && imgPageIndex === 1) {
+                  slides.push({
+                    type: 'video',
+                    content: '',
+                    videoUrl: '/video/1分钟看懂_自动_与_自主_的差别.mp4',
+                  });
+                }
               }
               }
             }
@@ -534,6 +553,30 @@ function getCourseData(courseId?: string): any {
                   output: `${ch.title}的详细解读。AI根据知识图谱为您整理关键要点和深入分析，帮助您快速理解和应用。`,
                 },
               ],
+            });
+          }
+          
+          if (isChapter3 && slides.length > 0) {
+            slides.splice(1, 0, {
+              type: 'video',
+              content: '',
+              videoUrl: '/video/1分钟看懂_自动_与_自主_的差别.mp4',
+            });
+          }
+          
+          if (isChapter5 && slides.length > 0) {
+            slides.splice(1, 0, {
+              type: 'video',
+              content: '',
+              videoUrl: '/video/世界模型：让机器人_理解_世界的关键一跃.mp4',
+            });
+          }
+          
+          if (isChapter7 && slides.length > 0) {
+            slides.splice(1, 0, {
+              type: 'video',
+              content: '',
+              videoUrl: '/video/具身智能治理三要素：可解释、可评估、可监管.mp4',
             });
           }
           
@@ -1817,30 +1860,85 @@ export default function CourseLearnPage() {
                               </span>
                             </div>
                             
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={toggleFullscreen}
-                                className="w-8 h-8 bg-white/20 rounded flex items-center justify-center hover:bg-white/30 transition-colors"
-                              >
-                                {isFullscreen ? (
-                                  <Minimize2 className="h-4 w-4 text-white" />
-                                ) : (
-                                  <Maximize2 className="h-4 w-4 text-white" />
-                                )}
-                              </button>
                             </div>
-                          </div>
                         </div>
 
-                        {/* AI视频标签 */}
-                        <div className="absolute top-3 left-3 flex items-center gap-2">
-                          <span className="bg-red-600 text-white border border-red-400 shadow-lg px-2 py-0.5 rounded-full text-xs font-medium flex items-center">
-                            <Video className="h-3 w-3 mr-1" />
-                            AI视频课程
-                          </span>
-                          <span className="bg-black/70 text-white border border-white/30 text-xs px-2 py-0.5 rounded-full">
-                            {chapter.title}
-                          </span>
+                        <div className="absolute top-3 left-[23px] w-fit h-[180px] bg-black/80 backdrop-blur-sm border border-white/20 rounded-lg p-3 shadow-xl z-10">
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="bg-red-600 text-white border border-red-400 shadow-lg px-2 py-0.5 rounded-full text-xs font-medium flex items-center whitespace-nowrap">
+                              <Video className="h-3 w-3 mr-1" />
+                              AI视频课程
+                            </span>
+                            <span className="bg-black/70 text-white border border-white/30 text-xs px-2 py-0.5 rounded-full whitespace-nowrap">
+                              {chapter.title}
+                            </span>
+                          </div>
+                          <div className="text-xs text-white/60 mb-2 flex items-center gap-1">
+                            <Target className="h-3 w-3 text-red-400" />
+                            核心要点
+                          </div>
+                          <ul className="space-y-1.5">
+                            {chapter.title.includes('第3章') && chapter.title.includes('自动') && chapter.title.includes('自主') && (
+                              <>
+                                <li className="text-xs text-white font-semibold flex items-center gap-2">
+                                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                                  自动 ≠ 自主
+                                </li>
+                                <li className="text-xs text-gray-300 flex items-center gap-2">
+                                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                  自动按预设，自主能应变
+                                </li>
+                                <li className="text-xs text-gray-300 flex items-center gap-2">
+                                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                  自主 = 感知—认知—决策—执行—反馈
+                                </li>
+                                <li className="text-xs text-gray-300 flex items-center gap-2">
+                                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                  面向治理，必须可解释、可评估、可监管
+                                </li>
+                              </>
+                            )}
+                            {chapter.title.includes('第5章') && chapter.title.includes('世界模型') && (
+                              <>
+                                <li className="text-xs text-white font-semibold flex items-center gap-2">
+                                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                                  世界模型 = 机器人的"常识模拟器"
+                                </li>
+                                <li className="text-xs text-gray-300 flex items-center gap-2">
+                                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                  预测—执行—修正，形成经验闭环
+                                </li>
+                                <li className="text-xs text-gray-300 flex items-center gap-2">
+                                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                  决定具身智能能否进入真实复杂场景
+                                </li>
+                                <li className="text-xs text-gray-300 flex items-center gap-2">
+                                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                  走向自主的关键一跃
+                                </li>
+                              </>
+                            )}
+                            {chapter.title.includes('第7章') && chapter.title.includes('可解释') && chapter.title.includes('可评估') && chapter.title.includes('可监管') && (
+                              <>
+                                <li className="text-xs text-white font-semibold flex items-center gap-2">
+                                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                                  可解释：决策留痕可追溯
+                                </li>
+                                <li className="text-xs text-gray-300 flex items-center gap-2">
+                                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                  可评估：指标先行数据说话
+                                </li>
+                                <li className="text-xs text-gray-300 flex items-center gap-2">
+                                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                  可监管：权限分级日志不可篡改
+                                </li>
+                                <li className="text-xs text-gray-300 flex items-center gap-2">
+                                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                  先治理后扩展，先试点再推广
+                                </li>
+                              </>
+                            )}
+                          </ul>
                         </div>
                       </div>
                     )}
