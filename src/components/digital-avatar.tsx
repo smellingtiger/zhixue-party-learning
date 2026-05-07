@@ -404,32 +404,22 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, on
 
             {/* 进度条区域 */}
             <div className="mb-1 mt-1">
-              {/* 小节标题 - 完整显示（最多两行），自适应空间 */}
+              {/* 小节标题 - 绝对定位对齐节点 */}
               {sectionMarkers.length > 0 && (
-                <div className="relative" style={{ height: '2.25rem' }}>
+                <div className="relative h-5 mb-1">
                   {sectionMarkers.map((marker, idx) => {
                     const pct = effectiveTotalDuration > 0
                       ? (marker.timeOffset / effectiveTotalDuration) * 100
                       : 0;
-                    const isRightEdge = pct > 85;
                     return (
                       <div
                         key={idx}
-                        className="absolute flex flex-col justify-end"
-                        style={{
-                          left: isRightEdge ? 'auto' : `${pct}%`,
-                          right: isRightEdge ? '0' : 'auto',
-                          bottom: '0.25rem',
-                          transform: isRightEdge ? 'none' : 'translateX(-50%)',
-                        }}
+                        className="absolute bottom-0"
+                        style={{ left: `${pct}%`, transform: 'translateX(-50%)' }}
                       >
-                        <p
-                          className="text-[11px] leading-snug text-gray-700 font-medium whitespace-nowrap"
-                          style={{ textAlign: isRightEdge ? 'right' : 'center' }}
-                        >
+                        <span className="text-[10px] text-red-600 font-medium text-center whitespace-nowrap block">
                           {marker.title}
-                        </p>
-                        <div className="w-px h-1 bg-red-400/60 self-center" />
+                        </span>
                       </div>
                     );
                   })}
