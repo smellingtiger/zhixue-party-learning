@@ -1338,7 +1338,7 @@ export default function CourseLearnPage() {
                   {/* AI能力标识 */}
                   <span className="border border-orange-300 text-orange-700 bg-orange-50 px-2 py-0.5 rounded-full text-xs font-medium flex items-center">
                     <Sparkles className="h-3 w-3 mr-1" />
-                    AI图文混合
+                    {[3, 5, 7].includes(currentChapter) ? 'AI视频' : 'AI图文混合'}
                   </span>
                 </div>
               </div>
