@@ -317,6 +317,9 @@ export default function AICoursePage() {
 
   return (
     <div className="container mx-auto px-4 py-8 flex-1 overflow-y-auto">
+      {/* 生成前区域：标题、输入、逻辑解读、生成步骤 */}
+      {!showResult && (
+        <>
       {/* 第一行：标题区 + 右侧生成逻辑解读 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         {/* 左侧：标题 + 输入 + 预设主题 */}
@@ -492,6 +495,8 @@ export default function AICoursePage() {
           </div>
         </div>
       )}
+        </>
+      )}
 
       {/* 生成结果 */}
       {showResult && generatedCourse && (
@@ -578,15 +583,12 @@ export default function AICoursePage() {
                 {(editMode ? editedChapters : generatedCourse.chapters).map((chapter: any, idx: number) => (
                   <div key={chapter.id} className="p-4 border-2 border-black bg-white relative" style={{ boxShadow: '3px 3px 0 0 #000' }}>
                     <div className="flex items-center gap-4">
-                      {/* 彩色封面块 + 编号角标 */}
+                      {/* 彩色封面块 */}
                       <div className="relative flex-shrink-0">
                         <div className={`w-14 h-14 flex items-center justify-center border-2 border-black font-black text-2xl text-white ${
                           idx % 5 === 0 ? 'bg-red-500' : idx % 5 === 1 ? 'bg-purple-600' : idx % 5 === 2 ? 'bg-amber-400 text-black' : idx % 5 === 3 ? 'bg-emerald-500' : 'bg-pink-500'
                         }`}>
                           {idx + 1}
-                        </div>
-                        <div className="absolute -top-2 -right-2 bg-black text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center">
-                          {idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
