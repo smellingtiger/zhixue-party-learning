@@ -16,13 +16,13 @@ const notoSerifSC = Noto_Serif_SC({
 
 export const metadata: Metadata = {
   title: {
-    default: '红韵智学 - 党政学习全屏沉浸平台',
-    template: '%s | 红韵智学',
+    default: '精英在线智能学习平台 - 党政学习全屏沉浸平台',
+    template: '%s | 精英在线智能学习平台',
   },
   description:
     '全屏沉浸式党政学习平台，像刷抖音一样学习。整合权威学习资源，智能推荐精品内容，让学习更高效。',
   keywords: [
-    '红韵智学',
+    '精英在线智能学习平台',
     '党政学习',
     '主题教育',
     '党课',

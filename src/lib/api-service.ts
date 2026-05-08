@@ -78,14 +78,15 @@ export class ApiService {
    */
   static async getVerifyCode() {
     const timestamp = new Date().getTime();
-    return this.request<{ IsSuccess: boolean; Data: { Img: string } }>(
-      '/api/common/GetLoginVC',
-      'GET',
-      {},
-      { [String(timestamp)]: '' }
-    );
+    try {
+      const response = await fetch(`/api/common/GetLoginVC?t=${timestamp}`);
+      if (!response.ok) return { IsSuccess: false, Data: { Img: '' } };
+      return await response.json();
+    } catch {
+      return { IsSuccess: false, Data: { Img: '' } };
+    }
   }
-  
+
   /**
    * 发送短信验证码
    * @param telephone 手机号码

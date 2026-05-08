@@ -926,7 +926,7 @@ function KnowledgeGraphSidebar({ expanded, onClose, onSelectNode, userLearningPa
             <Target className="h-6 w-6 text-white" />
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-[20px] font-bold text-gray-800" style={{ fontFamily: 'Noto Serif SC, serif' }}>红韵智学</h2>
+            <h2 className="text-[20px] font-bold text-gray-800" style={{ fontFamily: 'Noto Serif SC, serif' }}>精英在线智能学习平台</h2>
             <p className="text-[15px] text-gray-500">知识图谱 · {diffLabel}</p>
           </div>
           <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={onClose}>
@@ -1470,8 +1470,8 @@ export default function HomePage() {
           type: 'card',
           title: course.title,
           subtitle: '详细讲解',
-          source: '红韵智学',
-          author: '红韵智学',
+          source: '精英在线智能学习平台',
+          author: '精英在线智能学习平台',
           duration: course.duration + '分钟',
           category: node.name,
           tags: node.keyPoints || [],

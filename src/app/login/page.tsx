@@ -38,18 +38,13 @@ export default function LoginPage() {
 
   // 刷新图形验证码
   const refreshVerifyCode = async () => {
-    console.log('开始刷新验证码');
     try {
       const data = await ApiService.getVerifyCode();
-      console.log('验证码请求响应数据:', data);
       if (data.IsSuccess && data.Data && data.Data.Img) {
-        console.log('设置验证码图片URL:', data.Data.Img.substring(0, 100) + '...');
         setVerifyCodeUrl(data.Data.Img);
-      } else {
-        throw new Error('获取验证码失败');
       }
     } catch (err) {
-      console.error('刷新验证码失败:', err);
+      // 静默失败，不影响页面使用
     }
   };
 
@@ -227,7 +222,7 @@ export default function LoginPage() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-red-600 to-orange-500 flex items-center justify-center shadow-lg">
               <BrainCircuit className="w-9 h-9 text-white" />
             </div>
-            <CardTitle className="text-2xl font-bold text-slate-900">红韵智学</CardTitle>
+            <CardTitle className="text-2xl font-bold text-slate-900">精英在线智能学习平台</CardTitle>
             <CardDescription className="text-slate-500">党政学习平台</CardDescription>
           </CardHeader>
           
@@ -387,6 +382,32 @@ export default function LoginPage() {
                 ) : (
                   '登录'
                 )}
+              </Button>
+
+              {/* 游客登录按钮 */}
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-11 border-2 border-dashed border-gray-300 text-gray-600 font-medium hover:bg-gray-50"
+                onClick={() => {
+                  // 创建虚拟用户信息
+                  const guestUser = {
+                    UserId: 'guest_' + Date.now(),
+                    UserName: '游客用户',
+                    NickName: '游客',
+                    Avatar: '',
+                    IsFirstLogin: false,
+                    LoginTime: new Date().toISOString(),
+                  };
+                  
+                  // 调用登录函数
+                  login(guestUser, () => {
+                    // 跳转到首页
+                    router.push('/');
+                  });
+                }}
+              >
+                游客登录（无需注册）
               </Button>
 
               {/* 密码重置链接 */}
