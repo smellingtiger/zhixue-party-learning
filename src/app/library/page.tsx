@@ -246,7 +246,7 @@ export default function LibraryPage() {
   const thinkingSteps = useMemo(() => [
     { title: '读取知识图谱诊断结果', detail: `正在加载学习诊断数据...\n\n• 身份角色：${hasDiagnostic ? diagnosticData.roles.join('、') : '未检测'}\n• 学习主题：${hasDiagnostic ? diagnosticData.topics.join('、') : '未选择'}\n• 难度等级：${hasDiagnostic ? (diagnosticData.difficulty === 'beginner' ? '入门级' : diagnosticData.difficulty === 'intermediate' ? '进阶级' : '深入级') : '未设定'}` },
     { title: '分析课程需求与目标受众', detail: `基于具身智能专题分析：\n\n• 核心需求：机关干部对前沿技术的认知与治理能力\n• 知识缺口：具身智能从概念到国家战略的政策脉络、技术闭环机制、应用场景与项目论证\n• 受众定位：党政类在线学习平台成人用户（机关干部）\n• 课程深度：${hasDiagnostic ? (diagnosticData.difficulty === 'beginner' ? '入门级——侧重基础概念和认知框架' : diagnosticData.difficulty === 'intermediate' ? '进阶级——技术与治理并重' : '深入级——强化实操评估与调研方法') : '进阶级'}` },
-    { title: '检索相关知识点与资料', detail: `检索资源包括：\n\n• 具身智能专题：信通院发展报告、标准体系(2026版)、CEAI白皮书、ITU-T标准\n• 政策文献：2025/2026年政府工作报告、"十五五"规划纲要、国务院发展研究中心报告\n• 课程关联：前沿技术系列、数字政府建设、科技政策与产业治理\n• 权威来源：人民网经济·科技频道、新华网"人工智能+"、共产党员网、求是杂志、智源社区` },
+    { title: '检索相关知识点与资料', detail: `检索资源包括：\n\n📚 知识库新增课程\n   • 具身智能引论（ID:3464，时长4.7分钟）\n   • 前沿技术系列课程\n\n📖 图书与期刊资源\n   • 《具身智能发展报告（2025年）》\n   • 《人形机器人与具身智能标准体系（2026版）》\n   • CEAI中国具身智能白皮书\n\n✏️ 试题库相关试题\n   • 具身智能概念辨析题\n   • 核心技术理解与应用题\n   • 政策与治理场景选择题\n\n🌐 权威网站检索\n   • 信通院官网（caict.ac.cn）\n   • 人民网科技频道\n   • 新华网"人工智能+"专题\n   • 共产党员网权威解读` },
     { title: '进行内容合规审核', detail: `三级合规校验：\n\n• 政治方向：确保与《二十大报告》原文一致，核心表述准确\n• 政策解读：对照最新政策文件版本（如2024年修订版《纪律处分条例》）\n• 敏感筛查：不涉及未公开文件，所有链接均为官方权威来源` },
     { title: '设计课程结构与章节安排', detail: `构建课程框架：\n\n• 章节结构：前言+5-8章（含核心概念、政策法规、实务操作、案例剖析等）\n• 章节时长：${hasDiagnostic ? (diagnosticData.difficulty === 'beginner' ? '入门级约50分钟' : diagnosticData.difficulty === 'intermediate' ? '进阶级约75分钟' : '深入级约100分钟') : '约75分钟'}\n• 学习目标：每章2-4条，可衡量\n• 互动设计：章节末尾设单选测试题` },
     { title: '生成课程内容与学习目标', detail: `AI撰写各章节：\n\n• 生成方式：大语言模型 + 知识图谱驱动\n• 每章结构：学习目标→知识点讲解→政策引用→实务指南→案例分析→权威链接\n• 输出格式：Markdown文档，支持编辑` },
@@ -444,51 +444,7 @@ export default function LibraryPage() {
 
   return (
       <div className="container mx-auto px-4 py-8 flex-1 overflow-y-auto">
-        {/* 搜索栏 */}
-        <Card className="mb-8 border-orange-100">
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="搜索课程、知识点..." 
-                  className="pl-10 border-orange-100"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <Select defaultValue="all">
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="分类" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">全部分类</SelectItem>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select defaultValue="hot">
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue placeholder="排序" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="hot">最热</SelectItem>
-                  <SelectItem value="latest">最新</SelectItem>
-                  <SelectItem value="progress">我的进度</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
-          <TabsList className="mb-4">
-            <TabsTrigger value="courses">系统课程</TabsTrigger>
-            <TabsTrigger value="micro">微课速学</TabsTrigger>
-            <TabsTrigger value="quotes">金句收藏</TabsTrigger>
-            <TabsTrigger value="ai-course">AI生成课程</TabsTrigger>
-          </TabsList>
 
           {/* 系统课程 */}
           <TabsContent value="courses">
@@ -651,37 +607,12 @@ export default function LibraryPage() {
 
           {/* AI生成课程 */}
           <TabsContent value="ai-course">
-            {/* 顶部横幅导航区 */}
-            <div className="mb-6 border-2 border-black bg-amber-400 px-5 py-3 flex items-center justify-between" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-black flex items-center justify-center">
-                  <Sparkles className="h-6 w-6 text-amber-400" />
-                </div>
-                <span className="text-lg font-black text-black tracking-tight">AI课程生成控制台</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {['平台总览', '课程库', '生成记录', '模板中心'].map((label) => (
-                  <button
-                    key={label}
-                    className="px-4 py-1.5 bg-white border-2 border-black text-xs font-bold hover:bg-black hover:text-amber-400 transition-colors"
-                    style={{ boxShadow: '2px 2px 0 0 #000' }}
-                    disabled
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 主视觉标题区 + 右侧信息面板 */}
+            {/* 第一行：标题区 + 右侧生成逻辑解读 */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-              {/* 左侧：超大标题区 */}
+              {/* 左侧：标题 + 输入 + 预设主题 */}
               <div className="lg:col-span-2 border-2 border-black bg-white p-8 relative" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-                <div className="absolute top-3 right-3 bg-purple-600 text-white text-xs font-bold px-3 py-1 border-2 border-black" style={{ boxShadow: '2px 2px 0 0 #000', transform: 'rotate(2deg)' }}>
-                  AI DRIVEN
-                </div>
                 <h1 className="text-5xl font-black text-black mb-4 leading-none tracking-tighter" style={{ textShadow: '2px 2px 0 #e0e0e0' }}>
-                  AI智能<br/>生成课程
+                  AI智能生成课程
                 </h1>
                 <p className="text-base text-gray-600 mb-6 max-w-lg leading-relaxed">
                   输入课程主题，AI自动设计课程结构、生成章节内容、匹配学习目标，让课程创作效率提升10倍。
@@ -735,126 +666,90 @@ export default function LibraryPage() {
                     ))}
                   </div>
                 </div>
-
-                {/* 生成逻辑说明 */}
-                <div className="mt-6 pt-6 border-t-2 border-black">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-7 h-7 bg-amber-400 flex items-center justify-center border-2 border-black" style={{ boxShadow: '2px 2px 0 0 #000' }}>
-                      <Lightbulb className="h-4 w-4 text-black" />
-                    </div>
-                    <span className="font-black text-sm text-black">
-                      {generationLogic ? '本次生成逻辑解读' : '课程生成逻辑说明'}
-                    </span>
-                    {generationLogic && !generationLogic.hasDiagnosis && (
-                      <span className="text-[10px] text-gray-500 ml-2">（通用模式）</span>
-                    )}
-                  </div>
-
-                  {generationLogic ? (
-                    /* 动态生成逻辑说明 - 基于诊断结果 */
-                    <div className="space-y-3">
-                      {/* 角色解读 */}
-                      <div className="flex items-start gap-3 p-3 border-2 border-black bg-red-50 relative" style={{ boxShadow: '2px 2px 0 0 #000' }}>
-                        <div className="absolute -top-2.5 left-2 bg-red-600 text-white text-[10px] font-black px-2 py-0.5">身份匹配</div>
-                        <div className="mt-1">
-                          <div className="text-[12px] text-gray-800 leading-relaxed">{generationLogic.roleInterpretation}</div>
-                        </div>
-                      </div>
-                      {/* 主题关联 */}
-                      <div className="flex items-start gap-3 p-3 border-2 border-black bg-purple-50 relative" style={{ boxShadow: '2px 2px 0 0 #000' }}>
-                        <div className="absolute -top-2.5 left-2 bg-purple-600 text-white text-[10px] font-black px-2 py-0.5">主题关联</div>
-                        <div className="mt-1">
-                          <div className="text-[12px] text-gray-800 leading-relaxed">{generationLogic.topicConnection}</div>
-                        </div>
-                      </div>
-                      {/* 难度匹配 */}
-                      <div className="flex items-start gap-3 p-3 border-2 border-black bg-amber-50 relative" style={{ boxShadow: '2px 2px 0 0 #000' }}>
-                        <div className="absolute -top-2.5 left-2 bg-amber-500 text-black text-[10px] font-black px-2 py-0.5">难度适配</div>
-                        <div className="mt-1">
-                          <div className="text-[12px] text-gray-800 leading-relaxed">{generationLogic.difficultyMatch}</div>
-                        </div>
-                      </div>
-                      {/* 综合推荐 */}
-                      <div className="flex items-start gap-3 p-3 border-2 border-black bg-emerald-50 relative" style={{ boxShadow: '2px 2px 0 0 #000' }}>
-                        <div className="absolute -top-2.5 left-2 bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5">综合推荐</div>
-                        <div className="mt-1">
-                          <div className="text-[12px] text-gray-800 leading-relaxed font-medium">{generationLogic.recommendation}</div>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    /* 通用5步流程说明 - 未生成课程时显示 */
-                    <>
-                      <div className="grid grid-cols-4 gap-3">
-                        {[
-                          { step: '01', title: '诊断读取', desc: '读取您的知识图谱诊断结果' },
-                          { step: '02', title: '需求分析', desc: '分析课程主题与目标受众画像' },
-                          { step: '03', title: '知识检索', desc: '从权威知识库匹配相关内容' },
-                          { step: '04', title: '合规审核', desc: '政治方向与政策解读校验' },
-                          { step: '05', title: '结构设计', desc: '编排章节顺序与课时分配' },
-                          { step: '06', title: '内容生成', desc: 'AI撰写各章节具体内容' },
-                          { step: '07', title: '教学优化', desc: '案例选择与练习设计' },
-                          { step: '08', title: '目标匹配', desc: '输出学习目标与课程简介' },
-                        ].map((item) => (
-                          <div key={item.step} className="border-2 border-black bg-gray-50 p-3 relative" style={{ boxShadow: '2px 2px 0 0 #000' }}>
-                            <div className="absolute -top-2.5 left-2 bg-black text-amber-400 text-[10px] font-black px-2 py-0.5">
-                              {item.step}
-                            </div>
-                            <div className="font-black text-sm text-black mb-1 mt-1">{item.title}</div>
-                            <div className="text-[11px] text-gray-600 leading-snug">{item.desc}</div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="mt-3 flex items-center gap-2 text-xs text-gray-500">
-                        <span className="w-1 h-3 bg-purple-600 rounded-full"></span>
-                        基于大语言模型 + 党建知识图谱 + 您的诊断结果 · 生成结果可编辑后确认创建
-                      </div>
-                    </>
-                  )}
-                </div>
               </div>
 
-              {/* 右侧信息面板 */}
-              <div className="border-2 border-black bg-purple-600 p-6 text-white relative" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-                <div className="absolute top-3 right-3 bg-amber-400 text-black text-xs font-bold px-2 py-1 border-2 border-black" style={{ boxShadow: '2px 2px 0 0 #000' }}>
-                  平台能力
+              {/* 右侧：生成逻辑解读面板（常驻） */}
+              <div className="border-2 border-black bg-white p-6" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-7 h-7 bg-amber-400 flex items-center justify-center border-2 border-black" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+                    <Lightbulb className="h-4 w-4 text-black" />
+                  </div>
+                  <span className="font-black text-sm text-black">本次生成逻辑解读</span>
                 </div>
-                <div className="mt-4">
-                  <div className="text-6xl font-black mb-1" style={{ textShadow: '3px 3px 0 #000' }}>
-                    {isGenerating ? `${currentStep + 1}` : `${thinkingSteps.length}`}
+
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3 p-3 border-2 border-black bg-red-50 relative" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+                    <div className="absolute -top-2.5 left-2 bg-red-600 text-white text-[10px] font-black px-2 py-0.5">身份匹配</div>
+                    <div className="mt-1">
+                      <div className="text-[12px] text-gray-800 leading-relaxed">{generationLogic?.roleInterpretation || '根据您的学习诊断身份，AI将匹配对应的课程内容侧重方向。'}</div>
+                    </div>
                   </div>
-                  <div className="text-sm font-bold mb-4">大步骤智能生成</div>
-                  <div className="space-y-2 mb-5">
-                    {thinkingSteps.slice(0, isGenerating ? currentStep + 1 : thinkingSteps.length).map((step, idx) => (
-                      <div key={idx}>
-                        <div
-                          className="flex items-center gap-2 text-sm font-medium bg-white/20 px-3 py-1.5 border border-white/30 cursor-pointer select-none"
-                          onClick={() => setExpandedStep(expandedStep === idx ? null : idx)}
-                        >
-                          {idx < currentStep || !isGenerating ? (
-                            <CheckCircle2 className="h-3 w-3 text-amber-400 flex-shrink-0" />
-                          ) : (
-                            <span className="w-3 h-3 flex-shrink-0 animate-pulse text-amber-400">●</span>
-                          )}
-                          <span className="truncate flex-1">{step.title}</span>
-                          {expandedStep === idx ? (
-                            <ChevronUp className="h-3 w-3 flex-shrink-0 text-white/60" />
-                          ) : (
-                            <ChevronDown className="h-3 w-3 flex-shrink-0 text-white/60" />
-                          )}
-                        </div>
-                        {expandedStep === idx && (
-                          <div className="mt-1 ml-4 text-[10px] text-amber-200/90 leading-relaxed bg-white/10 px-3 py-2 rounded border border-white/20">
-                            {step.detail}
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                  <div className="flex items-start gap-3 p-3 border-2 border-black bg-purple-50 relative" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+                    <div className="absolute -top-2.5 left-2 bg-purple-600 text-white text-[10px] font-black px-2 py-0.5">主题关联</div>
+                    <div className="mt-1">
+                      <div className="text-[12px] text-gray-800 leading-relaxed">{generationLogic?.topicConnection || 'AI将根据您感兴趣的学习主题，自动关联知识图谱中相关知识点。'}</div>
+                    </div>
                   </div>
-                  <div className="text-[10px] text-white/60 border-t border-white/20 pt-3">
-                    基于大语言模型与知识图谱驱动
+                  <div className="flex items-start gap-3 p-3 border-2 border-black bg-amber-50 relative" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+                    <div className="absolute -top-2.5 left-2 bg-amber-500 text-black text-[10px] font-black px-2 py-0.5">难度适配</div>
+                    <div className="mt-1">
+                      <div className="text-[12px] text-gray-800 leading-relaxed">{generationLogic?.difficultyMatch || 'AI将根据您选择的难度等级，调整课程的理论深度与章节数量。'}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 border-2 border-black bg-emerald-50 relative" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+                    <div className="absolute -top-2.5 left-2 bg-emerald-600 text-white text-[10px] font-black px-2 py-0.5">综合推荐</div>
+                    <div className="mt-1">
+                      <div className="text-[12px] text-gray-800 leading-relaxed font-medium">{generationLogic?.recommendation || '请先完成学习诊断，或直接输入课程主题开始生成。'}</div>
+                    </div>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* 第二行：智能生成步骤（全宽） */}
+            <div className="border-2 border-black bg-gradient-to-b from-indigo-700 to-indigo-900 p-6 text-white mb-6" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+              <div className="flex items-center gap-4 mb-5">
+                <div className="text-6xl font-black text-amber-300" style={{ textShadow: '3px 3px 0 #000' }}>
+                  {isGenerating ? `${currentStep + 1}` : `${thinkingSteps.length}`}
+                </div>
+                <div>
+                  <div className="text-base font-black tracking-wide">大步骤智能生成</div>
+                  <div className="text-xs text-white/50">点击卡片查看详情</div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                {thinkingSteps.slice(0, isGenerating ? currentStep + 1 : thinkingSteps.length).map((step, idx) => (
+                  <div
+                    key={idx}
+                    className={`border p-3 cursor-pointer select-none transition-all h-[72px] ${
+                      expandedStep === idx
+                        ? 'border-amber-400 bg-amber-400/10'
+                        : 'border-white/20 bg-black/20 hover:bg-black/40'
+                    }`}
+                    onClick={() => setExpandedStep(expandedStep === idx ? null : idx)}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      {idx < currentStep || !isGenerating ? (
+                        <CheckCircle2 className="h-3.5 w-3.5 text-amber-300 flex-shrink-0" />
+                      ) : (
+                        <span className="w-3.5 h-3.5 flex-shrink-0 animate-pulse text-amber-300 text-xs">●</span>
+                      )}
+                      <span className="text-xs font-bold text-amber-300/80">Step {idx + 1}</span>
+                    </div>
+                    <div className="text-[13px] font-semibold leading-snug truncate">{step.title}</div>
+                  </div>
+                ))}
+              </div>
+              {expandedStep !== null && expandedStep < thinkingSteps.length && (
+                <div className="mt-3 p-4 bg-black/40 border border-white/10 text-[13px] text-white/95 leading-relaxed whitespace-pre-line">
+                  <div className="text-xs font-bold text-amber-300 mb-2">
+                    {thinkingSteps[expandedStep].title}
+                  </div>
+                  {thinkingSteps[expandedStep].detail}
+                </div>
+              )}
+              <div className="mt-4 text-[11px] text-white/40 border-t border-white/10 pt-3 font-medium text-center">
+                基于大语言模型与知识图谱驱动 · 诊断 → 生成 → 优化的全链路智能化
               </div>
             </div>
 
@@ -896,96 +791,64 @@ export default function LibraryPage() {
               <>
                 {/* 宽大画布容器 */}
                 <div className="overflow-x-visible -mx-4 px-4 py-2">
-                {/* 功能统计卡片行 */}
-                <div className="grid grid-cols-4 gap-4 mb-6">
-                  {[
-                    { label: '课程类型', value: generatedCourse.courseType, color: 'bg-purple-500', icon: '📋' },
-                    { label: '总学时', value: `${generatedCourse.totalHours}学时`, color: 'bg-amber-400', icon: '⏱' },
-                    { label: '难度等级', value: generatedCourse.difficulty, color: 'bg-pink-500', icon: '📊' },
-                    { label: '章节数', value: `${editMode ? editedChapters.length : generatedCourse.chapters.length}章`, color: 'bg-emerald-500', icon: '📑' },
-                  ].map((stat, idx) => (
-                    <div
-                      key={idx}
-                      className={`${stat.color} border-2 border-black p-5 relative text-white`}
-                      style={{ boxShadow: '4px 4px 0 0 #000' }}
-                    >
-                      <div className="absolute top-2 right-2 text-xl">{stat.icon}</div>
-                      <div className="text-3xl font-black mb-1" style={{ textShadow: '2px 2px 0 #000' }}>{stat.value}</div>
-                      <div className="text-sm font-bold opacity-80">{stat.label}</div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* 课程基本信息卡片 */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-                  {/* 左侧：课程简介 */}
-                  <div className="border-2 border-black bg-white p-6 relative" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-                    <div className="absolute -top-3 left-4 bg-red-600 text-white text-xs font-black px-3 py-1 border-2 border-black" style={{ boxShadow: '2px 2px 0 0 #000' }}>
-                      01 · 课程简介
-                    </div>
-                    <div className="flex items-center justify-between mb-4 mt-2">
-                      <h3 className="font-black text-xl text-black">{generatedCourse.courseName}</h3>
-                      <div className="flex gap-2">
-                        {editMode ? (
-                          <>
-                            <Button size="sm" variant="outline" className="border-2 border-black" style={{ borderRadius: '0' }} onClick={() => setEditMode(false)}>
-                              取消
-                            </Button>
-                            <Button size="sm" className="bg-green-500 text-white font-bold border-2 border-black" style={{ borderRadius: '0', boxShadow: '2px 2px 0 0 #000' }} onClick={handleSave}>
-                              <Save className="h-4 w-4 mr-1" />
-                              保存
-                            </Button>
-                          </>
-                        ) : (
-                          <Button size="sm" variant="outline" className="border-2 border-black font-bold" style={{ borderRadius: '0' }} onClick={() => setEditMode(true)}>
-                            <Edit3 className="h-4 w-4 mr-1" />
-                            编辑
+                {/* 课程简介卡片（全宽） */}
+                <div className="border-2 border-black bg-white p-6 relative mb-6" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+                  <div className="absolute -top-3 left-4 bg-red-600 text-white text-xs font-black px-3 py-1 border-2 border-black" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+                    课程简介
+                  </div>
+                  <div className="flex items-center justify-between mb-4 mt-2">
+                    <h3 className="font-black text-3xl text-black">{generatedCourse.courseName}</h3>
+                    <div className="flex gap-2 flex-shrink-0">
+                      {editMode ? (
+                        <>
+                          <Button size="sm" variant="outline" className="border-2 border-black" style={{ borderRadius: '0' }} onClick={() => setEditMode(false)}>
+                            取消
                           </Button>
-                        )}
-                      </div>
-                    </div>
-                    <p className="text-gray-700 text-sm leading-relaxed">{generatedCourse.description}</p>
-                    <div className="mt-4 pt-4 border-t-2 border-black">
-                      <div className="text-sm font-bold text-black mb-2">学习目标</div>
-                      <ul className="space-y-1.5">
-                        {generatedCourse.learningObjectives.map((obj: string, idx: number) => (
-                          <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
-                            <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
-                            {obj}
-                          </li>
-                        ))}
-                      </ul>
+                          <Button size="sm" className="bg-green-500 text-white font-bold border-2 border-black" style={{ borderRadius: '0', boxShadow: '2px 2px 0 0 #000' }} onClick={handleSave}>
+                            <Save className="h-4 w-4 mr-1" />
+                            保存
+                          </Button>
+                        </>
+                      ) : (
+                        <Button size="sm" variant="outline" className="border-2 border-black font-bold" style={{ borderRadius: '0' }} onClick={() => setEditMode(true)}>
+                          <Edit3 className="h-4 w-4 mr-1" />
+                          编辑
+                        </Button>
+                      )}
                     </div>
                   </div>
 
-                  {/* 右侧：目标受众 */}
-                  <div className="border-2 border-black bg-emerald-500 p-6 text-white relative" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-                    <div className="absolute -top-3 right-4 bg-amber-400 text-black text-xs font-black px-3 py-1 border-2 border-black" style={{ boxShadow: '2px 2px 0 0 #000' }}>
-                      02 · 受众分析
-                    </div>
-                    <div className="mt-2">
-                      <div className="text-4xl font-black mb-2" style={{ textShadow: '2px 2px 0 #000' }}>
-                        {generatedCourse.targetAudience}
+                  {/* 4个属性标签 */}
+                  <div className="flex flex-wrap gap-3 mb-5">
+                    {[
+                      { label: '课程类型', value: generatedCourse.courseType, color: 'bg-purple-500', icon: '📋' },
+                      { label: '总学时', value: `${generatedCourse.totalHours}学时`, color: 'bg-amber-400', icon: '⏱' },
+                      { label: '难度等级', value: generatedCourse.difficulty, color: 'bg-pink-500', icon: '📊' },
+                      { label: '章节数', value: `${editMode ? editedChapters.length : generatedCourse.chapters.length}章`, color: 'bg-emerald-500', icon: '📑' },
+                    ].map((stat, idx) => (
+                      <div
+                        key={idx}
+                        className={`${stat.color} border-2 border-black flex items-center gap-2 px-4 py-2 text-white`}
+                        style={{ boxShadow: '3px 3px 0 0 #000' }}
+                      >
+                        <span className="text-base">{stat.icon}</span>
+                        <span className="text-sm font-black">{stat.value}</span>
+                        <span className="text-[10px] font-bold opacity-75 ml-0.5">{stat.label}</span>
                       </div>
-                      <div className="text-sm opacity-90 mb-6">目标受众群体</div>
-                      <div className="bg-white text-black p-4 border-2 border-black" style={{ boxShadow: '2px 2px 0 0 #000' }}>
-                        <div className="font-bold text-sm mb-2">课程信息</div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-gray-500">类型</span>
-                            <span className="font-bold">{generatedCourse.courseType}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-500">学时</span>
-                            <span className="font-bold">{generatedCourse.totalHours}学时</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-500">难度</span>
-                            <span className="font-bold">{generatedCourse.difficulty}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    ))}
+                  </div>
+
+                  <p className="text-gray-700 text-sm leading-relaxed">{generatedCourse.description}</p>
+                  <div className="mt-4 pt-4 border-t-2 border-black">
+                    <div className="text-sm font-bold text-black mb-2">学习目标</div>
+                    <ul className="space-y-1.5">
+                      {generatedCourse.learningObjectives.map((obj: string, idx: number) => (
+                        <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
+                          <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+                          {obj}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
 

@@ -48,9 +48,18 @@ export const useAuth = () => {
     const currentUserId = userData.UserId;
     
     if (previousUserId && currentUserId && previousUserId !== currentUserId) {
-      // 用户切换了，清空上一个用户的学习进度
+      // 用户切换了，清空上一个用户的所有数据
       localStorage.removeItem('learning_progress');
-      console.log(`[Auth] 用户切换: ${previousUserId} → ${currentUserId}，已清空学习进度`);
+      localStorage.removeItem('ai_generated_course');
+      localStorage.removeItem('current_ai_course');
+      localStorage.removeItem('user_diagnostic');
+      localStorage.removeItem('user_diagnostic_completed');
+      localStorage.removeItem('onboarding_completed');
+      localStorage.removeItem('completed_slides_1');
+      localStorage.removeItem('slide_notes_1');
+      localStorage.removeItem('current_chapter_1');
+      localStorage.removeItem('current_slide_1');
+      console.log(`[Auth] 用户切换: ${previousUserId} → ${currentUserId}，已清空所有学习数据`);
     }
     
     localStorage.setItem('user', JSON.stringify(userData));
