@@ -20,7 +20,6 @@ import {
   TrendingUp,
   User,
   ChevronRight,
-  ChevronLeft,
   X,
   CheckCircle2,
   CheckCircle,
@@ -65,8 +64,7 @@ import {
   Clock3,
   Flame,
   StarHalf,
-  Layers3,
-  Map
+  Layers3
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -74,11 +72,9 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import MindMap from '@/components/mind-map';
 import { partyKnowledgeGraph, generateLearningPath, getNodeById } from '@/lib/knowledge-graph';
 import type { KnowledgeNode, LearningProgress } from '@/lib/types';
@@ -824,38 +820,32 @@ function TreeNode({ node, depth, expandedNodes, onToggle, onSelectNode, selected
   return null;
 }
 
-// 左侧栏：知识图谱
-function KnowledgeGraphSidebar({ expanded, onClose, onSelectNode, userLearningPath, diagnosticData }: { expanded: boolean; onClose: () => void; onSelectNode?: (nodeId: string, nodeName: string) => void; userLearningPath: any; diagnosticData: { roles: string[]; topics: string[]; difficulty: string } | null }) {
-  const [showDiagnostic, setShowDiagnostic] = useState(true);
-  const [showMindMapModal, setShowMindMapModal] = useState(false);
+// 横置知识图谱栏 - 页面顶部核心展示区
+function KnowledgeGraphBar({ onSelectNode, userLearningPath, diagnosticData, selectedNodeId, setSelectedNodeId }: {
+  onSelectNode?: (nodeId: string, nodeName: string) => void;
+  userLearningPath: any;
+  diagnosticData: { roles: string[]; topics: string[]; difficulty: string } | null;
+  selectedNodeId: string;
+  setSelectedNodeId: (id: string) => void;
+}) {
   const [learningProgress, setLearningProgress] = useState<LearningProgress[]>([]);
+  const [activeModuleId, setActiveModuleId] = useState<string>('');
 
-  // 从localStorage读取学习进度
   useEffect(() => {
     const saved = localStorage.getItem('learning_progress');
     if (saved) {
-      try {
-        setLearningProgress(JSON.parse(saved));
-      } catch {
-        // ignore
-      }
+      try { setLearningProgress(JSON.parse(saved)); } catch { /* ignore */ }
     }
   }, []);
 
-  // 监听storage变化，实时更新进度
   useEffect(() => {
     const handleStorageChange = () => {
       const saved = localStorage.getItem('learning_progress');
       if (saved) {
-        try {
-          setLearningProgress(JSON.parse(saved));
-        } catch {
-          // ignore
-        }
+        try { setLearningProgress(JSON.parse(saved)); } catch { /* ignore */ }
       }
     };
     window.addEventListener('storage', handleStorageChange);
-    // 也监听自定义事件（同页面内更新）
     window.addEventListener('learningProgressUpdated', handleStorageChange);
     return () => {
       window.removeEventListener('storage', handleStorageChange);
@@ -863,181 +853,145 @@ function KnowledgeGraphSidebar({ expanded, onClose, onSelectNode, userLearningPa
     };
   }, []);
 
-  // 展开/折叠节点，默认全部展开
-  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(() => {
-    const initial = new Set<string>();
-    
-    // 递归收集所有节点ID
-    const collectNodeIds = (node: KnowledgeNode) => {
-      initial.add(node.id);
-      if (node.children) {
-        node.children.forEach(child => collectNodeIds(child));
-      }
-    };
-    
-    // 收集所有节点ID，默认全部展开
-    collectNodeIds(userLearningPath.rootNode);
-    return initial;
-  });
-  const [selectedNodeId, setSelectedNodeId] = useState<string>(() => {
-    // 初始化默认选中根节点
-    return userLearningPath?.rootNode?.id || '';
-  });
-
-  // 刚完成诊断跳转过来时，默认选中根节点
-  useEffect(() => {
-    const justCompleted = localStorage.getItem('just_completed_onboarding');
-    if (justCompleted === 'true' && userLearningPath?.rootNode) {
-      // 选中根节点
-      setSelectedNodeId(userLearningPath.rootNode.id);
-      onSelectNode?.(userLearningPath.rootNode.id, userLearningPath.rootNode.name);
-      // 清除标记
-      localStorage.removeItem('just_completed_onboarding');
-    }
-  }, [userLearningPath, onSelectNode]);
-
-  // 处理节点选择
-  const handleNodeSelect = (nodeId: string, nodeName: string) => {
-    setSelectedNodeId(nodeId);
-    onSelectNode?.(nodeId, nodeName);
-  };
-
-  const handleToggle = (id: string) => {
-    setExpandedNodes(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
-
   const diffLabel = userLearningPath.difficulty === 'beginner' ? '入门' : userLearningPath.difficulty === 'intermediate' ? '进阶' : '深入';
-  const hasDiagnostic = true;
+  const rootNode = userLearningPath.rootNode;
+  const modules = rootNode.children || [];
+
+  const isCourseCompleted = (nodeId: string, courseId: string) => {
+    const prog = learningProgress.find(p => p.nodeId === nodeId);
+    return prog?.completedCourses?.includes(courseId) || false;
+  };
+
+  const handleModuleClick = (module: KnowledgeNode) => {
+    setActiveModuleId(activeModuleId === module.id ? '' : module.id);
+    setSelectedNodeId(module.id);
+    onSelectNode?.(module.id, module.name);
+  };
+
+  const handleSubCategoryClick = (sub: KnowledgeNode) => {
+    setSelectedNodeId(sub.id);
+    onSelectNode?.(sub.id, sub.name);
+  };
+
+  const getTotalModuleProgress = (module: KnowledgeNode): number => {
+    let total = 0;
+    let completed = 0;
+    const traverse = (node: KnowledgeNode) => {
+      if (node.courses) {
+        node.courses.forEach(c => {
+          total++;
+          if (isCourseCompleted(node.id, c.id)) completed++;
+        });
+      }
+      if (node.children) node.children.forEach(traverse);
+    };
+    traverse(module);
+    return total > 0 ? Math.round((completed / total) * 100) : 0;
+  };
 
   return (
-    <div className={`h-full bg-white border-r border-gray-200 flex flex-col transition-all duration-300 shrink-0 ${expanded ? 'w-72' : 'w-0 overflow-hidden'}`}>
-      {/* 顶部 Logo 区域 */}
-      <div className="px-5 pt-5 pb-4 shrink-0">
+    <div className="w-full bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-6">
+      {/* 标题栏 */}
+      <div className="flex items-center px-5 py-3 bg-gradient-to-r from-red-50 via-orange-50 to-amber-50 border-b border-orange-100">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-red-500 via-orange-500 to-amber-500 flex items-center justify-center">
-            <Target className="h-6 w-6 text-white" />
+          <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-red-500 via-orange-500 to-amber-500 flex items-center justify-center">
+            <Layers3 className="h-5 w-5 text-white" />
           </div>
-          <div className="flex-1 min-w-0">
-            <h2 className="text-[20px] font-bold text-gray-800" style={{ fontFamily: 'Noto Serif SC, serif' }}>红韵智学</h2>
-            <p className="text-[15px] text-gray-500">知识图谱 · {diffLabel}</p>
+          <div>
+            <h2 className="text-lg font-bold text-gray-800">知识图谱 · {diffLabel}版学习路径</h2>
+            <p className="text-xs text-gray-500">共{rootNode.children?.length || 0}个知识模块 · {userLearningPath.totalDuration}分钟</p>
           </div>
-          <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0" onClick={onClose}>
-            <X className="h-5 w-5 text-gray-400" />
-          </Button>
         </div>
       </div>
 
-      {/* 分隔线 */}
-      <div className="mx-5 border-t border-gray-100 shrink-0" />
+      {/* 思维导图图谱 - 直接展示在模块上方 */}
+      <div className="border-b border-gray-100" style={{ height: '450px' }}>
+        <MindMap
+          data={rootNode}
+          progress={learningProgress}
+          interactive={true}
+          highlightedNodes={selectedNodeId ? [selectedNodeId] : []}
+          onNodeClick={(node: KnowledgeNode) => {
+            setSelectedNodeId(node.id);
+            setActiveModuleId(node.level === 1 ? node.id : (node.level === 0 ? '' : node.id));
+            onSelectNode?.(node.id, node.name);
+          }}
+        />
+      </div>
 
-      {/* 个性化诊断结果面板 */}
-      <div className="px-5 py-3 shrink-0">
-        <button
-          onClick={() => setShowDiagnostic(!showDiagnostic)}
-          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 hover:from-orange-100 hover:to-amber-100 transition-colors text-left"
-        >
-          <Sparkles className="h-5 w-5 text-orange-500 shrink-0" />
-          <span className="flex-1 text-[18px] font-semibold text-gray-700">个性化诊断结果</span>
-          <ChevronRight className={`h-5 w-5 text-gray-400 transition-transform ${showDiagnostic ? 'rotate-90' : ''}`} />
-        </button>
-        {showDiagnostic && (
-          <div className="mt-3 space-y-2.5 pl-1">
-            {/* 诊断选择记录 */}
-            <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-              <p className="text-[16px] font-medium text-gray-700 mb-2">您的诊断选择</p>
-              <div className="space-y-2">
-                {diagnosticData?.roles && diagnosticData.roles.length > 0 && (
-                  <div>
-                    <p className="text-[14px] text-gray-500 mb-1">身份选择</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {diagnosticData.roles.map(role => (
-                        <Badge key={role} variant="secondary" className="text-[14px] bg-red-100 text-red-700 border-0 px-3 py-1">{role}</Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {diagnosticData?.topics && diagnosticData.topics.length > 0 && (
-                  <div>
-                    <p className="text-[14px] text-gray-500 mb-1">学习主题</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {diagnosticData.topics.map(topic => (
-                        <Badge key={topic} variant="secondary" className="text-[14px] bg-blue-100 text-blue-700 border-0 px-3 py-1">{topic}</Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {diagnosticData?.difficulty && (
-                  <div>
-                    <p className="text-[14px] text-gray-500 mb-1">难度选择</p>
-                    <Badge variant="secondary" className="text-[14px] bg-green-100 text-green-700 border-0 px-3 py-1">
-                      {diagnosticData.difficulty === 'beginner' ? '入门级' : diagnosticData.difficulty === 'intermediate' ? '进阶级' : '精通级'}
-                    </Badge>
-                  </div>
-                )}
+      {/* 个性化诊断 - 长期展示 */}
+      <div className="px-5 py-4 bg-gradient-to-r from-orange-50/50 to-amber-50/50 border-b border-orange-100">
+        <div className="flex items-center gap-2 mb-3">
+          <Sparkles className="h-4 w-4 text-orange-500" />
+          <h3 className="text-sm font-bold text-gray-700">个性化诊断结果</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white rounded-lg p-3 border border-gray-200">
+              <p className="text-xs font-medium text-gray-500 mb-1.5">身份选择</p>
+              <div className="flex flex-wrap gap-1">
+                {diagnosticData?.roles?.map(role => (
+                  <Badge key={role} variant="secondary" className="text-xs bg-red-100 text-red-700 border-0">{role}</Badge>
+                )) || <Badge variant="secondary" className="text-xs">普通党员</Badge>}
               </div>
             </div>
-
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-3 border border-purple-100">
-              <p className="text-[16px] font-medium text-purple-700 mb-1.5">推荐原因</p>
-              <p className="text-[16px] text-purple-600 leading-relaxed">
-                根据您选择的身份和感兴趣的主题，系统为您匹配了以下{userLearningPath.rootNode.children?.length || 0}个知识模块，共{userLearningPath.totalDuration}分钟的学习内容。
+            <div className="bg-white rounded-lg p-3 border border-gray-200">
+              <p className="text-xs font-medium text-gray-500 mb-1.5">学习主题</p>
+              <div className="flex flex-wrap gap-1">
+                {diagnosticData?.topics?.map(topic => (
+                  <Badge key={topic} variant="secondary" className="text-xs bg-blue-100 text-blue-700 border-0">{topic}</Badge>
+                )) || <Badge variant="secondary" className="text-xs">二十大精神</Badge>}
+              </div>
+            </div>
+            <div className="bg-white rounded-lg p-3 border border-gray-200">
+              <p className="text-xs font-medium text-gray-500 mb-1.5">难度 · 推荐原因</p>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                {diffLabel}级 · 为您匹配{modules.length}个知识模块
               </p>
-              <Button 
-                className="mt-3 w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:opacity-90" 
-                onClick={() => {
-                  const saved = localStorage.getItem('learning_progress');
-                  if (saved) {
-                    try { setLearningProgress(JSON.parse(saved)); } catch { /* ignore */ }
-                  }
-                  setShowMindMapModal(true);
-                }}
-              >
-                <Map className="h-4 w-4 mr-2" />
-                查看诊断结果图谱
-              </Button>
             </div>
           </div>
-        )}
+        </div>
+
+      {/* 核心：横置知识模块选项卡 */}
+      <div className="px-5 py-4">
+        <p className="text-xs font-medium text-gray-400 mb-3 uppercase tracking-wide">知识模块</p>
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+          {modules.map((module: KnowledgeNode) => {
+            const isActive = activeModuleId === module.id || selectedNodeId === module.id;
+            const progress = getTotalModuleProgress(module);
+            const childCount = (module.children?.length || 0) + (module.courses?.length || 0);
+            return (
+              <button
+                key={module.id}
+                onClick={() => handleModuleClick(module)}
+                className={`flex-shrink-0 flex flex-col items-center gap-2 px-5 py-3 rounded-xl transition-all duration-200 min-w-[120px] ${
+                  isActive
+                    ? 'bg-gradient-to-br from-red-500 to-orange-500 text-white shadow-lg shadow-orange-200 scale-105'
+                    : 'bg-gray-50 text-gray-600 hover:bg-orange-50 hover:text-orange-700 border border-gray-100 hover:border-orange-200'
+                }`}
+              >
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${
+                  isActive ? 'bg-white/20' : 'bg-white'
+                }`}>
+                  {module.name.charAt(0)}
+                </div>
+                <span className="text-sm font-bold whitespace-nowrap">{module.name}</span>
+                <span className={`text-xs ${isActive ? 'text-white/70' : 'text-gray-400'}`}>
+                  {childCount}项内容
+                </span>
+                {progress > 0 && (
+                  <div className="w-full h-1 bg-white/20 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${isActive ? 'bg-white' : 'bg-orange-400'}`}
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* 分隔线 */}
-      <div className="mx-5 border-t border-gray-100 shrink-0" />
-
-      {/* 树形内容区域 */}
-      <ScrollArea className="flex-1 overflow-y-auto">
-        <div className="py-2">
-          <TreeNode node={userLearningPath.rootNode} depth={0} expandedNodes={expandedNodes} onToggle={handleToggle} onSelectNode={handleNodeSelect} selectedNodeId={selectedNodeId} progress={learningProgress} />
-        </div>
-      </ScrollArea>
-      {/* 诊断结果图谱弹框 */}
-      <Dialog open={showMindMapModal} onOpenChange={setShowMindMapModal}>
-        <DialogContent className="max-w-[90vw] max-h-[90vh] w-full p-0" style={{ minWidth: '800px', minHeight: '600px' }} aria-describedby="mindmap-description">
-          <DialogHeader className="px-6 pt-6 pb-3 border-b">
-            <DialogTitle className="text-xl font-bold flex items-center gap-2" style={{ fontFamily: 'Noto Serif SC, serif' }}>
-              <Map className="h-6 w-6 text-blue-500" />
-              个人诊断结果图谱
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex-1 min-h-[500px] bg-gradient-to-br from-gray-50 to-gray-100">
-            <MindMap 
-              data={userLearningPath.rootNode}
-              progress={learningProgress}
-              interactive={false}
-            />
-            <div id="mindmap-description" className="sr-only">
-              个人诊断结果图谱展示了基于您的身份和学习主题生成的个性化学习路径，包含知识模块和学习时长信息。
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
@@ -1348,7 +1302,6 @@ export default function HomePage() {
   const [selectedContent, setSelectedContent] = useState<ContentItem | null>(null);
   const [isReadingModalOpen, setIsReadingModalOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
-  const [isKnowledgeGraphOpen, setIsKnowledgeGraphOpen] = useState(false);
   const [selectedNodeId, setSelectedNodeId] = useState<string>('');
   const [selectedNodeName, setSelectedNodeName] = useState<string>('');
   
@@ -1411,52 +1364,7 @@ export default function HomePage() {
     }
   }, [userLearningPath]);
   
-  // 动态生成分类按钮，规则：点击节点的下一级节点作为分类，末级节点不进行分类
-  const generateCategories = () => {
-    const baseCategories = [{ id: 'all', name: '完整', icon: Layers3 }];
-    
-    // 从用户学习路径中查找当前节点
-    const findNodeInLearningPath = (currentNode: KnowledgeNode): KnowledgeNode | null => {
-      if (currentNode.id === selectedNodeId) return currentNode;
-      if (currentNode.children) {
-        for (const child of currentNode.children) {
-          const found = findNodeInLearningPath(child);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-    
-    // 从用户学习路径中查找当前节点
-    const currentNode = findNodeInLearningPath(userLearningPath.rootNode);
-    
-    // 如果当前节点有子节点，将子节点作为分类
-    if (currentNode && currentNode.children && currentNode.children.length > 0) {
-      // 遍历用户学习路径中的子节点
-      currentNode.children.forEach(child => {
-        // 对于 Level 1 节点（知识模块），总是作为分类显示（与左侧树结构一致）
-        // 对于 Level 2+ 节点，只添加有子节点或课程的节点作为分类
-        const isLevel1 = child.level === 1;
-        const hasChildren = child.children && child.children.length > 0;
-        const hasCourses = child.courses && child.courses.length > 0;
-        const hasContent = child.content !== undefined;
-        
-        if (isLevel1 || hasChildren || hasCourses || hasContent) {
-          baseCategories.push({
-            id: child.id,
-            name: child.name,
-            icon: child.id.includes('basics') || child.id.includes('theory') || child.name.includes('理论') || child.name.includes('党章') ? BookOpen : Target
-          });
-        }
-      });
-    }
-    
-    return baseCategories;
-  };
-  
-  const categories = useMemo(() => {
-    return generateCategories();
-  }, [userLearningPath, selectedNodeId]);
+  // 动态生成分类按钮：已废弃，子分类筛选融入下方内容区
   
   // 从知识图谱中提取内容
   const extractContentsFromGraph = (node: KnowledgeNode): ContentItem[] => {
@@ -1713,119 +1621,147 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex flex-1 overflow-hidden relative">
-      {/* 左侧：知识图谱 */}
-      <KnowledgeGraphSidebar 
-        expanded={isKnowledgeGraphOpen}
-        onClose={() => setIsKnowledgeGraphOpen(false)}  
-        onSelectNode={handleNodeSelect}
-        userLearningPath={userLearningPath}
-        diagnosticData={diagnosticData}
-      />
-      
-      {/* 展开/收起按钮 */}
-      {!isKnowledgeGraphOpen && (
-        <div className="absolute left-0 top-20 z-10">
-          <Button
-            variant="secondary"
-            size="icon"
-            className="rounded-r-lg rounded-l-none shadow-md bg-white border border-l-0 border-gray-200 hover:bg-orange-50 h-12 group relative"
-            onClick={() => setIsKnowledgeGraphOpen(true)}
-          >
-            <Layers3 className="h-4 w-4 text-orange-500" />
-            <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-              知识图谱
-            </span>
-          </Button>
-        </div>
-      )}
-
-      {/* 内容流 */}
+    <div className="flex flex-1 overflow-hidden">
+      {/* 内容流 - 上方横置知识图谱 + 下方内容卡片 */}
       <main className="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-orange-50/50 to-white">
-          {/* 选中模块标题 */}
-          {selectedNodeName && (
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <Layers3 className="h-5 w-5 text-orange-500" />
-                {selectedNodeName}
-              </h2>
-              <div className="h-1 w-20 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full mt-2" />
-            </div>
-          )}
-          
-          {/* 分类筛选 */}
-          <div className="flex items-center gap-2 mb-6">
-          {categories.map((cat) => {
-            const Icon = cat.icon;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => {
-                  setActiveCategory(cat.id);
-                  
-                  // 直接使用分类的id作为目标节点ID
-                  const targetNodeId = cat.id === 'all' ? selectedNodeId || 'root' : cat.id;
-                  
-                  // 查找目标节点
-                  const findNode = (currentNode: KnowledgeNode): KnowledgeNode | null => {
-                    if (currentNode.id === targetNodeId) return currentNode;
-                    if (currentNode.children) {
-                      for (const child of currentNode.children) {
-                        const found = findNode(child);
+        {/* 横置知识图谱 - 页面核心展示区 */}
+        <KnowledgeGraphBar
+          onSelectNode={handleNodeSelect}
+          userLearningPath={userLearningPath}
+          diagnosticData={diagnosticData}
+          selectedNodeId={selectedNodeId}
+          setSelectedNodeId={setSelectedNodeId}
+        />
+
+        {/* 课程内容区 - 主展示区域 */}
+        {selectedNodeName && (
+          <div>
+            {/* 区域头部：标题 + 统计 + 子分类标签 */}
+            <div className="mb-6 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="flex items-center justify-between px-5 py-4 bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-100">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <BookOpen className="h-5 w-5 text-orange-500" />
+                    {selectedNodeName}
+                  </h2>
+                  <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-700 border-0">
+                    {filteredContentsByCategory.length}门课程
+                  </Badge>
+                </div>
+              </div>
+
+              {/* 子分类快速筛选标签 */}
+              {(() => {
+                const findNode = (currentNode: KnowledgeNode, targetId: string): KnowledgeNode | null => {
+                  if (currentNode.id === targetId) return currentNode;
+                  if (currentNode.children) {
+                    for (const child of currentNode.children) {
+                      const found = findNode(child, targetId);
+                      if (found) return found;
+                    }
+                  }
+                  return null;
+                };
+                let currentNode = findNode(userLearningPath.rootNode, selectedNodeId);
+                // 如果当前节点是子分类（无子节点），向上回溯到模块级节点获取子分类列表
+                if (currentNode && (!currentNode.children || currentNode.children.length === 0)) {
+                  const findParentModule = (node: KnowledgeNode, targetId: string): KnowledgeNode | null => {
+                    if (node.children) {
+                      for (const child of node.children) {
+                        if (child.id === targetId) return node;
+                        const found = findParentModule(child, targetId);
                         if (found) return found;
                       }
                     }
                     return null;
                   };
-                  
-                  // 从用户学习路径中查找目标节点
-                  const targetNode = findNode(userLearningPath.rootNode);
-                  if (targetNode) {
-                    // 更新左侧选中节点
-                    setSelectedNodeId(targetNode.id);
-                    setSelectedNodeName(targetNode.name);
+                  const parentModule = findParentModule(userLearningPath.rootNode, selectedNodeId);
+                  if (parentModule) {
+                    currentNode = parentModule;
                   }
-                }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeCategory === cat.id 
-                    ? 'bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-md' 
-                    : 'bg-white text-gray-600 hover:bg-orange-50 border border-gray-200 hover:border-orange-200'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {cat.name}
-              </button>
-            );
-          })}
+                }
+                const subCategories = currentNode?.children || [];
 
-        </div>
-
-        {/* 内容列表 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredContentsByCategory.map((item) => (
-            <div key={item.id} className="relative group">
-              <ContentCard item={item} onClick={() => handleReadContent(item)} />
-              <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button 
-                  size="icon" 
-                  variant="secondary" 
-                  className="h-8 w-8 bg-white/90 hover:bg-white"
-                  onClick={(e) => { e.stopPropagation(); handleLike(item.id); }}
-                >
-                  <Heart className={`h-4 w-4 ${item.isLiked ? 'fill-orange-500 text-orange-500' : ''}`} />
-                </Button>
-                <Button 
-                  size="icon" 
-                  variant="secondary" 
-                  className="h-8 w-8 bg-white/90 hover:bg-white"
-                  onClick={(e) => { e.stopPropagation(); handleBookmark(item.id); }}
-                >
-                  <Bookmark className={`h-4 w-4 ${item.isBookmarked ? 'fill-amber-500 text-amber-500' : ''}`} />
-                </Button>
-              </div>
+                return subCategories.length > 0 ? (
+                  <div className="px-5 py-3 bg-gray-50/50 flex items-center gap-2 flex-wrap">
+                    <span className="text-xs text-gray-400 shrink-0">筛选：</span>
+                    <button
+                      onClick={() => {
+                        setActiveCategory('all');
+                      }}
+                      className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                        activeCategory === 'all'
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-white text-gray-600 hover:bg-orange-50 border border-gray-200'
+                      }`}
+                    >
+                      全部
+                    </button>
+                    {subCategories.map((sub: KnowledgeNode) => {
+                      const subCourses = sub.courses || [];
+                      return (
+                        <button
+                          key={sub.id}
+                          onClick={() => {
+                            setActiveCategory(sub.id);
+                          }}
+                          className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                            activeCategory === sub.id
+                              ? 'bg-orange-500 text-white'
+                              : 'bg-white text-gray-600 hover:bg-orange-50 border border-gray-200'
+                          }`}
+                        >
+                          {sub.name}
+                          {subCourses.length > 0 && (
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                              activeCategory === sub.id ? 'bg-white/20' : 'bg-gray-100'
+                            }`}>
+                              {subCourses.length}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : null;
+              })()}
             </div>
-          ))}
-        </div>
+
+            {/* 课程卡片网格 */}
+            {filteredContentsByCategory.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredContentsByCategory.map((item) => (
+                  <div key={item.id} className="relative group">
+                    <ContentCard item={item} onClick={() => handleReadContent(item)} />
+                    <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button 
+                        size="icon" 
+                        variant="secondary" 
+                        className="h-8 w-8 bg-white/90 hover:bg-white"
+                        onClick={(e) => { e.stopPropagation(); handleLike(item.id); }}
+                      >
+                        <Heart className={`h-4 w-4 ${item.isLiked ? 'fill-orange-500 text-orange-500' : ''}`} />
+                      </Button>
+                      <Button 
+                        size="icon" 
+                        variant="secondary" 
+                        className="h-8 w-8 bg-white/90 hover:bg-white"
+                        onClick={(e) => { e.stopPropagation(); handleBookmark(item.id); }}
+                      >
+                        <Bookmark className={`h-4 w-4 ${item.isBookmarked ? 'fill-amber-500 text-amber-500' : ''}`} />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
+                <BookOpen className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-400 text-sm">当前分类下暂无课程内容</p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* 加载更多 */}
         <div className="flex justify-center mt-8">

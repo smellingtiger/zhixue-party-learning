@@ -37,7 +37,6 @@ const navItems = [
 
 export function MainNav() {
   const pathname = usePathname();
-  const isHomePage = pathname === '/';
   const isLoginPage = pathname === '/login';
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -97,16 +96,6 @@ export function MainNav() {
       }
     };
   }, []);
-
-  // 路由切换时收起/展开导航栏
-  useEffect(() => {
-    if (isHomePage) {
-      setIsExpanded(true);
-    } else {
-      setIsExpanded(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
 
   // 登录页面：隐藏导航栏
   if (isLoginPage) {

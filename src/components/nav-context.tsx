@@ -8,7 +8,7 @@ interface NavContextType {
 }
 
 const NavContext = createContext<NavContextType>({
-  isExpanded: true,
+  isExpanded: false,
   setIsExpanded: () => {},
 });
 
@@ -17,7 +17,7 @@ export function useNavContext() {
 }
 
 export function NavProvider({ children }: { children: ReactNode }) {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   return (
     <NavContext.Provider value={{ isExpanded, setIsExpanded }}>
