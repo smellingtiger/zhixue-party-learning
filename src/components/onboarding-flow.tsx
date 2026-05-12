@@ -14,20 +14,21 @@ import { partyKnowledgeGraph, generateLearningPath } from '@/lib/knowledge-graph
 import { LearningPath, KnowledgeNode, LearningProgress } from '@/lib/types';
 import { 
   BrainCircuit, 
-  Map, 
   MessageSquare, 
   GraduationCap, 
   ArrowLeft,
-  Sparkles,
   Home,
   LogOut,
   User,
   Loader2,
   CheckCircle2,
-  BookOpen,
-  Target,
-  Lightbulb,
-  PartyPopper
+  FileText,
+  Sparkles,
+  Network,
+  Eye,
+  PenTool,
+  Users,
+  Zap,
 } from 'lucide-react';
 
 // 随机欢迎语
@@ -323,100 +324,139 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             >
               {/* Hero区域 - 新用户欢迎页 */}
               <div className="relative overflow-hidden rounded-3xl" style={{ backgroundImage: 'url(/welcome-bg.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
-                {/* 引导流程提示 */}
-                <div className="absolute top-6 left-6 z-20">
-                  <div className="relative group">
-                    <button className="p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all duration-200">
-                      <Lightbulb className="w-6 h-6 text-red-500" />
-                    </button>
-                    <div className="absolute left-0 top-full mt-2 w-80 bg-white rounded-lg shadow-xl p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                      <h4 className="font-bold text-slate-900 mb-3">引导流程说明</h4>
-                      <div className="space-y-3 text-sm text-slate-600">
-                        <div className="flex items-start gap-2">
-                          <span className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold text-xs shrink-0 mt-0.5">1</span>
-                          <p>完成学习诊断，回答身份、学习主题和难度相关问题</p>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <span className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold text-xs shrink-0 mt-0.5">2</span>
-                          <p>智能生成专属课程，系统根据诊断结果推荐学习内容</p>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <span className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold text-xs shrink-0 mt-0.5">3</span>
-                          <p>查看知识图谱，了解党建知识体系结构</p>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <span className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold text-xs shrink-0 mt-0.5">4</span>
-                          <p>进入主站学习，开始系统学习之旅</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="relative z-10 max-w-2xl mx-auto text-center py-12 px-6">
+                <div className="relative z-10 max-w-5xl mx-auto text-center py-12 px-6">
                   <motion.h2 
-                    className="text-3xl md:text-4xl font-bold text-slate-900 mb-4"
+                    className="text-3xl md:text-4xl font-bold text-white mb-8"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                   >
-                    欢迎来到全省统一战线网络学院
+                    党政教育学习智能体
                   </motion.h2>
-                  
-                  {/* AI形象 + 随机欢迎语 */}
+
+                  {/* 引导流程提示 */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="mb-6 flex items-center justify-center gap-3"
+                    transition={{ delay: 0.4 }}
+                    className="mb-8"
                   >
-                    <img src="/welcome-character.png" alt="AI助手" className="h-16 w-auto" />
-                    <p className="text-xl text-slate-700 font-medium">
-                      {showWelcome ? typewriterText : ''}
-                      <span className="animate-pulse">|</span>
-                    </p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {[
+                        { step: 1, icon: FileText, title: '学习诊断', desc: '回答身份与学习偏好' },
+                        { step: 2, icon: Sparkles, title: '智能推荐', desc: '生成专属学习课程' },
+                        { step: 3, icon: Network, title: '知识图谱', desc: '了解党建知识体系' },
+                        { step: 4, icon: GraduationCap, title: '开始学习', desc: '进入系统学习之旅' },
+                      ].map((item) => (
+                        <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
+                          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                            <item.icon className="w-5 h-5 text-white" />
+                          </div>
+                          <span className="text-xs font-bold text-white/60">STEP {item.step}</span>
+                          <span className="text-sm font-bold text-white">{item.title}</span>
+                          <span className="text-xs text-white/70">{item.desc}</span>
+                        </div>
+                      ))}
+                    </div>
                   </motion.div>
-                  
-                  <motion.p 
-                    className="text-slate-800 text-lg mb-8"
+
+                  {/* 软件特色 — 三大智能体 */}
+                  <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
+                    className="mb-6"
                   >
-                    开启您的党建学习之旅，通过AI智能分析为您量身定制学习路径
-                  </motion.p>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
-                    className="flex flex-wrap justify-center gap-4"
-                  >
-                    <Button 
-                      size="lg"
-                      onClick={() => setCurrentView('diagnostic')}
-                      className="bg-gradient-to-r from-red-500 to-red-500 hover:from-red-600 hover:to-red-600 text-white shadow-lg"
-                    >
-                      <Sparkles className="w-5 h-5 mr-2" />
-                      开始学习诊断
-                    </Button>
-                    <Button 
-                      size="lg"
-                      onClick={() => setCurrentView('mindmap')}
-                      variant="outline"
-                      className="border-2 border-red-300 text-slate-700 hover:bg-red-50"
-                    >
-                      <Map className="w-5 h-5 mr-2" />
-                      先看看知识图谱
-                    </Button>
+                    <div className="inline-flex items-center gap-2 mb-2">
+                      <Zap className="w-5 h-5 text-yellow-300" />
+                      <h3 className="text-xl font-bold text-white">AI 核心能力 · 三大智能体</h3>
+                      <Zap className="w-5 h-5 text-yellow-300" />
+                    </div>
+                    <p className="text-white/70 max-w-2xl mx-auto text-sm mb-8">
+                      基于深度诊断结果，三大 AI 智能体协同驱动，为您构建全方位、个性化的智慧学习生态
+                    </p>
                   </motion.div>
-                  
 
+                  <div className="grid md:grid-cols-3 gap-5 mb-6">
+                    {/* 智能体一：智能分析解读 */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6, type: 'spring', stiffness: 200 }}
+                      whileHover={{ y: -6, scale: 1.02 }}
+                      className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-500/30 via-red-400/20 to-orange-400/20 backdrop-blur-sm border border-white/20 p-6 text-left hover:border-red-300/60 hover:shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all duration-500"
+                    >
+                      <div className="absolute -top-6 -right-6 w-24 h-24 bg-red-500/10 rounded-full blur-2xl group-hover:bg-red-500/20 transition-all duration-500" />
+                      <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-12 h-12 rounded-xl bg-red-500/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <Eye className="w-6 h-6 text-red-300 group-hover:text-white transition-colors duration-300" />
+                          </div>
+                          <div>
+                            <span className="text-xs font-bold text-red-300/80 tracking-wider">智能体 01</span>
+                            <h4 className="text-lg font-bold text-white">智能分析解读</h4>
+                          </div>
+                        </div>
+                        <p className="text-sm text-white/75 leading-relaxed">
+                          实时追踪学习进度，深度捕捉交互反馈与行为习惯。AI 精准解读每位学员的偏好与短板，毫秒级推送专属学习内容——<span className="text-red-300 font-medium">比您更懂您的学习需求</span>
+                        </p>
+                      </div>
+                    </motion.div>
+
+                    {/* 智能体二：智能生成学习资料 */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.75, type: 'spring', stiffness: 200 }}
+                      whileHover={{ y: -6, scale: 1.02 }}
+                      className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/30 via-blue-400/20 to-cyan-400/20 backdrop-blur-sm border border-white/20 p-6 text-left hover:border-blue-300/60 hover:shadow-[0_0_30px_rgba(59,130,246,0.3)] transition-all duration-500"
+                    >
+                      <div className="absolute -top-6 -right-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all duration-500" />
+                      <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-12 h-12 rounded-xl bg-blue-500/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <PenTool className="w-6 h-6 text-blue-300 group-hover:text-white transition-colors duration-300" />
+                          </div>
+                          <div>
+                            <span className="text-xs font-bold text-blue-300/80 tracking-wider">智能体 02</span>
+                            <h4 className="text-lg font-bold text-white">智能生成内容</h4>
+                          </div>
+                        </div>
+                        <p className="text-sm text-white/75 leading-relaxed">
+                          汇聚全网权威内容与历史学习数据，AI 深度解析课程内核，智能重组知识体系。<span className="text-blue-300 font-medium">唤醒沉睡的资料，让每一份旧识重新迸发生命力</span>
+                        </p>
+                      </div>
+                    </motion.div>
+
+                    {/* 智能体三：学员智能组班 */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.9, type: 'spring', stiffness: 200 }}
+                      whileHover={{ y: -6, scale: 1.02 }}
+                      className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/30 via-emerald-400/20 to-green-400/20 backdrop-blur-sm border border-white/20 p-6 text-left hover:border-emerald-300/60 hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all duration-500"
+                    >
+                      <div className="absolute -top-6 -right-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-500" />
+                      <div className="relative z-10">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-12 h-12 rounded-xl bg-emerald-500/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <Users className="w-6 h-6 text-emerald-300 group-hover:text-white transition-colors duration-300" />
+                          </div>
+                          <div>
+                            <span className="text-xs font-bold text-emerald-300/80 tracking-wider">智能体 03</span>
+                            <h4 className="text-lg font-bold text-white">学员智能组班</h4>
+                          </div>
+                        </div>
+                        <p className="text-sm text-white/75 leading-relaxed">
+                          统计学情数据，智能匹配教学资源，精准推荐适配课堂。<span className="text-emerald-300 font-medium">不落下每一位学员的进度，不辜负每一位老师的付出——让优质教育资源的分配，从此清晰可见</span>
+                        </p>
+                      </div>
+                    </motion.div>
+                  </div>
                 </div>
               </div>
 
-              {/* 平台特色介绍 - 新设计方案 */}
-              <div className="space-y-10">
-                {/* 功能模块展示 */}
+              {/* 功能模块展示 */}
                 <div className="grid md:grid-cols-3 gap-6">
                   <motion.div
                     whileHover={{ y: -8, boxShadow: '0 20px 25px -5px rgba(220, 38, 38, 0.1)' }}
@@ -512,65 +552,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   </motion.div>
                 </div>
 
-                {/* 学习路径展示 */}
-                <Card className="border-0 shadow-xl relativet bg-cover bg-center" style={{ backgroundImage: 'url(/classGardenbg.png), url(/aijieguo.png)' }}>
-                  <CardContent className="p-8 relative z-10">
-                    <div className="text-center mb-10">
-                      <h3 className="text-2xl font-bold text-slate-900 mb-4">个性化学习路径</h3>
-                      <p className="text-slate-600 max-w-2xl mx-auto">基于您的诊断结果，系统将为您生成专属学习路径，让学习更有针对性</p>
-                    </div>
-                    <div className="relative">
-                      {/* 路径时间线 */}
-                      <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1.5 bg-gradient-to-b from-red-300 to-orange-300 rounded-full"></div>
-                      
-                      <div className="space-y-16">
-                        <motion.div 
-                          initial={{ opacity: 0, x: -50 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.2 }}
-                          className="flex items-center gap-8"
-                        >
-                          <div className="flex-1 text-right pr-8">
-                            <h4 className="font-bold text-lg text-slate-900 mb-2">基础学习</h4>
-                            <p className="text-sm text-slate-600">掌握核心概念和基本理论，建立知识基础</p>
-                          </div>
-                          <div className="z-10 w-16 h-16 rounded-full bg-red-500 flex items-center justify-center text-white font-bold text-xl">1</div>
-                          <div className="flex-1 pl-8"></div>
-                        </motion.div>
-                        
-                        <motion.div 
-                          initial={{ opacity: 0, x: 50 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.4 }}
-                          className="flex items-center gap-8"
-                        >
-                          <div className="flex-1 pr-8"></div>
-                          <div className="z-10 w-16 h-16 rounded-full bg-orange-500 flex items-center justify-center text-white font-bold text-xl">2</div>
-                          <div className="flex-1 pl-8">
-                            <h4 className="font-bold text-lg text-slate-900 mb-2">进阶提升</h4>
-                            <p className="text-sm text-slate-600">深入理解和应用实践，提升专业能力</p>
-                          </div>
-                        </motion.div>
-                        
-                        <motion.div 
-                          initial={{ opacity: 0, x: -50 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.6 }}
-                          className="flex items-center gap-8"
-                        >
-                          <div className="flex-1 text-right pr-8">
-                            <h4 className="font-bold text-lg text-slate-900 mb-2">综合应用</h4>
-                            <p className="text-sm text-slate-600">理论联系实际，解决实际问题</p>
-                          </div>
-                          <div className="z-10 w-16 h-16 rounded-full bg-yellow-500 flex items-center justify-center text-white font-bold text-xl">3</div>
-                          <div className="flex-1 pl-8"></div>
-                        </motion.div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-              </div>
             </motion.div>
           )}
 
