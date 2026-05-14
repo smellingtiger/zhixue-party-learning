@@ -585,6 +585,29 @@ export function getNodeById(id: string, node: KnowledgeNode): KnowledgeNode | nu
 
 
 /**
+ * 根据难度等级获取被锁定的节点ID集合
+ * beginner: 锁定 difficulty >= 2 的节点
+ * intermediate: 锁定 difficulty >= 3 的节点
+ * advanced: 不锁定任何节点
+ */
+export function getDifficultyLockedNodeIds(root: KnowledgeNode, level: string): Set<string> {
+  const maxDifficulty = level === 'beginner' ? 1 : level === 'intermediate' ? 2 : 3;
+  const locked = new Set<string>();
+
+  function scan(node: KnowledgeNode) {
+    if (node.difficulty && node.difficulty > maxDifficulty) {
+      locked.add(node.id);
+    }
+    if (node.children) {
+      node.children.forEach(scan);
+    }
+  }
+
+  scan(root);
+  return locked;
+}
+
+/**
  * 提取课程标题前缀（去掉括号及其内容）
  */
 function extractCoursePrefix(title: string): string {
@@ -664,15 +687,14 @@ function injectCoursesRecursive(node: KnowledgeNode): KnowledgeNode {
   return injectCoursesToNode(node);
 }
 
-// 筛选节点
+// 筛选节点（不包含难度筛选）
 function filterNodes(
   node: KnowledgeNode,
-  selectedIds: Set<string>,
-  level: string
+  selectedIds: Set<string>
 ): KnowledgeNode | null {
   // 递归过滤子节点
   let filteredChildren = node.children
-    ?.map(child => filterNodes(child, selectedIds, level))
+    ?.map(child => filterNodes(child, selectedIds))
     .filter((child): child is KnowledgeNode => child !== null);
 
   const isSelected = selectedIds.has(node.id);
@@ -682,7 +704,7 @@ function filterNodes(
     return { ...node, children: filteredChildren };
   }
 
-  // Level 1 一级分类节点：只要有子节点就保留（不做难度筛选）
+  // Level 1 一级分类节点：只要有子节点就保留
   if (node.level === 1) {
     if ((filteredChildren && filteredChildren.length > 0) || isSelected) {
       return { ...node, children: filteredChildren };
@@ -690,20 +712,11 @@ function filterNodes(
     return null;
   }
 
-  // Level 2+ 节点：根据难度和选中状态筛选
-  const complexity = node.difficulty;
+  // Level 2+ 节点：根据选中状态筛选，不再按难度过滤
   if (isSelected) {
-    // 用户选中的节点始终保留
     return { ...node, children: undefined };
   }
-  if (complexity) {
-    // 根据难度筛选
-    if (level === 'beginner' && complexity > 1) return null;
-    if (level === 'intermediate' && complexity > 2) return null;
-  }
 
-  // 叶子节点未被选中且有难度限制时移除
-  // 但是，如果父节点被选中，保留子节点
   if (!filteredChildren?.length && !isSelected) {
     return null;
   }
@@ -711,25 +724,23 @@ function filterNodes(
   return { ...node, children: filteredChildren };
 }
 
-// 生成学习路径
+// 角色到节点的映射（导出供诊断结果展示使用）
+export const roleNodeMap: Record<string, string[]> = {
+  '党支部书记': ['grassroots-party-work', 'party-life'],
+  '党务工作者': ['grassroots-party-work', 'membership-development'],
+  '普通党员': ['party-constitution', 'party-history'],
+  '入党积极分子': ['party-constitution', 'membership-development'],
+  '预备党员': ['party-theory', 'integrity-education'],
+};
+
+// 生成学习路径（level 仅用于元数据显示，不做节点过滤）
 export function generateLearningPath(profile: {
   roles: string[];
   topics: string[];
-  level: string;
+  level?: string;
 }): LearningPath {
   // 收集选中的节点ID
   const selectedIds = new Set<string>();
-  
-  // 角色映射到对应节点
-  const roleNodeMap: Record<string, string[]> = {
-    '党支部书记': ['grassroots-party-work', 'party-life'],
-    '党务工作者': ['grassroots-party-work', 'membership-development'],
-    '普通党员': ['party-constitution', 'party-history'],
-    '入党积极分子': ['party-constitution', 'membership-development'],
-    '预备党员': ['party-theory', 'integrity-education'],
-  };
-
-  // 主题映射到对应节点（使用全局映射）
 
   profile.roles.forEach(role => {
     const nodes = roleNodeMap[role];
@@ -765,8 +776,8 @@ export function generateLearningPath(profile: {
     }
   });
   
-  // 筛选并构建学习路径
-  const filteredRoot = filterNodes(partyKnowledgeGraph, selectedIds, profile.level);
+  // 筛选并构建学习路径（不进行难度筛选）
+  const filteredRoot = filterNodes(partyKnowledgeGraph, selectedIds);
   
   // 计算总时长
   let totalDuration = 0;
@@ -782,13 +793,6 @@ export function generateLearningPath(profile: {
     calcDuration(filteredRoot);
   }
   
-  // 难度标题映射
-  const difficultyLabels = {
-    beginner: '入门级',
-    intermediate: '进阶级',
-    advanced: '深入级'
-  };
-  
   // 生成标题
   const selectedRole = profile.roles[0] || '党员';
   const selectedTopic = profile.topics[0] || '综合学习';
@@ -796,10 +800,10 @@ export function generateLearningPath(profile: {
   return {
     id: `path-${Date.now()}`,
     title: `${selectedRole} · ${selectedTopic}`,
-    description: `基于您的选择，为您规划了「${difficultyLabels[profile.level as keyof typeof difficultyLabels]}」学习方案`,
+    description: `基于您的选择，为您规划个性化学习方案`,
     rootNode: injectCoursesRecursive(filteredRoot || partyKnowledgeGraph),
     totalDuration: totalDuration || 120,
-    difficulty: profile.level as 'beginner' | 'intermediate' | 'advanced'
+    difficulty: (profile.level as 'beginner' | 'intermediate' | 'advanced') || 'beginner'
   };
 }
 

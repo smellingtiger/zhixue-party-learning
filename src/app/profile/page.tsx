@@ -47,8 +47,6 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { useAuth } from '@/lib/auth';
 
 
 // 用户数据
@@ -105,7 +103,6 @@ const calendarData = [
 ];
 
 export default function ProfilePage() {
-  const { logout } = useAuth();
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const [soundEffects, setSoundEffects] = useState(true);
@@ -348,7 +345,11 @@ export default function ProfilePage() {
             {/* 退出登录 */}
             <Card>
               <CardContent className="p-4">
-                <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={logout}>
+                <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => {
+                  localStorage.removeItem('user');
+                  localStorage.removeItem('userId');
+                  window.location.reload();
+                }}>
                   <LogOut className="h-4 w-4 mr-2" />
                   退出登录
                 </Button>

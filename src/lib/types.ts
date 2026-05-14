@@ -21,6 +21,8 @@ export interface KnowledgeNode {
   prerequisites?: string[];
   courses?: CourseInfo[];
   videoId?: string;
+  isCourseNode?: boolean;
+  courseData?: CourseInfo;
 }
 
 // 课程内容
