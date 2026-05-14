@@ -551,23 +551,23 @@ export const diagnosticOptions: DiagnosticOption[] = [
   { id: 'r4', label: '入党积极分子', category: 'role', tags: ['入党教育'] },
   { id: 'r5', label: '预备党员', category: 'role', tags: ['党性修养'] },
   { id: 'r6', label: '群众', category: 'role', tags: ['了解党建'] },
-  // 学习主题
-  { id: 't1', label: '二十大精神', category: 'topic', tags: ['理论学习'] },
+  // 学习主题（与图谱节点名称保持一致）
+  { id: 't1', label: '二十大精神学习', category: 'topic', tags: ['理论学习'] },
   { id: 't2', label: '党史学习', category: 'topic', tags: ['历史教育'] },
-  { id: 't3', label: '党章党规', category: 'topic', tags: ['制度学习'] },
-  { id: 't4', label: '基层党务', category: 'topic', tags: ['实务操作'] },
-  { id: 't5', label: '乡村振兴', category: 'topic', tags: ['政策解读'] },
-  { id: 't6', label: '党风廉政', category: 'topic', tags: ['警示教育'] },
+  { id: 't3', label: '党章学习', category: 'topic', tags: ['制度学习'] },
+  { id: 't4', label: '基层党务工作', category: 'topic', tags: ['实务操作'] },
+  { id: 't5', label: '乡村振兴战略', category: 'topic', tags: ['政策解读'] },
+  { id: 't6', label: '党风廉政建设', category: 'topic', tags: ['警示教育'] },
 ];
 
 // 主题映射到对应节点
 export const topicNodeMap: Record<string, string> = {
-  '二十大精神': 'party-20th-congress',
+  '二十大精神学习': 'party-20th-congress',
   '党史学习': 'party-history',
-  '党章党规': 'party-constitution',
-  '基层党务': 'grassroots-party-work',
-  '乡村振兴': 'rural-revitalization',
-  '党风廉政': 'disciplinary-style',
+  '党章学习': 'party-constitution',
+  '基层党务工作': 'grassroots-party-work',
+  '乡村振兴战略': 'rural-revitalization',
+  '党风廉政建设': 'disciplinary-style',
 };
 
 // 递归查找节点
@@ -775,6 +775,28 @@ export function generateLearningPath(profile: {
       selectedIds.add(parentId);
     }
   });
+  
+  // 添加子节点（当选中父节点时，自动包含其子节点）
+  const childrenMap: Record<string, string[]> = {
+    'rural-revitalization': ['rural-policy', 'rural-governance'],
+    'party-20th-congress': ['20th-report', 'chinese-modernization', 'comprehensive-strict-governance'],
+    'grassroots-party-work': ['membership-development', 'party-life', 'mass-work'],
+    'party-building-basics': ['party-constitution', 'party-history', 'party-theory'],
+    'disciplinary-style': ['integrity-education', 'supervision-system'],
+  };
+  
+  const idsToAdd: string[] = [];
+  selectedIds.forEach(id => {
+    const children = childrenMap[id];
+    if (children) {
+      children.forEach(childId => {
+        if (!selectedIds.has(childId)) {
+          idsToAdd.push(childId);
+        }
+      });
+    }
+  });
+  idsToAdd.forEach(id => selectedIds.add(id));
   
   // 筛选并构建学习路径（不进行难度筛选）
   const filteredRoot = filterNodes(partyKnowledgeGraph, selectedIds);

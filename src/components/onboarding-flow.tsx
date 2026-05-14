@@ -632,19 +632,19 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                           查看全貌
                         </button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-[90vw] max-h-[85vh] w-[1200px] p-0 gap-0" showCloseButton={false}>
-                        <DialogHeader className="px-6 pt-5 pb-3 border-b">
+                      <DialogContent className="w-[96vw] max-w-[96vw] min-w-[1200px] max-h-[96vh] h-[96vh] p-0 gap-0 border-0 flex flex-col" showCloseButton={false}>
+                        <DialogHeader className="px-4 pt-3 pb-2 border-b shrink-0">
                           <div className="flex items-center justify-between">
-                            <DialogTitle className="text-lg font-bold flex items-center gap-2">
-                              <Network className="w-5 h-5 text-red-600" />
+                            <DialogTitle className="text-base font-bold flex items-center gap-2">
+                              <Network className="w-4 h-4 text-red-600" />
                               党建知识全貌
                             </DialogTitle>
-                            <Button variant="ghost" size="icon" onClick={() => setShowFullMap(false)} className="h-8 w-8">
-                              <X className="w-4 h-4" />
+                            <Button variant="ghost" size="icon" onClick={() => setShowFullMap(false)} className="h-7 w-7">
+                              <X className="w-3.5 h-3.5" />
                             </Button>
                           </div>
                         </DialogHeader>
-                        <div className="h-[75vh] w-full">
+                        <div className="flex-1 w-full min-h-0">
                           <MindMap 
                             data={partyKnowledgeGraph}
                             progress={progress}
