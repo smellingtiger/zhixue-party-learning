@@ -310,7 +310,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                   >
-                    红韵学习智能体
+                    精英在线学习智能体
                   </motion.h2>
 
                   {/* 软件特色 — 三大智能体 */}
@@ -795,7 +795,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-slate-500 text-sm">
               <BrainCircuit className="w-5 h-5" />
-              <span>智慧党建学习平台 · AI驱动学习新体验</span>
+              <span>精英在线学习智能体 · AI驱动学习新体验</span>
             </div>
             <div className="text-slate-400 text-xs">
               © 2024 智慧党建 · 让学习更智能
