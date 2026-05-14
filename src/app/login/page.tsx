@@ -174,7 +174,7 @@ export default function LoginPage() {
           login(userInfo.Data.Model);
           // 首次登录，跳转到引导页
           console.log('首次登录，跳转到引导页');
-          router.push('/onboarding');
+          router.push('/');
         } else {
           console.error('获取用户信息失败:', userInfo);
           throw new Error('获取用户信息失败');

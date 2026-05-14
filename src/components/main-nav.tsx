@@ -24,10 +24,9 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavContext } from './nav-context';
-import { useAuth } from '@/lib/auth';
 
 const navItems = [
-  { id: 'home', name: '首页', href: '/', icon: Home },
+  { id: 'home', name: '首页', href: '/home', icon: Home },
   { id: 'ai-course', name: 'AI智能生成课程', href: '/ai-course', icon: Sparkles },
   { id: 'aiclass', name: 'AI组班', href: '/training-candidates', icon: Users },
   { id: 'profile', name: '我的', href: '/profile', icon: User },
@@ -36,79 +35,34 @@ const navItems = [
 export function MainNav() {
   const pathname = usePathname();
   const isLoginPage = pathname === '/login';
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // 使用全局 Context 共享展开/收起状态
   const { isExpanded, setIsExpanded } = useNavContext();
   
-  // 使用登录状态管理
-  const { user, loading, logout } = useAuth();
-  
-  // 强制同步用户状态
+  const [userName, setUserName] = useState('游客用户');
+  const [userDisplayName, setUserDisplayName] = useState('游客');
+
   useEffect(() => {
-    // 只在客户端执行
     if (typeof window !== 'undefined') {
       const userData = localStorage.getItem('user');
       if (userData) {
-        // 直接从localStorage读取用户信息，确保导航栏立即显示
-        setHasCompletedOnboarding(true);
+        try {
+          const parsedUser = JSON.parse(userData);
+          setUserName(parsedUser.name || parsedUser.Account || parsedUser.UserName || '游客用户');
+          setUserDisplayName(parsedUser.display_name || parsedUser.NickName || '游客');
+        } catch {
+          // ignore
+        }
       }
     }
   }, []);
 
-  // 检测引导完成状态
-  useEffect(() => {
-    // 只在客户端执行
-    if (typeof window !== 'undefined') {
-      const completed = localStorage.getItem('onboarding_completed');
-      setHasCompletedOnboarding(completed === 'true');
-    }
-  }, [user, pathname, loading]); // 当登录状态、路径或加载状态变化时重新检查
-
-  // 监听登录成功事件，强制更新用户状态
-  useEffect(() => {
-    const handleLoginSuccess = (event: CustomEvent) => {
-      if (event.detail) {
-        // 直接更新用户状态，确保导航栏立即显示用户信息
-        setHasCompletedOnboarding(true);
-      }
-    };
-
-    // 监听引导完成事件，更新导航栏状态
-    const handleOnboardingComplete = () => {
-      // 直接更新引导完成状态，确保导航栏立即显示
-      setHasCompletedOnboarding(true);
-    };
-
-    // 只在客户端添加事件监听器
-    if (typeof window !== 'undefined') {
-      window.addEventListener('userLoggedIn', handleLoginSuccess as EventListener);
-      window.addEventListener('onboardingCompleted', handleOnboardingComplete as EventListener);
-    }
-
-    return () => {
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('userLoggedIn', handleLoginSuccess as EventListener);
-        window.removeEventListener('onboardingCompleted', handleOnboardingComplete as EventListener);
-      }
-    };
-  }, []);
-
-  // 登录页面：隐藏导航栏
   if (isLoginPage) {
     return null;
   }
 
-  // 引导页：隐藏导航栏，因为OnboardingFlow组件有自己的导航栏
-  if (hasCompletedOnboarding === false) {
-    return null;
-  }
+  const showExpandedContent = true;
 
-  // 所有页面都支持展开/收起状态
-  const showExpandedContent = hasCompletedOnboarding === true;
-
-  // 通用红色系样式
   const baseHeaderStyle = showExpandedContent
     ? "bg-gradient-to-r from-red-700 via-red-600 to-orange-500"
     : "bg-gradient-to-r from-red-700 via-red-600 to-orange-500";
@@ -143,14 +97,14 @@ export function MainNav() {
         {/* 顶部导航行 */}
         <div className="flex items-center justify-between px-6 py-3">
           <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href="/home" className="flex items-center gap-2">
               <img 
                 src="/icon.png" 
-                alt="全省统一战线网络学院" 
+                alt="红韵学习智能体" 
                 className="h-10 w-auto object-contain"
               />
               <span className="font-bold text-lg hidden md:block text-white">
-                全省统一战线网络学院
+                红韵学习智能体
               </span>
             </Link>
             
@@ -211,37 +165,29 @@ export function MainNav() {
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-400 rounded-full" />
             </Button>
             
-            {user ? (
-              <div className="relative group">
-                <Link href="/profile">
-                  <Avatar className="h-8 w-8 cursor-pointer border-2 border-white/50">
-                    <AvatarFallback className="bg-white text-red-600 font-medium">{user.name?.charAt(0) || user.Account?.charAt(0) || '党'}</AvatarFallback>
-                  </Avatar>
-                </Link>
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                  <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
-                    {user.name || user.Account || '用户'}
-                  </div>
-                  <button 
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={() => logout()}
-                  >
-                    <LogOut className="inline-block h-4 w-4 mr-2" />
-                    退出登录
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <Link href="/login">
-                <Button 
-                  variant="default" 
-                  size="sm"
-                  className="bg-white text-red-600 hover:bg-white/90"
-                >
-                  登录
-                </Button>
+            <div className="relative group">
+              <Link href="/profile">
+                <Avatar className="h-8 w-8 cursor-pointer border-2 border-white/50">
+                  <AvatarFallback className="bg-white text-red-600 font-medium">{userDisplayName?.charAt(0) || '党'}</AvatarFallback>
+                </Avatar>
               </Link>
-            )}
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
+                  {userName || '用户'}
+                </div>
+                <button 
+                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  onClick={() => {
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('userId');
+                    window.location.reload();
+                  }}
+                >
+                  <LogOut className="inline-block h-4 w-4 mr-2" />
+                  退出登录
+                </button>
+              </div>
+            </div>
             
             {/* 展开/收起按钮 */}
             {showExpandedContent && (
@@ -283,7 +229,7 @@ export function MainNav() {
             >
               {/* 欢迎文字 */}
               <h1 className="text-2xl font-bold text-white mb-2 drop-shadow-lg">
-                欢迎来到全省统一战线网络学院
+                欢迎来到红韵学习智能体
               </h1>
               <p className="text-white/80 text-sm mb-5 drop-shadow">
                 开启您的党建学习之旅

@@ -5,8 +5,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { diagnosticOptions, generateLearningPath } from '@/lib/knowledge-graph';
-import { LearningPath } from '@/lib/types';
+import { diagnosticOptions } from '@/lib/knowledge-graph';
 import { CheckCircle2, Sparkles, BookOpen, Users, Target } from 'lucide-react';
 
 interface DiagnosticSurveyProps {
@@ -37,7 +36,6 @@ export function DiagnosticSurvey({ onPathGenerated }: DiagnosticSurveyProps) {
 
   const handleGenerate = () => {
     setIsGenerating(true);
-    // 模拟生成过程
     setTimeout(() => {
       onPathGenerated(selectedRoles, selectedTopics, level);
       setIsGenerating(false);
@@ -166,6 +164,34 @@ export function DiagnosticSurvey({ onPathGenerated }: DiagnosticSurveyProps) {
                 ))}
               </div>
               
+              {/* 难度选择 */}
+              <div>
+                <label className="text-sm font-medium text-slate-700 mb-3 block">
+                  <Target className="w-4 h-4 inline mr-1" />
+                  选择学习难度
+                </label>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { value: 'beginner', label: '入门', desc: '基础内容，适合初学者' },
+                    { value: 'intermediate', label: '进阶', desc: '中等难度，适合有一定基础' },
+                    { value: 'advanced', label: '深入', desc: '全面内容，包括复杂主题' }
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setLevel(opt.value)}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        level === opt.value
+                          ? 'border-red-500 bg-red-50'
+                          : 'border-slate-200 bg-white hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="font-medium">{opt.label}</div>
+                      <div className="text-xs text-slate-500">{opt.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
               <div className="flex justify-between pt-4">
                 <Button 
                   variant="outline"
@@ -186,7 +212,7 @@ export function DiagnosticSurvey({ onPathGenerated }: DiagnosticSurveyProps) {
         </motion.div>
       )}
 
-      {/* 步骤3：确认并生成 */}
+      {/* 步骤3：确认选择并生成 */}
       {step === 2 && (
         <motion.div
           initial={{ opacity: 0, x: 20 }}
@@ -224,34 +250,6 @@ export function DiagnosticSurvey({ onPathGenerated }: DiagnosticSurveyProps) {
                     <Badge key={topic} variant="secondary" className="bg-blue-100 text-blue-700">
                       {topic}
                     </Badge>
-                  ))}
-                </div>
-              </div>
-              
-              {/* 难度选择 */}
-              <div>
-                <label className="text-sm font-medium text-slate-700 mb-3 block">
-                  <Target className="w-4 h-4 inline mr-1" />
-                  选择学习难度
-                </label>
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { value: 'beginner', label: '入门', desc: '基础内容，适合初学者' },
-                    { value: 'intermediate', label: '进阶', desc: '中等难度，适合有一定基础' },
-                    { value: 'advanced', label: '深入', desc: '全面内容，包括复杂主题' }
-                  ].map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => setLevel(opt.value)}
-                      className={`p-4 rounded-xl border-2 transition-all ${
-                        level === opt.value
-                          ? 'border-red-500 bg-red-50'
-                          : 'border-slate-200 bg-white hover:border-slate-300'
-                      }`}
-                    >
-                      <div className="font-medium">{opt.label}</div>
-                      <div className="text-xs text-slate-500">{opt.desc}</div>
-                    </button>
                   ))}
                 </div>
               </div>

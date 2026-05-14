@@ -1,17 +1,24 @@
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 
-// 全局用户状态管理
-let globalUser: any = null;
+const createGuestUser = () => ({
+  UserId: 'guest_default',
+  UserName: '游客用户',
+  NickName: '游客',
+  name: '游客用户',
+  display_name: '游客',
+  Avatar: '',
+  IsFirstLogin: false,
+  LoginTime: new Date().toISOString(),
+});
+
+let globalUser: any = createGuestUser();
 
 export const useAuth = () => {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<any>(createGuestUser());
   const [loading, setLoading] = useState(true);
   const callbackRef = useRef<(() => void) | undefined>(undefined);
 
   useEffect(() => {
-    // 只在客户端执行，避免服务器端渲染时的 localStorage 错误
     if (typeof window !== 'undefined') {
       const userData = localStorage.getItem('user');
       if (userData) {
@@ -23,13 +30,13 @@ export const useAuth = () => {
           console.error('解析用户数据失败:', error);
           localStorage.removeItem('user');
           localStorage.removeItem('userId');
-          globalUser = null;
-          setUser(null);
+          globalUser = createGuestUser();
+          setUser(createGuestUser());
         }
       } else {
-        // 确保在没有用户数据时设置为 null
-        globalUser = null;
-        setUser(null);
+        const guestUser = createGuestUser();
+        globalUser = guestUser;
+        setUser(guestUser);
       }
     }
     setLoading(false);
@@ -90,10 +97,9 @@ export const useAuth = () => {
     localStorage.removeItem('user_diagnostic');
     localStorage.removeItem('user_diagnostic_completed');
     localStorage.removeItem('onboarding_completed');
-    // 清空全局用户状态
-    globalUser = null;
-    setUser(null);
-    router.push('/login');
+    const guestUser = createGuestUser();
+    globalUser = guestUser;
+    setUser(guestUser);
   };
 
   return { user, loading, login, logout };

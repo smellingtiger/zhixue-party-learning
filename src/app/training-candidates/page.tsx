@@ -352,7 +352,7 @@ export default function TrainingCandidatesPage() {
                 智能匹配培训对象，避免重复调训，提升培训效率
               </p>
             </div>
-            <Link href="/">
+            <Link href="/home">
               <Button variant="secondary" className="bg-white/20 text-white hover:bg-white/30 border-0">
                 <Home className="h-4 w-4 mr-2" />
                 返回刷课
