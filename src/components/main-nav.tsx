@@ -100,11 +100,11 @@ export function MainNav() {
             <Link href="/home" className="flex items-center gap-2">
               <img 
                 src="/icon.png" 
-                alt="红韵学习智能体" 
+                alt="精英在线学习智能体" 
                 className="h-10 w-auto object-contain"
               />
               <span className="font-bold text-lg hidden md:block text-white">
-                红韵学习智能体
+                精英在线学习智能体
               </span>
             </Link>
             
@@ -229,7 +229,7 @@ export function MainNav() {
             >
               {/* 欢迎文字 */}
               <h1 className="text-2xl font-bold text-white mb-2 drop-shadow-lg">
-                欢迎来到红韵学习智能体
+                欢迎来到精英在线学习智能体
               </h1>
               <p className="text-white/80 text-sm mb-5 drop-shadow">
                 开启您的党建学习之旅
