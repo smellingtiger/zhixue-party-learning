@@ -551,20 +551,18 @@ export const diagnosticOptions: DiagnosticOption[] = [
   { id: 'r4', label: '入党积极分子', category: 'role', tags: ['入党教育'] },
   { id: 'r5', label: '预备党员', category: 'role', tags: ['党性修养'] },
   { id: 'r6', label: '群众', category: 'role', tags: ['了解党建'] },
-  // 学习主题（与图谱节点名称保持一致）
+  // 学习主题（与图谱一级节点名称保持一致）
   { id: 't1', label: '二十大精神学习', category: 'topic', tags: ['理论学习'] },
-  { id: 't2', label: '党史学习', category: 'topic', tags: ['历史教育'] },
-  { id: 't3', label: '党章学习', category: 'topic', tags: ['制度学习'] },
-  { id: 't4', label: '基层党务工作', category: 'topic', tags: ['实务操作'] },
-  { id: 't5', label: '乡村振兴战略', category: 'topic', tags: ['政策解读'] },
-  { id: 't6', label: '党风廉政建设', category: 'topic', tags: ['警示教育'] },
+  { id: 't2', label: '党建基础理论', category: 'topic', tags: ['理论学习'] },
+  { id: 't3', label: '基层党务工作', category: 'topic', tags: ['实务操作'] },
+  { id: 't4', label: '乡村振兴战略', category: 'topic', tags: ['政策解读'] },
+  { id: 't5', label: '党风廉政建设', category: 'topic', tags: ['警示教育'] },
 ];
 
-// 主题映射到对应节点
+// 主题映射到对应节点（一级节点）
 export const topicNodeMap: Record<string, string> = {
   '二十大精神学习': 'party-20th-congress',
-  '党史学习': 'party-history',
-  '党章学习': 'party-constitution',
+  '党建基础理论': 'party-building-basics',
   '基层党务工作': 'grassroots-party-work',
   '乡村振兴战略': 'rural-revitalization',
   '党风廉政建设': 'disciplinary-style',

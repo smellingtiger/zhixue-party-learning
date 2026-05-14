@@ -338,7 +338,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                       transition={{ delay: 0.6, type: 'spring', stiffness: 200 }}
                       whileHover={{ y: -6, scale: 1.02 }}
                       onClick={() => setActiveAgent(activeAgent === 1 ? null : 1)}
-                      className="group cursor-pointer relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-500/30 via-red-400/20 to-orange-400/20 backdrop-blur-sm border border-white/20 p-6 text-left hover:border-red-300/60 hover:shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all duration-500"
+                      className="group cursor-pointer relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-600/80 via-red-500/70 to-orange-500/70 backdrop-blur-sm border border-white/30 p-6 text-left hover:border-red-300/60 hover:shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all duration-500"
                     >
                       <div className="absolute -top-6 -right-6 w-24 h-24 bg-red-500/10 rounded-full blur-2xl group-hover:bg-red-500/20 transition-all duration-500" />
                       <div className="relative z-10">
@@ -347,11 +347,11 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                             <Eye className="w-6 h-6 text-red-300 group-hover:text-white transition-colors duration-300" />
                           </div>
                           <div>
-                            <span className="text-xs font-bold text-red-300/80 tracking-wider">智能体 01</span>
-                            <h4 className="text-lg font-bold text-white">智能分析解读</h4>
+                            <span className="text-sm font-bold text-red-300/80 tracking-wider">智能体 01</span>
+                            <h4 className="text-2xl font-bold text-white">智能分析解读</h4>
                           </div>
                         </div>
-                        <p className="text-sm text-white/75 leading-relaxed">
+                        <p className="text-base text-white/75 leading-relaxed">
                           实时追踪学习进度，深度捕捉交互反馈与行为习惯。AI 精准解读每位学员的偏好与短板，毫秒级推送专属学习内容——<span className="text-red-300 font-medium">比您更懂您的学习需求</span>
                         </p>
                       </div>
@@ -364,7 +364,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                       transition={{ delay: 0.75, type: 'spring', stiffness: 200 }}
                       whileHover={{ y: -6, scale: 1.02 }}
                       onClick={() => setActiveAgent(activeAgent === 2 ? null : 2)}
-                      className="group cursor-pointer relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/30 via-blue-400/20 to-cyan-400/20 backdrop-blur-sm border border-white/20 p-6 text-left hover:border-blue-300/60 hover:shadow-[0_0_30px_rgba(59,130,246,0.3)] transition-all duration-500"
+                      className="group cursor-pointer relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600/80 via-blue-500/70 to-cyan-500/70 backdrop-blur-sm border border-white/30 p-6 text-left hover:border-blue-300/60 hover:shadow-[0_0_30px_rgba(59,130,246,0.3)] transition-all duration-500"
                     >
                       <div className="absolute -top-6 -right-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all duration-500" />
                       <div className="relative z-10">
@@ -373,11 +373,11 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                             <PenTool className="w-6 h-6 text-blue-300 group-hover:text-white transition-colors duration-300" />
                           </div>
                           <div>
-                            <span className="text-xs font-bold text-blue-300/80 tracking-wider">智能体 02</span>
-                            <h4 className="text-lg font-bold text-white">智能生成内容</h4>
+                            <span className="text-sm font-bold text-blue-300/80 tracking-wider">智能体 02</span>
+                            <h4 className="text-2xl font-bold text-white">智能生成内容</h4>
                           </div>
                         </div>
-                        <p className="text-sm text-white/75 leading-relaxed">
+                        <p className="text-base text-white/75 leading-relaxed">
                           汇聚全网权威内容与历史学习数据，AI 深度解析课程内核，智能重组知识体系。<span className="text-blue-300 font-medium">唤醒沉睡的资料，让每一份旧识重新迸发生命力</span>
                         </p>
                       </div>
@@ -390,7 +390,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                       transition={{ delay: 0.9, type: 'spring', stiffness: 200 }}
                       whileHover={{ y: -6, scale: 1.02 }}
                       onClick={() => setActiveAgent(activeAgent === 3 ? null : 3)}
-                      className="group cursor-pointer relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/30 via-emerald-400/20 to-green-400/20 backdrop-blur-sm border border-white/20 p-6 text-left hover:border-emerald-300/60 hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all duration-500"
+                      className="group cursor-pointer relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600/80 via-emerald-500/70 to-green-500/70 backdrop-blur-sm border border-white/30 p-6 text-left hover:border-emerald-300/60 hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all duration-500"
                     >
                       <div className="absolute -top-6 -right-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-500" />
                       <div className="relative z-10">
@@ -399,11 +399,11 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                             <Users className="w-6 h-6 text-emerald-300 group-hover:text-white transition-colors duration-300" />
                           </div>
                           <div>
-                            <span className="text-xs font-bold text-emerald-300/80 tracking-wider">智能体 03</span>
-                            <h4 className="text-lg font-bold text-white">学员智能组班</h4>
+                            <span className="text-sm font-bold text-emerald-300/80 tracking-wider">智能体 03</span>
+                            <h4 className="text-2xl font-bold text-white">学员智能组班</h4>
                           </div>
                         </div>
-                        <p className="text-sm text-white/75 leading-relaxed">
+                        <p className="text-base text-white/75 leading-relaxed">
                           统计学情数据，智能匹配教学资源，精准推荐适配课堂。<span className="text-emerald-300 font-medium">不落下每一位学员的进度，不辜负每一位老师的付出——让优质教育资源的分配，从此清晰可见</span>
                         </p>
                       </div>
