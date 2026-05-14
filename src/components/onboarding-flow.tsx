@@ -12,9 +12,9 @@ import { DiagnosticSurvey } from '@/components/diagnostic-survey';
 import { AIIntentChat } from '@/components/ai-intent-chat';
 import { partyKnowledgeGraph, generateLearningPath, roleNodeMap, topicNodeMap, getNodeById, getDifficultyLockedNodeIds } from '@/lib/knowledge-graph';
 import { LearningPath, KnowledgeNode, LearningProgress } from '@/lib/types';
-import { 
+import {
   BrainCircuit,
-  GraduationCap, 
+  GraduationCap,
   ArrowLeft,
   Loader2,
   FileText,
@@ -29,7 +29,6 @@ import {
   Search,
 } from 'lucide-react';
 
-// 随机欢迎语
 const welcomeMessages = [
   "开启您的党建学习之旅！",
   "知识的力量从这里开始！",
@@ -52,11 +51,10 @@ interface OnboardingFlowProps {
   onComplete?: () => void;
 }
 
-// 打字机特效组件
 function TypewriterText({ text, onComplete }: { text: string; onComplete?: () => void }) {
   const [displayText, setDisplayText] = useState('');
   const [showCursor, setShowCursor] = useState(true);
-  
+
   useEffect(() => {
     let index = 0;
     const interval = setInterval(() => {
@@ -69,10 +67,10 @@ function TypewriterText({ text, onComplete }: { text: string; onComplete?: () =>
         onComplete?.();
       }
     }, 50);
-    
+
     return () => clearInterval(interval);
   }, [text, onComplete]);
-  
+
   return (
     <span>
       {displayText}
@@ -95,10 +93,9 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [diagnosticTopics, setDiagnosticTopics] = useState<string[]>([]);
   const [difficultyLockedNodes, setDifficultyLockedNodes] = useState<Set<string>>(new Set());
   const [showFullMap, setShowFullMap] = useState(false);
-  
 
-  
-  // 从 localStorage 获取当前用户
+
+
   const [currentUser, setCurrentUser] = useState<CurrentUser>(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('user');
@@ -106,7 +103,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         try {
           return JSON.parse(stored);
         } catch {
-          // ignore
         }
       }
     }
@@ -120,19 +116,16 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   const [progress, setProgress] = useState<LearningProgress[]>([]);
 
-  // 从localStorage读取学习进度
   useEffect(() => {
     const saved = localStorage.getItem('learning_progress');
     if (saved) {
       try {
         setProgress(JSON.parse(saved));
       } catch {
-        // ignore
       }
     }
   }, []);
 
-  // 递归获取所有节点ID
   const getAllNodeIds = (node: KnowledgeNode): string[] => {
     let ids = [node.id];
     if (node.children) {
@@ -143,7 +136,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     return ids;
   };
 
-  // 从localStorage恢复诊断状态，直接显示诊断报告
   useEffect(() => {
     const saved = localStorage.getItem('user_diagnostic');
     if (saved) {
@@ -163,22 +155,18 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         setHasCompletedDiagnostic(true);
         setCurrentView('mindmap');
       } catch {
-        // ignore
       }
     }
   }, []);
 
-  // 随机选择欢迎语 + 打字机效果
   useEffect(() => {
     const randomMsg = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
     setWelcomeMessage(randomMsg);
     setShowWelcome(false);
     setTypewriterText('');
-    
-    // 短暂延迟后开始打字
+
     const timer = setTimeout(() => {
       setShowWelcome(true);
-      // 打字机效果
       let index = 0;
       const typeInterval = setInterval(() => {
         index++;
@@ -189,11 +177,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       }, 50);
       return () => clearInterval(typeInterval);
     }, 500);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
-  // 保存诊断结果到数据库（静默处理，不影响主流程）
   const saveDiagnostic = async (path: LearningPath, roles: string[], topics: string[], difficulty: string) => {
     try {
       const response = await fetch('/api/user/diagnostic', {
@@ -210,57 +197,47 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       });
 
       if (!response.ok) {
-        // 数据库保存失败不影响主流程，localStorage 已备份
         console.warn('诊断结果数据库保存失败，已使用 localStorage 备份');
       } else {
         console.log('诊断结果已保存到数据库');
       }
     } catch (err) {
-      // 网络错误等不影响主流程
       console.warn('诊断结果保存网络异常，已使用 localStorage 备份');
     }
   };
 
-  // 处理诊断完成后的路径生成
   const handlePathGenerated = (roles: string[], topics: string[], difficulty: string) => {
-    // 保存原始选择以供展示
     setDiagnosticRoles(roles);
     setDiagnosticTopics(topics);
-    
-    // 根据诊断结果生成学习路径（不按难度过滤节点）
+
     const path = generateLearningPath({
       roles,
       topics,
       level: difficulty,
     });
-    
+
     setGeneratedPath(path);
-    
-    // 设置高亮节点
+
     const nodes = getAllNodeIds(path.rootNode);
     setHighlightedNodes(nodes);
-    
-    // 计算难度锁定节点（仅用于灰色显示，不实际过滤）
+
     const locked = getDifficultyLockedNodeIds(path.rootNode, difficulty);
     setDifficultyLockedNodes(locked);
-    
+
     setHasCompletedDiagnostic(true);
-    
-    // 同时保存到 localStorage 供主页读取
+
     localStorage.setItem('user_diagnostic', JSON.stringify({
       roles,
       topics,
       difficulty,
       pathId: path.id,
     }));
-    
-    // 保存到数据库
+
     saveDiagnostic(path, roles, topics, difficulty);
-    
+
     setCurrentView('mindmap');
   };
 
-  // 处理重新诊断
   const handleResetDiagnostic = () => {
     setHasCompletedDiagnostic(false);
     setGeneratedPath(null);
@@ -272,27 +249,22 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     localStorage.removeItem('user_diagnostic');
   };
 
-  // 处理AI意图检测
   const handleIntentDetected = (keywords: string[], pathId: string) => {
-    // 根据关键词高亮对应节点
     if (pathId) {
       setHighlightedNodes(prev => [...new Set([...prev, pathId])]);
     }
     setCurrentView('mindmap');
   };
 
-  // 统计学习进度
   const completedCount = progress.filter(p => p.status === 'completed').length;
   const totalNodes = getAllNodeIds(partyKnowledgeGraph).length;
   const progressPercent = Math.round((completedCount / totalNodes) * 100);
 
   return (
-    
+
     <div className="min-h-screen bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100">
-      {/* 主内容区域 */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="w-full px-4 py-8">
         <AnimatePresence mode="wait">
-          {/* 首页视图 */}
           {currentView === 'home' && (
             <motion.div
               key="home"
@@ -301,10 +273,9 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-8"
             >
-              {/* Hero区域 - 新用户欢迎页 */}
               <div className="relative overflow-hidden rounded-3xl" style={{ backgroundImage: 'url(/welcome-bg.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
                 <div className="relative z-10 max-w-5xl mx-auto text-center py-12 px-6">
-                  <motion.h2 
+                  <motion.h2
                     className="text-3xl md:text-4xl font-bold text-white mb-8"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -313,7 +284,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                     精英在线学习智能体
                   </motion.h2>
 
-                  {/* 软件特色 — 三大智能体 */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -331,7 +301,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   </motion.div>
 
                   <div className="grid md:grid-cols-3 gap-5 mb-6">
-                    {/* 智能体一：智能分析解读 */}
                     <motion.div
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -357,7 +326,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                       </div>
                     </motion.div>
 
-                    {/* 智能体二：智能生成学习资料 */}
                     <motion.div
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -383,7 +351,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                       </div>
                     </motion.div>
 
-                    {/* 智能体三：学员智能组班 */}
                     <motion.div
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -410,7 +377,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                     </motion.div>
                   </div>
 
-                  {/* 智能体详情展开区 */}
                   <AnimatePresence mode="wait">
                     {activeAgent !== null && (
                       <motion.div
@@ -508,7 +474,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                             ))}
                           </div>
 
-                          {/* 快捷跳转 */}
                           <div className="mt-5 pt-4 border-t border-white/10">
                             {activeAgent === 1 && (
                               <Button
@@ -552,7 +517,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             </motion.div>
           )}
 
-          {/* 诊断问卷视图 */}
           {currentView === 'diagnostic' && (
             <motion.div
               key="diagnostic"
@@ -569,7 +533,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             </motion.div>
           )}
 
-          {/* 思维导图视图 */}
           {currentView === 'mindmap' && (
             <motion.div
               key="mindmap"
@@ -578,7 +541,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               exit={{ opacity: 0 }}
               className="py-4"
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-4">
                   <Button
                     variant="ghost"
@@ -590,7 +553,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   </Button>
                   <div>
                     <h2 className="text-2xl font-bold text-slate-900">
-                      诊断完成报告
+                      诊断报告
                     </h2>
                     {generatedPath && (
                       <p className="text-slate-500 text-sm">
@@ -599,89 +562,57 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                     )}
                   </div>
                 </div>
-                
               </div>
-              
-              {/* 诊断完成报告 */}
-              {generatedPath && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="mb-8"
-                >
-                  <Card className="border-0 shadow-xl overflow-hidden relative" style={{ background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.9) 0%, rgba(234, 88, 12, 0.9) 100%)' }}>
-                    {/* 波浪装饰 */}
-                    <div className="absolute bottom-0 right-0 w-full h-30 overflow-hidden">
-                      <svg className="absolute bottom-0 right-0 w-full" viewBox="0 0 1200 100" preserveAspectRatio="none">
-                        <path 
-                          d="M0,20 C150,80 350,20 500,60 C650,100 800,10 1000,50 C1100,70 1150,30 1200,50 L1200,100 L0,100 Z" 
-                          style={{ fill: 'rgba(255,255,255,0.25)' }}
-                        />
-                        <path 
-                          d="M0,40 C100,60 250,0 400,40 C550,80 700,20 850,60 C950,80 1050,40 1200,70 L1200,100 L0,100 Z" 
-                          style={{ fill: 'rgba(255,255,255,0.15)' }}
-                        />
-                      </svg>
-                    </div>
-                    {/* 查看全貌弹框入口 */}
-                    <Dialog open={showFullMap} onOpenChange={setShowFullMap}>
-                      <DialogTrigger asChild>
-                        <button className="absolute top-3 right-3 z-20 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/20 hover:bg-white/35 text-white/90 hover:text-white text-xs font-medium transition-all duration-200 backdrop-blur-sm border border-white/20">
-                          <Eye className="w-3.5 h-3.5" />
-                          查看全貌
-                        </button>
-                      </DialogTrigger>
-                      <DialogContent className="w-[96vw] max-w-[96vw] min-w-[1200px] max-h-[96vh] h-[96vh] p-0 gap-0 border-0 flex flex-col" showCloseButton={false}>
-                        <DialogHeader className="px-4 pt-3 pb-2 border-b shrink-0">
-                          <div className="flex items-center justify-between">
-                            <DialogTitle className="text-base font-bold flex items-center gap-2">
-                              <Network className="w-4 h-4 text-red-600" />
-                              党建知识全貌
-                            </DialogTitle>
-                            <Button variant="ghost" size="icon" onClick={() => setShowFullMap(false)} className="h-7 w-7">
-                              <X className="w-3.5 h-3.5" />
-                            </Button>
-                          </div>
-                        </DialogHeader>
-                        <div className="flex-1 w-full min-h-0">
-                          <MindMap 
-                            data={partyKnowledgeGraph}
-                            progress={progress}
-                            highlightedNodes={[]}
-                            interactive={false}
-                          />
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center flex-shrink-0">
-                          <CheckCircle2 className="w-6 h-6 text-red-600" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-xl font-bold text-white mb-2">诊断完成！</h3>
-                          <p className="text-white/90 mb-4">
-                            亲爱的{currentUser?.display_name || '同学'}，基于您的选择，我们为您定制了专属学习路径。
-                          </p>
-                          <div className="space-y-2 text-sm text-white/80">
-                            <p>📚 <span className="font-medium">推荐学习时长：</span>{generatedPath.totalDuration} 分钟</p>
-                            <p>� <span className="font-medium">核心知识点：</span>{generatedPath.rootNode.children?.length || 0} 个主题模块</p>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
 
-                  {/* 诊断选择记录 */}
-                  <Card className="border-0 shadow-lg mt-4">
+              <div className="flex gap-4" style={{ height: 'calc(100vh - 220px)' }}>
+                <div className="w-[400px] shrink-0 flex flex-col gap-4 overflow-y-auto">
+                  {generatedPath && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <Card className="border-0 shadow-xl overflow-hidden relative" style={{ background: 'linear-gradient(135deg, rgba(220, 38, 38, 0.9) 0%, rgba(234, 88, 12, 0.9) 100%)' }}>
+                        <div className="absolute bottom-0 right-0 w-full h-30 overflow-hidden">
+                          <svg className="absolute bottom-0 right-0 w-full" viewBox="0 0 1200 100" preserveAspectRatio="none">
+                            <path
+                              d="M0,20 C150,80 350,20 500,60 C650,100 800,10 1000,50 C1100,70 1150,30 1200,50 L1200,100 L0,100 Z"
+                              style={{ fill: 'rgba(255,255,255,0.25)' }}
+                            />
+                            <path
+                              d="M0,40 C100,60 250,0 400,40 C550,80 700,20 850,60 C950,80 1050,40 1200,70 L1200,100 L0,100 Z"
+                              style={{ fill: 'rgba(255,255,255,0.15)' }}
+                            />
+                          </svg>
+                        </div>
+                        <CardContent className="p-5">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center flex-shrink-0">
+                              <CheckCircle2 className="w-5 h-5 text-red-600" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="text-lg font-bold text-white mb-1">诊断完成！</h3>
+                              <p className="text-white/90 text-sm mb-3">
+                                亲爱的{currentUser?.display_name || '同学'}，基于您的选择，我们为您定制了专属学习路径。
+                              </p>
+                              <div className="space-y-1 text-sm text-white/80">
+                                <p><span className="font-medium">推荐学习时长：</span>{generatedPath.totalDuration} 分钟</p>
+                                <p><span className="font-medium">核心知识点：</span>{generatedPath.rootNode.children?.length || 0} 个主题模块</p>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  )}
+
+                  <Card className="border-0 shadow-lg flex-1">
                     <CardContent className="p-5">
                       <h4 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <Users className="w-5 h-5 text-red-600" />
-                        诊断选择记录
+                        选择记录
                       </h4>
-                      
-                      {/* 身份选择 */}
+
                       {diagnosticRoles.length > 0 && (
                         <div className="mb-3">
                           <h5 className="text-sm font-semibold text-slate-600 mb-2">已选身份</h5>
@@ -706,7 +637,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                         </div>
                       )}
 
-                      {/* 主题选择 */}
                       {diagnosticTopics.length > 0 && (
                         <div>
                           <h5 className="text-sm font-semibold text-slate-600 mb-2">已选学习主题</h5>
@@ -732,24 +662,51 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                       )}
                     </CardContent>
                   </Card>
-                </motion.div>
-              )}
-              
-              <Card className="border-0 shadow-xl overflow-hiddent">
-                <div className="h-[calc(100vh-400px)] min-h-[500px]">
-                  <MindMap 
+                </div>
+
+                <Card className="border-0 shadow-xl overflow-hidden flex-1">
+                  <MindMap
                     data={generatedPath?.rootNode || partyKnowledgeGraph}
                     progress={progress}
                     highlightedNodes={highlightedNodes}
                     interactive={!hasCompletedDiagnostic}
                     lockedByDifficultyNodes={difficultyLockedNodes}
                   />
-                </div>
-              </Card>
+                </Card>
+              </div>
+
+              <Dialog open={showFullMap} onOpenChange={setShowFullMap}>
+                <DialogTrigger asChild>
+                  <button className="fixed bottom-6 right-6 z-20 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium shadow-lg transition-all duration-200">
+                    <Eye className="w-4 h-4" />
+                    查看全貌
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="w-[96vw] max-w-[96vw] min-w-[1200px] max-h-[96vh] h-[96vh] p-0 gap-0 border-0 flex flex-col" showCloseButton={false}>
+                  <DialogHeader className="px-4 pt-3 pb-2 border-b shrink-0">
+                    <div className="flex items-center justify-between">
+                      <DialogTitle className="text-base font-bold flex items-center gap-2">
+                        <Network className="w-4 h-4 text-red-600" />
+                        党建知识全貌
+                      </DialogTitle>
+                      <Button variant="ghost" size="icon" onClick={() => setShowFullMap(false)} className="h-7 w-7">
+                        <X className="w-3.5 h-3.5" />
+                      </Button>
+                    </div>
+                  </DialogHeader>
+                  <div className="flex-1 w-full min-h-0">
+                    <MindMap
+                      data={partyKnowledgeGraph}
+                      progress={progress}
+                      highlightedNodes={[]}
+                      interactive={false}
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
             </motion.div>
           )}
 
-          {/* AI助手视图 */}
           {currentView === 'ai' && (
             <motion.div
               key="ai"
@@ -769,7 +726,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           )}
         </AnimatePresence>
 
-        {/* 保存中提示 */}
         <AnimatePresence>
           {isSaving && (
             <motion.div
@@ -789,7 +745,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         </AnimatePresence>
       </main>
 
-      {/* 页脚 */}
       <footer className="mt-16 border-t border-slate-200 ">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
