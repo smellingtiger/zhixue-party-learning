@@ -49,14 +49,8 @@ export async function POST(request: NextRequest) {
 
       try {
         const pythonScript = path.join(process.cwd(), 'scripts', 'tts_generate.py');
-        const escapedText = chapter.text
-          .replace(/["]/g, '\\"')
-          .replace(/\n/g, ' ')
-          .replace(/\r/g, '')
-          .trim();
 
-        const command = `python "${pythonScript}" --text "${escapedText}" --output "${audioPath}"`;
-        const output = execSync(command, { timeout: 30000, encoding: 'utf-8' });
+        const output = execFileSync('python', [pythonScript, '--text', chapter.text, '--output', audioPath], { timeout: 30000, encoding: 'utf-8' });
         const result = JSON.parse(output.trim());
 
         if (result.success) {
