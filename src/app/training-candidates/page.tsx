@@ -85,7 +85,7 @@ const generateAvoidedUsers = (topic: string, count: number = 3) => {
 };
 
 // 根据主题智能生成推荐学员
-const generateRecommendedUsers = (topic: string, count: number = 6) => {
+const generateRecommendedUsers = (topic: string, count: number = 12) => {
   const recommendedCandidates = userPool.filter(u => u.status !== 'avoided').sort(() => Math.random() - 0.5).slice(0, count);
   return recommendedCandidates;
 };
@@ -119,7 +119,7 @@ const presetPlans = [
       classLocation: '省行政学院一号教学楼',
       classIntroduction: '本培训班围绕习近平新时代中国特色社会主义思想核心要义，系统梳理党的二十大精神、新时代统战工作要求，通过专题授课、现场教学、研讨交流等形式，提升参训干部的理论素养和政治能力，培训为期3天，共8个专题课程。',
       courses: courseTemplates.filter((_, idx) => idx < 6),
-      recommendedUsers: userPool.filter(u => u.status !== 'avoided' && u.role === '中共党员').slice(0, 5),
+      recommendedUsers: userPool.filter(u => u.status !== 'avoided' && u.role === '中共党员').slice(0, 9),
       avoidedUsers: userPool.filter(u => u.status === 'avoided').slice(0, 2),
       riskCount: 1,
       fullScanCount: 12,
@@ -134,7 +134,7 @@ const presetPlans = [
       classLocation: '省社会主义学院学术报告厅',
       classIntroduction: '本次培训针对全省各级统战干部，围绕新时代统战工作重点难点、民营经济统战、民族宗教工作、新的社会阶层人士统战等核心内容，邀请中央统战部专家、高校教授授课，提升统战干部的业务能力和履职水平，培训为期5天，包含8门专题课程和2次现场教学。',
       courses: courseTemplates.filter((_, idx) => idx >= 2 && idx < 9),
-      recommendedUsers: userPool.filter(u => u.status !== 'avoided').slice(0, 6),
+      recommendedUsers: userPool.filter(u => u.status !== 'avoided').slice(0, 12),
       avoidedUsers: userPool.filter(u => u.status === 'avoided').slice(0, 3),
       riskCount: 2,
       fullScanCount: 15,
@@ -149,7 +149,7 @@ const presetPlans = [
       classLocation: '省工商联培训中心',
       classIntroduction: '本次研讨班面向全省民营企业家和工商联系统干部，围绕当前民营经济发展的政策支持、转型升级、数字化发展、营商环境优化等主题开展专题研讨，邀请发改委、经信厅领导和行业专家授课，助力民营经济高质量发展，培训为期4天，包含6门专题课程和2次企业参访。',
       courses: courseTemplates.filter((_, idx) => [0, 1, 7, 8, 10, 12].includes(idx)),
-      recommendedUsers: userPool.filter(u => u.status !== 'avoided' && ['民建会员', '无党派人士', '民进会员'].includes(u.role)).slice(0, 5),
+      recommendedUsers: userPool.filter(u => u.status !== 'avoided' && ['民建会员', '无党派人士', '民进会员'].includes(u.role)).slice(0, 9),
       avoidedUsers: userPool.filter(u => u.status === 'avoided').slice(1, 4),
       riskCount: 1,
       fullScanCount: 10,
@@ -164,7 +164,7 @@ const presetPlans = [
       classLocation: '市委党校',
       classIntroduction: '本次培训针对乡镇、街道基层统战工作骨干，围绕基层统战工作实务、民族宗教事务管理、新的社会阶层人士统战工作、乡贤统战等内容，通过案例教学、经验分享、实地观摩等形式，提升基层统战干部的实操能力，培训为期4天，包含7门专题课程。',
       courses: courseTemplates.filter((_, idx) => [1, 5, 6, 7, 8, 11, 13].includes(idx)),
-      recommendedUsers: userPool.filter(u => u.status !== 'avoided').slice(2, 7),
+      recommendedUsers: userPool.filter(u => u.status !== 'avoided').slice(0, 9),
       avoidedUsers: userPool.filter(u => u.status === 'avoided').slice(0, 2),
       riskCount: 0,
       fullScanCount: 8,
@@ -179,7 +179,7 @@ const presetPlans = [
       classLocation: '省社会主义学院',
       classIntroduction: '本次培训班面向全省优秀党外中青年干部，为期12天，涵盖政治理论、统战知识、履职能力、经济形势、国情教育等多个模块，全面提升党外干部的政治素养和履职能力，培养优秀的党外后备干部队伍。',
       courses: courseTemplates.filter((_, idx) => [0, 1, 2, 3, 5, 7, 12, 13].includes(idx)),
-      recommendedUsers: userPool.filter(u => u.status !== 'avoided' && u.role !== '中共党员').slice(0, 6),
+      recommendedUsers: userPool.filter(u => u.status !== 'avoided' && u.role !== '中共党员').slice(0, 9),
       avoidedUsers: userPool.filter(u => u.status === 'avoided').slice(2, 5),
       riskCount: 1,
       fullScanCount: 14,
@@ -250,11 +250,11 @@ export default function TrainingCandidatesPage() {
         fullScanCount: data.full_scan_count || Math.floor(Math.random() * 10) + 5,
       };
 
-      // 兜底：保证推荐人数最少5个
-      if (processedData.recommendedUsers.length < 5) {
+      // 兜底：保证推荐人数最少9个
+      if (processedData.recommendedUsers.length < 9) {
         const existingIds = processedData.recommendedUsers.map((u: any) => u.id);
         const supplementUsers = userPool.filter(u => u.status !== 'avoided' && !existingIds.includes(u.id));
-        processedData.recommendedUsers = [...processedData.recommendedUsers, ...supplementUsers.slice(0, 5 - processedData.recommendedUsers.length)];
+        processedData.recommendedUsers = [...processedData.recommendedUsers, ...supplementUsers.slice(0, 9 - processedData.recommendedUsers.length)];
       }
       
       return processedData;

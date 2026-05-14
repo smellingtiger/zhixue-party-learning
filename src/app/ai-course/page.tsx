@@ -96,6 +96,10 @@ export default function AICoursePage() {
   });
   
   const [generationLogic, setGenerationLogic] = useState<any>(null);
+  const [showGenerationPanel, setShowGenerationPanel] = useState(() => {
+    const saved = localStorage.getItem('ai_generated_course');
+    return !saved;
+  });
 
   const router = useRouter();
   const hasDiagnostic = diagnosticData && (diagnosticData.roles.length > 0 || diagnosticData.topics.length > 0);
@@ -202,6 +206,7 @@ export default function AICoursePage() {
     setIsGenerating(true);
     setCurrentStep(0);
     setShowResult(false);
+    setShowGenerationPanel(true);
     setGenerationLogic(null);
 
     const interval = setInterval(() => {
@@ -237,6 +242,7 @@ export default function AICoursePage() {
       setGenerationLogic(generateLogicExplanation(topic, currentDiagnostic));
       setIsGenerating(false);
       setShowResult(true);
+      setShowGenerationPanel(false);
     }, 2500);
   };
 
@@ -317,13 +323,21 @@ export default function AICoursePage() {
 
   return (
     <div className="container mx-auto px-4 py-8 flex-1 overflow-y-auto">
-      {/* 生成前区域：标题、输入、逻辑解读、生成步骤 */}
-      {!showResult && (
+      {/* 生成前区域：标题、输入、逻辑解读、生成步骤 - 可折叠 */}
+      {(showGenerationPanel || isGenerating) && (
         <>
       {/* 第一行：标题区 + 右侧生成逻辑解读 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
         {/* 左侧：标题 + 输入 + 预设主题 */}
         <div className="lg:col-span-2 border-2 border-black bg-white p-8 relative" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+          {/* 右上角折叠按钮 */}
+          <button
+            onClick={() => setShowGenerationPanel(false)}
+            className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-xs font-bold border border-gray-300 px-2 py-1 bg-white hover:bg-gray-100 transition-colors"
+            title="折叠生成面板"
+          >
+            折叠 ▲
+          </button>
           <h1 className="text-5xl font-black text-black mb-4 leading-none tracking-tighter" style={{ textShadow: '2px 2px 0 #e0e0e0' }}>
             AI智能生成课程
           </h1>
@@ -496,6 +510,29 @@ export default function AICoursePage() {
         </div>
       )}
         </>
+      )}
+
+      {/* 生成面板折叠状态栏 - 当折叠且有结果时显示 */}
+      {!showGenerationPanel && !isGenerating && showResult && (
+        <div className="border-2 border-black bg-gray-900 p-3 mb-6 flex items-center justify-between text-white" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-amber-400 flex items-center justify-center border-2 border-black" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+              <Sparkles className="h-4 w-4 text-black" />
+            </div>
+            <div>
+              <span className="font-bold text-sm text-amber-400">AI生成面板</span>
+              <span className="text-xs text-gray-400 ml-2">已折叠</span>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowGenerationPanel(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-amber-400 text-black font-bold border-2 border-black hover:bg-amber-500 transition-all text-sm"
+            style={{ boxShadow: '2px 2px 0 0 #000' }}
+          >
+            <span>▼</span>
+            展开生成面板
+          </button>
+        </div>
       )}
 
       {/* 生成结果 */}
@@ -700,6 +737,7 @@ export default function AICoursePage() {
                 <Button size="lg" variant="outline" className="border-2 border-gray-400 text-gray-400 font-bold hover:bg-gray-400 hover:text-white" style={{ borderRadius: '0' }} onClick={() => {
                   setShowResult(false);
                   setGeneratedCourse(null);
+                  setShowGenerationPanel(true);
                   localStorage.removeItem('ai_generated_course');
                   localStorage.removeItem('current_ai_course');
                   localStorage.removeItem('completed_slides_1');
