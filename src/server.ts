@@ -7,9 +7,11 @@ const dev = process.env.COZE_PROJECT_ENV !== 'PROD';
 const hostname = process.env.HOSTNAME || 'localhost';
 const port = parseInt(process.env.PORT || '3000', 10);
 
-// Create Next.js app
-const app = next({ dev, hostname, port });
-const handle = app.getRequestHandler();
+const NEXT_INTERNAL_PATHS = [
+  '/_next',
+  '/__nextjs',
+  '/__webpack_hmr',
+];
 
 app.prepare().then(() => {
   const server = createServer(async (req, res) => {
@@ -50,16 +52,15 @@ app.prepare().then(() => {
       res.statusCode = 500;
       res.end('Internal server error');
     }
-  });
-  server.once('error', err => {
-    console.error(err);
-    process.exit(1);
-  });
-  server.listen(port, () => {
-    console.log(
-      `> Server listening at http://${hostname}:${port} as ${
-        dev ? 'development' : process.env.COZE_PROJECT_ENV
-      }`,
-    );
-  });
+  } catch (err) {
+    console.error('Error occurred handling', req.url, err);
+    res.statusCode = 500;
+    res.end('Internal server error');
+  }
+}).listen(port, () => {
+  console.log(
+    `> Server listening at http://${hostname}:${port} as ${
+      dev ? 'development' : process.env.COZE_PROJECT_ENV
+    }`,
+  );
 });
