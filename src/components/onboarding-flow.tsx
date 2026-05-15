@@ -348,7 +348,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                           </div>
                           <div>
                             <span className="text-sm font-bold text-red-300/80 tracking-wider">智能体 01</span>
-                            <h4 className="text-2xl font-bold text-white">智能分析解读</h4>
+                            <h4 className="text-2xl font-bold text-white">AI个性化推荐</h4>
                           </div>
                         </div>
                         <p className="text-base text-white/75 leading-relaxed">
@@ -374,7 +374,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                           </div>
                           <div>
                             <span className="text-sm font-bold text-blue-300/80 tracking-wider">智能体 02</span>
-                            <h4 className="text-2xl font-bold text-white">智能生成内容</h4>
+                            <h4 className="text-2xl font-bold text-white">AI生成课程</h4>
                           </div>
                         </div>
                         <p className="text-base text-white/75 leading-relaxed">
@@ -400,7 +400,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                           </div>
                           <div>
                             <span className="text-sm font-bold text-emerald-300/80 tracking-wider">智能体 03</span>
-                            <h4 className="text-2xl font-bold text-white">学员智能组班</h4>
+                            <h4 className="text-2xl font-bold text-white">AI智能组班</h4>
                           </div>
                         </div>
                         <p className="text-base text-white/75 leading-relaxed">
@@ -444,9 +444,9 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                                   'text-emerald-300'
                                 }`}>智能体 0{activeAgent} · 工作流程</span>
                                 <h4 className="text-base font-bold text-white">
-                                  {activeAgent === 1 ? '智能分析解读' :
-                                   activeAgent === 2 ? '智能生成学习资料' :
-                                   '学员智能组班'}
+                                  {activeAgent === 1 ? 'AI个性化推荐' :
+                                   activeAgent === 2 ? 'AI生成课程' :
+                                   'AI智能组班'}
                                 </h4>
                               </div>
                             </div>
@@ -789,20 +789,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         </AnimatePresence>
       </main>
 
-      {/* 页脚 */}
-      <footer className="mt-16 border-t border-slate-200 ">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-slate-500 text-sm">
-              <BrainCircuit className="w-5 h-5" />
-              <span>精英在线学习智能体 · AI驱动学习新体验</span>
-            </div>
-            <div className="text-slate-400 text-xs">
-              © 2024 智慧党建 · 让学习更智能
-            </div>
-          </div>
-        </div>
-      </footer>
+
     </div>
   );
 }

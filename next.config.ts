@@ -16,6 +16,26 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
+        source: '/api/knowledge-base/:path*',
+        destination: '/api/knowledge-base/:path*',
+      },
+      {
+        source: '/api/knowledge-base',
+        destination: '/api/knowledge-base',
+      },
+      {
+        source: '/api/outline/:path*',
+        destination: '/api/outline/:path*',
+      },
+      {
+        source: '/api/tts/:path*',
+        destination: '/api/tts/:path*',
+      },
+      {
+        source: '/api/llm',
+        destination: '/api/llm',
+      },
+      {
         source: '/api/:path*',
         destination: 'http://192.168.1.244:8082/api/:path*',
       },

@@ -17,10 +17,17 @@ app.prepare().then(() => {
       const parsedUrl = parse(req.url!, true);
       
       // Proxy API requests to backend server
-      if (parsedUrl.pathname?.startsWith('/api/') || 
+      // Exclude local API routes that should be handled by Next.js
+      const isLocalApiRoute = parsedUrl.pathname?.startsWith('/api/outline/') ||
+                               parsedUrl.pathname?.startsWith('/api/tts/') ||
+                               parsedUrl.pathname?.startsWith('/api/llm') ||
+                               parsedUrl.pathname?.startsWith('/api/knowledge-base/') ||
+                               parsedUrl.pathname?.startsWith('/api/knowledge-base');
+      
+      if ((parsedUrl.pathname?.startsWith('/api/') || 
           parsedUrl.pathname?.startsWith('/sso/') || 
           parsedUrl.pathname?.startsWith('/user/') || 
-          parsedUrl.pathname?.startsWith('/live/')) {
+          parsedUrl.pathname?.startsWith('/live/')) && !isLocalApiRoute) {
         const proxy = createProxyMiddleware({
           target: 'http://192.168.1.244:8082',
           changeOrigin: true,

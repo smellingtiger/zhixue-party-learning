@@ -8,10 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import {
   Play,
   Pause,
-  SkipForward,
-  SkipBack,
   Clock,
-  Users,
   Volume2,
   VolumeX,
   Maximize,
@@ -19,9 +16,9 @@ import {
   ChevronRight,
   CheckCircle,
   Circle,
-  Home,
   ArrowLeft,
 } from 'lucide-react';
+import { VideoOutline } from '@/components/video-outline';
 import { partyKnowledgeGraph } from '@/lib/knowledge-graph';
 import { courseVideoMapping } from '@/lib/video-mapping';
 import type { KnowledgeNode, LearningProgress } from '@/lib/types';
@@ -221,6 +218,11 @@ export default function CoursePage() {
   const [progress, setProgress] = useState<LearningProgress[]>([]);
   const [currentNode, setCurrentNode] = useState<KnowledgeNode | null>(null);
   const [selectedCourseIndex, setSelectedCourseIndex] = useState(0);
+
+  // 当前正在播放的课程ID
+  const currentCourseId = currentNode?.courses && currentNode.courses.length > 0
+    ? currentNode.courses[selectedCourseIndex]?.id
+    : courseId;
 
   // 加载进度
   useEffect(() => {
@@ -424,6 +426,17 @@ export default function CoursePage() {
     const time = parseFloat(e.target.value);
     if (videoRef.current) {
       videoRef.current.currentTime = time;
+      setCurrentTime(time);
+    }
+  };
+
+  const handleSeekToOutline = (time: number) => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = time;
+      if (!isPlaying) {
+        videoRef.current.play().catch(() => {});
+        setIsPlaying(true);
+      }
       setCurrentTime(time);
     }
   };
@@ -685,7 +698,7 @@ export default function CoursePage() {
             </div>
           </div>
 
-          {/* 右侧：知识树大纲 */}
+          {/* 右侧：AI课程大纲（基于语音转写） */}
           <aside className="w-80 flex-shrink-0">
             <div className="bg-white rounded-lg border-2 border-gray-200 p-5 sticky top-6">
               <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-4">
@@ -693,10 +706,9 @@ export default function CoursePage() {
                 课程大纲
               </h3>
               <div className="max-h-[calc(100vh-200px)] overflow-y-auto pr-1 -mr-1">
-                <KnowledgeTreeOutline
-                  currentNodeId={courseId}
-                  onNodeClick={handleNodeClick}
-                  progress={progress}
+                <VideoOutline
+                  courseId={currentCourseId}
+                  onSeekTo={handleSeekToOutline}
                 />
               </div>
             </div>
