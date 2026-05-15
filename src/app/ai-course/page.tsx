@@ -427,7 +427,7 @@ export default function AICoursePage() {
       </div>
 
       {/* 第二行：智能生成步骤（全宽） */}
-      <div className="border-2 border-black bg-gradient-to-b from-indigo-700 to-indigo-900 p-6 text-white mb-6" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+      <div className="border-2 border-black bg-gradient-to-br from-red-600 via-red-500 to-orange-500 p-6 text-white mb-6" style={{ boxShadow: '4px 4px 0 0 #000' }}>
         <div className="flex items-center gap-4 mb-5">
           <div className="text-6xl font-black text-amber-300" style={{ textShadow: '3px 3px 0 #000' }}>
             {isGenerating ? `${currentStep + 1}` : `${thinkingSteps.length}`}

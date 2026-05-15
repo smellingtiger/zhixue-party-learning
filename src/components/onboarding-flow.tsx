@@ -431,13 +431,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                               { step: 3, icon: Network, title: '知识图谱', desc: '了解党建知识体系' },
                               { step: 4, icon: GraduationCap, title: '开始学习', desc: '进入系统学习之旅' },
                             ].map((item) => (
-                              <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/10 border border-white/10 hover:bg-white/15 transition-colors">
-                                <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center">
+                              <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/25 border border-white/30 hover:bg-white/35 transition-colors">
+                                <div className="w-10 h-10 rounded-full bg-white/30 flex items-center justify-center">
                                   <item.icon className="w-4 h-4 text-white" />
                                 </div>
-                                <span className="text-[10px] font-bold text-white/40">STEP {item.step}</span>
-                                <span className="text-sm font-bold text-white">{item.title}</span>
-                                <span className="text-xs text-white/60 text-center">{item.desc}</span>
+                                <span className="text-[20px] font-bold text-white" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>STEP {item.step}</span>
+                                <span className="text-base font-bold text-white" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>{item.title}</span>
+                                <span className="text-sm text-white/90 text-center" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>{item.desc}</span>
                               </div>
                             ))}
 
@@ -447,13 +447,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                               { step: 3, icon: Network, title: '知识库整合', desc: '知识检索、内容筛选、审核复查，确保内容质量' },
                               { step: 4, icon: Sparkles, title: '视频图片生成', desc: '自动AI生成配图和教学视频' },
                             ].map((item) => (
-                              <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/10 border border-white/10 hover:bg-white/15 transition-colors">
-                                <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center">
+                              <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/25 border border-white/30 hover:bg-white/35 transition-colors">
+                                <div className="w-10 h-10 rounded-full bg-white/30 flex items-center justify-center">
                                   <item.icon className="w-4 h-4 text-white" />
                                 </div>
-                                <span className="text-[10px] font-bold text-white/40">STEP {item.step}</span>
-                                <span className="text-sm font-bold text-white">{item.title}</span>
-                                <span className="text-xs text-white/60 text-center">{item.desc}</span>
+                                <span className="text-[20px] font-bold text-white" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>STEP {item.step}</span>
+                                <span className="text-base font-bold text-white" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>{item.title}</span>
+                                <span className="text-sm text-white/90 text-center" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>{item.desc}</span>
                               </div>
                             ))}
 
@@ -463,13 +463,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                               { step: 3, icon: Sparkles, title: '智能匹配推荐', desc: '多维数据模型生成最优推荐名单与课程方案' },
                               { step: 4, icon: CheckCircle2, title: '一键生成班级', desc: '确认方案，自动发送通知，全程数字化管理' },
                             ].map((item) => (
-                              <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/10 border border-white/10 hover:bg-white/15 transition-colors">
-                                <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center">
+                              <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/25 border border-white/30 hover:bg-white/35 transition-colors">
+                                <div className="w-10 h-10 rounded-full bg-white/30 flex items-center justify-center">
                                   <item.icon className="w-4 h-4 text-white" />
                                 </div>
-                                <span className="text-[10px] font-bold text-white/40">STEP {item.step}</span>
-                                <span className="text-sm font-bold text-white">{item.title}</span>
-                                <span className="text-xs text-white/60 text-center">{item.desc}</span>
+                                <span className="text-[20px] font-bold text-white" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>STEP {item.step}</span>
+                                <span className="text-base font-bold text-white" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>{item.title}</span>
+                                <span className="text-sm text-white/90 text-center" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>{item.desc}</span>
                               </div>
                             ))}
                           </div>
