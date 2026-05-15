@@ -7,52 +7,62 @@ const dev = process.env.COZE_PROJECT_ENV !== 'PROD';
 const hostname = process.env.HOSTNAME || 'localhost';
 const port = parseInt(process.env.PORT || '3000', 10);
 
-// Create Next.js app
-const app = next({ dev, hostname, port });
-const handle = app.getRequestHandler();
+const NEXT_INTERNAL_PATHS = [
+  '/_next',
+  '/__nextjs',
+  '/__webpack_hmr',
+];
 
-app.prepare().then(() => {
-  const server = createServer(async (req, res) => {
-    try {
-      const parsedUrl = parse(req.url!, true);
-      
-      // Proxy API requests to backend server
-      if (parsedUrl.pathname?.startsWith('/api/') || 
-          parsedUrl.pathname?.startsWith('/sso/') || 
-          parsedUrl.pathname?.startsWith('/user/') || 
-          parsedUrl.pathname?.startsWith('/live/')) {
-        const proxy = createProxyMiddleware({
-          target: 'http://192.168.1.244:8082',
-          changeOrigin: true,
-          pathRewrite: {
-            '^/api': '/api',
-            '^/sso': '/sso',
-            '^/user': '/user',
-            '^/live': '/live',
-          },
-        });
-        
-        // @ts-ignore
-        proxy(req, res);
-      } else {
-        // Handle Next.js requests
-        await handle(req, res, parsedUrl);
-      }
-    } catch (err) {
-      console.error('Error occurred handling', req.url, err);
-      res.statusCode = 500;
-      res.end('Internal server error');
+function isNextInternalPath(pathname: string | undefined): boolean {
+  if (!pathname) return false;
+  return NEXT_INTERNAL_PATHS.some(path => pathname.startsWith(path));
+}
+
+function shouldProxy(pathname: string | undefined): boolean {
+  if (!pathname || isNextInternalPath(pathname)) {
+    return false;
+  }
+  return (
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/sso/') ||
+    pathname.startsWith('/user/') ||
+    pathname.startsWith('/live/')
+  );
+}
+
+createServer(async (req, res) => {
+  try {
+    const parsedUrl = parse(req.url!, true);
+
+    if (shouldProxy(parsedUrl.pathname)) {
+      const proxy = createProxyMiddleware({
+        target: 'http://192.168.1.244:8082',
+        changeOrigin: true,
+        ws: true,
+        pathRewrite: {
+          '^/api': '/api',
+          '^/sso': '/sso',
+          '^/user': '/user',
+          '^/live': '/live',
+        },
+      });
+
+      proxy(req, res);
+    } else {
+      const app = next({ dev, hostname, port });
+      await app.prepare();
+      const handle = app.getRequestHandler();
+      await handle(req, res, parsedUrl);
     }
-  });
-  server.once('error', err => {
-    console.error(err);
-    process.exit(1);
-  });
-  server.listen(port, () => {
-    console.log(
-      `> Server listening at http://${hostname}:${port} as ${
-        dev ? 'development' : process.env.COZE_PROJECT_ENV
-      }`,
-    );
-  });
+  } catch (err) {
+    console.error('Error occurred handling', req.url, err);
+    res.statusCode = 500;
+    res.end('Internal server error');
+  }
+}).listen(port, () => {
+  console.log(
+    `> Server listening at http://${hostname}:${port} as ${
+      dev ? 'development' : process.env.COZE_PROJECT_ENV
+    }`,
+  );
 });
