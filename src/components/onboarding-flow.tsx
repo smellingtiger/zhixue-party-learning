@@ -317,7 +317,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                           </div>
                           <div>
                             <span className="text-sm font-bold text-red-300/80 tracking-wider">智能体 01</span>
-                            <h4 className="text-2xl font-bold text-white">智能分析解读</h4>
+                            <h4 className="text-2xl font-bold text-white">AI个性化推荐</h4>
                           </div>
                         </div>
                         <p className="text-base text-white/75 leading-relaxed">
@@ -342,7 +342,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                           </div>
                           <div>
                             <span className="text-sm font-bold text-blue-300/80 tracking-wider">智能体 02</span>
-                            <h4 className="text-2xl font-bold text-white">智能生成内容</h4>
+                            <h4 className="text-2xl font-bold text-white">AI生成课程</h4>
                           </div>
                         </div>
                         <p className="text-base text-white/75 leading-relaxed">
@@ -367,7 +367,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                           </div>
                           <div>
                             <span className="text-sm font-bold text-emerald-300/80 tracking-wider">智能体 03</span>
-                            <h4 className="text-2xl font-bold text-white">学员智能组班</h4>
+                            <h4 className="text-2xl font-bold text-white">AI智能组班</h4>
                           </div>
                         </div>
                         <p className="text-base text-white/75 leading-relaxed">
@@ -410,9 +410,9 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                                   'text-emerald-300'
                                 }`}>智能体 0{activeAgent} · 工作流程</span>
                                 <h4 className="text-base font-bold text-white">
-                                  {activeAgent === 1 ? '智能分析解读' :
-                                   activeAgent === 2 ? '智能生成学习资料' :
-                                   '学员智能组班'}
+                                  {activeAgent === 1 ? 'AI个性化推荐' :
+                                   activeAgent === 2 ? 'AI生成课程' :
+                                   'AI智能组班'}
                                 </h4>
                               </div>
                             </div>
@@ -431,13 +431,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                               { step: 3, icon: Network, title: '知识图谱', desc: '了解党建知识体系' },
                               { step: 4, icon: GraduationCap, title: '开始学习', desc: '进入系统学习之旅' },
                             ].map((item) => (
-                              <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/10 border border-white/10 hover:bg-white/15 transition-colors">
-                                <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center">
+                              <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/25 border border-white/30 hover:bg-white/35 transition-colors">
+                                <div className="w-10 h-10 rounded-full bg-white/30 flex items-center justify-center">
                                   <item.icon className="w-4 h-4 text-white" />
                                 </div>
-                                <span className="text-[10px] font-bold text-white/40">STEP {item.step}</span>
-                                <span className="text-sm font-bold text-white">{item.title}</span>
-                                <span className="text-xs text-white/60 text-center">{item.desc}</span>
+                                <span className="text-[20px] font-bold text-white" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>STEP {item.step}</span>
+                                <span className="text-base font-bold text-white" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>{item.title}</span>
+                                <span className="text-sm text-white/90 text-center" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>{item.desc}</span>
                               </div>
                             ))}
 
@@ -447,13 +447,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                               { step: 3, icon: Network, title: '知识库整合', desc: '知识检索、内容筛选、审核复查，确保内容质量' },
                               { step: 4, icon: Sparkles, title: '视频图片生成', desc: '自动AI生成配图和教学视频' },
                             ].map((item) => (
-                              <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/10 border border-white/10 hover:bg-white/15 transition-colors">
-                                <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center">
+                              <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/25 border border-white/30 hover:bg-white/35 transition-colors">
+                                <div className="w-10 h-10 rounded-full bg-white/30 flex items-center justify-center">
                                   <item.icon className="w-4 h-4 text-white" />
                                 </div>
-                                <span className="text-[10px] font-bold text-white/40">STEP {item.step}</span>
-                                <span className="text-sm font-bold text-white">{item.title}</span>
-                                <span className="text-xs text-white/60 text-center">{item.desc}</span>
+                                <span className="text-[20px] font-bold text-white" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>STEP {item.step}</span>
+                                <span className="text-base font-bold text-white" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>{item.title}</span>
+                                <span className="text-sm text-white/90 text-center" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>{item.desc}</span>
                               </div>
                             ))}
 
@@ -463,13 +463,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                               { step: 3, icon: Sparkles, title: '智能匹配推荐', desc: '多维数据模型生成最优推荐名单与课程方案' },
                               { step: 4, icon: CheckCircle2, title: '一键生成班级', desc: '确认方案，自动发送通知，全程数字化管理' },
                             ].map((item) => (
-                              <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/10 border border-white/10 hover:bg-white/15 transition-colors">
-                                <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center">
+                              <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/25 border border-white/30 hover:bg-white/35 transition-colors">
+                                <div className="w-10 h-10 rounded-full bg-white/30 flex items-center justify-center">
                                   <item.icon className="w-4 h-4 text-white" />
                                 </div>
-                                <span className="text-[10px] font-bold text-white/40">STEP {item.step}</span>
-                                <span className="text-sm font-bold text-white">{item.title}</span>
-                                <span className="text-xs text-white/60 text-center">{item.desc}</span>
+                                <span className="text-[20px] font-bold text-white" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>STEP {item.step}</span>
+                                <span className="text-base font-bold text-white" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>{item.title}</span>
+                                <span className="text-sm text-white/90 text-center" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>{item.desc}</span>
                               </div>
                             ))}
                           </div>
@@ -745,19 +745,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         </AnimatePresence>
       </main>
 
-      <footer className="mt-16 border-t border-slate-200 ">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-slate-500 text-sm">
-              <BrainCircuit className="w-5 h-5" />
-              <span>精英在线学习智能体 · AI驱动学习新体验</span>
-            </div>
-            <div className="text-slate-400 text-xs">
-              © 2024 智慧党建 · 让学习更智能
-            </div>
-          </div>
-        </div>
-      </footer>
+
     </div>
   );
 }

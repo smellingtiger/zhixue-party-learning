@@ -26,9 +26,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavContext } from './nav-context';
 
 const navItems = [
-  { id: 'home', name: '智能诊断', href: '/home', icon: Home },
-  { id: 'ai-course', name: 'AI智能生成课程', href: '/ai-course', icon: Sparkles },
-  { id: 'aiclass', name: 'AI组班', href: '/training-candidates', icon: Users },
+  { id: 'home', name: 'AI个性化推荐', href: '/home', icon: Home },
+  { id: 'ai-course', name: 'AI生成课程', href: '/ai-course', icon: Sparkles },
+  { id: 'aiclass', name: 'AI智能组班', href: '/training-candidates', icon: Users },
   { id: 'knowledge', name: '知识库', href: '/knowledge-base', icon: Library },
   { id: 'ai-profile', name: 'AI画像', href: '/ai-profile', icon: PenTool },
   { id: 'profile', name: '我的', href: '/profile', icon: User },

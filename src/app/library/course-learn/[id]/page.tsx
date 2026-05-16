@@ -664,6 +664,11 @@ export default function CourseLearnPage() {
   const [currentChapter, setCurrentChapter] = useState(getInitialChapter);
   const [currentSlide, setCurrentSlide] = useState(() => {
     try {
+      // 如果URL有chapter参数，说明是从外部指定章节进入，重置为第0页
+      const chapterParam = searchParams.get('chapter');
+      if (chapterParam !== null) {
+        return 0;
+      }
       const saved = localStorage.getItem(`current_slide_${courseId}`);
       return saved ? parseInt(saved, 10) : 0;
     } catch {
