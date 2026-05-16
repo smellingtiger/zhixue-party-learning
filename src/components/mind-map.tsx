@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import * as d3 from 'd3';
 import { KnowledgeNode, LearningProgress } from '@/lib/types';
 import { getNodeById } from '@/lib/knowledge-graph';
@@ -22,67 +22,47 @@ interface TreeNode extends d3.HierarchyPointNode<KnowledgeNode> {
   y0?: number;
 }
 
-// 计算节点的状态（根据课程完成情况）
+// 计算节点的状态（根据课程完成情况）- 生产环境移除调试日志
 function calculateNodeStatus(
   node: KnowledgeNode,
   progress: LearningProgress[],
   highlightedNodes: string[]
 ): 'locked' | 'available' | 'in_progress' | 'completed' {
-  // 如果是叶子节点（有课程或content）
   const hasCourses = node.courses && node.courses.length > 0;
   const hasContent = !!node.content;
-  
+
   if (hasCourses || hasContent) {
     const nodeProgress = progress.find(p => p.nodeId === node.id);
     const allCourseIds = hasCourses ? node.courses!.map(c => c.id) : [node.id];
     const completedCourses = nodeProgress?.completedCourses || [];
-    
-    console.log(`[calculateNodeStatus] 节点: ${node.id}, progress:`, nodeProgress, `completedCourses:`, completedCourses, `allCourseIds:`, allCourseIds);
-    
-    // 如果所有课程都完成了
+
     if (allCourseIds.length > 0 && allCourseIds.every(id => completedCourses.includes(id))) {
-      console.log(`[calculateNodeStatus] ${node.id} → completed (所有课程完成)`);
       return 'completed';
     }
-    
-    // 如果有部分课程完成了
     if (completedCourses.length > 0) {
-      console.log(`[calculateNodeStatus] ${node.id} → in_progress (部分完成)`);
       return 'in_progress';
     }
-    
-    // 如果节点在进度中但状态是completed（向后兼容）
     if (nodeProgress?.status === 'completed') {
-      console.log(`[calculateNodeStatus] ${node.id} → completed (向后兼容)`);
       return 'completed';
     }
-    
-    // 如果节点在进度中且状态是in_progress
     if (nodeProgress?.status === 'in_progress') {
-      console.log(`[calculateNodeStatus] ${node.id} → in_progress (向后兼容)`);
       return 'in_progress';
     }
-    
-    // 检查是否可学习（高亮节点）
     if (highlightedNodes.includes(node.id)) {
-      console.log(`[calculateNodeStatus] ${node.id} → available (高亮节点)`);
       return 'available';
     }
-    
-    console.log(`[calculateNodeStatus] ${node.id} → locked`);
     return 'locked';
   }
-  
-  // 如果是父节点，根据子节点状态计算
+
   if (node.children && node.children.length > 0) {
-    const childrenStatuses = node.children.map(child => 
+    const childrenStatuses = node.children.map(child =>
       calculateNodeStatus(child, progress, highlightedNodes)
     );
-    
+
     const allCompleted = childrenStatuses.every(s => s === 'completed');
     const hasInProgress = childrenStatuses.some(s => s === 'in_progress');
     const hasAvailable = childrenStatuses.some(s => s === 'available');
-    
+
     if (allCompleted && childrenStatuses.length > 0) {
       return 'completed';
     }
@@ -92,15 +72,33 @@ function calculateNodeStatus(
     if (hasAvailable) {
       return 'available';
     }
-    
     return 'locked';
   }
-  
-  // 默认状态
+
   if (highlightedNodes.includes(node.id)) {
     return 'available';
   }
   return 'locked';
+}
+
+// 预计算所有节点状态并缓存
+function buildStatusCache(
+  root: KnowledgeNode,
+  progress: LearningProgress[],
+  highlightedNodes: string[]
+): Map<string, 'locked' | 'available' | 'in_progress' | 'completed'> {
+  const cache = new Map<string, 'locked' | 'available' | 'in_progress' | 'completed'>();
+
+  function traverse(node: KnowledgeNode) {
+    const status = calculateNodeStatus(node, progress, highlightedNodes);
+    cache.set(node.id, status);
+    if (node.children) {
+      node.children.forEach(traverse);
+    }
+  }
+
+  traverse(root);
+  return cache;
 }
 
 function attachCoursesAsChildren(root: KnowledgeNode): KnowledgeNode {
@@ -173,12 +171,15 @@ export function MindMap({ data, progress = [], onNodeClick, highlightedNodes = [
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
-  // 获取节点状态（使用新的计算逻辑）
-  const getNodeStatus = useCallback((nodeId: string) => {
-    const node = getNodeById(nodeId, data);
-    if (!node) return 'locked';
-    return calculateNodeStatus(node, progress, highlightedNodes);
+  // 预计算所有节点状态缓存
+  const statusCache = useMemo(() => {
+    return buildStatusCache(data, progress, highlightedNodes);
   }, [data, progress, highlightedNodes]);
+
+  // 获取节点状态（从缓存读取）
+  const getNodeStatus = useCallback((nodeId: string) => {
+    return statusCache.get(nodeId) || 'locked';
+  }, [statusCache]);
 
   // 判断某个课程是否已完成
   const isCourseCompleted = useCallback((nodeId: string, courseId: string) => {
@@ -241,13 +242,19 @@ export function MindMap({ data, progress = [], onNodeClick, highlightedNodes = [
     const SIBLING_GAP = 12;
     const COURSE_SIBLING_GAP = 6;
 
-    // 文字宽度测量
+    // 文字宽度测量 - 使用缓存避免重复计算
     const textMeasureCanvas = document.createElement('canvas');
     const textMeasureCtx = textMeasureCanvas.getContext('2d')!;
-    
+    const textWidthCache = new Map<string, number>();
+
     const measureTextWidth = (text: string, fontSize: number, fontWeight: string = '400') => {
+      const key = `${fontWeight}|${fontSize}|${text}`;
+      const cached = textWidthCache.get(key);
+      if (cached !== undefined) return cached;
       textMeasureCtx.font = `${fontWeight} ${fontSize}px sans-serif`;
-      return textMeasureCtx.measureText(text).width;
+      const width = textMeasureCtx.measureText(text).width;
+      textWidthCache.set(key, width);
+      return width;
     };
 
     // 计算节点尺寸
@@ -431,7 +438,7 @@ export function MindMap({ data, progress = [], onNodeClick, highlightedNodes = [
       event.stopPropagation();
       const nodeData = d.data as KnowledgeNode;
       if (nodeData.isCourseNode && nodeData.courseData) {
-        router.push(`/course/${nodeData.courseData.id}`);
+        router.push(`/course/${nodeData.courseData.id}?courseId=${nodeData.courseData.id}`);
         return;
       }
       setSelectedNode(nodeData);
@@ -769,7 +776,7 @@ export function MindMap({ data, progress = [], onNodeClick, highlightedNodes = [
                     return (
                       <a
                         key={course.id}
-                        href={`/course/${course.id}`}
+                        href={`/course/${course.id}?courseId=${course.id}`}
                         className={`flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition-colors group ${
                           completed 
                             ? 'bg-green-50 hover:bg-green-100' 

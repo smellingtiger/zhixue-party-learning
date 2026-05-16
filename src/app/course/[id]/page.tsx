@@ -266,17 +266,14 @@ export default function CoursePage() {
           return prev;
         });
 
-        // 优先使用queryCourseId指定的课程，否则使用node.courses中的第一个
+        // 优先使用queryCourseId指定的课程，其次用URL路径中的courseId匹配，否则使用node.courses中的第一个
         if (node.courses && node.courses.length > 0) {
           let courseToPlay;
-          if (queryCourseId) {
-            const index = node.courses.findIndex(c => c.id === queryCourseId);
-            if (index !== -1) {
-              setSelectedCourseIndex(index);
-              courseToPlay = node.courses[index];
-            } else {
-              courseToPlay = node.courses[0];
-            }
+          const effectiveCourseId = queryCourseId || courseId;
+          const index = node.courses.findIndex(c => c.id === effectiveCourseId);
+          if (index !== -1) {
+            setSelectedCourseIndex(index);
+            courseToPlay = node.courses[index];
           } else {
             courseToPlay = node.courses[0];
           }

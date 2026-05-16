@@ -3,12 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, ChevronRight, FileText } from 'lucide-react';
 
-interface OutlineEntry {
-  paragraph_index: number;
+interface SemanticOutlineEntry {
+  index: number;
   start_time_second: number;
   end_time_second: number;
-  content: string;
-  title?: string;
+  summary: string;
 }
 
 interface VideoOutlineProps {
@@ -23,7 +22,7 @@ function formatTime(seconds: number): string {
 }
 
 export function VideoOutline({ courseId, onSeekTo }: VideoOutlineProps) {
-  const [outline, setOutline] = useState<OutlineEntry[]>([]);
+  const [outline, setOutline] = useState<SemanticOutlineEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
@@ -67,16 +66,16 @@ export function VideoOutline({ courseId, onSeekTo }: VideoOutlineProps) {
   return (
     <div className="space-y-1">
       {outline.map((entry) => {
-        const isActive = activeIndex === entry.paragraph_index;
+        const isActive = activeIndex === entry.index;
         return (
           <div
-            key={entry.paragraph_index}
+            key={entry.index}
             onClick={() => {
-              setActiveIndex(entry.paragraph_index);
+              setActiveIndex(entry.index);
               onSeekTo?.(entry.start_time_second);
             }}
             className={`
-              group flex items-start gap-2 py-2 px-3 rounded-md cursor-pointer transition-all
+              group flex items-start gap-2 py-2.5 px-3 rounded-md cursor-pointer transition-all
               ${isActive
                 ? 'bg-red-600 text-white shadow-sm'
                 : 'hover:bg-gray-100 text-gray-700'
@@ -87,10 +86,10 @@ export function VideoOutline({ courseId, onSeekTo }: VideoOutlineProps) {
               <ChevronRight className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-gray-400'}`} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className={`text-sm font-medium leading-snug line-clamp-2 ${isActive ? 'text-white' : ''}`}>
-                {entry.title || `第${entry.paragraph_index}部分`}
+              <div className={`text-sm leading-relaxed ${isActive ? 'text-white' : 'text-gray-700'}`}>
+                {entry.summary}
               </div>
-              <div className={`flex items-center gap-1 text-xs mt-0.5 ${isActive ? 'text-white/80' : 'text-gray-400'}`}>
+              <div className={`flex items-center gap-1 text-xs mt-1 ${isActive ? 'text-white/80' : 'text-gray-400'}`}>
                 <Clock className="w-3 h-3 flex-shrink-0" />
                 <span className="whitespace-nowrap">
                   {formatTime(entry.start_time_second)} - {formatTime(entry.end_time_second)}
