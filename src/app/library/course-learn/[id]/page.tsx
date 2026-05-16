@@ -263,6 +263,7 @@ function getCourseData(courseId?: string): any {
       else if (courseName.includes('具身智能')) courseCode = '4';
       else if (courseName.includes('党章')) courseCode = '5';
       else if (courseName.includes('基层') || courseName.includes('党务')) courseCode = '6';
+      else if (courseName.includes('乡村振兴')) courseCode = '7';
       
       return {
         id: parsed.chapters?.[0]?.id || 1,
