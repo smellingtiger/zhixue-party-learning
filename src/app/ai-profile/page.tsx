@@ -785,7 +785,9 @@ function RadarChatPanel({ skills, resetKey }: { skills: typeof skillTags; resetK
     const el = container.querySelector(`[data-chat-idx="${currentChatIdx}"]`) as HTMLElement | null;
     if (el) {
       const target = el.offsetTop + el.offsetHeight - container.clientHeight;
-      container.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
+      requestAnimationFrame(() => {
+        container.scrollTo({ top: Math.max(0, target), behavior: 'auto' });
+      });
     }
   }, [currentChatIdx]);
 
@@ -793,7 +795,9 @@ function RadarChatPanel({ skills, resetKey }: { skills: typeof skillTags; resetK
     if (allDone && scrollContainerRef.current) {
       const container = scrollContainerRef.current;
       const target = container.scrollHeight - container.clientHeight;
-      container.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
+      requestAnimationFrame(() => {
+        container.scrollTo({ top: Math.max(0, target), behavior: 'auto' });
+      });
     }
   }, [allDone]);
 
@@ -1674,7 +1678,7 @@ export default function AIProfilePage() {
           </div>
 
           {/* 右侧内容区 */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-br from-gray-50 via-white to-red-50/20">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-br from-gray-50 via-white to-red-50/20" style={{ overscrollBehavior: 'contain' }}>
 
             {/* 联动雷达图 + AI对话分析 */}
             <RadarChatPanel skills={skillTags} resetKey={rescanCounter} />
