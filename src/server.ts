@@ -52,11 +52,7 @@ app.prepare().then(() => {
       res.statusCode = 500;
       res.end('Internal server error');
     }
-  } catch (err) {
-    console.error('Error occurred handling', req.url, err);
-    res.statusCode = 500;
-    res.end('Internal server error');
-  }
+  });
 }).listen(port, () => {
   console.log(
     `> Server listening at http://${hostname}:${port} as ${
