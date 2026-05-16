@@ -724,7 +724,16 @@ export default function CourseLearnPage() {
 
   // 加载课程语音播报文稿
   useEffect(() => {
-    loadCourseScript().then(script => {
+    // 获取课程名称以加载对应的语音脚本
+    let courseName = '';
+    try {
+      const saved = localStorage.getItem('current_ai_course');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        courseName = parsed.courseName || '';
+      }
+    } catch {}
+    loadCourseScript(courseName).then(script => {
       if (script) {
         setSpeechContents(script.chapters);
       }
@@ -733,6 +742,7 @@ export default function CourseLearnPage() {
 
   const course = getCourseData(courseId);
   const chapter = course.chapters[currentChapter];
+  const isRuralCourse = (course.name || '').includes('乡村振兴');
   const slides = chapter?.slides || [];
   const currentSlideData = slides[currentSlide] ? [slides[currentSlide]] : [];
   const totalSlides = slides.length;
@@ -2124,6 +2134,7 @@ export default function CourseLearnPage() {
               <DigitalAvatar 
                 chapterContents={speechChapterContents}
                 currentChapterIndex={currentChapter}
+                audioPrefix={isRuralCourse ? '/audio/rural/' : '/audio/'}
                 onSpeechEnd={() => {
                   console.log('[数字人] 语音播放完成');
                 }}

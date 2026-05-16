@@ -58,9 +58,12 @@ export function getChapterSections(chapter: ChapterScript): SectionMarker[] {
   });
 }
 
-export async function loadCourseScript(): Promise<CourseScript | null> {
+export async function loadCourseScript(courseName?: string): Promise<CourseScript | null> {
   try {
-    const response = await fetch('/course-scripts/script.json');
+    const scriptFile = courseName && courseName.includes('乡村振兴')
+      ? '/course-scripts/rural-revitalization-script.json'
+      : '/course-scripts/script.json';
+    const response = await fetch(scriptFile);
     if (!response.ok) {
       console.error('[课程文稿] 加载失败');
       return null;
