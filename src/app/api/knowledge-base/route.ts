@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-const KNOWLEDGE_SERVICE_URL = 'http://localhost:8080';
+const KNOWLEDGE_SERVICE_URL = process.env.KNOWLEDGE_SERVICE_URL || 'http://localhost:8080';
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
     const data = await res.json();
 
     const files = data.files || [];
+    const total = data.total ?? 0;
     const start = (page - 1) * pageSize;
     const paged = files.slice(start, start + pageSize);
 
@@ -34,13 +35,13 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       docs,
-      total: data.total,
+      total,
       page,
       pageSize,
-      totalPages: Math.ceil(data.total / pageSize),
-      categories: data.categories,
-      categoryCounts: data.category_counts,
-      totalDocuments: data.total,
+      totalPages: Math.ceil(total / pageSize),
+      categories: data.categories || [],
+      categoryCounts: data.category_counts || {},
+      totalDocuments: total,
     });
   } catch (error) {
     console.error('知识库API错误:', error);

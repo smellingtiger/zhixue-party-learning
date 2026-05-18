@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-const KNOWLEDGE_SERVICE_URL = 'http://localhost:8080';
+const KNOWLEDGE_SERVICE_URL = process.env.KNOWLEDGE_SERVICE_URL || 'http://localhost:8080';
 
 export async function GET(
   request: NextRequest,

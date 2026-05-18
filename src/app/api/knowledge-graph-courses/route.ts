@@ -4,7 +4,7 @@ import path from 'path';
 import { CourseInfo } from '@/lib/types';
 import { courseVideoMapping } from '@/lib/video-mapping';
 
-const KNOWLEDGE_BASE_DIR = 'E:\\社院课程stt\\knowledge_base_txt';
+const KNOWLEDGE_BASE_DIR = process.env.KNOWLEDGE_BASE_DIR || 'E:\\社院课程stt\\knowledge_base_txt';
 
 function buildSystemIdToVideoPathMap(): Record<string, string> {
   const map: Record<string, string> = {};
