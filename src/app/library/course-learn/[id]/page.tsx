@@ -84,6 +84,30 @@ function getCourseImageUrl(courseCode: string, chapterIndex: number, pageIndex: 
     '4-8-2': '/4-8-2.png',
     '4-8-3': '/4-8-3.png',
     '4-8-4': '/4-8-4.png',
+    '7-1-1': '/7-1-1.png',
+    '7-1-2': '/7-1-2.png',
+    '7-1-3': '/7-1-3.png',
+    '7-1-4': '/7-1-4.png',
+    '7-2-1': '/7-2-1.png',
+    '7-2-2': '/7-2-2.png',
+    '7-2-3': '/7-2-3.png',
+    '7-2-4': '/7-2-4.png',
+    '7-2-5': '/7-2-5.png',
+    '7-4-1': '/7-4-1.png',
+    '7-4-2': '/7-4-2.png',
+    '7-4-3': '/7-4-3.png',
+    '7-4-4': '/7-4-4.png',
+    '7-4-5': '/7-4-5.png',
+    '7-6-1': '/7-6-1.png',
+    '7-6-2': '/7-6-2.png',
+    '7-6-3': '/7-6-3.png',
+    '7-6-4': '/7-6-4.png',
+    '7-8-1': '/7-8-1.png',
+    '7-8-2': '/7-8-2.png',
+    '7-8-3': '/7-8-3.png',
+    '7-8-4': '/7-8-4.png',
+    '7-8-5': '/7-8-5.png',
+    '7-0-1': '/前言配图（乡村振兴）.png',
   };
   if (knownImageMap[imageKey]) {
     return knownImageMap[imageKey];
@@ -274,9 +298,9 @@ function getCourseData(courseId?: string): any {
           const videoUrl = getCourseVideoUrl(ch.id?.toString() || courseId || '');
           const chapterContent = ch.content || '';
           const slides = [];
-          const isChapter3 = ch.title.includes('第3章') && ch.title.includes('自动') && ch.title.includes('自主');
-          const isChapter5 = ch.title.includes('第5章') && ch.title.includes('世界模型');
-          const isChapter7 = ch.title.includes('第7章') && ch.title.includes('可解释') && ch.title.includes('可评估') && ch.title.includes('可监管');
+          const isChapter3 = (ch.title.includes('第3章') && ch.title.includes('自动') && ch.title.includes('自主')) || (ch.title.includes('第3章') && ch.title.includes('扶贫') && ch.title.includes('振兴'));
+          const isChapter5 = (ch.title.includes('第5章') && ch.title.includes('世界模型')) || (ch.title.includes('第5章') && ch.title.includes('合作社'));
+          const isChapter7 = (ch.title.includes('第7章') && ch.title.includes('可解释') && ch.title.includes('可评估') && ch.title.includes('可监管')) || (ch.title.includes('第7章') && ch.title.includes('可落地') && ch.title.includes('可评估') && ch.title.includes('可推广'));
           
           if (videoUrl) {
             slides.push({ type: 'video', content: '', videoUrl });
@@ -457,10 +481,13 @@ function getCourseData(courseId?: string): any {
               };
 
               if (ch.title.startsWith('前言')) {
+                const prefaceImageUrl = getCourseImageUrl(courseCode, 0, 1);
                 slides.push({
-                  type: 'text',
+                  type: 'mixed',
                   content: chapterContent,
                   chapterTitle: ch.title,
+                  imageUrl: prefaceImageUrl || undefined,
+                  imageCaption: prefaceImageUrl ? '前言：乡村振兴战略概述' : undefined,
                   thinkingSteps: generateGenericThinkingSteps(chapterContent, ch.title, chIdx * 100),
                 });
               } else {
@@ -558,30 +585,33 @@ function getCourseData(courseId?: string): any {
           }
           
           if (isChapter3 && slides.length > 0) {
+            const isRuralCh3 = ch.title.includes('扶贫') && ch.title.includes('振兴');
             slides.splice(1, 0, {
               type: 'video',
               content: '',
-              videoUrl: '/video/1分钟看懂_自动_与_自主_的差别.mp4',
+              videoUrl: isRuralCh3 ? '/video/1分钟看懂_扶贫_与_振兴_的差别.mp4' : '/video/1分钟看懂_自动_与_自主_的差别.mp4',
             });
           }
           
           if (isChapter5 && slides.length > 0) {
+            const isRuralCh5 = ch.title.includes('合作社');
             slides.splice(1, 0, {
               type: 'video',
               content: '',
-              videoUrl: '/video/世界模型：让机器人_理解_世界的关键一跃.mp4',
+              videoUrl: isRuralCh5 ? '/video/合作社——一次关键跃迁.mp4' : '/video/世界模型：让机器人_理解_世界的关键一跃.mp4',
             });
           }
           
           if (isChapter7 && slides.length > 0) {
+            const isRuralCh7 = ch.title.includes('可落地') && ch.title.includes('可推广');
             slides.splice(1, 0, {
               type: 'video',
               content: '',
-              videoUrl: '/video/具身智能治理三要素：可解释、可评估、可监管.mp4',
+              videoUrl: isRuralCh7 ? '/video/乡村振兴治理三要素：可落地、可评估、可推广.mp4' : '/video/具身智能治理三要素：可解释、可评估、可监管.mp4',
             });
           }
           
-          const summaries: Record<string, string> = {
+          const embodiedSummaries: Record<string, string> = {
             '前言：为什么机关干部要了解具身智能？': '具身智能已从实验室概念跃迁为国家战略高地。2025年首次写入《政府工作报告》，2030年市场规模预计达4000亿元。作为机关干部，需要建立可操作的理解框架——不是为了追逐概念，而是为了判断项目、评估风险、制定规则、组织试点。',
             '第1章：什么是具身智能——从概念到国家战略': '具身智能是"有物理载体的智能体"，核心三要素为具身本体、智能内核、环境交互。区别于纯大模型（离身智能）和传统机器人（具身不智能），政务场景采购不应盲目追求"人形"。',
             '第2章：核心机制与关键技术': '具身智能的核心是"五步闭环"（感知→认知→决策→执行→反馈）。关键技术包括多模态感知、模仿学习+强化学习、世界模型、运动与操作控制、安全围栏。世界模型是弥补端到端VLA泛化性短板的核心方向。',
@@ -592,6 +622,18 @@ function getCourseData(courseId?: string): any {
             '第7章："可解释、可评估、可监管"三要素': '具身智能治理的三要素：可解释（决策留痕可追溯）、可评估（指标先行数据说话）、可监管（权限分级日志不可篡改）。先治理后扩展，先试点再推广。',
             '第8章：组织一次本地化具身智能应用小调研': '从调研目标、受访对象、10题短问卷到5页内评审材料模板，提供完整的本地化调研工具箱。帮助学员将调研结果落地为可操作的试点建议。',
           };
+          const ruralSummaries: Record<string, string> = {
+            '前言：为什么机关干部要深刻理解乡村振兴？': '乡村振兴已从顶层设计进入系统推进、精准落地的关键阶段。党的十九大首次提出实施乡村振兴战略，2025年中央农村工作会议强调学习运用"千万工程"经验。作为机关干部，需要建立可操作的理解框架——识别痛点、设计方案、统筹资源、评估成效。',
+            '第1章：什么是乡村振兴——从概念到国家战略': '乡村振兴的核心是"二十字方针"：产业兴旺、生态宜居、乡风文明、治理有效、生活富裕。区别于"仅靠财政补贴""城镇化翻版""仅仅搞农业"，强调内生发展动力、各美其美、多元化路径。',
+            '第2章：核心机制与关键路径': '乡村振兴的核心推进机制是"五大振兴"协同驱动：产业振兴（根基）→人才振兴（支撑）→文化振兴（灵魂）→生态振兴（底线）→组织振兴（保障）。从"输血"到"造血"的发展范式转变是关键。',
+            '第3章：1分钟看懂"扶贫"与"振兴"的差别': '通过分屏对比展示：扶贫是"送"，解决"有没有"的问题；振兴是"造"，解决"好不好"的问题。振兴等于产业、人才、文化、生态、组织协同推进。',
+            '第4章：面向公共治理的四大实践领域': '乡村振兴在政务领域聚焦四大板块：产业发展与集体经济、民生改善与公共服务、生态保护与绿色发展、文化传承与民族团结。每项场景配有实践载体和落地案例。',
+            '第5章：合作社——一次关键跃迁': '合作社等于党建引领乘以群众参与乘以市场对接。从单打独斗到抱团发展，从看天吃饭到品牌溢价。因地制宜、因村施策，是乡村振兴的关键制度创新。',
+            '第6章：项目论证与评估方法': '提供"六问"论证清单（产业基础、群众意愿、组织保障、资金可持续、生态红线、评估方案）和六维加权评分表，帮助机关干部快速识别"伪振兴"项目。',
+            '第7章："可落地、可评估、可推广"三要素': '乡村振兴治理三要素：可落地（从纸面到地面）、可评估（指标量化数据说话）、可推广（做成一个带动一片）。先试点后推广，先组织后放活。',
+            '第8章：组织一次本地化乡村振兴项目小调研': '从调研目标、受访对象、10题短问卷到5页内评审材料模板，提供完整的本地化调研工具箱。帮助学员将调研结果落地为可操作的试点建议。',
+          };
+          const summaries = courseCode === '7' ? ruralSummaries : embodiedSummaries;
           return { id: ch.id, title: ch.title, totalSlides: slides.length, aiSummary: summaries[ch.title] || `${ch.title}。深入讲解核心要义，帮助您全面掌握相关知识点和实践方法。`, keyPoints: [ch.title.replace(/第.*章[：:]/, '').substring(0, 10)], videoUrl, slides };
         }),
       };
@@ -722,16 +764,15 @@ export default function CourseLearnPage() {
   const [learningSeconds, setLearningSeconds] = useState(0);
   const [speechContents, setSpeechContents] = useState<ChapterScript[]>([]);
 
-  // 加载课程语音播报文稿
+  const course = getCourseData(courseId);
+
   useEffect(() => {
-    loadCourseScript().then(script => {
+    loadCourseScript(course?.name).then(script => {
       if (script) {
         setSpeechContents(script.chapters);
       }
     });
-  }, []);
-
-  const course = getCourseData(courseId);
+  }, [course?.name]);
   const chapter = course.chapters[currentChapter];
   const slides = chapter?.slides || [];
   const currentSlideData = slides[currentSlide] ? [slides[currentSlide]] : [];
@@ -2124,6 +2165,7 @@ export default function CourseLearnPage() {
               <DigitalAvatar 
                 chapterContents={speechChapterContents}
                 currentChapterIndex={currentChapter}
+                courseName={course?.name}
                 onSpeechEnd={() => {
                   console.log('[数字人] 语音播放完成');
                 }}

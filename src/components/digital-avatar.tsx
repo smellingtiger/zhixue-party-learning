@@ -27,6 +27,7 @@ interface DigitalAvatarProps {
   currentChapterIndex: number;
   onSpeechEnd?: () => void;
   onSectionChange?: (sectionIndex: number) => void;
+  courseName?: string;
 }
 
 function formatTime(seconds: number): string {
@@ -35,7 +36,7 @@ function formatTime(seconds: number): string {
   return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
-export default function DigitalAvatar({ chapterContents, currentChapterIndex, onSpeechEnd, onSectionChange }: DigitalAvatarProps) {
+export default function DigitalAvatar({ chapterContents, currentChapterIndex, onSpeechEnd, onSectionChange, courseName }: DigitalAvatarProps) {
   const [status, setStatus] = useState<PlayStatus>('idle');
   const [speed, setSpeed] = useState(1.0);
   const [audioDurations, setAudioDurations] = useState<Record<string, number>>({});
@@ -52,8 +53,10 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, on
 
   const currentContent = chapterContents[currentChapterIndex];
   const chapterId = CHAPTER_IDS[currentChapterIndex] || `chapter${currentChapterIndex}`;
-  const audioUrl = `/audio/${chapterId}.mp3`;
-  const hasAudio = audioAvailable[chapterId] === true;
+  const audioPrefix = courseName && (courseName.includes('乡村振兴') || courseName.includes('rural')) ? 'rural-' : '';
+  const audioKey = `${audioPrefix}${chapterId}`;
+  const audioUrl = `/audio/${audioKey}.mp3`;
+  const hasAudio = audioAvailable[audioKey] === true;
 
   useEffect(() => {
     fetch('/audio/durations.json')
@@ -65,7 +68,7 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, on
   useEffect(() => {
     const check = async () => {
       for (let i = 0; i < chapterContents.length && i < CHAPTER_IDS.length; i++) {
-        const id = CHAPTER_IDS[i];
+        const id = `${audioPrefix}${CHAPTER_IDS[i]}`;
         try {
           const res = await fetch(`/audio/${id}.mp3`, { method: 'HEAD' });
           setAudioAvailable(prev => ({ ...prev, [id]: res.ok }));
@@ -75,7 +78,7 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, on
       }
     };
     check();
-  }, [chapterContents.length]);
+  }, [chapterContents.length, audioPrefix]);
 
   const splitIntoSentences = (text: string): string[] => {
     return text
@@ -93,7 +96,7 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, on
   }, [currentContent]);
 
   const effectiveTotalDuration = hasAudio
-    ? (audioDurations[chapterId] || audioDuration || estimatedTotalDuration)
+    ? (audioDurations[audioKey] || audioDuration || estimatedTotalDuration)
     : estimatedTotalDuration;
 
   const progressPercent = effectiveTotalDuration > 0 ? (currentTime / effectiveTotalDuration) * 100 : 0;

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllKnowledgeDocs, searchKnowledgeDocs } from '@/lib/knowledge-base';
 
 export const dynamic = 'force-dynamic';
+
+const KNOWLEDGE_SERVICE_URL = 'http://localhost:8080';
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,39 +12,37 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const pageSize = parseInt(searchParams.get('pageSize') || '50');
 
-    let docs = query ? searchKnowledgeDocs(query) : getAllKnowledgeDocs();
+    const params = new URLSearchParams();
+    if (query) params.set('q', query);
+    if (category && category !== 'all') params.set('category', category);
+    params.set('sort', 'title');
 
-    const allCategories = [...new Set(docs.map(d => d.category))];
-    
-    // 计算每个分类的总数量（在过滤之前）
-    const categoryCounts: Record<string, number> = {};
-    for (const doc of docs) {
-      categoryCounts[doc.category] = (categoryCounts[doc.category] || 0) + 1;
-    }
+    const res = await fetch(`${KNOWLEDGE_SERVICE_URL}/api/files?${params}`);
+    const data = await res.json();
 
-    if (category) {
-      docs = docs.filter(d => d.category === category);
-    }
-
-    const total = docs.length;
     const start = (page - 1) * pageSize;
-    const paged = docs.slice(start, start + pageSize);
+    const paged = data.files.slice(start, start + pageSize);
+
+    const docs = paged.map((f: any) => ({
+      id: f.id,
+      courseName: f.title,
+      category: f.category,
+      paragraphCount: f.paragraph_count,
+      fileName: f.filename,
+    }));
 
     return NextResponse.json({
-      docs: paged,
-      total,
+      docs,
+      total: data.total,
       page,
       pageSize,
-      totalPages: Math.ceil(total / pageSize),
-      categories: allCategories,
-      categoryCounts,
-      totalDocuments: docs.length,
+      totalPages: Math.ceil(data.total / pageSize),
+      categories: data.categories,
+      categoryCounts: data.category_counts,
+      totalDocuments: data.total,
     });
   } catch (error) {
     console.error('知识库API错误:', error);
-    return NextResponse.json(
-      { error: '获取知识库列表失败' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '获取知识库列表失败' }, { status: 500 });
   }
 }
