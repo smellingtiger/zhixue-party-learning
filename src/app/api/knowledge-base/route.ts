@@ -20,8 +20,9 @@ export async function GET(request: NextRequest) {
     const res = await fetch(`${KNOWLEDGE_SERVICE_URL}/api/files?${params}`);
     const data = await res.json();
 
+    const files = data.files || [];
     const start = (page - 1) * pageSize;
-    const paged = data.files.slice(start, start + pageSize);
+    const paged = files.slice(start, start + pageSize);
 
     const docs = paged.map((f: any) => ({
       id: f.id,

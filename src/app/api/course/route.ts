@@ -184,32 +184,62 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    let apiUrl: string;
-    if (playType === 'JY') {
-      apiUrl = `${API_URL}/Home/PlayJY`;
-    } else if (playType === 'Office') {
-      apiUrl = `${API_URL}/Home/PlayOffice`;
-    } else {
-      apiUrl = `${API_URL}/Home/PlaySingle`;
-    }
-
     // 获取认证信息
     const { cookie, token } = await ensureAuth();
-    
+
     // 认证失败处理
     if (!cookie) {
       console.error('[Play API] Authentication failed! No session cookie available.');
       console.error('[Play API] Please check backend credentials and server connectivity.');
-      return NextResponse.json({ 
-        error: 'no-token', 
+      return NextResponse.json({
+        error: 'no-token',
         message: '后端登录失败，请检查服务器连接或联系管理员',
         IsSuccess: false,
         Type: 401
       }, { status: 401 });
     }
 
-    const requestBody = new URLSearchParams({ courseId });
-    
+    // Jwplay 类型需要先调 Play API 获取数字 CourseId
+    let targetCourseId = courseId;
+    if (playType === 'Jwplay') {
+      console.log('[Play API] Step 1: Fetching course info via Play API for', courseId);
+      const playBody = new URLSearchParams({ id: courseId });
+      if (token) {
+        Object.entries(token).forEach(([key, value]) => {
+          playBody.set(key, value);
+        });
+      }
+      const playResult = await httpPost(`${API_URL}/Home/Play`, playBody.toString(), cookie);
+      try {
+        const playData = JSON.parse(playResult.data);
+        if (playData.Data && playData.Data.CourseId) {
+          const numericId = String(playData.Data.CourseId);
+          console.log('[Play API] Got numeric CourseId:', numericId, 'from original:', courseId);
+          targetCourseId = numericId;
+        } else {
+          console.log('[Play API] Play API did not return CourseId, trying direct call');
+        }
+      } catch {
+        console.log('[Play API] Failed to parse Play response, trying direct call');
+      }
+    }
+
+    let apiUrl: string;
+    let requestBody: URLSearchParams;
+    if (playType === 'JY') {
+      apiUrl = `${API_URL}/Home/PlayJY`;
+      requestBody = new URLSearchParams({ courseId: targetCourseId });
+    } else if (playType === 'Office') {
+      apiUrl = `${API_URL}/Home/PlayOffice`;
+      requestBody = new URLSearchParams({ courseId: targetCourseId });
+    } else if (playType === 'Jwplay') {
+      apiUrl = `${API_URL}/Home/PlayJwplay`;
+      requestBody = new URLSearchParams({ courseid: targetCourseId });
+    } else {
+      apiUrl = `${API_URL}/Home/PlaySingle`;
+      requestBody = new URLSearchParams({ courseId: targetCourseId });
+    }
+
     // 添加防伪造 Token
     if (token) {
       Object.entries(token).forEach(([key, value]) => {
@@ -217,18 +247,18 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    console.log('[Play API] Calling:', apiUrl, 'with cookie:', !!cookie, 'token:', JSON.stringify(token));
+    console.log('[Play API] Calling:', apiUrl, 'with courseId:', targetCourseId);
 
     // 使用 http 模块发送请求，确保 Cookie 正确传递
     const playResult = await httpPost(apiUrl, requestBody.toString(), cookie);
-    
+
     let data: any;
     try {
       data = JSON.parse(playResult.data);
     } catch (e) {
       data = { error: 'Invalid response', raw: playResult.data.slice(0, 500) };
     }
-    
+
     console.log('[Play API] Response for', courseId, ':', JSON.stringify(data).slice(0, 300));
     return NextResponse.json(data);
   } catch (error) {

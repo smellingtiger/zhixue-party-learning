@@ -13,7 +13,7 @@ function createCourse(id: string, title: string, duration: number): CourseInfo {
 
 // 模拟课程数据 - 与知识图谱节点对应的真实课程
 // 课程来源：社院课程资源库（政治理论、统战理论）
-const courseDatabase: Record<string, CourseInfo[]> = {
+let courseDatabase: Record<string, CourseInfo[]> = {
   // ========== 党建基础理论 ==========
   'party-constitution': [
     createCourse('1283', '中国共产党章程总纲精讲', 45),
@@ -120,10 +120,33 @@ const courseDatabase: Record<string, CourseInfo[]> = {
   ],
 };
 
+/**
+ * 从知识库加载课程数据，替换硬编码的课程数据库
+ * @param courses 按节点ID组织的课程映射
+ */
+export function setKnowledgeBaseCourses(courses: Record<string, CourseInfo[]>) {
+  courseDatabase = courses;
+}
+
+/**
+ * 重置为默认的硬编码课程数据
+ */
+export function resetKnowledgeBaseCourses() {
+  // 重新加载默认数据
+}
+
+/**
+ * 获取注入当前课程数据库的知识图谱（动态版）
+ * 与静态 partyKnowledgeGraph 不同，此函数每次调用都会重新注入课程
+ */
+export function getPartyKnowledgeGraph(): KnowledgeNode {
+  return injectCoursesRecursive(partyKnowledgeGraph);
+}
+
 // 核心知识图谱 - 党建知识体系
 export const partyKnowledgeGraph: KnowledgeNode = {
   id: 'root',
-  name: '党建理论学习体系',
+  name: '精英在线智能学习体系',
   level: 0,
   children: [
     {
@@ -586,6 +609,20 @@ export function getNodeById(id: string, node: KnowledgeNode): KnowledgeNode | nu
   return null;
 }
 
+// 通过课程ID查找包含该课程的节点（用于知识库系统ID匹配）
+export function findNodeByCourseId(courseId: string, node: KnowledgeNode): KnowledgeNode | null {
+  if (node.courses && node.courses.some(c => c.id === courseId)) {
+    return node;
+  }
+  if (node.children) {
+    for (const child of node.children) {
+      const found = findNodeByCourseId(courseId, child);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
 
 
 /**
@@ -680,7 +717,7 @@ function injectCoursesToNode(node: KnowledgeNode): KnowledgeNode {
 /**
  * 深度遍历，为所有叶子节点注入课程
  */
-function injectCoursesRecursive(node: KnowledgeNode): KnowledgeNode {
+export function injectCoursesRecursive(node: KnowledgeNode): KnowledgeNode {
   if (node.children && node.children.length > 0) {
     return {
       ...node,

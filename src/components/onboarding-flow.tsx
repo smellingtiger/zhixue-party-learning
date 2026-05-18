@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import MindMap from '@/components/mind-map';
 import { DiagnosticSurvey } from '@/components/diagnostic-survey';
 import { AIIntentChat } from '@/components/ai-intent-chat';
-import { partyKnowledgeGraph, generateLearningPath, roleNodeMap, topicNodeMap, getNodeById, getDifficultyLockedNodeIds } from '@/lib/knowledge-graph';
+import { partyKnowledgeGraph, generateLearningPath, roleNodeMap, topicNodeMap, getNodeById, getDifficultyLockedNodeIds, setKnowledgeBaseCourses, injectCoursesRecursive } from '@/lib/knowledge-graph';
 import { LearningPath, KnowledgeNode, LearningProgress } from '@/lib/types';
 import {
   BrainCircuit,
@@ -93,6 +93,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [diagnosticTopics, setDiagnosticTopics] = useState<string[]>([]);
   const [difficultyLockedNodes, setDifficultyLockedNodes] = useState<Set<string>>(new Set());
   const [showFullMap, setShowFullMap] = useState(false);
+  const [knowledgeBaseGraph, setKnowledgeBaseGraph] = useState<KnowledgeNode | null>(null);
 
 
 
@@ -158,6 +159,22 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       } catch {
       }
     }
+  }, []);
+
+  // 从知识库加载课程数据，替换硬编码课程
+  useEffect(() => {
+    fetch('/api/knowledge-graph-courses')
+      .then(res => res.json())
+      .then(data => {
+        if (data.courses) {
+          setKnowledgeBaseCourses(data.courses);
+          setKnowledgeBaseGraph(injectCoursesRecursive(partyKnowledgeGraph));
+          console.log(`[知识库] 已加载 ${data.totalKnowledgeBaseCourses} 门课程到知识图谱`);
+        }
+      })
+      .catch(err => {
+        console.warn('[知识库] 加载知识图谱课程失败，使用默认课程数据:', err);
+      });
   }, []);
 
   useEffect(() => {
@@ -691,7 +708,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                     <div className="flex items-center justify-between">
                       <DialogTitle className="text-base font-bold flex items-center gap-2">
                         <Network className="w-4 h-4 text-red-600" />
-                        党建知识全貌
+                        完整知识体系
                       </DialogTitle>
                       <Button variant="ghost" size="icon" onClick={() => setShowFullMap(false)} className="h-7 w-7">
                         <X className="w-3.5 h-3.5" />
@@ -700,7 +717,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   </DialogHeader>
                   <div className="flex-1 w-full min-h-0">
                     <MindMap
-                      data={partyKnowledgeGraph}
+                      data={knowledgeBaseGraph || partyKnowledgeGraph}
                       progress={progress}
                       highlightedNodes={[]}
                       interactive={false}

@@ -37,31 +37,43 @@ const OUTLINE_PROMPT = `你是一位资深的党课课程教研专家。请对�
 - keyPoints 必须是简短的短语或短句
 - 确保整个JSON是合法可解析的`;
 
-async function callLLM(content: string): Promise<string> {
-  const config = new Config();
-  const customHeaders = HeaderUtils.extractForwardHeaders(
-    new Headers() as unknown as Record<string, string>
-  );
-  const client = new LLMClient(config, customHeaders as any);
+const LLM_TIMEOUT_MS = 120000;
 
-  const messages = [
-    { role: 'system' as const, content: OUTLINE_PROMPT },
-    { role: 'user' as const, content: `请对以下党课转写文本进行智能分段和大纲提炼：\n\n${content}` },
-  ];
+async function callLLM(content: string, requestHeaders: Headers): Promise<string> {
+  try {
+    const config = new Config();
+    const customHeaders = HeaderUtils.extractForwardHeaders(requestHeaders);
+    const client = new LLMClient(config, customHeaders);
 
-  let fullResponse = '';
-  const stream = client.stream(messages, {
-    temperature: 0.3,
-    model: 'doubao-seed-2-0-pro-260215',
-  });
+    const messages = [
+      { role: 'system' as const, content: OUTLINE_PROMPT },
+      { role: 'user' as const, content: `请对以下党课转写文本进行智能分段和大纲提炼：\n\n${content}` },
+    ];
 
-  for await (const chunk of stream) {
-    if (chunk.content) {
-      fullResponse += chunk.content;
-    }
+    let fullResponse = '';
+    const stream = client.stream(messages, {
+      temperature: 0.3,
+      model: 'doubao-seed-2-0-pro-260215',
+    });
+
+    const streamPromise = (async () => {
+      for await (const chunk of stream) {
+        if (chunk.content) {
+          fullResponse += chunk.content;
+        }
+      }
+      return fullResponse;
+    })();
+
+    const timeoutPromise = new Promise<string>((_, reject) => {
+      setTimeout(() => reject(new Error('LLM调用超时（超过2分钟）')), LLM_TIMEOUT_MS);
+    });
+
+    return await Promise.race([streamPromise, timeoutPromise]);
+  } catch (error) {
+    console.error('LLM调用失败:', error);
+    throw new Error(`LLM调用失败: ${error instanceof Error ? error.message : '未知错误'}`);
   }
-
-  return fullResponse;
 }
 
 function extractJsonFromResponse(response: string): any {
@@ -230,7 +242,7 @@ export async function POST(request: NextRequest) {
         // 步骤4：AI提炼大纲
         send({ step: 'outline', status: 'processing', message: '正在调用AI提炼课程大纲...', progress: 65 });
 
-        const llmResponse = await callLLM(textToSend);
+        const llmResponse = await callLLM(textToSend, request.headers);
 
         const outlineData = extractJsonFromResponse(llmResponse);
 

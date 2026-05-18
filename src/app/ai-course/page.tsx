@@ -205,13 +205,12 @@ export default function AICoursePage() {
     handleGenerate(plan.data);
   };
 
-  const handleGenerate = (presetData?: any) => {
+  const handleGenerate = async (presetData?: any) => {
     if (!courseTopic.trim() && !presetData) return;
 
     let currentDiagnostic: { roles: string[]; topics: string[]; difficulty?: string } | null = null;
     try {
       const saved = localStorage.getItem('user_diagnostic');
-      console.log('[课程生成] localStorage中的诊断数据:', saved);
       if (saved) {
         const parsed = JSON.parse(saved);
         currentDiagnostic = {
@@ -219,9 +218,6 @@ export default function AICoursePage() {
           topics: parsed.topics || [],
         };
         setDiagnosticData(currentDiagnostic);
-        console.log('[课程生成] 诊断数据解析成功:', currentDiagnostic);
-      } else {
-        console.log('[课程生成] localStorage中没有诊断数据');
       }
     } catch (e) {
       console.error('[课程生成] 读取诊断数据失败:', e);
@@ -233,41 +229,112 @@ export default function AICoursePage() {
     setShowGenerationPanel(true);
     setGenerationLogic(null);
 
-    const interval = setInterval(() => {
-      setCurrentStep(prev => {
-        if (prev >= thinkingSteps.length - 1) {
-          clearInterval(interval);
-          return prev;
-        }
-        return prev + 1;
-      });
-    }, 400);
+    if (presetData) {
+      const interval = setInterval(() => {
+        setCurrentStep(prev => {
+          if (prev >= thinkingSteps.length - 1) {
+            clearInterval(interval);
+            return prev;
+          }
+          return prev + 1;
+        });
+      }, 400);
 
-    setTimeout(() => {
-      const topic = presetData ? presetData.courseName : courseTopic;
-      const courseData = presetData || {
-        courseName: `${courseTopic}专题课程`,
-        courseType: '专题课程',
-        totalHours: (Math.floor(Math.random() * 8) + 4) / 10,
-        difficulty: '中级',
-        targetAudience: '统战系统干部',
-        chapters: generateChapters(courseTopic),
-        description: `本课程围绕"${courseTopic}"主题，系统讲解相关理论知识和实践方法，帮助学员全面掌握核心要义，提升业务能力。`,
-        learningObjectives: [
-          `深刻理解${courseTopic}的核心内涵`,
-          `掌握相关的政策要求和工作方法`,
-          `提升解决实际问题的能力`,
-          `推动工作创新发展`,
-        ],
-      };
-      setGeneratedCourse(courseData);
-      setEditedChapters([...courseData.chapters]);
-      console.log('[课程生成] 生成逻辑说明使用的诊断数据:', currentDiagnostic);
-      setGenerationLogic(generateLogicExplanation(topic, currentDiagnostic));
+      setTimeout(() => {
+        setGeneratedCourse(presetData);
+        setEditedChapters([...presetData.chapters]);
+        setGenerationLogic(generateLogicExplanation(presetData.courseName, currentDiagnostic));
+        setIsGenerating(false);
+        setShowResult(true);
+        setShowGenerationPanel(false);
+      }, 2500);
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:8081/api/generate-course', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: courseTopic.trim(),
+          diagnostic: currentDiagnostic,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API请求失败: ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('无法读取响应流');
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('event: ')) {
+            const eventType = line.slice(7).trim();
+            continue;
+          }
+          if (line.startsWith('data: ')) {
+            const dataStr = line.slice(6);
+            try {
+              const data = JSON.parse(dataStr);
+
+              const prevLine = lines[lines.indexOf(line) - 1] || '';
+              const eventType = prevLine.startsWith('event: ') ? prevLine.slice(7).trim() : '';
+
+              if (eventType === 'step' && data.index !== undefined) {
+                setCurrentStep(data.index);
+                setThinkingStepDetail(data.index, data.detail, data.title);
+              } else if (eventType === 'meta') {
+                if (data.estimatedTime) setEstimatedTime(data.estimatedTime);
+                if (data.matchQuality) setMatchQuality(data.matchQuality);
+              } else if (eventType === 'course') {
+                const courseData = data;
+                setGeneratedCourse(courseData);
+                setEditedChapters([...courseData.chapters]);
+                setGenerationLogic(generateLogicExplanation(courseData.courseName || courseTopic, currentDiagnostic));
+                setIsGenerating(false);
+                setShowResult(true);
+                setShowGenerationPanel(false);
+              } else if (eventType === 'error') {
+                console.error('[课程生成] 服务端错误:', data.message);
+                setIsGenerating(false);
+                setShowGenerationPanel(false);
+                alert(`课程生成失败: ${data.message}`);
+              }
+            } catch (parseErr) {
+              // ignore parse errors for incomplete data
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('[课程生成] 请求错误:', error);
       setIsGenerating(false);
-      setShowResult(true);
       setShowGenerationPanel(false);
-    }, 2500);
+      const msg = error instanceof Error && error.message.includes('Failed to fetch')
+        ? '课程生成服务未启动，请先启动Python服务'
+        : `课程生成失败: ${error instanceof Error ? error.message : '未知错误'}`;
+      alert(msg);
+    }
+  };
+
+  const [stepDetails, setStepDetails] = useState<Record<number, { title?: string; detail?: string }>>({});
+  const [estimatedTime, setEstimatedTime] = useState<string>('');
+  const [matchQuality, setMatchQuality] = useState<string>('');
+
+  const setThinkingStepDetail = (index: number, detail: string, title?: string) => {
+    setStepDetails(prev => ({ ...prev, [index]: { ...prev[index], detail, title } }));
   };
 
   const generateChapters = (topic: string) => {
@@ -486,20 +553,23 @@ export default function AICoursePage() {
                 )}
                 <span className="text-xs font-bold text-amber-300/80">Step {idx + 1}</span>
               </div>
-              <div className="text-[13px] font-semibold leading-snug truncate">{step.title}</div>
+              <div className="text-[13px] font-semibold leading-snug truncate">{stepDetails[idx]?.title || step.title}</div>
             </div>
           ))}
         </div>
         {expandedStep !== null && expandedStep < thinkingSteps.length && (
           <div className="mt-3 p-4 bg-black/40 border border-white/10 text-[13px] text-white/95 leading-relaxed whitespace-pre-line">
             <div className="text-xs font-bold text-amber-300 mb-2">
-              {thinkingSteps[expandedStep].title}
+              {stepDetails[expandedStep]?.title || thinkingSteps[expandedStep].title}
             </div>
-            {thinkingSteps[expandedStep].detail}
+            {stepDetails[expandedStep]?.detail || thinkingSteps[expandedStep].detail}
           </div>
         )}
         <div className="mt-4 text-[11px] text-white/40 border-t border-white/10 pt-3 font-medium text-center">
           基于大语言模型与知识图谱驱动 · 诊断 → 生成 → 优化的全链路智能化
+          {estimatedTime && <span className="ml-3 text-amber-300/60">⏱ 预计耗时：{estimatedTime}</span>}
+          {matchQuality === 'no_match' && <span className="ml-2 text-orange-300/70">· 联网搜索模式</span>}
+          {matchQuality === 'low' && <span className="ml-2 text-yellow-300/70">· 模糊匹配+联网补充</span>}
         </div>
       </div>
 

@@ -37,7 +37,7 @@ function formatTime(seconds: number): string {
   return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
-export default function DigitalAvatar({ chapterContents, currentChapterIndex, audioPrefix = '/audio/', onSpeechEnd, onSectionChange }: DigitalAvatarProps) {
+export default function DigitalAvatar({ chapterContents, currentChapterIndex, audioPrefix = '/audio/', onSpeechEnd, onSectionChange, courseName }: DigitalAvatarProps) {
   const [status, setStatus] = useState<PlayStatus>('idle');
   const [speed, setSpeed] = useState(1.0);
   const [audioDurations, setAudioDurations] = useState<Record<string, number>>({});
@@ -54,8 +54,8 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
 
   const currentContent = chapterContents[currentChapterIndex];
   const chapterId = CHAPTER_IDS[currentChapterIndex] || `chapter${currentChapterIndex}`;
-  const audioPrefix = courseName && (courseName.includes('乡村振兴') || courseName.includes('rural')) ? 'rural-' : '';
-  const audioKey = `${audioPrefix}${chapterId}`;
+  const audioFilePrefix = courseName && (courseName.includes('乡村振兴') || courseName.includes('rural')) ? 'rural-' : '';
+  const audioKey = `${audioFilePrefix}${chapterId}`;
   const audioUrl = `/audio/${audioKey}.mp3`;
   const hasAudio = audioAvailable[audioKey] === true;
 
@@ -69,9 +69,9 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
   useEffect(() => {
     const check = async () => {
       for (let i = 0; i < chapterContents.length && i < CHAPTER_IDS.length; i++) {
-        const id = `${audioPrefix}${CHAPTER_IDS[i]}`;
+        const id = `${audioFilePrefix}${CHAPTER_IDS[i]}`;
         try {
-          const res = await fetch(`${audioPrefix}${id}.mp3`, { method: 'HEAD' });
+          const res = await fetch(`/audio/${id}.mp3`, { method: 'HEAD' });
           setAudioAvailable(prev => ({ ...prev, [id]: res.ok }));
         } catch {
           setAudioAvailable(prev => ({ ...prev, [id]: false }));
@@ -79,7 +79,7 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
       }
     };
     check();
-  }, [chapterContents.length, audioPrefix]);
+  }, [chapterContents.length, audioFilePrefix]);
 
   const splitIntoSentences = (text: string): string[] => {
     return text

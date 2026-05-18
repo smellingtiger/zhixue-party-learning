@@ -19,7 +19,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { VideoOutline } from '@/components/video-outline';
-import { partyKnowledgeGraph } from '@/lib/knowledge-graph';
+import { partyKnowledgeGraph, findNodeByCourseId, getPartyKnowledgeGraph } from '@/lib/knowledge-graph';
 import { courseVideoMapping } from '@/lib/video-mapping';
 import type { KnowledgeNode, LearningProgress } from '@/lib/types';
 
@@ -50,7 +50,7 @@ async function fetchVideoUrl(courseId: string) {
     const response = await fetch('/api/course', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ courseId }),
+      body: JSON.stringify({ courseId, playType: 'Jwplay' }),
     });
     const data = await response.json();
     // 后端返回格式：{ Data: { Url: "..." }, Code: 1 }
@@ -252,7 +252,7 @@ export default function CoursePage() {
     async function loadCourse() {
       setIsLoading(true);
       
-      const node = findNodeById(courseId, partyKnowledgeGraph);
+      const node = findNodeById(courseId, getPartyKnowledgeGraph());
       if (node) {
         setCurrentNode(node);
         
@@ -285,6 +285,9 @@ export default function CoursePage() {
           if (localUrl) {
             setVideoUrl(localUrl);
             console.log('[课程播放] 使用本地视频:', localUrl);
+          } else if (courseToPlay.videoPath) {
+            setVideoUrl(`/${courseToPlay.videoPath}`);
+            console.log('[课程播放] 使用知识库视频:', courseToPlay.videoPath);
           } else {
             // 如果本地没有，再尝试从后端获取
             const targetId = courseToPlay.videoId || courseToPlay.id;
@@ -308,6 +311,20 @@ export default function CoursePage() {
               setVideoUrl(videoUrl);
               console.log('[课程播放] 使用后端视频:', videoUrl);
             }
+          }
+        }
+      } else {
+        // 降级处理：课程ID未在知识图谱中注册，直接从后端获取视频和课程信息
+        console.log('[课程播放] 课程未在知识图谱中，尝试从后端获取:', courseId);
+        const localUrl = getLocalVideoUrl(courseId);
+        if (localUrl) {
+          setVideoUrl(localUrl);
+          console.log('[课程播放] 使用本地视频:', localUrl);
+        } else {
+          const backendVideoUrl = await fetchVideoUrl(courseId);
+          if (backendVideoUrl) {
+            setVideoUrl(backendVideoUrl);
+            console.log('[课程播放] 使用后端视频:', backendVideoUrl);
           }
         }
       }
@@ -337,6 +354,9 @@ export default function CoursePage() {
     if (localUrl) {
       setVideoUrl(localUrl);
       console.log('[课程播放] 使用本地视频:', localUrl);
+    } else if (course.videoPath) {
+      setVideoUrl(`/${course.videoPath}`);
+      console.log('[课程播放] 使用知识库视频:', course.videoPath);
     } else {
       // 如果本地没有，再尝试从后端获取
       const targetId = course.videoId || course.id;

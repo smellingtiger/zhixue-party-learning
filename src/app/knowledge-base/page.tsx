@@ -66,11 +66,17 @@ export default function KnowledgeBasePage() {
 
       const res = await fetch(`/api/knowledge-base?${params}`);
       const data: ApiResponse = await res.json();
-      setDocs(data.docs);
-      setTotal(data.total);
-      setCategories(data.categories);
-      if (data.categoryCounts) {
-        setCategoryCounts(data.categoryCounts);
+      if (data.docs && Array.isArray(data.docs)) {
+        setDocs(data.docs);
+        setTotal(data.total ?? 0);
+        setCategories(data.categories ?? []);
+        if (data.categoryCounts) {
+          setCategoryCounts(data.categoryCounts);
+        }
+      } else {
+        setDocs([]);
+        setTotal(0);
+        setCategories([]);
       }
     } catch (err) {
       console.error('加载知识库失败:', err);
@@ -88,8 +94,12 @@ export default function KnowledgeBasePage() {
     setSelectedDoc(null);
     try {
       const res = await fetch(`/api/knowledge-base/${encodeURIComponent(doc.id)}`);
-      const data: KnowledgeDocDetail = await res.json();
-      setSelectedDoc(data);
+      const data = await res.json();
+      if (data.segments) {
+        setSelectedDoc(data);
+      } else {
+        setSelectedDoc({ ...data, segments: [] });
+      }
     } catch (err) {
       console.error('加载文档详情失败:', err);
     } finally {
@@ -314,7 +324,7 @@ export default function KnowledgeBasePage() {
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Badge variant="secondary" className="text-xs">{selectedDoc.category}</Badge>
-                  <span>{selectedDoc.segments.length} 个段落</span>
+                  <span>{selectedDoc.segments?.length ?? 0} 个段落</span>
                 </div>
               </div>
 
@@ -324,7 +334,7 @@ export default function KnowledgeBasePage() {
                 </div>
               ) : (
                 <div className="p-4 space-y-3">
-                  {selectedDoc.segments.map((seg, idx) => (
+                  {selectedDoc.segments?.map((seg, idx) => (
                     <div key={idx} className="p-3 rounded-lg border border-gray-100 hover:border-red-200 transition-colors">
                       <div className="flex items-center justify-between mb-1">
                         <h4 className="text-sm font-medium text-red-600">{seg.title}</h4>
