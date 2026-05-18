@@ -77,6 +77,14 @@ export interface IntentResult {
   confidence: number;
 }
 
+// 文本需求分析结果
+export interface RequirementAnalysis {
+  keywords: string[];
+  matchedTopics: string[];
+  matchedNodes: string[];
+  suggestedLevel: 'beginner' | 'intermediate' | 'advanced';
+}
+
 // 学习进度
 export interface LearningProgress {
   nodeId: string;

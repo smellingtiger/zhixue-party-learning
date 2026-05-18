@@ -1372,7 +1372,7 @@ export default function AIProfilePage() {
                   LV.8 · 资深学员
                 </div>
               </div>
-              <h2 className="text-xl font-bold text-gray-800 mt-7">党员同志</h2>
+              <h2 className="text-xl font-bold text-gray-800 mt-7">优秀干部</h2>
               <p className="text-gray-400 text-sm">学习达人</p>
               <div className="flex items-center justify-center gap-2 mt-2">
                 <Trophy className="h-4 w-4 text-yellow-500" />

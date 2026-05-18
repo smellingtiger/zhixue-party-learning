@@ -44,7 +44,7 @@ const userPool = [
   { id: 10, name: '王浩', role: '中共党员', org: '台州市发改委', region: '台州', tags: ['经济工作', '产业研究', '业务骨干'], status: 'avoided', reason: '2024年11月参加过全省民营经济发展统战工作专题班，1年内已参加同类型培训，自动避开', trainingRecords: [{ name: '2024年全省民营经济发展统战工作专题班', date: '2024-11-20', status: '已完成', score: 86 }] },
   { id: 11, name: '陈刚', role: '民建会员', org: '丽水市生态环境局', region: '丽水', tags: ['生态经济', '环保专家', '高级工程师'], status: 'avoided', reason: '2024年11月参加过全省生态经济发展统战工作专题培训班，1年内已参加同类型培训，自动避开', trainingRecords: [{ name: '2024年全省生态经济发展统战工作专题培训班', date: '2024-11-05', status: '已完成', score: 91 }] },
   { id: 12, name: '刘敏', role: '民进会员', org: '杭州市教育局', region: '杭州', tags: ['教育系统', '基础教育研究', '特级教师'], status: 'recommended', reason: '杭州市学军中学特级教师，民进杭州市委会教育委主任，从事基础教育管理工作12年，近1年未参加统战系统培训，符合选调要求', trainingRecords: [] },
-  { id: 13, name: '马强', role: '中共党员', org: '杭州市委组织部干部教育处', region: '杭州', tags: ['干部教育', '党务工作者', '基层骨干'], status: 'new', reason: '从事干部教育培训管理工作4年，负责全市党员干部培训规划，从未参加过统战系统专题培训，属于应培未培人员', trainingRecords: [] },
+  { id: 13, name: '马强', role: '中共党员', org: '杭州市委组织部干部教育处', region: '杭州', tags: ['干部教育', '组织工作', '基层骨干'], status: 'new', reason: '从事干部教育培训管理工作4年，负责全市党员干部培训规划，从未参加过统战系统专题培训，属于应培未培人员', trainingRecords: [] },
   { id: 14, name: '朱磊', role: '中共党员', org: '宁波市委统战部经济处', region: '宁波', tags: ['经济统战', '民营经济服务', '业务骨干'], status: 'recommended', reason: '宁波市委统战部经济处副处长，从事民营经济统战工作5年，负责服务宁波市民营企业统战工作，近1年未参加省级统战专题培训，符合选调条件', trainingRecords: [] },
   { id: 15, name: '胡军', role: '中共党员', org: '温州市委宣传部宣传处', region: '温州', tags: ['宣传工作', '统战宣传', '骨干'], status: 'recommended', reason: '温州市委宣传部宣传处副处长，负责全市统战宣传工作，策划过多场统战主题宣传活动，近1年未参加省级统战专题培训，适合参训', trainingRecords: [] },
 ];

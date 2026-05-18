@@ -110,7 +110,7 @@ export default function AICoursePage() {
   const [editMode, setEditMode] = useState(false);
   const [editedChapters, setEditedChapters] = useState<any[]>([]);
   
-  const [diagnosticData, setDiagnosticData] = useState<{ roles: string[]; topics: string[]; difficulty?: string } | null>(() => {
+  const [diagnosticData, setDiagnosticData] = useState<{ roles: string[]; topics: string[]; difficulty?: string; customRequirements?: string } | null>(() => {
     try {
       const saved = localStorage.getItem('user_diagnostic');
       if (saved) {
@@ -118,6 +118,7 @@ export default function AICoursePage() {
         return {
           roles: parsed.roles || [],
           topics: parsed.topics || [],
+          customRequirements: parsed.customRequirements || '',
         };
       }
     } catch {}
@@ -134,7 +135,7 @@ export default function AICoursePage() {
   const hasDiagnostic = diagnosticData && (diagnosticData.roles.length > 0 || diagnosticData.topics.length > 0);
 
   const thinkingSteps = useMemo(() => [
-    { title: '读取知识图谱诊断结果', detail: `正在加载学习诊断数据...\n\n• 身份角色：${hasDiagnostic ? diagnosticData.roles.join('、') : '未检测'}\n• 学习主题：${hasDiagnostic ? diagnosticData.topics.join('、') : '未选择'}` },
+    { title: '读取知识图谱诊断结果', detail: `正在加载学习诊断数据...\n\n• 身份角色：${hasDiagnostic ? diagnosticData.roles.join('、') : '未检测'}\n• 学习主题：${hasDiagnostic ? diagnosticData.topics.join('、') : '未选择'}${hasDiagnostic && diagnosticData.customRequirements ? `\n• 学习需求：${diagnosticData.customRequirements.slice(0, 50)}${diagnosticData.customRequirements.length > 50 ? '...' : ''}` : ''}` },
     { title: '分析课程需求与目标受众', detail: `基于具身智能专题分析：\n\n• 核心需求：机关干部对前沿技术的认知与治理能力\n• 知识缺口：具身智能从概念到国家战略的政策脉络、技术闭环机制、应用场景与项目论证\n• 受众定位：党政类在线学习平台成人用户（机关干部）` },
     { title: '检索相关知识点与资料', detail: `检索资源包括：\n\n📚 知识库新增课程\n   • 具身智能引论（ID:3464，时长4.7分钟）\n   • 前沿技术系列课程\n\n📖 图书与期刊资源\n   • 《具身智能发展报告（2025年）》\n   • 《人形机器人与具身智能标准体系（2026版）》\n   • CEAI中国具身智能白皮书\n\n✏️ 试题库相关试题\n   • 具身智能概念辨析题\n   • 核心技术理解与应用题\n   • 政策与治理场景选择题\n\n🌐 权威网站检索\n   • 信通院官网（caict.ac.cn）\n   • 人民网科技频道\n   • 新华网"人工智能+"专题\n   • 共产党员网权威解读` },
     { title: '进行内容合规审核', detail: `三级合规校验：\n\n• 政治方向：确保与《二十大报告》原文一致，核心表述准确\n• 政策解读：对照最新政策文件版本（如2024年修订版《纪律处分条例》）\n• 敏感筛查：不涉及未公开文件，所有链接均为官方权威来源` },
@@ -146,28 +147,34 @@ export default function AICoursePage() {
 
   const [expandedStep, setExpandedStep] = useState<number | null>(null);
 
-  const generateLogicExplanation = (topic: string, diagnostic: { roles: string[]; topics: string[]; difficulty?: string } | null) => {
+  const generateLogicExplanation = (topic: string, diagnostic: { roles: string[]; topics: string[]; difficulty?: string; customRequirements?: string } | null) => {
     const hasDiag = diagnostic && (diagnostic.roles.length > 0 || diagnostic.topics.length > 0);
+    const hasRequirements = diagnostic?.customRequirements && diagnostic.customRequirements.trim();
     
     const roleInterpretation = hasDiag ? (
       diagnostic!.roles.length > 0 
-        ? `根据您在学习诊断中选择的身份「${diagnostic!.roles.join('、')}」，系统判断您需要侧重${diagnostic!.roles.includes('党支部书记') || diagnostic!.roles.includes('党务工作者') ? '实务操作和基层党建方法' : '理论学习和思想武装'}方面的内容。`
+        ? `根据您在学习诊断中选择的身份「${diagnostic!.roles.join('、')}」，系统判断您需要侧重${diagnostic!.roles.includes('厅局级干部') || diagnostic!.roles.includes('县处级干部') ? '领导能力与行政管理' : '政策理论与实务基础'}方面的内容。`
         : '系统根据您的身份标签，判断了适合您的内容深度和学习方向。'
     ) : '由于暂未完成学习诊断，系统默认以综合受众为标准生成课程。';
 
     const topicConnection = hasDiag ? (
       diagnostic!.topics.length > 0
-        ? `您在学习诊断中感兴趣的主题「${diagnostic!.topics.join('、')}」与本课程内容高度关联。AI已将相关知识点融入章节设计中，确保内容与您的学习偏好相匹配。`
+        ? `您在学习诊断中感兴趣的培训方向「${diagnostic!.topics.join('、')}」与本课程内容高度关联。AI已将相关知识点融入章节设计中，确保内容与您的学习偏好相匹配。`
         : '系统根据课程主题自动匹配了相关知识模块。'
     ) : '系统根据课程主题自动匹配了相关知识模块。';
 
+    const requirementMatch = hasRequirements
+      ? `您提交的学习需求「${diagnostic!.customRequirements!.slice(0, 40)}${diagnostic!.customRequirements!.length > 40 ? '...' : ''}」已被系统解析，匹配到的知识图谱节点已融入课程设计中。`
+      : null;
+
     const recommendation = hasDiag
-      ? `综上，AI根据您完整的诊断画像（身份 + 主题偏好），为您智能生成了这套课程。所有章节、时长、学习目标均经过个性化匹配，旨在最大化您的学习效率。`
+      ? `综上，AI根据您完整的诊断画像（身份 + 培训方向 + 学习需求），为您智能生成了这套课程。所有章节、时长、学习目标均经过个性化匹配，旨在最大化您的学习效率。`
       : `当前课程基于通用标准生成。建议前往引导页完成学习诊断，获取更精准的个性化课程推荐。`;
 
     return {
       roleInterpretation,
       topicConnection,
+      requirementMatch,
       difficultyMatch: null as string | null,
       recommendation,
       hasDiagnosis: hasDiag,
@@ -208,7 +215,7 @@ export default function AICoursePage() {
   const handleGenerate = (presetData?: any) => {
     if (!courseTopic.trim() && !presetData) return;
 
-    let currentDiagnostic: { roles: string[]; topics: string[]; difficulty?: string } | null = null;
+    let currentDiagnostic: { roles: string[]; topics: string[]; difficulty?: string; customRequirements?: string } | null = null;
     try {
       const saved = localStorage.getItem('user_diagnostic');
       console.log('[课程生成] localStorage中的诊断数据:', saved);
@@ -217,6 +224,7 @@ export default function AICoursePage() {
         currentDiagnostic = {
           roles: parsed.roles || [],
           topics: parsed.topics || [],
+          customRequirements: parsed.customRequirements || '',
         };
         setDiagnosticData(currentDiagnostic);
         console.log('[课程生成] 诊断数据解析成功:', currentDiagnostic);
@@ -440,6 +448,14 @@ export default function AICoursePage() {
                 <div className="text-[12px] text-gray-800 leading-relaxed">{generationLogic?.topicConnection || 'AI将根据您感兴趣的学习主题，自动关联知识图谱中相关知识点。'}</div>
               </div>
             </div>
+            {generationLogic?.requirementMatch && (
+              <div className="flex items-start gap-3 p-3 border-2 border-black bg-green-50 relative" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+                <div className="absolute -top-2.5 left-2 bg-green-600 text-white text-[10px] font-black px-2 py-0.5">需求匹配</div>
+                <div className="mt-1">
+                  <div className="text-[12px] text-gray-800 leading-relaxed">{generationLogic.requirementMatch}</div>
+                </div>
+              </div>
+            )}
             <div className="flex items-start gap-3 p-3 border-2 border-black bg-amber-50 relative" style={{ boxShadow: '2px 2px 0 0 #000' }}>
               <div className="absolute -top-2.5 left-2 bg-amber-500 text-black text-[10px] font-black px-2 py-0.5">智能分析</div>
               <div className="mt-1">
