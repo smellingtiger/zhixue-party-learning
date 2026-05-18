@@ -767,13 +767,14 @@ export default function CourseLearnPage() {
   const course = getCourseData(courseId);
 
   useEffect(() => {
-    loadCourseScript(course?.name).then(script => {
+    loadCourseScript().then(script => {
       if (script) {
         setSpeechContents(script.chapters);
       }
     });
   }, [course?.name]);
   const chapter = course.chapters[currentChapter];
+  const isRuralCourse = (course.name || '').includes('乡村振兴');
   const slides = chapter?.slides || [];
   const currentSlideData = slides[currentSlide] ? [slides[currentSlide]] : [];
   const totalSlides = slides.length;
@@ -2165,7 +2166,6 @@ export default function CourseLearnPage() {
               <DigitalAvatar 
                 chapterContents={speechChapterContents}
                 currentChapterIndex={currentChapter}
-                courseName={course?.name}
                 onSpeechEnd={() => {
                   console.log('[数字人] 语音播放完成');
                 }}

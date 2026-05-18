@@ -144,6 +144,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         const path = generateLearningPath({
           roles: diagnostic.roles || [],
           topics: diagnostic.topics || [],
+          customRequirements: diagnostic.customRequirements || undefined,
         });
         setGeneratedPath(path);
         setDiagnosticRoles(diagnostic.roles || []);
@@ -181,7 +182,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  const saveDiagnostic = async (path: LearningPath, roles: string[], topics: string[], difficulty: string) => {
+  const saveDiagnostic = async (path: LearningPath, roles: string[], topics: string[], difficulty: string, customRequirements: string) => {
     try {
       const response = await fetch('/api/user/diagnostic', {
         method: 'POST',
@@ -192,6 +193,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           topics,
           difficulty,
           learning_path_id: path.id,
+          custom_requirements: customRequirements || '',
           completed: true,
         }),
       });
@@ -206,7 +208,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     }
   };
 
-  const handlePathGenerated = (roles: string[], topics: string[], difficulty: string) => {
+  const handlePathGenerated = (roles: string[], topics: string[], difficulty: string, customRequirements: string) => {
     setDiagnosticRoles(roles);
     setDiagnosticTopics(topics);
 
@@ -214,6 +216,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       roles,
       topics,
       level: difficulty,
+      customRequirements: customRequirements || undefined,
     });
 
     setGeneratedPath(path);
@@ -231,9 +234,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       topics,
       difficulty,
       pathId: path.id,
+      customRequirements,
     }));
 
-    saveDiagnostic(path, roles, topics, difficulty);
+    saveDiagnostic(path, roles, topics, difficulty, customRequirements);
 
     setCurrentView('mindmap');
   };

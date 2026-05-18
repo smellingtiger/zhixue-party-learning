@@ -1,4 +1,4 @@
-import { KnowledgeNode, LearningPath, DiagnosticOption, CourseInfo } from './types';
+import { KnowledgeNode, LearningPath, DiagnosticOption, CourseInfo, RequirementAnalysis } from './types';
 import { getVideoPath } from './video-mapping';
 
 // 辅助函数：创建带视频路径的课程对象
@@ -544,28 +544,34 @@ export const partyKnowledgeGraph: KnowledgeNode = {
 
 // 诊断问卷选项
 export const diagnosticOptions: DiagnosticOption[] = [
-  // 身份角色
-  { id: 'r1', label: '党支部书记', category: 'role', tags: ['支部建设'] },
-  { id: 'r2', label: '党务工作者', category: 'role', tags: ['组织工作'] },
-  { id: 'r3', label: '普通党员', category: 'role', tags: ['个人学习'] },
-  { id: 'r4', label: '入党积极分子', category: 'role', tags: ['入党教育'] },
-  { id: 'r5', label: '预备党员', category: 'role', tags: ['党性修养'] },
-  { id: 'r6', label: '群众', category: 'role', tags: ['了解党建'] },
-  // 学习主题（与图谱一级节点名称保持一致）
-  { id: 't1', label: '二十大精神学习', category: 'topic', tags: ['理论学习'] },
-  { id: 't2', label: '党建基础理论', category: 'topic', tags: ['理论学习'] },
-  { id: 't3', label: '基层党务工作', category: 'topic', tags: ['实务操作'] },
-  { id: 't4', label: '乡村振兴战略', category: 'topic', tags: ['政策解读'] },
-  { id: 't5', label: '党风廉政建设', category: 'topic', tags: ['警示教育'] },
+  // 身份角色（公务员身份）
+  { id: 'r1', label: '厅局级干部', category: 'role', tags: ['领导力提升'] },
+  { id: 'r2', label: '县处级干部', category: 'role', tags: ['行政管理'] },
+  { id: 'r3', label: '乡科级干部', category: 'role', tags: ['基层治理'] },
+  { id: 'r4', label: '科员', category: 'role', tags: ['基础学习'] },
+  { id: 'r5', label: '基层工作人员', category: 'role', tags: ['实务操作'] },
+  { id: 'r6', label: '事业单位人员', category: 'role', tags: ['综合学习'] },
+  // 学习主题（公务员培训方向）
+  { id: 't1', label: '政策理论学习', category: 'topic', tags: ['理论学习'] },
+  { id: 't2', label: '行政管理能力', category: 'topic', tags: ['行政管理'] },
+  { id: 't3', label: '基层治理实务', category: 'topic', tags: ['基层实务'] },
+  { id: 't4', label: '乡村振兴与区域发展', category: 'topic', tags: ['政策解读'] },
+  { id: 't5', label: '廉政教育与纪律建设', category: 'topic', tags: ['警示教育'] },
+  { id: 't6', label: '数字经济与科技创新', category: 'topic', tags: ['前沿专题'] },
+  { id: 't7', label: '公文写作与表达能力', category: 'topic', tags: ['职业技能'] },
+  { id: 't8', label: '法律法规与依法行政', category: 'topic', tags: ['法治专题'] },
 ];
 
 // 主题映射到对应节点（一级节点）
 export const topicNodeMap: Record<string, string> = {
-  '二十大精神学习': 'party-20th-congress',
-  '党建基础理论': 'party-building-basics',
-  '基层党务工作': 'grassroots-party-work',
-  '乡村振兴战略': 'rural-revitalization',
-  '党风廉政建设': 'disciplinary-style',
+  '政策理论学习': 'party-20th-congress',
+  '行政管理能力': 'party-building-basics',
+  '基层治理实务': 'grassroots-party-work',
+  '乡村振兴与区域发展': 'rural-revitalization',
+  '廉政教育与纪律建设': 'disciplinary-style',
+  '数字经济与科技创新': 'party-20th-congress',
+  '公文写作与表达能力': 'party-building-basics',
+  '法律法规与依法行政': 'disciplinary-style',
 };
 
 // 递归查找节点
@@ -724,28 +730,112 @@ function filterNodes(
 
 // 角色到节点的映射（导出供诊断结果展示使用）
 export const roleNodeMap: Record<string, string[]> = {
-  '党支部书记': ['grassroots-party-work', 'party-life'],
-  '党务工作者': ['grassroots-party-work', 'membership-development'],
-  '普通党员': ['party-constitution', 'party-history'],
-  '入党积极分子': ['party-constitution', 'membership-development'],
-  '预备党员': ['party-theory', 'integrity-education'],
+  '厅局级干部': ['grassroots-party-work', 'party-life'],
+  '县处级干部': ['grassroots-party-work', 'membership-development'],
+  '乡科级干部': ['party-constitution', 'party-history'],
+  '科员': ['party-constitution', 'membership-development'],
+  '基层工作人员': ['party-theory', 'integrity-education'],
+  '事业单位人员': ['party-constitution', 'party-history'],
 };
+
+// 文本需求关键词匹配词典（公务员培训方向）
+const requirementKeywords: Record<string, { topics: string[]; nodes: string[] }> = {
+  '政策': { topics: ['政策理论学习'], nodes: ['20th-report', 'chinese-modernization'] },
+  '理论': { topics: ['政策理论学习'], nodes: ['party-theory', 'party-constitution'] },
+  '二十大': { topics: ['政策理论学习'], nodes: ['20th-report'] },
+  '现代化': { topics: ['政策理论学习', '数字经济与科技创新'], nodes: ['chinese-modernization'] },
+  '管理': { topics: ['行政管理能力'], nodes: ['party-life', 'grassroots-party-work'] },
+  '行政': { topics: ['行政管理能力', '法律法规与依法行政'], nodes: ['party-life'] },
+  '领导': { topics: ['行政管理能力'], nodes: ['party-life'] },
+  '基层': { topics: ['基层治理实务'], nodes: ['grassroots-party-work', 'mass-work', 'rural-governance'] },
+  '治理': { topics: ['基层治理实务', '法律法规与依法行政'], nodes: ['grassroots-party-work', 'rural-governance'] },
+  '乡村': { topics: ['乡村振兴与区域发展'], nodes: ['rural-policy', 'rural-governance'] },
+  '振兴': { topics: ['乡村振兴与区域发展'], nodes: ['rural-revitalization', 'rural-policy'] },
+  '三农': { topics: ['乡村振兴与区域发展'], nodes: ['rural-policy', 'rural-governance'] },
+  '区域': { topics: ['乡村振兴与区域发展'], nodes: ['rural-policy'] },
+  '廉政': { topics: ['廉政教育与纪律建设'], nodes: ['integrity-education', 'supervision-system'] },
+  '纪律': { topics: ['廉政教育与纪律建设'], nodes: ['integrity-education'] },
+  '反腐': { topics: ['廉政教育与纪律建设'], nodes: ['integrity-education', 'supervision-system'] },
+  '作风': { topics: ['廉政教育与纪律建设'], nodes: ['integrity-education'] },
+  '数字': { topics: ['数字经济与科技创新'], nodes: ['chinese-modernization'] },
+  '经济': { topics: ['数字经济与科技创新', '乡村振兴与区域发展'], nodes: ['chinese-modernization', 'rural-policy'] },
+  '科技': { topics: ['数字经济与科技创新'], nodes: ['chinese-modernization'] },
+  '创新': { topics: ['数字经济与科技创新'], nodes: ['chinese-modernization'] },
+  '智能': { topics: ['数字经济与科技创新'], nodes: ['chinese-modernization'] },
+  '公文': { topics: ['公文写作与表达能力'], nodes: ['party-life'] },
+  '写作': { topics: ['公文写作与表达能力'], nodes: ['party-life'] },
+  '表达': { topics: ['公文写作与表达能力'], nodes: ['party-life'] },
+  '法律': { topics: ['法律法规与依法行政'], nodes: ['supervision-system'] },
+  '法规': { topics: ['法律法规与依法行政'], nodes: ['supervision-system'] },
+  '依法': { topics: ['法律法规与依法行政'], nodes: ['supervision-system'] },
+  '法治': { topics: ['法律法规与依法行政'], nodes: ['supervision-system'] },
+  '党建': { topics: ['政策理论学习', '行政管理能力'], nodes: ['party-constitution', 'party-history', 'party-building-basics'] },
+  '组织': { topics: ['行政管理能力'], nodes: ['party-life', 'membership-development'] },
+  '人事': { topics: ['行政管理能力'], nodes: ['party-life'] },
+  '考核': { topics: ['行政管理能力'], nodes: ['party-life'] },
+  '应急': { topics: ['行政管理能力', '基层治理实务'], nodes: ['grassroots-party-work'] },
+  '信访': { topics: ['基层治理实务', '法律法规与依法行政'], nodes: ['mass-work'] },
+  '民生': { topics: ['基层治理实务', '乡村振兴与区域发展'], nodes: ['mass-work', 'rural-policy'] },
+  '服务': { topics: ['基层治理实务', '行政管理能力'], nodes: ['mass-work', 'party-life'] },
+};
+
+// 分析用户文本需求，匹配知识图谱节点和主题
+export function analyzeRequirements(text: string): RequirementAnalysis {
+  const keywords: string[] = [];
+  const matchedTopics = new Set<string>();
+  const matchedNodes = new Set<string>();
+
+  for (const [keyword, mapping] of Object.entries(requirementKeywords)) {
+    if (text.includes(keyword)) {
+      keywords.push(keyword);
+      mapping.topics.forEach(t => matchedTopics.add(t));
+      mapping.nodes.forEach(n => matchedNodes.add(n));
+    }
+  }
+
+  // 根据关键词数量推测学习深度
+  const suggestedLevel: 'beginner' | 'intermediate' | 'advanced' =
+    keywords.length <= 1 ? 'beginner' : keywords.length <= 3 ? 'intermediate' : 'advanced';
+
+  return {
+    keywords,
+    matchedTopics: Array.from(matchedTopics),
+    matchedNodes: Array.from(matchedNodes),
+    suggestedLevel,
+  };
+}
 
 // 生成学习路径（level 仅用于元数据显示，不做节点过滤）
 export function generateLearningPath(profile: {
   roles: string[];
   topics: string[];
   level?: string;
+  customRequirements?: string;
 }): LearningPath {
   // 收集选中的节点ID
   const selectedIds = new Set<string>();
+  const allTopics = [...profile.topics];
+
+  // 如果提供了文本需求，分析并合并主题
+  if (profile.customRequirements && profile.customRequirements.trim()) {
+    const analysis = analyzeRequirements(profile.customRequirements);
+    analysis.matchedTopics.forEach(t => {
+      if (!allTopics.includes(t)) {
+        allTopics.push(t);
+      }
+    });
+    analysis.matchedNodes.forEach(n => selectedIds.add(n));
+    if (!profile.level) {
+      profile.level = analysis.suggestedLevel;
+    }
+  }
 
   profile.roles.forEach(role => {
     const nodes = roleNodeMap[role];
     if (nodes) nodes.forEach(id => selectedIds.add(id));
   });
 
-  profile.topics.forEach(topic => {
+  allTopics.forEach(topic => {
     const nodeId = topicNodeMap[topic];
     if (nodeId) selectedIds.add(nodeId);
   });
@@ -814,13 +904,16 @@ export function generateLearningPath(profile: {
   }
   
   // 生成标题
-  const selectedRole = profile.roles[0] || '党员';
-  const selectedTopic = profile.topics[0] || '综合学习';
+  const selectedRole = profile.roles[0] || '干部';
+  const selectedTopic = allTopics[0] || '综合学习';
+  const hasCustomReq = profile.customRequirements && profile.customRequirements.trim();
   
   return {
     id: `path-${Date.now()}`,
-    title: `${selectedRole} · ${selectedTopic}`,
-    description: `基于您的选择，为您规划个性化学习方案`,
+    title: `${selectedRole} · ${selectedTopic}${hasCustomReq ? '（个性化定制）' : ''}`,
+    description: hasCustomReq
+      ? `根据您的身份、主题偏好及学习需求「${profile.customRequirements!.slice(0, 30)}${profile.customRequirements!.length > 30 ? '...' : ''}」，为您智能规划个性化学习方案`
+      : `基于您的选择，为您规划个性化学习方案`,
     rootNode: injectCoursesRecursive(filteredRoot || partyKnowledgeGraph),
     totalDuration: totalDuration || 120,
     difficulty: (profile.level as 'beginner' | 'intermediate' | 'advanced') || 'beginner'

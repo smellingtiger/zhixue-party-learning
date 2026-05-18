@@ -60,11 +60,10 @@ export function getChapterSections(chapter: ChapterScript): SectionMarker[] {
 
 export async function loadCourseScript(courseName?: string): Promise<CourseScript | null> {
   try {
-    let scriptUrl = '/course-scripts/script.json';
-    if (courseName && (courseName.includes('乡村振兴') || courseName.includes('rural'))) {
-      scriptUrl = '/course-scripts/rural-script.json';
-    }
-    const response = await fetch(scriptUrl);
+    const scriptFile = courseName && courseName.includes('乡村振兴')
+      ? '/course-scripts/rural-revitalization-script.json'
+      : '/course-scripts/script.json';
+    const response = await fetch(scriptFile);
     if (!response.ok) {
       console.error('[课程文稿] 加载失败');
       return null;

@@ -25,6 +25,7 @@ interface ChapterContent {
 interface DigitalAvatarProps {
   chapterContents: ChapterContent[];
   currentChapterIndex: number;
+  audioPrefix?: string;
   onSpeechEnd?: () => void;
   onSectionChange?: (sectionIndex: number) => void;
   courseName?: string;
@@ -36,7 +37,7 @@ function formatTime(seconds: number): string {
   return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
-export default function DigitalAvatar({ chapterContents, currentChapterIndex, onSpeechEnd, onSectionChange, courseName }: DigitalAvatarProps) {
+export default function DigitalAvatar({ chapterContents, currentChapterIndex, audioPrefix = '/audio/', onSpeechEnd, onSectionChange }: DigitalAvatarProps) {
   const [status, setStatus] = useState<PlayStatus>('idle');
   const [speed, setSpeed] = useState(1.0);
   const [audioDurations, setAudioDurations] = useState<Record<string, number>>({});
@@ -70,7 +71,7 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, on
       for (let i = 0; i < chapterContents.length && i < CHAPTER_IDS.length; i++) {
         const id = `${audioPrefix}${CHAPTER_IDS[i]}`;
         try {
-          const res = await fetch(`/audio/${id}.mp3`, { method: 'HEAD' });
+          const res = await fetch(`${audioPrefix}${id}.mp3`, { method: 'HEAD' });
           setAudioAvailable(prev => ({ ...prev, [id]: res.ok }));
         } catch {
           setAudioAvailable(prev => ({ ...prev, [id]: false }));
