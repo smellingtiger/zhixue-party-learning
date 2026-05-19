@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { resolveKnowledgeVideoId } from '@/lib/title-video-mapping';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,11 +18,16 @@ export async function GET(request: NextRequest) {
     if (category && category !== 'all') params.set('category', category);
     params.set('sort', 'title');
 
-    const res = await fetch(`${KNOWLEDGE_SERVICE_URL}/api/files?${params}`);
-    const data = await res.json();
+    const [filesRes, infoRes] = await Promise.all([
+      fetch(`${KNOWLEDGE_SERVICE_URL}/api/files?${params}`),
+      fetch(`${KNOWLEDGE_SERVICE_URL}/api/info`),
+    ]);
+
+    const data = await filesRes.json();
+    const info = await infoRes.json().catch(() => ({}));
 
     const files = data.files || [];
-    const total = data.total ?? 0;
+    const filteredCount = data.total ?? 0;
     const start = (page - 1) * pageSize;
     const paged = files.slice(start, start + pageSize);
 
@@ -31,17 +37,26 @@ export async function GET(request: NextRequest) {
       category: f.category,
       paragraphCount: f.paragraph_count,
       fileName: f.filename,
+      videoId: resolveKnowledgeVideoId(f.id, f.filename, f.title),
     }));
+
+    const globalTotal = info.total_files ?? data.total ?? 0;
+    const globalParagraphs = info.total_paragraphs || 0;
+    const globalCategories = info.categories || data.categories || [];
+    const globalCategoryCounts = info.category_counts || data.category_counts || {};
+    const globalCategoryParagraphs = info.category_paragraph_counts || {};
 
     return NextResponse.json({
       docs,
-      total,
+      total: filteredCount,
+      globalTotal,
+      globalParagraphs,
+      globalCategories,
+      globalCategoryCounts,
+      globalCategoryParagraphs,
       page,
       pageSize,
-      totalPages: Math.ceil(total / pageSize),
-      categories: data.categories || [],
-      categoryCounts: data.category_counts || {},
-      totalDocuments: total,
+      totalPages: Math.ceil(filteredCount / pageSize),
     });
   } catch (error) {
     console.error('知识库API错误:', error);

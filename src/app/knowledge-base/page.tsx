@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Library, BookOpen, FileText, Database, Search, Plus, Filter, X, ChevronDown, Clock, Loader2 } from 'lucide-react';
+import { Library, BookOpen, FileText, Database, Search, Plus, Filter, X, ChevronDown, Clock, Loader2, Play } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { KnowledgeProcess } from '@/components/knowledge-process';
+import { useRouter } from 'next/navigation';
 
 interface KnowledgeDoc {
   id: string;
@@ -14,6 +15,7 @@ interface KnowledgeDoc {
   category: string;
   paragraphCount: number;
   fileName: string;
+  videoId: string | null;
 }
 
 interface KnowledgeSegment {
@@ -29,11 +31,14 @@ interface KnowledgeDocDetail extends KnowledgeDoc {
 interface ApiResponse {
   docs: KnowledgeDoc[];
   total: number;
+  globalTotal: number;
+  globalParagraphs: number;
+  globalCategories: string[];
+  globalCategoryCounts: Record<string, number>;
+  globalCategoryParagraphs: Record<string, number>;
   page: number;
   pageSize: number;
   totalPages: number;
-  categories: string[];
-  categoryCounts: Record<string, number>;
 }
 
 const categoryIcons: Record<string, typeof Library> = {
@@ -43,10 +48,14 @@ const categoryIcons: Record<string, typeof Library> = {
 };
 
 export default function KnowledgeBasePage() {
+  const router = useRouter();
   const [docs, setDocs] = useState<KnowledgeDoc[]>([]);
   const [total, setTotal] = useState(0);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
+  const [globalTotal, setGlobalTotal] = useState(0);
+  const [globalParagraphs, setGlobalParagraphs] = useState(0);
+  const [globalCategories, setGlobalCategories] = useState<string[]>([]);
+  const [globalCategoryCounts, setGlobalCategoryCounts] = useState<Record<string, number>>({});
+  const [globalCategoryParagraphs, setGlobalCategoryParagraphs] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -69,14 +78,14 @@ export default function KnowledgeBasePage() {
       if (data.docs && Array.isArray(data.docs)) {
         setDocs(data.docs);
         setTotal(data.total ?? 0);
-        setCategories(data.categories ?? []);
-        if (data.categoryCounts) {
-          setCategoryCounts(data.categoryCounts);
-        }
+        setGlobalTotal(data.globalTotal ?? 0);
+        setGlobalParagraphs(data.globalParagraphs ?? 0);
+        setGlobalCategories(data.globalCategories ?? []);
+        setGlobalCategoryCounts(data.globalCategoryCounts ?? {});
+        setGlobalCategoryParagraphs(data.globalCategoryParagraphs ?? {});
       } else {
         setDocs([]);
         setTotal(0);
-        setCategories([]);
       }
     } catch (err) {
       console.error('加载知识库失败:', err);
@@ -119,10 +128,20 @@ export default function KnowledgeBasePage() {
     setSelectedDoc(null);
   };
 
-  const getCategoryCount = (cat: string) => {
-    if (cat === 'all') return total;
-    return categoryCounts[cat] || 0;
-  };
+  const displayDocCount =
+    selectedCategory === 'all'
+      ? globalTotal
+      : (globalCategoryCounts[selectedCategory] || 0);
+
+  const displayParagraphCount =
+    selectedCategory === 'all'
+      ? globalParagraphs
+      : (globalCategoryParagraphs[selectedCategory] || 0);
+
+  const displayTitle =
+    selectedCategory === 'all'
+      ? '社院课程知识库 · 共 ' + globalTotal + ' 份文档'
+      : '社院课程知识库 · ' + selectedCategory + ' · 共 ' + (globalCategoryCounts[selectedCategory] || 0) + ' 份文档';
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
@@ -130,7 +149,7 @@ export default function KnowledgeBasePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold">知识库</h1>
-            <p className="text-sm text-muted-foreground">社院课程知识库 · 共 {total} 份文档</p>
+            <p className="text-sm text-muted-foreground">{displayTitle}</p>
           </div>
           <div className="flex items-center gap-3">
             <form onSubmit={handleSearch} className="relative">
@@ -175,9 +194,9 @@ export default function KnowledgeBasePage() {
             >
               <Library className="h-4 w-4" />
               <span className="flex-1 text-left">全部分类</span>
-              <Badge variant="secondary" className="text-xs">{total}</Badge>
+              <Badge variant="secondary" className="text-xs">{globalTotal}</Badge>
             </button>
-            {categories.map((cat) => {
+            {globalCategories.map((cat) => {
               const Icon = categoryIcons[cat] || FileText;
               return (
                 <button
@@ -190,7 +209,7 @@ export default function KnowledgeBasePage() {
                   <Icon className="h-4 w-4" />
                   <span className="flex-1 text-left">{cat}</span>
                   <Badge variant="secondary" className="text-xs">
-                    {getCategoryCount(cat)}
+                    {globalCategoryCounts[cat] || 0}
                   </Badge>
                 </button>
               );
@@ -215,12 +234,12 @@ export default function KnowledgeBasePage() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-3 gap-4 mb-6">
                   <Card>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-2xl font-bold text-red-600">{total}</p>
+                          <p className="text-2xl font-bold text-red-600">{displayDocCount}</p>
                           <p className="text-sm text-muted-foreground">文档总数</p>
                         </div>
                         <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
@@ -233,7 +252,7 @@ export default function KnowledgeBasePage() {
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-2xl font-bold text-blue-600">{categories.length}</p>
+                          <p className="text-2xl font-bold text-blue-600">{globalCategories.length}</p>
                           <p className="text-sm text-muted-foreground">知识分类</p>
                         </div>
                         <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
@@ -246,28 +265,11 @@ export default function KnowledgeBasePage() {
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-2xl font-bold text-green-600">
-                            {docs.reduce((sum, d) => sum + d.paragraphCount, 0)}
-                          </p>
+                          <p className="text-2xl font-bold text-green-600">{displayParagraphCount}</p>
                           <p className="text-sm text-muted-foreground">总段落数</p>
                         </div>
                         <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
                           <BookOpen className="h-5 w-5 text-green-600" />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-2xl font-bold text-amber-600">
-                            {Math.round(docs.filter(d => d.paragraphCount > 0).length / Math.max(total, 1) * 100)}%
-                          </p>
-                          <p className="text-sm text-muted-foreground">文档覆盖率</p>
-                        </div>
-                        <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-                          <Database className="h-5 w-5 text-amber-600" />
                         </div>
                       </div>
                     </CardContent>
@@ -284,10 +286,12 @@ export default function KnowledgeBasePage() {
                       {docs.map((doc) => (
                         <div
                           key={doc.id}
-                          onClick={() => handleDocClick(doc)}
-                          className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                          className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors group"
                         >
-                          <div className="flex items-center gap-3 min-w-0">
+                          <div
+                            onClick={() => handleDocClick(doc)}
+                            className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+                          >
                             <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
                               <FileText className="h-5 w-5 text-red-600" />
                             </div>
@@ -297,10 +301,35 @@ export default function KnowledgeBasePage() {
                                 <span>{doc.category}</span>
                                 <span>·</span>
                                 <span>{doc.paragraphCount} 段</span>
+                                {doc.videoId && (
+                                  <>
+                                    <span>·</span>
+                                    <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 border-green-200">有视频</Badge>
+                                  </>
+                                )}
                               </div>
                             </div>
                           </div>
-                          <ChevronDown className="h-4 w-4 text-gray-400 flex-shrink-0 ml-2" />
+                          <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                            {doc.videoId && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 px-3 text-xs border-red-200 text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  router.push(`/course/${encodeURIComponent(doc.id)}?courseId=${encodeURIComponent(doc.id)}`);
+                                }}
+                              >
+                                <Play className="h-3 w-3 mr-1" />
+                                播放
+                              </Button>
+                            )}
+                            <ChevronDown
+                              className="h-4 w-4 text-gray-400 flex-shrink-0 cursor-pointer"
+                              onClick={() => handleDocClick(doc)}
+                            />
+                          </div>
                         </div>
                       ))}
                     </div>

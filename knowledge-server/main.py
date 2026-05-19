@@ -17,10 +17,42 @@ from fastapi.responses import HTMLResponse
 import uvicorn
 
 KNOWLEDGE_BASE_DIR = Path(r"E:\社院课程stt\knowledge_base_txt")
+PROCESSED_DIR = Path(r"E:\社院课程stt\knowledge_base_processed")
 TITLES_DIR = Path(r"E:\社院课程stt\knowledge_base_titles")
+CLASSIFICATION_FILE = Path(r"E:\社院课程stt\classification_result.json")
+COURSE_NAME_MAPPING_FILE = Path(r"d:\TraeProject\zhixue-party-learning\knowledge-server\course_name_mapping.json")
 SERVER_HOST = "0.0.0.0"
 SERVER_PORT = 8080
 SERVER_TITLE = "智学知识库"
+
+# 加载新的分类数据
+_new_categories_cache = None
+def load_new_categories():
+    global _new_categories_cache
+    if _new_categories_cache is None:
+        if CLASSIFICATION_FILE.exists():
+            try:
+                data = json.loads(CLASSIFICATION_FILE.read_text(encoding="utf-8"))
+                _new_categories_cache = {u["file"]: u["new_category"] for u in data.get("updates", [])}
+            except:
+                _new_categories_cache = {}
+        else:
+            _new_categories_cache = {}
+    return _new_categories_cache
+
+# 加载课程名称映射
+_course_name_mapping_cache = None
+def load_course_name_mapping():
+    global _course_name_mapping_cache
+    if _course_name_mapping_cache is None:
+        if COURSE_NAME_MAPPING_FILE.exists():
+            try:
+                _course_name_mapping_cache = json.loads(COURSE_NAME_MAPPING_FILE.read_text(encoding="utf-8"))
+            except:
+                _course_name_mapping_cache = {}
+        else:
+            _course_name_mapping_cache = {}
+    return _course_name_mapping_cache
 
 app = FastAPI(title=SERVER_TITLE, version="1.0.0")
 
@@ -39,36 +71,70 @@ class CourseDoc:
         self.filename = filepath.name
         self.id = str(uuid.uuid5(uuid.NAMESPACE_DNS, str(filepath)))
         self._parsed = None
-        self._llm_titles = None
+        self._processed = None
 
-    def _load_llm_titles(self) -> Optional[list[str]]:
-        if self._llm_titles is not None:
-            return self._llm_titles
-        
-        if not TITLES_DIR.exists():
-            self._llm_titles = None
-            return None
-        
-        # 尝试匹配JSON文件
-        base_name = self.filepath.stem
-        json_file = TITLES_DIR / f"{base_name}.json"
-        
+    def _load_processed(self) -> Optional[dict]:
+        """尝试加载已处理的JSON文件（包含清洗+分段+标题）"""
+        if self._processed is not None:
+            return self._processed
+
+        json_file = PROCESSED_DIR / f"{self.filepath.stem}.json"
         if json_file.exists():
             try:
                 data = json.loads(json_file.read_text(encoding="utf-8"))
-                titles = [seg.get("title", seg.get("original_title", "")) for seg in data.get("segments", [])]
-                self._llm_titles = titles
-                return titles
+                segs = []
+                for seg in data.get("segments", []):
+                    segs.append({
+                        "title": seg.get("title", ""),
+                        "time": seg.get("time_start", ""),
+                        "content": seg.get("content", "")
+                    })
+                self._processed = {
+                    "title": data.get("title", self.filepath.stem),
+                    "category": data.get("category", "未分类"),
+                    "paragraph_count": data.get("segment_count", len(segs)),
+                    "segments": segs,
+                }
+                return self._processed
             except Exception:
-                self._llm_titles = None
-                return None
-        
-        self._llm_titles = None
+                pass
+
+        # 备选：从旧的titles目录加载标题
+        old_json = TITLES_DIR / f"{self.filepath.stem}.json"
+        if old_json.exists():
+            try:
+                data = json.loads(old_json.read_text(encoding="utf-8"))
+                titles = [seg.get("title", seg.get("original_title", "")) for seg in data.get("segments", [])]
+                self._processed = {"_titles_only": True, "titles": titles}
+                return self._processed
+            except Exception:
+                pass
+
+        self._processed = None
         return None
 
     def _parse(self):
         if self._parsed:
             return self._parsed
+
+        # 优先使用处理后的数据
+        processed = self._load_processed()
+        if processed and not processed.get("_titles_only"):
+            self._parsed = processed
+            # 即使使用处理后的数据,也要应用新分类和名称
+            new_cats = load_new_categories()
+            if self.filename in new_cats:
+                self._parsed["category"] = new_cats[self.filename]
+            
+            # 应用课程名称映射(将编码替换为中文名称)
+            name_mapping = load_course_name_mapping()
+            current_title = self._parsed.get("title", "")
+            if current_title and current_title in name_mapping:
+                self._parsed["title"] = name_mapping[current_title]
+            
+            return self._parsed
+
+        # 从原始txt解析
         try:
             text = self.filepath.read_text(encoding="utf-8")
         except Exception:
@@ -108,6 +174,7 @@ class CourseDoc:
         for line in lines[seg_start:]:
             m_bg = re.match(r"【背景[：:]\s*(.+?)[】]", line)
             m_ti = re.match(r"【要求[：:]\s*(.+?)[】]", line)
+            m_general = re.match(r"【(.+?)】", line)
             m_tm = re.match(r"\[时间\]\s*([\d:]+)", line)
             m_div = re.match(r"^={10,}", line)
 
@@ -119,6 +186,16 @@ class CourseDoc:
                         "content": "".join(current_content).strip()
                     })
                 current_title = (m_bg or m_ti).group(1).strip()
+                current_time = ""
+                current_content = []
+            elif m_general and not m_tm:
+                if current_title and current_content:
+                    segments.append({
+                        "title": current_title,
+                        "time": current_time,
+                        "content": "".join(current_content).strip()
+                    })
+                current_title = m_general.group(1).strip()
                 current_time = ""
                 current_content = []
             elif m_tm:
@@ -145,12 +222,12 @@ class CourseDoc:
                 "content": "".join(current_content).strip()
             })
 
-        # 尝试加载 LLM 生成的标题
-        llm_titles = self._load_llm_titles()
-        if llm_titles:
+        # 应用旧的标题JSON（仅标题替换）
+        if processed and processed.get("_titles_only"):
+            titles = processed.get("titles", [])
             for i, seg in enumerate(segments):
-                if i < len(llm_titles) and llm_titles[i]:
-                    seg["title"] = llm_titles[i]
+                if i < len(titles) and titles[i]:
+                    seg["title"] = titles[i]
 
         self._parsed = {
             "title": title or self.filename.replace(".txt", ""),
@@ -158,6 +235,17 @@ class CourseDoc:
             "paragraph_count": para_count or len(segments),
             "segments": segments,
         }
+        
+        # 应用新的分类数据(覆盖旧分类)
+        new_cats = load_new_categories()
+        if self.filename in new_cats:
+            self._parsed["category"] = new_cats[self.filename]
+        
+        # 应用课程名称映射(将编码替换为中文名称)
+        name_mapping = load_course_name_mapping()
+        if title and title in name_mapping:
+            self._parsed["title"] = name_mapping[title]
+        
         return self._parsed
 
     @property
@@ -329,10 +417,12 @@ async def server_info():
     total_size = sum(d.size for d in docs)
     total_paragraphs = sum(d.paragraph_count for d in docs)
 
-    # 统计已有LLM标题的课程数量
-    llm_count = 0
-    if TITLES_DIR.exists():
-        llm_count = len(list(TITLES_DIR.glob("*.json")))
+    category_paragraph_counts = {}
+    for d in docs:
+        c = d.category
+        category_paragraph_counts[c] = category_paragraph_counts.get(c, 0) + d.paragraph_count
+
+    processed_count = len(list(PROCESSED_DIR.glob("*.json"))) if PROCESSED_DIR.exists() else 0
 
     return {
         "name": SERVER_TITLE,
@@ -342,9 +432,10 @@ async def server_info():
         "total_size_display": f"{total_size / 1024 / 1024:.1f} MB",
         "categories": categories,
         "category_counts": category_counts,
+        "category_paragraph_counts": category_paragraph_counts,
         "total_paragraphs": total_paragraphs,
         "data_source": str(KNOWLEDGE_BASE_DIR),
-        "llm_titles_ready": llm_count,
+        "processed_count": processed_count,
         "server_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     }
 
@@ -429,7 +520,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Serif SC',san
   <div class="header-left">
     <div class="header-logo">知</div>
     <span class="header-title">知识库</span>
-    <span class="header-subtitle">565门课程 · 局域网服务</span>
+    <span class="header-subtitle" id="headerSubtitle">加载中...</span>
   </div>
   <div class="header-right">
     <div class="search-box">
@@ -466,7 +557,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Serif SC',san
     <div class="content-body" id="contentBody">
       <div class="welcome-screen">
         <div class="welcome-icon">&#x1F4DA;</div>
-        <div class="welcome-text">565门课程知识库</div>
+        <div class="welcome-text" id="welcomeText">知识库加载中...</div>
         <div class="welcome-hint">从左侧选择一个课程开始阅读</div>
       </div>
     </div>
@@ -477,11 +568,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Serif SC',san
 <div class="toast" id="toast"></div>
 
 <script>
-let curCat='', curSort='title', curSearch='', curId=null, allFiles=[];
+let curCat='', curSort='title', curSearch='', curId=null, allFiles=[], totalAll=565;
 
 function init(){
   document.getElementById('serverAddr').textContent=window.location.host;
   loadFiles();
+  loadInfo();
   const cb=document.getElementById('contentBody');
   cb.addEventListener('scroll',function(){
     document.getElementById('_scroll').classList.toggle('show',cb.scrollTop>300);
@@ -502,17 +594,34 @@ async function loadFiles(){
     const r=await fetch('/api/files?'+p.toString());
     const d=await r.json();
     allFiles=d.files;
+    if(!curCat && !curSearch) totalAll=d.total;
     renderCats(d.categories,d.category_counts);
     renderFiles(d.files);
     document.getElementById('fileStats').textContent='共 '+d.total+' 个课程';
+    updateDisplayCounts(totalAll);
   }catch(e){
     showToast('加载失败');
   }
 }
 
+async function loadInfo(){
+  try{
+    const r=await fetch('/api/info');
+    const info=await r.json();
+    updateDisplayCounts(info.total_files||0);
+  }catch(e){
+    console.error('加载info失败');
+  }
+}
+
+function updateDisplayCounts(total){
+  document.getElementById('headerSubtitle').textContent=total+'门课程 · 局域网服务';
+  document.getElementById('welcomeText').textContent=total+'门课程知识库';
+}
+
 function renderCats(cats,counts){
   const list=document.getElementById('categoryList');
-  let html='<button class="category-item'+(curCat===''?' active':'')+'" onclick="filterCat(\'\')"><span class="category-icon">&#x1F4C1;</span> 全部课程 <span class="count">'+allFiles.length+'</span></button>';
+  let html='<button class="category-item'+(curCat===''?' active':'')+'" onclick="filterCat(\'\')"><span class="category-icon">&#x1F4C1;</span> 全部课程 <span class="count">'+totalAll+'</span></button>';
   cats.forEach(function(c){
     html+='<button class="category-item'+(curCat===c?' active':'')+'" onclick="filterCat(\''+c+'\')"><span class="category-icon">&#x1F4D6;</span> '+c+' <span class="count">'+(counts[c]||0)+'</span></button>';
   });
@@ -540,12 +649,12 @@ function renderFiles(files){
 }
 
 function filterCat(cat){
-  curCat=cat; curSearch=''; document.getElementById('searchInput').value='';
-  curId=null; loadFiles();
-  document.getElementById('contentTitle').textContent='欢迎使用知识库';
-  document.getElementById('contentMeta').innerHTML='';
-  document.getElementById('contentBody').innerHTML='<div class="welcome-screen"><div class="welcome-icon">&#x1F4DA;</div><div class="welcome-text">565门课程知识库</div><div class="welcome-hint">从左侧选择一个课程开始阅读</div></div>';
-}
+    curCat=cat; curSearch=''; document.getElementById('searchInput').value='';
+    curId=null; loadFiles();
+    document.getElementById('contentTitle').textContent='欢迎使用知识库';
+    document.getElementById('contentMeta').innerHTML='';
+    document.getElementById('contentBody').innerHTML='<div class="welcome-screen"><div class="welcome-icon">&#x1F4DA;</div><div class="welcome-text" id="welcomeText">知识库加载中...</div><div class="welcome-hint">从左侧选择一个课程开始阅读</div></div>';
+  }
 
 function changeSort(s){
   curSort=s;
@@ -619,28 +728,32 @@ if __name__ == "__main__":
     separator = "=" * 55
     print(f"""
 {separator}
-  {SERVER_TITLE} - 局域网知识库文件服务
+  {SERVER_TITLE} - 公务员在线学习知识库
 {separator}
 
   数据源: {KNOWLEDGE_BASE_DIR}
   LLM标题: {TITLES_DIR}
+  分类数据: {CLASSIFICATION_FILE}
   服务地址: http://{SERVER_HOST}:{SERVER_PORT}
   局域网访问: http://你的IP地址:{SERVER_PORT}
 
   按 Ctrl+C 停止服务
 {separator}
     """)
+    
+    # 预加载分类缓存
+    load_new_categories()
 
     docs = scan_all_docs()
     cats, cnts = get_categories(docs)
     total_paras = sum(d.paragraph_count for d in docs)
-    llm_count = len(list(TITLES_DIR.glob("*.json"))) if TITLES_DIR.exists() else 0
+    processed_count = len(list(PROCESSED_DIR.glob("*.json"))) if PROCESSED_DIR.exists() else 0
 
     print(f"  已发现 {len(docs)} 个课程文件:\n")
     for c in cats:
         print(f"    [{c}] {cnts[c]} 个课程")
     print(f"\n  总段落数: {total_paras}")
-    print(f"  LLM标题已生成: {llm_count}/{len(docs)}")
+    print(f"  已处理课程: {processed_count}/{len(docs)}")
     print(f"\n{separator}\n")
 
     uvicorn.run(app, host=SERVER_HOST, port=SERVER_PORT, log_level="info")

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { resolveKnowledgeVideoId } from '@/lib/title-video-mapping';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,6 +32,7 @@ export async function GET(
       category: data.category,
       paragraphCount: data.paragraph_count,
       fileName: data.filename,
+      videoId: resolveKnowledgeVideoId(data.id, data.filename, data.title),
       segments,
     });
   } catch (error) {

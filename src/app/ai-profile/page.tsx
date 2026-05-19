@@ -280,7 +280,7 @@ function HoloScanActivity() {
                   <item.icon className="h-4 w-4 mx-auto mb-1" style={{ color: item.color }} />
                   <p className="text-[10px] text-gray-500">{item.label}</p>
                   <p className="text-sm font-bold text-white tabular-nums">{item.value}</p>
-                  {item.sub && <p className="text-[10px]" style={{ color }}>{item.sub}</p>}
+                  {item.sub && <p className="text-[10px]" style={{ color: item.color }}>{item.sub}</p>}
                 </div>
               ))}
             </div>
@@ -1484,12 +1484,12 @@ export default function AIProfilePage() {
 
                   const renderCard = (skill: typeof skillTags[0], index: number, isCenter: boolean) => {
                     const style = getCardStyle(index);
-                    const colors = {
+                    const colors = ({
                       excellent: { border: '#22c55e', bg: 'from-green-50 to-emerald-50', gradient: 'from-green-500 to-emerald-600' },
                       good: { border: '#3b82f6', bg: 'from-blue-50 to-indigo-50', gradient: 'from-blue-500 to-indigo-600' },
                       medium: { border: '#eab308', bg: 'from-yellow-50 to-amber-50', gradient: 'from-yellow-500 to-amber-600' },
                       poor: { border: '#ef4444', bg: 'from-red-50 to-rose-50', gradient: 'from-red-500 to-rose-600' }
-                    }[skill.status];
+                    } as const)[skill.status] || { border: '#6b7280', bg: 'from-gray-50 to-gray-100', gradient: 'from-gray-500 to-gray-600' };
 
                     return (
                       <div
