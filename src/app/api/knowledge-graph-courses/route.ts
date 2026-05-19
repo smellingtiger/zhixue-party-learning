@@ -4,7 +4,7 @@ import path from 'path';
 import { CourseInfo } from '@/lib/types';
 import { courseVideoMapping } from '@/lib/video-mapping';
 
-const KNOWLEDGE_BASE_DIR = process.env.KNOWLEDGE_BASE_DIR || 'E:\\社院课程stt\\knowledge_base_txt';
+const KNOWLEDGE_BASE_DIR = 'E:\\社院课程stt\\knowledge_base_txt';
 
 function buildSystemIdToVideoPathMap(): Record<string, string> {
   const map: Record<string, string> = {};
@@ -17,18 +17,65 @@ function buildSystemIdToVideoPathMap(): Record<string, string> {
   return map;
 }
 
-// 建立 DSPTXYZY 系统ID → 8082数字ID 反向映射
+// 建立所有系统ID → 8082数字ID 反向映射
+// 来源1: video-mapping.ts (DSPTXYZY系列)
+// 来源2: 精英课程资源库Excel + 8082 CourseList API 双向匹配 (GC/NGC/HGC系列)
 function buildSystemIdToNumericIdMap(): Record<string, string> {
   const map: Record<string, string> = {};
+
+  // 来源1: 从video-mapping.ts提取DSPTXYZY映射
   for (const [numericId, videoPath] of Object.entries(courseVideoMapping)) {
     const fileName = path.basename(videoPath, '.mp4');
-    // 跳过纯数字文件名（如 DSP210705），只保留 DSPTXYZY 系列
     if (fileName.startsWith('DSPTXYZY')) {
-      if (!map[fileName]) {
-        map[fileName] = numericId;
-      }
+      if (!map[fileName]) map[fileName] = numericId;
     }
   }
+
+  // 来源2: GC/NGC/HGC通过中文名匹配8082 (精英课程资源库Excel + 8082 API)
+  const extraMappings: Record<string, string> = {
+    'GC39I0415115_1511': '797',
+    'GC39I0315115_1511': '796',
+    'GC39I1215115_1511': '805',
+    'GC39I1015115_1511': '803',
+    'DSPTXYZY20120106': '1307',
+    'DSPTXYZY20120107': '1306',
+    'GC04I1116105_1611': '692',
+    'GC71A4519095_1909': '974',
+    'NGC03I0819085_1909': '1009',
+    'GC03I0518125_1901': '983',
+    'GC39I0215115_1511': '795',
+    'NGC20110301': '1305',
+    'NGC20110302': '1305',
+    'NGC03I2019035_1904': '845',
+    'GC16I3316085_1609': '780',
+    'GC06I0715055_1506': '793',
+    'GC41I3316035_1604': '784',
+    'HGC07I0920035_2004': '1415',
+    'DSPTXYZY21031101': '1345',
+    'DSPTXYZY20041779': '1125',
+    'HGC07I1020035_2004': '1415',
+    'GC09N0519095_1910': '991',
+    'GC09N0619095_1910': '991',
+    'DSPTXYZY21031109': '1337',
+    'GC13A3416065_1610': '734',
+    'GC13A3516065_1610': '734',
+    'DSPTXYZY21031115': '1331',
+    'HGC72I3520115_2012': '1347',
+    'GC13I0819055_1906': '951',
+    'GC13I0919055_1906': '951',
+    'GC03I0918115_1811': '946',
+    'GC32I1014105_1411': '764',
+    'HGC07I1220095_2010': '1413',
+    'HGC07I1320095_2010': '1413',
+    'GC07C1214090_1411': '755',
+    'GC04I0916105_1611': '728',
+    'GC04I1115015_1504': '745',
+    'DSPTXYZY21031104': '1342',
+    'GC34I2415015_1502': '753',
+    'DSPTXYZY21031124': '1322',
+  };
+  Object.assign(map, extraMappings);
+
   return map;
 }
 

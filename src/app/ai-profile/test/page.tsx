@@ -181,7 +181,7 @@ function RadarChatPanel({ skills, resetKey }: { skills: typeof skillTags; resetK
     const observer = new IntersectionObserver(
       (entries) => entries.forEach(e => {
         if (e.isIntersecting) {
-          const idx = Number(e.target.dataset.chatIdx);
+          const idx = Number((e.target as HTMLElement).dataset.chatIdx);
           setVisibleSet(prev => new Set([...prev, idx]));
           setActiveSkillIdx(idx);
           const targetVal = skills[radarChats[idx].skillIdx].level;

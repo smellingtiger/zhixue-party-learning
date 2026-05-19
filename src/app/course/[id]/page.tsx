@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { NavBar } from '@/components/nav-bar';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -19,16 +19,17 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { VideoOutline } from '@/components/video-outline';
-import { partyKnowledgeGraph, findNodeByCourseId, getPartyKnowledgeGraph } from '@/lib/knowledge-graph';
+import { partyKnowledgeGraph, getPartyKnowledgeGraph } from '@/lib/knowledge-graph';
 import { courseVideoMapping } from '@/lib/video-mapping';
+import { resolveKnowledgeVideoId } from '@/lib/title-video-mapping';
 import type { KnowledgeNode, LearningProgress } from '@/lib/types';
 
 // 获取本地视频URL（优先使用本地视频）
 function getLocalVideoUrl(courseId: string): string | null {
   const videoPath = courseVideoMapping[courseId];
   if (videoPath) {
-    // 直接返回public目录下的静态文件路径
-    return `/${videoPath}`;
+    // 编码中文路径，确保浏览器正确请求
+    return `/${encodeURI(videoPath)}`;
   }
   return null;
 }
@@ -44,7 +45,7 @@ async function fetchCourseDetail(courseId: string) {
   }
 }
 
-// 从后端获取视频播放地址（通过代理）
+// 从后端获取视频播放地址，通过代理解决CORS问题
 async function fetchVideoUrl(courseId: string) {
   try {
     const response = await fetch('/api/course', {
@@ -53,9 +54,19 @@ async function fetchVideoUrl(courseId: string) {
       body: JSON.stringify({ courseId, playType: 'Jwplay' }),
     });
     const data = await response.json();
-    // 后端返回格式：{ Data: { Url: "..." }, Code: 1 }
     console.log('fetchVideoUrl result for', courseId, ':', data);
-    return data?.Data?.Url || data?.Data?.url || null;
+    const urls = Array.isArray(data?.Data?.Urls) ? data.Data.Urls : Array.isArray(data?.Data?.urls) ? data.Data.urls : [];
+    const preferredUrl = urls.find((item: any) => Number(item?.Quality) === 1)?.Url
+      || urls.find((item: any) => item?.Url)?.Url
+      || null;
+    const ossUrl = data?.Data?.Url || data?.Data?.url || preferredUrl;
+    console.log('fetchVideoUrl OSS URL:', ossUrl);
+    if (ossUrl) {
+      const proxyUrl = `/api/video-proxy?url=${encodeURIComponent(ossUrl)}&_t=${Date.now()}`;
+      console.log('fetchVideoUrl proxy URL (first 200 chars):', proxyUrl.slice(0, 200));
+      return proxyUrl;
+    }
+    return null;
   } catch (error) {
     console.error('Failed to fetch video URL:', error);
     return null;
@@ -201,11 +212,12 @@ function KnowledgeTreeOutline({
 
 export default function CoursePage() {
   const router = useRouter();
-  const params = useParams();
-  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-  const courseId = params.id as string;
+  const rawParams = useParams();
+  const searchParams = useSearchParams();
+  const courseId = rawParams.id as string;
   const queryCourseId = searchParams?.get('courseId') || null;
   const videoRef = useRef<HTMLVideoElement>(null);
+  const switchCourseSeqRef = useRef(0);
   
   const [courseDetail, setCourseDetail] = useState<any>(null);
   const [videoUrl, setVideoUrl] = useState<string>('');
@@ -218,6 +230,8 @@ export default function CoursePage() {
   const [progress, setProgress] = useState<LearningProgress[]>([]);
   const [currentNode, setCurrentNode] = useState<KnowledgeNode | null>(null);
   const [selectedCourseIndex, setSelectedCourseIndex] = useState(0);
+  const [videoError, setVideoError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   // 当前正在播放的课程ID
   const currentCourseId = currentNode?.courses && currentNode.courses.length > 0
@@ -251,6 +265,8 @@ export default function CoursePage() {
   useEffect(() => {
     async function loadCourse() {
       setIsLoading(true);
+      setVideoError(null);
+      setRetryCount(0);
       
       const node = findNodeById(courseId, getPartyKnowledgeGraph());
       if (node) {
@@ -286,7 +302,7 @@ export default function CoursePage() {
             setVideoUrl(localUrl);
             console.log('[课程播放] 使用本地视频:', localUrl);
           } else if (courseToPlay.videoPath) {
-            setVideoUrl(`/${courseToPlay.videoPath}`);
+            setVideoUrl(`/${encodeURI(courseToPlay.videoPath)}`);
             console.log('[课程播放] 使用知识库视频:', courseToPlay.videoPath);
           } else {
             // 如果本地没有，再尝试从后端获取
@@ -314,17 +330,39 @@ export default function CoursePage() {
           }
         }
       } else {
-        // 降级处理：课程ID未在知识图谱中注册，直接从后端获取视频和课程信息
-        console.log('[课程播放] 课程未在知识图谱中，尝试从后端获取:', courseId);
+        // 降级处理：课程ID未在知识图谱中注册，从知识库API获取videoId后播放
+        console.log('[课程播放] 课程未在知识图谱中，尝试从知识库获取:', courseId);
         const localUrl = getLocalVideoUrl(courseId);
         if (localUrl) {
           setVideoUrl(localUrl);
           console.log('[课程播放] 使用本地视频:', localUrl);
         } else {
-          const backendVideoUrl = await fetchVideoUrl(courseId);
-          if (backendVideoUrl) {
-            setVideoUrl(backendVideoUrl);
-            console.log('[课程播放] 使用后端视频:', backendVideoUrl);
+          const mappedVideoId = resolveKnowledgeVideoId(courseId);
+          if (mappedVideoId) {
+            const backendVideoUrl = await fetchVideoUrl(mappedVideoId);
+            if (backendVideoUrl) {
+              setVideoUrl(backendVideoUrl);
+              console.log('[课程播放] 使用映射视频(via KB id):', backendVideoUrl);
+            }
+          } else {
+          try {
+            const kbRes = await fetch(`/api/knowledge-base/${encodeURIComponent(courseId)}`);
+            if (!kbRes.ok) {
+              throw new Error(`知识库详情不存在: ${kbRes.status}`);
+            }
+            const kbData = await kbRes.json();
+            const targetId = kbData.videoId || resolveKnowledgeVideoId(kbData.id, kbData.fileName, kbData.courseName);
+            if (!targetId) {
+              throw new Error('知识库课程未匹配到视频ID');
+            }
+            const backendVideoUrl = await fetchVideoUrl(targetId);
+            if (backendVideoUrl) {
+              setVideoUrl(backendVideoUrl);
+              console.log('[课程播放] 使用后端视频(via KB):', backendVideoUrl);
+            }
+          } catch (error) {
+            console.error('[课程播放] 知识库课程未匹配到可播放视频:', error);
+          }
           }
         }
       }
@@ -344,30 +382,35 @@ export default function CoursePage() {
   const switchCourse = async (courseIndex: number) => {
     if (!currentNode?.courses || courseIndex >= currentNode.courses.length) return;
     
+    const seq = ++switchCourseSeqRef.current;
     setSelectedCourseIndex(courseIndex);
-    setIsLoading(true);
+    setVideoError(null);
+    setRetryCount(0);
+    setIsPlaying(false);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
     
     const course = currentNode.courses[courseIndex];
     
     // 优先使用本地视频映射
     const localUrl = getLocalVideoUrl(course.id);
     if (localUrl) {
-      setVideoUrl(localUrl);
+      if (seq === switchCourseSeqRef.current) setVideoUrl(localUrl);
       console.log('[课程播放] 使用本地视频:', localUrl);
     } else if (course.videoPath) {
-      setVideoUrl(`/${course.videoPath}`);
+      if (seq === switchCourseSeqRef.current) setVideoUrl(`/${encodeURI(course.videoPath)}`);
       console.log('[课程播放] 使用知识库视频:', course.videoPath);
     } else {
       // 如果本地没有，再尝试从后端获取
       const targetId = course.videoId || course.id;
-      const videoUrl = await fetchVideoUrl(targetId);
-      if (videoUrl) {
-        setVideoUrl(videoUrl);
-        console.log('[课程播放] 使用后端视频:', videoUrl);
+      const fetchedUrl = await fetchVideoUrl(targetId);
+      if (fetchedUrl) {
+        if (seq === switchCourseSeqRef.current) setVideoUrl(fetchedUrl);
+        console.log('[课程播放] 使用后端视频:', fetchedUrl);
       }
     }
-    
-    setIsLoading(false);
   };
 
   // 视频时间更新
@@ -427,15 +470,18 @@ export default function CoursePage() {
   };
 
   const togglePlay = () => {
-    if (videoRef.current && videoUrl) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play().catch(e => {
+    if (!videoRef.current || !videoUrl) return;
+    const video = videoRef.current;
+    if (isPlaying) {
+      video.pause();
+    } else {
+      video.play()
+        .then(() => setIsPlaying(true))
+        .catch(e => {
+          if (e?.name === 'AbortError') return;
           console.error('播放失败:', e);
+          setIsPlaying(false);
         });
-      }
-      setIsPlaying(!isPlaying);
     }
   };
 
@@ -451,12 +497,38 @@ export default function CoursePage() {
     if (videoRef.current) {
       videoRef.current.currentTime = time;
       if (!isPlaying) {
-        videoRef.current.play().catch(() => {});
-        setIsPlaying(true);
+        videoRef.current.play()
+          .then(() => setIsPlaying(true))
+          .catch(e => {
+            if (e?.name === 'AbortError') return;
+          });
       }
       setCurrentTime(time);
     }
   };
+
+  useEffect(() => {
+    if (!videoUrl || !videoRef.current) return;
+
+    const videoEl = videoRef.current;
+    const tryAutoPlay = async () => {
+      try {
+        await videoEl.play();
+      } catch (e: any) {
+        if (e?.name === 'AbortError' || e?.name === 'NotAllowedError') return;
+        console.error('自动播放失败:', e);
+      }
+    };
+
+    const onCanPlay = () => {
+      void tryAutoPlay();
+    };
+
+    videoEl.addEventListener('canplay', onCanPlay, { once: true });
+    return () => {
+      videoEl.removeEventListener('canplay', onCanPlay);
+    };
+  }, [videoUrl]);
 
   const toggleMute = () => {
     if (videoRef.current) {
@@ -548,19 +620,99 @@ export default function CoursePage() {
             {/* 视频播放器 */}
             <div className="bg-black rounded-lg overflow-hidden aspect-video relative group">
               {videoUrl ? (
-            <video
+            <div className="relative w-full h-full">
+              <video
               ref={videoRef}
               src={videoUrl}
               className="w-full h-full object-contain"
+              preload="metadata"
+              playsInline
+              muted={isMuted}
+              onClick={togglePlay}
               onTimeUpdate={handleTimeUpdate}
               onLoadedMetadata={handleLoadedMetadata}
+              onCanPlay={() => {
+                console.log('[视频] canPlay事件触发，视频可以播放');
+                setVideoError(null);
+              }}
+              onWaiting={() => console.log('[视频] waiting - 缓冲中...')}
+              onStalled={() => console.log('[视频] stalled - 网络停滞')}
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
               onError={(e) => {
-                console.error('视频加载失败:', e);
-                setVideoUrl('');
+                const mediaError = (e.target as HTMLVideoElement).error;
+                const errCode = mediaError?.code;
+                const errMsg = mediaError?.message || '';
+                console.error('视频加载失败: code=' + errCode + ' msg=' + errMsg);
+                console.error('视频加载失败 - 完整videoUrl:', videoUrl);
+                console.error('视频加载失败 - MediaError对象:', mediaError);
+                let friendlyMsg = '视频加载失败';
+                if (errCode === 1) friendlyMsg = '视频加载被中断';
+                else if (errCode === 2) friendlyMsg = '视频加载中发生网络错误';
+                else if (errCode === 3) friendlyMsg = '视频解码失败，请尝试其他浏览器';
+                else if (errCode === 4) friendlyMsg = '视频源不可用或格式不支持';
+                setVideoError(friendlyMsg + ' (code=' + errCode + ')');
+                if (retryCount < 1) {
+                  setRetryCount(prev => prev + 1);
+                  setTimeout(() => {
+                    setVideoError(null);
+                    const videoEl = videoRef.current;
+                    if (videoEl) {
+                      videoEl.load();
+                      videoEl.addEventListener('canplay', function onCanPlay() {
+                        videoEl.removeEventListener('canplay', onCanPlay);
+                        videoEl.play().then(() => {
+                          setIsPlaying(true);
+                        }).catch(() => {});
+                      }, { once: true });
+                    }
+                  }, 2000);
+                }
               }}
             />
+              {!videoError && !isPlaying && (
+                <button
+                  type="button"
+                  onClick={togglePlay}
+                  className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors hover:bg-black/30"
+                  aria-label="播放视频"
+                >
+                  <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white/90 text-red-600 shadow-lg">
+                    <Play className="h-8 w-8 translate-x-0.5" />
+                  </span>
+                </button>
+              )}
+              {videoError && (
+                <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-10">
+                  <div className="text-center text-white p-6">
+                    <div className="mb-4 text-red-400 text-5xl">⚠️</div>
+                    <h3 className="text-lg font-bold mb-2">{videoError}</h3>
+                    <p className="text-gray-400 text-sm mb-4">
+                      视频加载异常，正在尝试恢复...
+                    </p>
+                    <button
+                      onClick={() => {
+                        setVideoError(null);
+                        setRetryCount(0);
+                        const videoEl = videoRef.current;
+                        if (videoEl) {
+                          videoEl.load();
+                          videoEl.addEventListener('canplay', function onCanPlay() {
+                            videoEl.removeEventListener('canplay', onCanPlay);
+                            videoEl.play().then(() => {
+                              setIsPlaying(true);
+                            }).catch(() => {});
+                          }, { once: true });
+                        }
+                      }}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                    >
+                      重新加载
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           ) : (
             <div className="flex items-center justify-center h-full bg-gray-900">
               <div className="text-center text-white p-6">
@@ -574,7 +726,7 @@ export default function CoursePage() {
               
               {/* 视频控制栏 */}
               {videoUrl && (
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-100 transition-opacity">
                   {/* 进度条 */}
                   <input
                     type="range"
@@ -601,17 +753,6 @@ export default function CoursePage() {
                       <button onClick={toggleMute} className="text-white hover:text-red-500 transition-colors">
                         {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
                       </button>
-                      <input
-                        type="range"
-                        min={0}
-                        max={1}
-                        step={0.1}
-                        value={volume}
-                        onChange={handleVolumeChange}
-                        className="w-20 h-1 bg-gray-600 rounded-full appearance-none cursor-pointer
-                          [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-2 [&::-webkit-slider-thumb]:h-2 
-                          [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer"
-                      />
                       <button className="text-white hover:text-red-500 transition-colors">
                         <Maximize className="h-5 w-5" />
                       </button>

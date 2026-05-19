@@ -5,7 +5,11 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const { courseId, courseTitle, transcript } = await request.json();
+    const { courseId, courseTitle, transcript } = await request.json() as {
+      courseId: string;
+      courseTitle: string;
+      transcript: Array<{ start_time_second: number; end_time_second: number; content: string }>;
+    };
     const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
     const config = new Config();
     const client = new LLMClient(config, customHeaders);
@@ -39,8 +43,8 @@ export async function POST(request: NextRequest) {
 ${paragraphs}`;
 
     const messages = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userMessage }
+      { role: 'system' as const, content: systemPrompt },
+      { role: 'user' as const, content: userMessage },
     ];
 
     let fullResponse = '';

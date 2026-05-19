@@ -1020,12 +1020,13 @@ export default function CourseLearnPage() {
   // 视频控制函数
   const toggleVideoPlay = () => {
     if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
+      if (videoRef.current.paused) {
+        videoRef.current.play().catch(e => {
+          if (e?.name === 'AbortError') return;
+        });
       } else {
-        videoRef.current.play();
+        videoRef.current.pause();
       }
-      setIsPlaying(!isPlaying);
     }
   };
 

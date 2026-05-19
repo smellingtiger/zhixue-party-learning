@@ -17,6 +17,24 @@ let antiForgeryToken: Record<string, string> | null = null;
 let isAuthenticating = false;
 let authQueue: Array<() => void> = [];
 
+function pickPlayableUrl(data: any): string | null {
+  const directUrl = data?.Data?.Url || data?.Data?.url;
+  if (directUrl) return directUrl;
+
+  const urls = Array.isArray(data?.Data?.Urls) ? data.Data.Urls : Array.isArray(data?.Data?.urls) ? data.Data.urls : [];
+  if (urls.length === 0) return null;
+
+  const qualityPriority = [1, 2, 3, 0];
+  const sorted = [...urls].sort((a, b) => {
+    const qa = qualityPriority.indexOf(Number(a?.Quality));
+    const qb = qualityPriority.indexOf(Number(b?.Quality));
+    return (qa === -1 ? 99 : qa) - (qb === -1 ? 99 : qb);
+  });
+
+  const matched = sorted.find(item => item?.Url || item?.url);
+  return matched?.Url || matched?.url || null;
+}
+
 /**
  * 使用 http 模块发送请求并捕获 Set-Cookie
  */
@@ -145,25 +163,43 @@ export async function GET(request: NextRequest) {
   const channelCode = searchParams.get('channelCode') || '';
 
   try {
+    const { cookie, token } = await ensureAuth();
+
     if (courseId) {
-      const response = await fetch(`${API_URL}/Page/CourseContent`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-        body: new URLSearchParams({ Id: courseId, titleNav: '课程详情' }),
-      });
-      return NextResponse.json(await response.json());
+      const reqBody = new URLSearchParams({ Id: courseId, titleNav: '课程详情' });
+      if (token) {
+        Object.entries(token).forEach(([key, value]) => reqBody.set(key, value));
+      }
+      const result = await httpPost(`${API_URL}/Page/CourseContent`, reqBody.toString(), cookie || undefined);
+      try {
+        const data = JSON.parse(result.data);
+        return NextResponse.json(data);
+      } catch {
+        return NextResponse.json({ error: 'Invalid response' });
+      }
     }
 
-    const response = await fetch(`${API_URL}/Page/CourseList`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-      body: new URLSearchParams({
-        page, rows, sort: 'Sort', order: 'desc',
-        courseType: 'All', channelId: '', channelCode, title: '',
-        titleNav: '课程中心', wordLimt: '35', teacher: '', TagId: '', channelIds: '',
-      }),
+    const reqBody = new URLSearchParams({
+      page, rows, sort: 'Sort', order: 'desc',
+      courseType: 'All', channelId: '', channelCode, title: '',
+      titleNav: '课程中心', wordLimt: '35', teacher: '', TagId: '', channelIds: '',
     });
-    return NextResponse.json(await response.json());
+    if (token) {
+      Object.entries(token).forEach(([key, value]) => reqBody.set(key, value));
+    }
+    const result = await httpPost(`${API_URL}/Page/CourseList`, reqBody.toString(), cookie || undefined);
+    // 支持原始返回（调试用）
+    if (searchParams.get('raw') === '1') {
+      return new NextResponse(result.data, {
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      });
+    }
+    try {
+      const data = JSON.parse(result.data);
+      return NextResponse.json(data);
+    } catch {
+      return NextResponse.json({ error: 'Invalid response', raw: result.data.slice(0, 500) });
+    }
   } catch (error) {
     console.error('Failed to fetch course data:', error);
     return NextResponse.json({ error: 'Failed to fetch course data' }, { status: 500 });
@@ -260,6 +296,10 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[Play API] Response for', courseId, ':', JSON.stringify(data).slice(0, 300));
+    const playableUrl = pickPlayableUrl(data);
+    if (playableUrl && data?.Data && !data.Data.Url) {
+      data.Data.Url = playableUrl;
+    }
     return NextResponse.json(data);
   } catch (error) {
     console.error('Failed to get video URL:', error);
