@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import MindMap from '@/components/mind-map';
 import { DiagnosticSurvey } from '@/components/diagnostic-survey';
 import { AIIntentChat } from '@/components/ai-intent-chat';
-import { partyKnowledgeGraph, generateLearningPath, roleNodeMap, topicNodeMap, getNodeById, getDifficultyLockedNodeIds, injectCoursesRecursive, fetchKnowledgeBaseCourses, initTopicNodeMap } from '@/lib/knowledge-graph';
+import { partyKnowledgeGraph, generateLearningPath, roleNodeMap, topicNodeMap, getNodeById, getDynamicKnowledgeGraph, getDifficultyLockedNodeIds, injectCoursesRecursive, fetchKnowledgeBaseCourses, initTopicNodeMap, analyzeRequirements, getTopicNodeMap } from '@/lib/knowledge-graph';
 import { LearningPath, KnowledgeNode, LearningProgress } from '@/lib/types';
 import {
   BrainCircuit,
@@ -27,6 +27,7 @@ import {
   Zap,
   X,
   Search,
+  Target,
 } from 'lucide-react';
 
 const welcomeMessages = [
@@ -91,6 +92,11 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [typewriterText, setTypewriterText] = useState('');
   const [diagnosticRoles, setDiagnosticRoles] = useState<string[]>([]);
   const [diagnosticTopics, setDiagnosticTopics] = useState<string[]>([]);
+  const [diagnosticLevel, setDiagnosticLevel] = useState<string>('');
+  const [diagnosticRequirements, setDiagnosticRequirements] = useState<string>('');
+  const [diagnosticKeywords, setDiagnosticKeywords] = useState<string[]>([]);
+  const [diagnosticMatchedTopics, setDiagnosticMatchedTopics] = useState<string[]>([]);
+  const [diagnosticMatchedNodes, setDiagnosticMatchedNodes] = useState<string[]>([]);
   const [difficultyLockedNodes, setDifficultyLockedNodes] = useState<Set<string>>(new Set());
   const [showFullMap, setShowFullMap] = useState(false);
   const [knowledgeBaseGraph, setKnowledgeBaseGraph] = useState<KnowledgeNode | null>(null);
@@ -252,6 +258,20 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const handlePathGenerated = async (roles: string[], topics: string[], difficulty: string, customRequirements: string) => {
     setDiagnosticRoles(roles);
     setDiagnosticTopics(topics);
+    setDiagnosticLevel(difficulty);
+    setDiagnosticRequirements(customRequirements || '');
+
+    // 分析自定义需求中的关键词
+    if (customRequirements && customRequirements.trim()) {
+      const analysis = analyzeRequirements(customRequirements);
+      setDiagnosticKeywords(analysis.keywords);
+      setDiagnosticMatchedTopics(analysis.matchedTopics);
+      setDiagnosticMatchedNodes(analysis.matchedNodes);
+    } else {
+      setDiagnosticKeywords([]);
+      setDiagnosticMatchedTopics([]);
+      setDiagnosticMatchedNodes([]);
+    }
 
     await fetchKnowledgeBaseCourses();
     initTopicNodeMap();
@@ -661,23 +681,46 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                         选择记录
                       </h4>
 
+                      {/* 学习深度 */}
+                      {diagnosticLevel && (
+                        <div className="mb-3">
+                          <h5 className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-1.5">
+                            <Target className="w-3.5 h-3.5 text-red-500" />
+                            学习深度
+                          </h5>
+                          <Badge className={
+                            diagnosticLevel === 'beginner' ? 'bg-green-500' :
+                            diagnosticLevel === 'intermediate' ? 'bg-amber-500' : 'bg-red-500'
+                          }>
+                            {diagnosticLevel === 'beginner' ? '入门级（基础内容）' :
+                             diagnosticLevel === 'intermediate' ? '进阶级（进阶内容）' :
+                             '深入级（全部内容）'}
+                          </Badge>
+                        </div>
+                      )}
+
+                      {/* 已选身份 */}
                       {diagnosticRoles.length > 0 && (
                         <div className="mb-3">
                           <h5 className="text-sm font-semibold text-slate-600 mb-2">已选身份</h5>
                           <div className="flex flex-wrap gap-2">
                             {diagnosticRoles.map(role => {
                               const nodeIds = roleNodeMap[role] || [];
+                              const effectiveGraph = knowledgeBaseGraph || getDynamicKnowledgeGraph() || partyKnowledgeGraph;
                               return (
                                 <div key={role} className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-50/60 rounded-lg border border-red-100">
                                   <Badge className="bg-red-500 hover:bg-red-600 text-white shrink-0">{role}</Badge>
-                                  {nodeIds.map(nodeId => {
-                                    const node = getNodeById(nodeId, partyKnowledgeGraph);
+                                  {nodeIds.length > 0 ? nodeIds.map(nodeId => {
+                                    const node = getNodeById(nodeId, effectiveGraph);
+                                    if (!node) return null;
                                     return (
                                       <Badge key={nodeId} variant="outline" className="text-xs border-red-200 text-red-700 bg-red-50">
-                                        {node?.name || nodeId}
+                                        {node.name}
                                       </Badge>
                                     );
-                                  })}
+                                  }) : (
+                                    <span className="text-xs text-slate-400">匹配全貌图谱中...</span>
+                                  )}
                                 </div>
                               );
                             })}
@@ -685,13 +728,16 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                         </div>
                       )}
 
+                      {/* 已选学习主题 */}
                       {diagnosticTopics.length > 0 && (
-                        <div>
+                        <div className="mb-3">
                           <h5 className="text-sm font-semibold text-slate-600 mb-2">已选学习主题</h5>
                           <div className="flex flex-wrap gap-2">
                             {diagnosticTopics.map(topic => {
-                              const nodeId = topicNodeMap[topic];
-                              const node = nodeId ? getNodeById(nodeId, partyKnowledgeGraph) : null;
+                              const effectiveTopicMap = Object.keys(topicNodeMap).length > 0 ? topicNodeMap : getTopicNodeMap();
+                              const nodeId = effectiveTopicMap[topic];
+                              const effectiveGraph = knowledgeBaseGraph || getDynamicKnowledgeGraph() || partyKnowledgeGraph;
+                              const node = nodeId ? getNodeById(nodeId, effectiveGraph) : null;
                               return (
                                 <div key={topic} className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50/60 rounded-lg border border-blue-100">
                                   <Badge className="bg-blue-500 hover:bg-blue-600 text-white shrink-0">{topic}</Badge>
@@ -700,11 +746,71 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                                       {node.name}
                                     </Badge>
                                   ) : (
-                                    <span className="text-xs text-slate-400">—</span>
+                                    <span className="text-xs text-slate-400">全貌图谱匹配中...</span>
                                   )}
                                 </div>
                               );
                             })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 您的具体学习需求 */}
+                      {diagnosticRequirements && (
+                        <div className="mb-3">
+                          <h5 className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-1.5">
+                            <FileText className="w-3.5 h-3.5 text-amber-500" />
+                            您的具体学习需求
+                          </h5>
+                          <div className="text-sm text-slate-700 bg-amber-50/60 rounded-lg border border-amber-100 px-3 py-2">
+                            {diagnosticRequirements}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 系统识别关键词和关联主题 */}
+                      {diagnosticKeywords.length > 0 && (
+                        <div className="mb-3">
+                          <h5 className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+                            系统识别到以下关键词和关联主题
+                          </h5>
+                          <div className="space-y-2">
+                            <div className="flex flex-wrap gap-1.5">
+                              <span className="text-xs text-slate-500 self-center">关键词：</span>
+                              {diagnosticKeywords.map(kw => (
+                                <Badge key={kw} variant="outline" className="text-xs border-purple-200 text-purple-700 bg-purple-50">
+                                  {kw}
+                                </Badge>
+                              ))}
+                            </div>
+                            {diagnosticMatchedTopics.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5">
+                                <span className="text-xs text-slate-500 self-center">关联主题：</span>
+                                {diagnosticMatchedTopics.map(t => (
+                                  <Badge key={t} variant="outline" className="text-xs border-indigo-200 text-indigo-700 bg-indigo-50">
+                                    {t}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                            {diagnosticMatchedNodes.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5">
+                                <span className="text-xs text-slate-500 self-center">关联节点：</span>
+                                {diagnosticMatchedNodes.slice(0, 8).map(nid => {
+                                  const effectiveGraph = knowledgeBaseGraph || getDynamicKnowledgeGraph() || partyKnowledgeGraph;
+                                  const node = getNodeById(nid, effectiveGraph);
+                                  return node ? (
+                                    <Badge key={nid} variant="outline" className="text-xs border-teal-200 text-teal-700 bg-teal-50">
+                                      {node.name}
+                                    </Badge>
+                                  ) : null;
+                                })}
+                                {diagnosticMatchedNodes.length > 8 && (
+                                  <span className="text-xs text-slate-400 self-center">+{diagnosticMatchedNodes.length - 8} 更多</span>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
