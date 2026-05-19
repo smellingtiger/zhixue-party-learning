@@ -233,6 +233,23 @@ export default function CoursePage() {
   const [videoError, setVideoError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
 
+  const applyVideoSource = async (sourceUrl: string, switchSeq?: number) => {
+    if (!sourceUrl) {
+      setVideoUrl('');
+      return false;
+    }
+
+    if (switchSeq !== undefined && switchSeq !== switchCourseSeqRef.current) {
+      return false;
+    }
+
+    setCurrentTime(0);
+    setDuration(0);
+    setIsPlaying(false);
+    setVideoUrl(sourceUrl);
+    return true;
+  };
+
   // 当前正在播放的课程ID
   const currentCourseId = currentNode?.courses && currentNode.courses.length > 0
     ? currentNode.courses[selectedCourseIndex]?.id
@@ -299,18 +316,18 @@ export default function CoursePage() {
           const localUrl = getLocalVideoUrl(courseToPlay.id);
           console.log('获取到的视频URL:', localUrl);
           if (localUrl) {
-            setVideoUrl(localUrl);
+            await applyVideoSource(localUrl);
             console.log('[课程播放] 使用本地视频:', localUrl);
           } else if (courseToPlay.videoPath) {
-            setVideoUrl(`/${encodeURI(courseToPlay.videoPath)}`);
+            await applyVideoSource(`/${encodeURI(courseToPlay.videoPath)}`);
             console.log('[课程播放] 使用知识库视频:', courseToPlay.videoPath);
           } else {
             // 如果本地没有，再尝试从后端获取
             const targetId = courseToPlay.videoId || courseToPlay.id;
-            const videoUrl = await fetchVideoUrl(targetId);
-            if (videoUrl) {
-              setVideoUrl(videoUrl);
-              console.log('[课程播放] 使用后端视频:', videoUrl);
+            const resolvedUrl = await fetchVideoUrl(targetId);
+            if (resolvedUrl) {
+              await applyVideoSource(resolvedUrl);
+              console.log('[课程播放] 使用后端视频:', resolvedUrl);
             }
           }
         } else {
@@ -319,13 +336,13 @@ export default function CoursePage() {
           const localUrl = getLocalVideoUrl(node.id);
           console.log('获取到的视频URL:', localUrl);
           if (localUrl) {
-            setVideoUrl(localUrl);
+            await applyVideoSource(localUrl);
             console.log('[课程播放] 使用本地视频:', localUrl);
           } else if (node.videoId) {
-            const videoUrl = await fetchVideoUrl(node.videoId);
-            if (videoUrl) {
-              setVideoUrl(videoUrl);
-              console.log('[课程播放] 使用后端视频:', videoUrl);
+            const resolvedUrl = await fetchVideoUrl(node.videoId);
+            if (resolvedUrl) {
+              await applyVideoSource(resolvedUrl);
+              console.log('[课程播放] 使用后端视频:', resolvedUrl);
             }
           }
         }
@@ -334,14 +351,14 @@ export default function CoursePage() {
         console.log('[课程播放] 课程未在知识图谱中，尝试从知识库获取:', courseId);
         const localUrl = getLocalVideoUrl(courseId);
         if (localUrl) {
-          setVideoUrl(localUrl);
+          await applyVideoSource(localUrl);
           console.log('[课程播放] 使用本地视频:', localUrl);
         } else {
           const mappedVideoId = resolveKnowledgeVideoId(courseId);
           if (mappedVideoId) {
             const backendVideoUrl = await fetchVideoUrl(mappedVideoId);
             if (backendVideoUrl) {
-              setVideoUrl(backendVideoUrl);
+              await applyVideoSource(backendVideoUrl);
               console.log('[课程播放] 使用映射视频(via KB id):', backendVideoUrl);
             }
           } else {
@@ -357,7 +374,7 @@ export default function CoursePage() {
             }
             const backendVideoUrl = await fetchVideoUrl(targetId);
             if (backendVideoUrl) {
-              setVideoUrl(backendVideoUrl);
+              await applyVideoSource(backendVideoUrl);
               console.log('[课程播放] 使用后端视频(via KB):', backendVideoUrl);
             }
           } catch (error) {
@@ -397,17 +414,17 @@ export default function CoursePage() {
     // 优先使用本地视频映射
     const localUrl = getLocalVideoUrl(course.id);
     if (localUrl) {
-      if (seq === switchCourseSeqRef.current) setVideoUrl(localUrl);
+      if (seq === switchCourseSeqRef.current) await applyVideoSource(localUrl, seq);
       console.log('[课程播放] 使用本地视频:', localUrl);
     } else if (course.videoPath) {
-      if (seq === switchCourseSeqRef.current) setVideoUrl(`/${encodeURI(course.videoPath)}`);
+      if (seq === switchCourseSeqRef.current) await applyVideoSource(`/${encodeURI(course.videoPath)}`, seq);
       console.log('[课程播放] 使用知识库视频:', course.videoPath);
     } else {
       // 如果本地没有，再尝试从后端获取
       const targetId = course.videoId || course.id;
       const fetchedUrl = await fetchVideoUrl(targetId);
       if (fetchedUrl) {
-        if (seq === switchCourseSeqRef.current) setVideoUrl(fetchedUrl);
+        if (seq === switchCourseSeqRef.current) await applyVideoSource(fetchedUrl, seq);
         console.log('[课程播放] 使用后端视频:', fetchedUrl);
       }
     }

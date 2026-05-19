@@ -26,7 +26,7 @@ function createStreamingRequest(
   });
 }
 
-export async function GET(request: NextRequest) {
+async function proxyRequest(request: NextRequest, method: 'GET' | 'HEAD') {
   try {
     const { searchParams } = new URL(request.url);
     const targetUrl = searchParams.get('url');
@@ -43,7 +43,12 @@ export async function GET(request: NextRequest) {
 
     console.log('[VideoProxy] Request:', targetUrl.slice(0, 120), 'Range:', rangeHeader || '(none)');
 
-    if (rangeHeader && /^bytes=\d+-$/i.test(rangeHeader)) {
+    if (!rangeHeader) {
+      // Force the initial probe request into byte-range mode so the browser can
+      // continue requesting the tail chunk when MP4 metadata lives near EOF.
+      rangeHeader = `bytes=0-${MAX_CHUNK_SIZE - 1}`;
+      console.log('[VideoProxy] Injected initial Range:', rangeHeader);
+    } else if (/^bytes=\d+-$/i.test(rangeHeader)) {
       const startByte = parseInt(rangeHeader.match(/bytes=(\d+)-/)?.[1] || '0', 10);
       const endByte = startByte + MAX_CHUNK_SIZE - 1;
       const originalRange = rangeHeader;
@@ -55,7 +60,7 @@ export async function GET(request: NextRequest) {
       hostname: parsedUrl.hostname,
       port: parsedUrl.port || (parsedUrl.protocol === 'https:' ? 443 : 80),
       path: parsedUrl.pathname + parsedUrl.search,
-      method: 'GET',
+      method,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Referer': referer,
@@ -115,6 +120,14 @@ export async function GET(request: NextRequest) {
 
     console.log('[VideoProxy] Returning:', responseStatus, 'CT:', contentType, 'CL:', responseHeaders['Content-Length'], 'CR:', contentRange?.slice(0, 60));
 
+    if (method === 'HEAD') {
+      upstream.resume();
+      return new Response(null, {
+        status: responseStatus,
+        headers: responseHeaders,
+      });
+    }
+
     const stream = new ReadableStream<Uint8Array>({
       start(controller) {
         upstream.on('data', (chunk: Buffer) => {
@@ -141,4 +154,12 @@ export async function GET(request: NextRequest) {
 
     return new Response('Proxy failed: ' + (error.message || 'Unknown error'), { status: 500 });
   }
+}
+
+export async function GET(request: NextRequest) {
+  return proxyRequest(request, 'GET');
+}
+
+export async function HEAD(request: NextRequest) {
+  return proxyRequest(request, 'HEAD');
 }

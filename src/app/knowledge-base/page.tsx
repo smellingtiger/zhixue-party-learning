@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { Library, BookOpen, FileText, Database, Search, Plus, Filter, X, ChevronDown, Clock, Loader2, Play } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Library, BookOpen, FileText, Database, Search, Plus, Filter, X, ChevronDown, Clock, Loader2, Play, Video, FileText as FileTextIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +23,14 @@ interface KnowledgeSegment {
   title: string;
   time: string;
   content: string;
+}
+
+interface VideoInfo {
+  has_video: boolean;
+  course_code?: string;
+  chinese_name?: string;
+  video_url?: string;
+  video_filename?: string;
 }
 
 interface KnowledgeDocDetail extends KnowledgeDoc {
@@ -64,6 +72,10 @@ export default function KnowledgeBasePage() {
   const [docLoading, setDocLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [showProcess, setShowProcess] = useState(false);
+  const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null);
+  const [videoLoading, setVideoLoading] = useState(false);
+  const [videoMode, setVideoMode] = useState<'video' | 'text'>('video');
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const fetchDocs = useCallback(async () => {
     setLoading(true);
@@ -114,6 +126,9 @@ export default function KnowledgeBasePage() {
   const handleDocClick = async (doc: KnowledgeDoc) => {
     setDocLoading(true);
     setSelectedDoc(null);
+    setVideoInfo(null);
+    setVideoLoading(false);
+    setVideoMode('video');
     try {
       const res = await fetch(`/api/knowledge-base/${encodeURIComponent(doc.id)}`);
       const data = await res.json();
@@ -121,6 +136,20 @@ export default function KnowledgeBasePage() {
         setSelectedDoc(data);
       } else {
         setSelectedDoc({ ...data, segments: [] });
+      }
+      
+      // 加载视频信息
+      setVideoLoading(true);
+      try {
+        const videoRes = await fetch(`/api/knowledge-base/${encodeURIComponent(doc.id)}/video`);
+        if (videoRes.ok) {
+          const videoData = await videoRes.json();
+          setVideoInfo(videoData);
+        }
+      } catch (ve) {
+        console.error('加载视频信息失败:', ve);
+      } finally {
+        setVideoLoading(false);
       }
     } catch (err) {
       console.error('加载文档详情失败:', err);
@@ -358,7 +387,7 @@ export default function KnowledgeBasePage() {
                 <div className="flex items-center justify-between mb-1">
                   <h3 className="font-semibold text-sm truncate">{selectedDoc.courseName}</h3>
                   <button
-                    onClick={() => setSelectedDoc(null)}
+                    onClick={() => { setSelectedDoc(null); setVideoInfo(null); }}
                     className="p-1 hover:bg-gray-100 rounded"
                   >
                     <X className="h-4 w-4" />
@@ -367,6 +396,9 @@ export default function KnowledgeBasePage() {
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Badge variant="secondary" className="text-xs">{selectedDoc.category}</Badge>
                   <span>{selectedDoc.segments?.length ?? 0} 个段落</span>
+                  {videoInfo?.has_video && (
+                    <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 border-green-200">有视频</Badge>
+                  )}
                 </div>
               </div>
 
@@ -375,23 +407,68 @@ export default function KnowledgeBasePage() {
                   <Loader2 className="h-6 w-6 animate-spin text-red-500" />
                 </div>
               ) : (
-                <div className="p-4 space-y-3">
-                  {selectedDoc.segments?.map((seg, idx) => (
-                    <div key={idx} className="p-3 rounded-lg border border-gray-100 hover:border-red-200 transition-colors">
-                      <div className="flex items-center justify-between mb-1">
-                        <h4 className="text-sm font-medium text-red-600">{seg.title}</h4>
-                        {seg.time && (
-                          <span className="text-xs text-gray-400 flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {seg.time}
-                          </span>
-                        )}
+                <div className="p-4">
+                  {/* 视频播放区域 */}
+                  {videoInfo?.has_video && videoInfo.video_url && (
+                    <div className="mb-4">
+                      <div className="flex gap-2 mb-3">
+                        <Button
+                          size="sm"
+                          variant={videoMode === 'video' ? 'default' : 'outline'}
+                          className={`text-xs h-8 ${videoMode === 'video' ? 'bg-red-600 hover:bg-red-700' : ''}`}
+                          onClick={() => setVideoMode('video')}
+                        >
+                          <Video className="h-3 w-3 mr-1" />
+                          视频播放
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={videoMode === 'text' ? 'default' : 'outline'}
+                          className={`text-xs h-8 ${videoMode === 'text' ? 'bg-red-600 hover:bg-red-700' : ''}`}
+                          onClick={() => setVideoMode('text')}
+                        >
+                          <FileTextIcon className="h-3 w-3 mr-1" />
+                          文本内容
+                        </Button>
                       </div>
-                      <p className="text-xs text-gray-600 line-clamp-4 leading-relaxed">
-                        {seg.content}
-                      </p>
+
+                      {videoMode === 'video' && (
+                        <div className="border rounded-lg overflow-hidden bg-black">
+                          <video
+                            ref={videoRef}
+                            src={videoInfo.video_url}
+                            className="w-full"
+                            controls
+                            preload="metadata"
+                            playsInline
+                            onError={() => console.error('视频加载失败')}
+                          />
+                        </div>
+                      )}
                     </div>
-                  ))}
+                  )}
+
+                  {/* 文本内容区域 */}
+                  {(videoMode === 'text' || !videoInfo?.has_video) && (
+                    <div className="space-y-3">
+                      {selectedDoc.segments?.map((seg, idx) => (
+                        <div key={idx} className="p-3 rounded-lg border border-gray-100 hover:border-red-200 transition-colors">
+                          <div className="flex items-center justify-between mb-1">
+                            <h4 className="text-sm font-medium text-red-600">{seg.title}</h4>
+                            {seg.time && (
+                              <span className="text-xs text-gray-400 flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {seg.time}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-600 line-clamp-4 leading-relaxed">
+                            {seg.content}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
