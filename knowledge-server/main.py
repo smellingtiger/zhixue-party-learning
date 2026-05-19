@@ -13,7 +13,7 @@ from datetime import datetime
 
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 import uvicorn
 
 KNOWLEDGE_BASE_DIR = Path(r"E:\社院课程stt\knowledge_base_txt")
@@ -21,6 +21,7 @@ PROCESSED_DIR = Path(r"E:\社院课程stt\knowledge_base_processed")
 TITLES_DIR = Path(r"E:\社院课程stt\knowledge_base_titles")
 CLASSIFICATION_FILE = Path(r"E:\社院课程stt\classification_result.json")
 COURSE_NAME_MAPPING_FILE = Path(r"d:\TraeProject\zhixue-party-learning\knowledge-server\course_name_mapping.json")
+NAS_MAPPING_FILE = Path(r"d:\TraeProject\zhixue-party-learning\knowledge-server\course_nas_mapping.json")
 SERVER_HOST = "0.0.0.0"
 SERVER_PORT = 8080
 SERVER_TITLE = "智学知识库"
@@ -54,6 +55,25 @@ def load_course_name_mapping():
             _course_name_mapping_cache = {}
     return _course_name_mapping_cache
 
+# 加载NAS视频映射
+_nas_mapping_cache = None
+def load_nas_mapping():
+    global _nas_mapping_cache
+    if _nas_mapping_cache is None:
+        if NAS_MAPPING_FILE.exists():
+            try:
+                data = json.loads(NAS_MAPPING_FILE.read_text(encoding="utf-8"))
+                # 按course_code建立索引
+                _nas_mapping_cache = {}
+                for item in data.get("matched", []):
+                    _nas_mapping_cache[item["course_code"]] = item
+                print(f"已加载 {len(_nas_mapping_cache)} 个课程的NAS视频映射")
+            except:
+                _nas_mapping_cache = {}
+        else:
+            _nas_mapping_cache = {}
+    return _nas_mapping_cache
+
 app = FastAPI(title=SERVER_TITLE, version="1.0.0")
 
 app.add_middleware(
@@ -72,6 +92,22 @@ class CourseDoc:
         self.id = str(uuid.uuid5(uuid.NAMESPACE_DNS, str(filepath)))
         self._parsed = None
         self._processed = None
+        self._raw_code = None
+
+    def get_course_code(self) -> str:
+        if self._raw_code is not None:
+            return self._raw_code
+        try:
+            text = self.filepath.read_text(encoding="utf-8")
+            for line in text.split("\n")[:6]:
+                m = re.search(r"【课程名称】(.+)", line)
+                if m:
+                    self._raw_code = m.group(1).strip()
+                    return self._raw_code
+        except Exception:
+            pass
+        self._raw_code = self.filepath.stem
+        return self._raw_code
 
     def _load_processed(self) -> Optional[dict]:
         """尝试加载已处理的JSON文件（包含清洗+分段+标题）"""
@@ -410,6 +446,76 @@ async def get_doc_detail(doc_id: str):
     return doc.to_detail()
 
 
+@app.get("/api/files/{doc_id}/video")
+async def get_doc_video(doc_id: str):
+    doc = get_doc_by_id(doc_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="文档不存在")
+    
+    # 获取课程编码
+    course_code = doc.get_course_code()
+    
+    nas_mapping = load_nas_mapping()
+    if course_code in nas_mapping:
+        item = nas_mapping[course_code]
+        return {
+            "has_video": True,
+            "course_code": course_code,
+            "chinese_name": item["chinese_name"],
+            "video_filename": item["video_filename"],
+            "video_url": f"/api/video/{course_code}",
+            "nas_path": item["nas_path"],
+        }
+    return {"has_video": False, "course_code": course_code}
+
+
+@app.get("/api/video/{course_code}")
+async def stream_video(course_code: str):
+    """代理NAS视频流"""
+    nas_mapping = load_nas_mapping()
+    if course_code not in nas_mapping:
+        raise HTTPException(status_code=404, detail="视频不存在")
+    
+    item = nas_mapping[course_code]
+    video_path = Path(item["nas_path"])
+    
+    if not video_path.exists():
+        raise HTTPException(status_code=404, detail="视频文件不存在")
+    
+    return FileResponse(
+        str(video_path),
+        media_type="video/mp4",
+        filename=item["video_filename"],
+        headers={"Accept-Ranges": "bytes"},
+    )
+
+
+@app.get("/api/video/{course_code}/info")
+async def get_video_info(course_code: str):
+    """获取视频信息（不返回文件）"""
+    nas_mapping = load_nas_mapping()
+    if course_code not in nas_mapping:
+        raise HTTPException(status_code=404, detail="视频不存在")
+    
+    item = nas_mapping[course_code]
+    video_path = Path(item["nas_path"])
+    
+    if not video_path.exists():
+        raise HTTPException(status_code=404, detail="视频文件不存在")
+    
+    file_size = video_path.stat().st_size
+    content_type, _ = mimetypes.guess_type(str(video_path))
+    
+    return {
+        "course_code": course_code,
+        "chinese_name": item["chinese_name"],
+        "video_filename": item["video_filename"],
+        "file_size": file_size,
+        "file_size_display": f"{file_size / 1024 / 1024:.1f} MB",
+        "content_type": content_type or "video/mp4",
+    }
+
+
 @app.get("/api/info")
 async def server_info():
     docs = scan_all_docs()
@@ -509,6 +615,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Serif SC',san
 #_scroll{position:fixed;bottom:80px;right:24px;width:40px;height:40px;border-radius:50%;background:var(--primary);color:#fff;border:none;cursor:pointer;box-shadow:0 2px 8px rgba(220,38,38,0.3);display:none;align-items:center;justify-content:center;font-size:20px;z-index:50}
 #_scroll.show{display:flex}
 .para-stat{font-size:13px;color:var(--text-muted);background:var(--bg);padding:4px 10px;border-radius:6px;display:inline-block}
+.video-container{margin-bottom:20px;border-radius:8px;overflow:hidden;background:#000}
+.video-container video{width:100%;max-height:400px;display:block}
+.video-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--primary);border-radius:8px;margin-bottom:16px;cursor:pointer;transition:.15s}
+.video-bar:hover{background:var(--primary-hover)}
+.video-bar-icon{font-size:18px}
+.video-bar-text{color:#fff;font-size:14px;font-weight:500}
+.video-bar-size{margin-left:auto;color:rgba(255,255,255,0.8);font-size:12px}
+.video-toggle{display:flex;gap:6px;margin-bottom:12px}
+.video-toggle button{padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:none;font-size:12px;cursor:pointer;transition:.15s;color:var(--text-muted)}
+.video-toggle button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
 ::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
 @media(max-width:768px){.sidebar{width:100%;max-height:200px;border-right:none;border-bottom:1px solid var(--border)}.main-container{flex-direction:column}.search-box input{width:120px}.header-subtitle,.server-info{display:none}}
@@ -568,7 +684,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Serif SC',san
 <div class="toast" id="toast"></div>
 
 <script>
-let curCat='', curSort='title', curSearch='', curId=null, allFiles=[], totalAll=565;
+let curCat='', curSort='title', curSearch='', curId=null, allFiles=[], totalAll=565, curVideoMode='video';
 
 function init(){
   document.getElementById('serverAddr').textContent=window.location.host;
@@ -688,6 +804,69 @@ async function openFile(id){
     var cat=d.category||'未分类';
     document.getElementById('contentMeta').innerHTML='<span>'+cat+'</span><span>'+d.size_display+'</span><span>'+d.segments.length+' 个段落</span><span class="para-stat">段落数:'+d.paragraph_count+'</span>';
     var html='';
+    
+    // 检查是否有视频
+     try{
+       var vr=await fetch('/api/files/'+id+'/video');
+       if(vr.ok){
+         var vd=await vr.json();
+         if(vd.has_video){
+           html+='<div class="video-toggle">'+
+             '<button class="active" id="btnVideo" onclick="switchVideoMode(\'video\',this)">视频播放</button>'+
+             '<button id="btnText" onclick="switchVideoMode(\'text\',this)">文本内容</button>'+
+           '</div>';
+           html+='<div id="videoSection"><div class="video-container" id="videoContainer"></div></div>';
+           html+='<div id="textSection" style="display:none">';
+           d.segments.forEach(function(seg){
+             html+='<div class="segment-card">'+
+               '<div class="segment-title">'+esc(seg.title)+'</div>'+
+               (seg.time?'<div class="segment-time">&#x23F1; '+seg.time+'</div>':'')+
+               '<div class="segment-content">'+esc(seg.content)+'</div>'+
+             '</div>';
+           });
+           html+='</div>';
+           document.getElementById('contentBody').innerHTML=html;
+           document.getElementById('contentBody').scrollTo({top:0,behavior:'smooth'});
+           // 使用JavaScript动态创建video元素
+           setTimeout(function(){
+             var container=document.getElementById('videoContainer');
+             if(container){
+               var video=document.createElement('video');
+               video.id='courseVideo';
+               video.controls=true;
+               video.preload='auto';
+               video.playsInline=true;
+               video.style.width='100%';
+               video.style.maxHeight='500px';
+               video.style.backgroundColor='#000';
+               var source=document.createElement('source');
+               source.src=vd.video_url;
+               source.type='video/mp4';
+               video.appendChild(source);
+               var fallback=document.createTextNode('您的浏览器不支持视频播放');
+               video.appendChild(fallback);
+               container.appendChild(video);
+               video.addEventListener('error',function(e){
+                 console.error('视频加载错误:',e);
+                 console.error('视频URL:',vd.video_url);
+                 showToast('视频加载失败');
+               });
+               video.addEventListener('canplay',function(){
+                 console.log('视频可以播放');
+               });
+               video.addEventListener('loadedmetadata',function(){
+                 console.log('视频元数据加载完成, 时长:',video.duration);
+               });
+               video.load();
+             }
+           },50);
+           return;
+         }
+       }
+     }catch(ve){
+       console.error('视频信息加载失败:',ve);
+     }
+    
     d.segments.forEach(function(seg){
       html+='<div class="segment-card">'+
         '<div class="segment-title">'+esc(seg.title)+'</div>'+
@@ -700,6 +879,25 @@ async function openFile(id){
   }catch(e){
     showToast('打开失败');
     document.getElementById('contentTitle').textContent='打开失败';
+  }
+}
+
+function switchVideoMode(mode, btn){
+  curVideoMode=mode;
+  var btns=document.querySelectorAll('.video-toggle button');
+  btns.forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  
+  var vs=document.getElementById('videoSection');
+  var ts=document.getElementById('textSection');
+  if(vs&&ts){
+    if(mode==='video'){
+      vs.style.display='block';
+      ts.style.display='none';
+    }else{
+      vs.style.display='none';
+      ts.style.display='block';
+    }
   }
 }
 
@@ -743,6 +941,10 @@ if __name__ == "__main__":
     
     # 预加载分类缓存
     load_new_categories()
+    
+    # 预加载NAS视频映射
+    nas_map = load_nas_mapping()
+    nas_count = len(nas_map)
 
     docs = scan_all_docs()
     cats, cnts = get_categories(docs)
@@ -754,6 +956,7 @@ if __name__ == "__main__":
         print(f"    [{c}] {cnts[c]} 个课程")
     print(f"\n  总段落数: {total_paras}")
     print(f"  已处理课程: {processed_count}/{len(docs)}")
+    print(f"  可用视频: {nas_count}/{len(docs)}")
     print(f"\n{separator}\n")
 
     uvicorn.run(app, host=SERVER_HOST, port=SERVER_PORT, log_level="info")
