@@ -1,144 +1,224 @@
 import { KnowledgeNode, LearningPath, DiagnosticOption, CourseInfo, RequirementAnalysis } from './types';
-import { getVideoPath } from './video-mapping';
 
-// 辅助函数：创建带视频路径的课程对象
 function createCourse(id: string, title: string, duration: number): CourseInfo {
-  return {
-    id,
-    title,
-    duration,
-    videoPath: getVideoPath(id),
-  };
+  return { id, title, duration };
 }
 
-// 模拟课程数据 - 与知识图谱节点对应的真实课程
-// 课程来源：社院课程资源库（政治理论、统战理论）
-let courseDatabase: Record<string, CourseInfo[]> = {
-  // ========== 党建基础理论 ==========
-  'party-constitution': [
-    createCourse('1283', '中国共产党章程总纲精讲', 45),
-    createCourse('1284', '中国共产党章程条文解读（党员权利义务）', 38),
-    createCourse('1285', '中国共产党章程组织制度与纪律', 52),
-    createCourse('1286', '党章修正案解读（上）', 40),
-    createCourse('1287', '习近平总书记在浙江的探索与实践', 42),
-  ],
-  'party-history': [
-    createCourse('1288', '中国共产党简史（上）—— 新民主主义革命时期', 55),
-    createCourse('1289', '中国共产党简史（中）—— 社会主义革命和建设时期', 50),
-    createCourse('1290', '中国共产党简史（下）—— 改革开放和社会主义现代化建设新时期', 48),
-    createCourse('1291', '百年党史重大事件回顾', 42),
-    createCourse('1292', '中国道路与中国梦', 46),
-    createCourse('1293', '不忘初心继续前进', 44),
-  ],
-  'party-theory': [
-    createCourse('1294', '马克思主义中国化时代化的理论逻辑', 48),
-    createCourse('1295', '毛泽东思想概论', 52),
-    createCourse('1296', '邓小平理论专题', 44),
-    createCourse('1297', '习近平新时代中国特色社会主义思想概论', 55),
-    createCourse('1298', '两步走战略准确把握开启全面建设社会主义现代化国家新征程', 48),
-    createCourse('1299', '新发展理念创新发展专题', 42),
-    createCourse('1300', '新发展理念绿色发展建设美丽中国', 45),
-  ],
-  // ========== 二十大精神学习 ==========
-  '20th-report': [
-    createCourse('1050', '党的二十大精神导读（上）', 55),
-    createCourse('1092', '党的二十大精神导读（中）', 50),
-    createCourse('1091', '党的二十大精神导读（下）', 48),
-    createCourse('1090', '新时代新征程中国共产党的使命任务', 42),
-    createCourse('1089', '党和国家历史上具有深远意义的伟大转折', 40),
-  ],
-  // ========== 中国式现代化 ==========
-  'chinese-modernization': [
-    createCourse('1301', '党的十九届五中全会关于2035年远景目标的战略构想（上）', 45),
-    createCourse('1302', '深入学习贯彻党的十九届五中全会精神，开启全面建设社会主义现代化国家新征程（下）', 38),
-    createCourse('1303', '深入学习贯彻党的十九届五中全会精神，开启全面建设社会主义现代化国家新征程（上）', 42),
-    createCourse('1304', '夺取全面建设社会主义现代化强国新胜利——深入学习党的十九届五中全会精神（下）', 50),
-    createCourse('1305', '夺取全面建设社会主义现代化强国新胜利——深入学习党的十九届五中全会精神（上）', 48),
-    createCourse('1306', '中国式现代化的中国特色和本质要求', 45),
-    createCourse('1307', '大统战系列之六：统一战线的一致性与多样性', 42),
-    createCourse('1308', '大统战系列之七：坚持大统战工作格局的着力重点', 40),
-    createCourse('1309', '大统战系列之八：用协商凝聚共识凝聚智慧凝聚力量', 48),
-  ],
-  // ========== 全面从严治党 ==========
-  'comprehensive-strict-governance': [
-    createCourse('1310', '大统战系列之九：凝聚共识需要把握好哪些关系', 48),
-    createCourse('1311', '大统战系列之十：中国新型政党制度', 44),
-    createCourse('1312', '大统战系列之十一：中国新型政党制度的理论渊源', 40),
-    createCourse('1313', '大统战系列之十二：中国新型政党制度的主要特征', 52),
-    createCourse('1314', '大统战系列之十三：中国新型政党制度的文化根基', 48),
-    createCourse('1315', '大统战系列之十四：中国新型政党制度的世界意义', 46),
-    createCourse('1316', '大统战系列之十五：党外知识分子的身份类型与特征', 42),
-    createCourse('1317', '大统战系列之十六：如何做好党外知识分子工作', 40),
-  ],
-  // ========== 基层党务工作 ==========
-  'membership-development': [
-    createCourse('1318', '大统战系列之十七：为何要重视高校党外知识分子工作', 45),
-    createCourse('1319', '大统战系列之十八：党外知识分子联谊会', 42),
-    createCourse('1320', '大统战系列之十九：新媒体环境下统战工作面临的机遇和挑战', 40),
-    createCourse('1321', '大统战系列之二十：如何做好新媒体环境下的统战工作', 38),
-  ],
-  'party-life': [
-    createCourse('1145', '从疫情蔓延看人类命运共同体的构建（上）', 45),
-    createCourse('1144', '从疫情蔓延看人类命运共同体的构建（中）', 42),
-    createCourse('1143', '从疫情蔓延看人类命运共同体的构建（下）', 40),
-  ],
-  'mass-work': [
-    createCourse('1322', '意识形态工作如何凝民心聚共识——习近平总书记关于意识形态工作重要讲话精神解读（上）', 45),
-    createCourse('1323', '坚持和发展中国特色社会主义宗教理论', 48),
-    createCourse('1324', '新时代群众工作方法与实践', 40),
-    createCourse('1139', '推动协商民主多层发展', 42),
-    createCourse('1132', '推动协商民主广泛发展', 44),
-    createCourse('1131', '协商民主的制度化发展与党的领导', 40),
-  ],
-  // ========== 乡村振兴战略 ==========
-  'rural-policy': [
-    createCourse('1328', '乡村振兴战略总体要求解读', 45),
-    createCourse('1329', '产业兴旺乡村振兴的核心动力', 42),
-    createCourse('1330', '生态宜居与乡风文明建设', 38),
-    createCourse('1331', '打好精准脱贫攻坚战', 40),
-    createCourse('1332', '精准扶贫与我国扶贫治理体系的完善', 44),
-    createCourse('1333', '精准扶贫的理论在中国的实践', 42),
-  ],
-  'rural-governance': [
-    createCourse('1334', '党建引领乡村治理新模式', 44),
-    createCourse('1335', '村民自治制度完善与实践', 40),
-    createCourse('1336', '法治乡村与德治乡村建设', 42),
-  ],
-  // ========== 党风廉政建设 ==========
-  'integrity-education': [
-    createCourse('1337', '全面从严治党的基本功——思想建党制度治党', 46),
-    createCourse('1338', '把权力关进制度的笼子里——反腐败体制机制建设', 48),
-    createCourse('1339', '十八大以来党风廉政建设和反腐败工作创新', 44),
-    createCourse('1340', '中国共产党纪律处分条例解读', 50),
-    createCourse('1341', '新时代廉洁自律准则学习', 35),
-  ],
-  'supervision-system': [
-    createCourse('1342', '党内监督体系与实施', 48),
-    createCourse('1343', '国家监察体制改革解读', 44),
-    createCourse('1344', '坚持和完善党和国家监督体系', 46),
-    createCourse('1345', '民主监督与审计监督实践', 42),
-  ],
+const filenameNodeMapping: Record<string, string[]> = {
+  // ===== 党章学习 =====
+  '党章': ['party-constitution'], '章程': ['party-constitution'],
+  '修养': ['party-constitution'], '党性': ['party-constitution'],
+  '党员权利': ['party-constitution'], '党员义务': ['party-constitution'],
+  '入党誓词': ['party-constitution'], '组织制度': ['party-constitution'],
+  '修身': ['party-constitution'], '官德': ['party-constitution'],
+
+  // ===== 党史学习 =====
+  '党史': ['party-history'], '百年': ['party-history'],
+  '革命': ['party-history'], '建国': ['party-history'],
+  '红军': ['party-history'], '抗战': ['party-history'],
+  '长征': ['party-history'], '抗美援朝': ['party-history'],
+  '改革开放': ['party-history'], '新中国': ['party-history'],
+  '党的历史': ['party-history'], '党的建设': ['party-history'],
+  '十一届三中全会': ['party-history'], '六中全会': ['party-history'],
+  '建党': ['party-history'], '百年奋斗': ['party-history'],
+
+  // ===== 党的创新理论 =====
+  '习近平': ['party-theory'], '新时代': ['party-theory'],
+  '马克思主义': ['party-theory'], '思想': ['party-theory'],
+  '中国特色': ['party-theory'], '治国理政': ['party-theory'],
+  '党的十九大': ['party-theory'], '十九大精神': ['party-theory'],
+  '理论': ['party-theory'], '政治理论': ['party-theory'],
+  '生态文明': ['party-theory'], '生态': ['party-theory'],
+  '两山': ['party-theory'], '治理体系': ['party-theory'],
+  '领导干部': ['party-theory'], '中青班': ['party-theory'],
+
+  // ===== 二十大报告解读 =====
+  '二十大': ['20th-report'], '二十大精神': ['20th-report'],
+  '报告解读': ['20th-report'], '大会精神': ['20th-report'],
+  '全会精神': ['20th-report'], '五中全会': ['20th-report'],
+  '党的十九届六中全会': ['20th-report'], '全会公报': ['20th-report'],
+
+  // ===== 中国式现代化 =====
+  '现代化': ['chinese-modernization'], '现代化强国': ['chinese-modernization'],
+  '新征程': ['chinese-modernization'], '共同富裕': ['chinese-modernization'],
+  '高质量发展': ['chinese-modernization'], '治理效能': ['chinese-modernization'],
+  '制度优势': ['chinese-modernization'],
+  '十四五': ['chinese-modernization'], '2035': ['chinese-modernization'],
+
+  // ===== 全面从严治党 =====
+  '从严治党': ['comprehensive-strict-governance'], '自我革命': ['comprehensive-strict-governance'],
+  '政治建设': ['comprehensive-strict-governance'], '四个全面': ['comprehensive-strict-governance'],
+  '伟大工程': ['comprehensive-strict-governance'],
+  '治党': ['comprehensive-strict-governance'], '问责': ['comprehensive-strict-governance'],
+  '政治过硬': ['comprehensive-strict-governance'], '本领高强': ['comprehensive-strict-governance'],
+
+  // ===== 发展党员工作 =====
+  '发展党员': ['membership-development'], '入党': ['membership-development'],
+  '积极分子': ['membership-development'], '预备党员': ['membership-development'],
+  '党员发展': ['membership-development'],
+
+  // ===== 党的组织生活 =====
+  '组织生活': ['party-life'], '三会一课': ['party-life'],
+  '支部': ['party-life'], '主题党日': ['party-life'],
+  '党课': ['party-life'], '基层组织': ['party-life'],
+  '基层党建': ['party-life'], '党支部': ['party-life'],
+
+  // ===== 群众工作方法 =====
+  '群众': ['mass-work'], '信访': ['mass-work'],
+  '矛盾': ['mass-work'], '调解': ['mass-work'],
+  '统战': ['mass-work', 'membership-development'], '统战理论': ['mass-work', 'membership-development'],
+  '民族': ['mass-work'], '宗教': ['mass-work'],
+  '意识形态': ['mass-work', 'party-theory'], '民心': ['mass-work'],
+  '协商': ['mass-work'], '民主': ['mass-work'],
+
+  // ===== 乡村振兴政策 =====
+  '乡村': ['rural-policy', 'rural-governance'], '振兴': ['rural-policy', 'rural-governance'],
+  '三农': ['rural-policy'], '农村': ['rural-policy'],
+  '农业': ['rural-policy'], '农民': ['rural-policy'],
+  '脱贫': ['rural-policy'], '扶贫': ['rural-policy'],
+  '小康': ['rural-policy'], '精准脱贫': ['rural-policy'],
+
+  // ===== 乡村治理现代化 =====
+  '乡村治理': ['rural-governance'], '基层治理': ['rural-governance', 'party-life'],
+  '社区': ['rural-governance'], '社会治理': ['rural-governance'],
+  '法治乡村': ['rural-governance'], '德治': ['rural-governance'],
+  '自治': ['rural-governance'],
+
+  // ===== 廉政教育 =====
+  '廉政': ['integrity-education'], '廉洁': ['integrity-education'],
+  '反腐': ['integrity-education', 'supervision-system'],
+  '八项规定': ['integrity-education'], '作风': ['integrity-education'],
+  '纪律处分': ['integrity-education'], '四风': ['integrity-education'],
+  '警示教育': ['integrity-education'],
+
+  // ===== 监督执纪体系 =====
+  '监督': ['supervision-system'], '监察': ['supervision-system'],
+  '审计': ['supervision-system'], '巡视': ['supervision-system'],
+  '纪律': ['supervision-system', 'integrity-education'],
+
+  // ===== 综合/交叉 =====
+  '经济': ['chinese-modernization', 'rural-policy'],
+  '抗疫': ['chinese-modernization', 'party-life'],
+  '疫情': ['chinese-modernization', 'party-life'],
+  '科技': ['chinese-modernization'], '创新': ['chinese-modernization'],
+  '法治': ['supervision-system'], '法律': ['supervision-system'],
+  '教育': ['party-life'], '干部': ['party-theory', 'party-life'],
+  '制度': ['comprehensive-strict-governance', 'supervision-system'],
+  '数字化': ['chinese-modernization'], '大数据': ['chinese-modernization'],
+  '安全': ['party-life', 'supervision-system'],
+  '应急': ['party-life'], '灾害': ['party-life'],
+  '国际': ['chinese-modernization'], '外交': ['chinese-modernization'],
 };
 
-/**
- * 从知识库加载课程数据，替换硬编码的课程数据库
- * @param courses 按节点ID组织的课程映射
- */
+function matchFilenameToNodes(filename: string): string[] {
+  const matched = new Set<string>();
+  const clean = filename.replace(/\.txt$/, '').replace(/[（(][一二三四五六七八九十上中下\d]+[）)]/g, '');
+  for (const [keyword, nodeIds] of Object.entries(filenameNodeMapping)) {
+    if (clean.includes(keyword)) {
+      nodeIds.forEach(n => matched.add(n));
+    }
+  }
+  if (matched.size === 0) matched.add('party-constitution');
+  return Array.from(matched);
+}
+
+const categoryToNodeMap: Record<string, string[]> = {
+  '政治理论': ['party-theory', 'party-constitution', '20th-report', 'party-history', 'chinese-modernization', 'comprehensive-strict-governance'],
+  '国家治理': ['grassroots-party-work', 'rural-policy', 'rural-governance', 'party-life', 'supervision-system', 'integrity-education', 'chinese-modernization'],
+  '统战理论': ['mass-work', 'membership-development', 'party-life', 'party-constitution'],
+};
+
+function matchCategoryToNodes(category: string): string[] {
+  return categoryToNodeMap[category] || ['party-constitution'];
+}
+
+export interface KnowledgeBaseApiDoc {
+  id: string;
+  title: string;
+  category: string;
+  paragraphCount: number;
+  fileName: string;
+}
+
+let courseDatabase: Record<string, CourseInfo[]> = {};
+
+export async function fetchKnowledgeBaseCourses(
+  apiBase?: string
+): Promise<{ courses: Record<string, CourseInfo[]>; docs: KnowledgeBaseApiDoc[]; categoryCounts: Record<string, number> }> {
+  try {
+    const baseUrl = apiBase || '/api/knowledge-base';
+    const url = `${baseUrl}?pageSize=600`;
+
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`API responded with ${res.status}`);
+
+    const data = await res.json();
+    const docs: KnowledgeBaseApiDoc[] = (data.docs || []).filter(
+      (d: KnowledgeBaseApiDoc) => d.id && d.title
+    );
+
+    console.log(`[知识库API] 获取到 ${docs.length} 份文档, 分类: ${JSON.stringify(data.categoryCounts || {})}`);
+
+    const courses: Record<string, CourseInfo[]> = {};
+
+    for (const doc of docs) {
+      const categoryNodes = matchCategoryToNodes(doc.category);
+      const filenameNodes = matchFilenameToNodes(doc.fileName);
+      const allNodeIds = Array.from(new Set([...categoryNodes, ...filenameNodes]));
+      const estimatedDuration = doc.paragraphCount ? Math.max(15, doc.paragraphCount * 3) : 30;
+
+      for (const nodeId of allNodeIds) {
+        if (!courses[nodeId]) courses[nodeId] = [];
+        if (!courses[nodeId].some(c => c.id === doc.id)) {
+          courses[nodeId].push(createCourse(doc.id, doc.fileName.replace(/\.txt$/, ''), estimatedDuration));
+        }
+      }
+    }
+
+    setKnowledgeBaseCourses(courses);
+    return { courses, docs, categoryCounts: data.categoryCounts || {} };
+  } catch (error) {
+    console.warn('知识库API获取失败:', error);
+    return { courses: courseDatabase, docs: [], categoryCounts: {} };
+  }
+}
+
 export function setKnowledgeBaseCourses(courses: Record<string, CourseInfo[]>) {
-  courseDatabase = courses;
+  courseDatabase = {};
+  for (const [nodeId, courseList] of Object.entries(courses)) {
+    courseDatabase[nodeId] = [...courseList];
+  }
+  rebuildKeywordIndex();
 }
 
-/**
- * 重置为默认的硬编码课程数据
- */
 export function resetKnowledgeBaseCourses() {
-  // 重新加载默认数据
+  courseDatabase = {};
+  rebuildKeywordIndex();
 }
 
-/**
- * 获取注入当前课程数据库的知识图谱（动态版）
- * 与静态 partyKnowledgeGraph 不同，此函数每次调用都会重新注入课程
- */
+let knowledgeBaseKeywordIndex = new Map<string, string[]>();
+
+function rebuildKeywordIndex() {
+  const index = new Map<string, string[]>();
+  for (const [nodeId, courses] of Object.entries(courseDatabase)) {
+    for (const course of courses) {
+      const clean = course.title.replace(/[《》（）【】\s]/g, '');
+      const words = clean.split(/[，。、：；！？,.!:;?]+/);
+      for (const word of words) {
+        if (word.length >= 2 && word.length <= 12) {
+          const existing = index.get(word);
+          if (existing) {
+            if (!existing.includes(nodeId)) existing.push(nodeId);
+          } else {
+            index.set(word, [nodeId]);
+          }
+        }
+      }
+    }
+  }
+  knowledgeBaseKeywordIndex = index;
+}
+
 export function getPartyKnowledgeGraph(): KnowledgeNode {
   return injectCoursesRecursive(partyKnowledgeGraph);
 }
@@ -814,6 +894,20 @@ const requirementKeywords: Record<string, { topics: string[]; nodes: string[] }>
   '信访': { topics: ['基层治理实务', '法律法规与依法行政'], nodes: ['mass-work'] },
   '民生': { topics: ['基层治理实务', '乡村振兴与区域发展'], nodes: ['mass-work', 'rural-policy'] },
   '服务': { topics: ['基层治理实务', '行政管理能力'], nodes: ['mass-work', 'party-life'] },
+  '统战': { topics: ['政策理论学习', '行政管理能力'], nodes: ['party-life', 'membership-development', 'party-constitution'] },
+  '协商民主': { topics: ['政策理论学习', '行政管理能力'], nodes: ['party-life', 'party-constitution'] },
+  '新型政党': { topics: ['政策理论学习'], nodes: ['party-theory', 'party-constitution'] },
+  '意识形态': { topics: ['政策理论学习', '公文写作与表达能力'], nodes: ['mass-work', 'party-theory'] },
+  '国家安全': { topics: ['政策理论学习', '法律法规与依法行政'], nodes: ['supervision-system'] },
+  '培训班': { topics: ['行政管理能力', '基层治理实务'], nodes: ['party-life', 'grassroots-party-work'] },
+  '参政议政': { topics: ['政策理论学习'], nodes: ['party-life', 'party-theory'] },
+  '生态文明': { topics: ['政策理论学习', '乡村振兴与区域发展'], nodes: ['party-theory', 'rural-policy'] },
+  '共同富裕': { topics: ['乡村振兴与区域发展', '政策理论学习'], nodes: ['rural-policy', 'chinese-modernization'] },
+  '脱贫攻坚': { topics: ['乡村振兴与区域发展'], nodes: ['rural-policy'] },
+  '扫黑除恶': { topics: ['基层治理实务', '法律法规与依法行政'], nodes: ['party-life', 'supervision-system'] },
+  '疫情防控': { topics: ['行政管理能力', '基层治理实务'], nodes: ['party-life'] },
+  '干部教育': { topics: ['行政管理能力', '政策理论学习'], nodes: ['party-life', 'party-theory'] },
+  '党员领导': { topics: ['行政管理能力'], nodes: ['party-life'] },
 };
 
 // 分析用户文本需求，匹配知识图谱节点和主题
@@ -830,7 +924,14 @@ export function analyzeRequirements(text: string): RequirementAnalysis {
     }
   }
 
-  // 根据关键词数量推测学习深度
+  // 同时搜索知识库课程标题关键词
+  for (const [word, nodeIds] of knowledgeBaseKeywordIndex) {
+    if (word.length >= 3 && text.includes(word)) {
+      keywords.push(word);
+      nodeIds.forEach(n => matchedNodes.add(n));
+    }
+  }
+
   const suggestedLevel: 'beginner' | 'intermediate' | 'advanced' =
     keywords.length <= 1 ? 'beginner' : keywords.length <= 3 ? 'intermediate' : 'advanced';
 
@@ -840,6 +941,36 @@ export function analyzeRequirements(text: string): RequirementAnalysis {
     matchedNodes: Array.from(matchedNodes),
     suggestedLevel,
   };
+}
+
+export interface KnowledgeBaseNodeSummary {
+  nodeId: string;
+  nodeName: string;
+  courseCount: number;
+  totalDuration: number;
+}
+
+export function getKnowledgeBaseCoverage(): KnowledgeBaseNodeSummary[] {
+  const nodeNameMap: Record<string, string> = {};
+  function collectNames(node: KnowledgeNode) {
+    nodeNameMap[node.id] = node.name;
+    if (node.children) node.children.forEach(collectNames);
+  }
+  collectNames(partyKnowledgeGraph);
+
+  const summaries: KnowledgeBaseNodeSummary[] = [];
+
+  for (const [nodeId, courses] of Object.entries(courseDatabase)) {
+    const totalDuration = courses.reduce((sum, c) => sum + c.duration, 0);
+    summaries.push({
+      nodeId,
+      nodeName: nodeNameMap[nodeId] || nodeId,
+      courseCount: courses.length,
+      totalDuration,
+    });
+  }
+
+  return summaries.sort((a, b) => b.courseCount - a.courseCount);
 }
 
 // 生成学习路径（level 仅用于元数据显示，不做节点过滤）

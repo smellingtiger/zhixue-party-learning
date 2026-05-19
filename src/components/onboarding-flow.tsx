@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import MindMap from '@/components/mind-map';
 import { DiagnosticSurvey } from '@/components/diagnostic-survey';
 import { AIIntentChat } from '@/components/ai-intent-chat';
-import { partyKnowledgeGraph, generateLearningPath, roleNodeMap, topicNodeMap, getNodeById, getDifficultyLockedNodeIds, setKnowledgeBaseCourses, injectCoursesRecursive } from '@/lib/knowledge-graph';
+import { partyKnowledgeGraph, generateLearningPath, roleNodeMap, topicNodeMap, getNodeById, getDifficultyLockedNodeIds, injectCoursesRecursive, fetchKnowledgeBaseCourses } from '@/lib/knowledge-graph';
 import { LearningPath, KnowledgeNode, LearningProgress } from '@/lib/types';
 import {
   BrainCircuit,
@@ -161,19 +161,15 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     }
   }, []);
 
-  // 从知识库加载课程数据，替换硬编码课程
+  // 从知识库API加载课程数据，替换离线课程映射
   useEffect(() => {
-    fetch('/api/knowledge-graph-courses')
-      .then(res => res.json())
-      .then(data => {
-        if (data.courses) {
-          setKnowledgeBaseCourses(data.courses);
-          setKnowledgeBaseGraph(injectCoursesRecursive(partyKnowledgeGraph));
-          console.log(`[知识库] 已加载 ${data.totalKnowledgeBaseCourses} 门课程到知识图谱`);
-        }
+    fetchKnowledgeBaseCourses()
+      .then(({ courses }) => {
+        setKnowledgeBaseGraph(injectCoursesRecursive(partyKnowledgeGraph));
+        console.log(`[知识库] 已从API加载课程数据到知识图谱`);
       })
       .catch(err => {
-        console.warn('[知识库] 加载知识图谱课程失败，使用默认课程数据:', err);
+        console.warn('[知识库] API加载失败，使用离线课程数据:', err);
       });
   }, []);
 
@@ -225,9 +221,11 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     }
   };
 
-  const handlePathGenerated = (roles: string[], topics: string[], difficulty: string, customRequirements: string) => {
+  const handlePathGenerated = async (roles: string[], topics: string[], difficulty: string, customRequirements: string) => {
     setDiagnosticRoles(roles);
     setDiagnosticTopics(topics);
+
+    await fetchKnowledgeBaseCourses();
 
     const path = generateLearningPath({
       roles,
