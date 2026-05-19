@@ -343,30 +343,22 @@ export default function KnowledgeBasePage() {
                                 <span>{doc.category}</span>
                                 <span>·</span>
                                 <span>{doc.paragraphCount} 段</span>
-                                {doc.videoId && (
-                                  <>
-                                    <span>·</span>
-                                    <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 border-green-200">有视频</Badge>
-                                  </>
-                                )}
                               </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                            {doc.videoId && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-8 px-3 text-xs border-red-200 text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  router.push(`/course/${encodeURIComponent(doc.id)}?courseId=${encodeURIComponent(doc.id)}`);
-                                }}
-                              >
-                                <Play className="h-3 w-3 mr-1" />
-                                播放
-                              </Button>
-                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 px-3 text-xs border-red-200 text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDocClick(doc);
+                              }}
+                            >
+                              <Play className="h-3 w-3 mr-1" />
+                              查看
+                            </Button>
                             <ChevronDown
                               className="h-4 w-4 text-gray-400 flex-shrink-0 cursor-pointer"
                               onClick={() => handleDocClick(doc)}
@@ -396,9 +388,6 @@ export default function KnowledgeBasePage() {
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <Badge variant="secondary" className="text-xs">{selectedDoc.category}</Badge>
                   <span>{selectedDoc.segments?.length ?? 0} 个段落</span>
-                  {videoInfo?.has_video && (
-                    <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 border-green-200">有视频</Badge>
-                  )}
                 </div>
               </div>
 
@@ -408,31 +397,31 @@ export default function KnowledgeBasePage() {
                 </div>
               ) : (
                 <div className="p-4">
-                  {/* 视频播放区域 */}
-                  {videoInfo?.has_video && videoInfo.video_url && (
-                    <div className="mb-4">
-                      <div className="flex gap-2 mb-3">
-                        <Button
-                          size="sm"
-                          variant={videoMode === 'video' ? 'default' : 'outline'}
-                          className={`text-xs h-8 ${videoMode === 'video' ? 'bg-red-600 hover:bg-red-700' : ''}`}
-                          onClick={() => setVideoMode('video')}
-                        >
-                          <Video className="h-3 w-3 mr-1" />
-                          视频播放
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant={videoMode === 'text' ? 'default' : 'outline'}
-                          className={`text-xs h-8 ${videoMode === 'text' ? 'bg-red-600 hover:bg-red-700' : ''}`}
-                          onClick={() => setVideoMode('text')}
-                        >
-                          <FileTextIcon className="h-3 w-3 mr-1" />
-                          文本内容
-                        </Button>
-                      </div>
+                  {/* 视频/文本切换 */}
+                  <div className="mb-4">
+                    <div className="flex gap-2 mb-3">
+                      <Button
+                        size="sm"
+                        variant={videoMode === 'video' ? 'default' : 'outline'}
+                        className={`text-xs h-8 ${videoMode === 'video' ? 'bg-red-600 hover:bg-red-700' : ''}`}
+                        onClick={() => setVideoMode('video')}
+                      >
+                        <Video className="h-3 w-3 mr-1" />
+                        视频播放
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={videoMode === 'text' ? 'default' : 'outline'}
+                        className={`text-xs h-8 ${videoMode === 'text' ? 'bg-red-600 hover:bg-red-700' : ''}`}
+                        onClick={() => setVideoMode('text')}
+                      >
+                        <FileTextIcon className="h-3 w-3 mr-1" />
+                        文本内容
+                      </Button>
+                    </div>
 
-                      {videoMode === 'video' && (
+                    {videoMode === 'video' && (
+                      videoInfo?.has_video && videoInfo.video_url ? (
                         <div className="border rounded-lg overflow-hidden bg-black">
                           <video
                             ref={videoRef}
@@ -444,12 +433,18 @@ export default function KnowledgeBasePage() {
                             onError={() => console.error('视频加载失败')}
                           />
                         </div>
-                      )}
-                    </div>
-                  )}
+                      ) : (
+                        <div className="border rounded-lg p-8 text-center bg-gray-50">
+                          <Video className="h-12 w-12 mx-auto text-gray-300 mb-2" />
+                          <p className="text-sm text-gray-500">暂无视频资源</p>
+                          <p className="text-xs text-gray-400 mt-1">该课程暂未上传视频</p>
+                        </div>
+                      )
+                    )}
+                  </div>
 
                   {/* 文本内容区域 */}
-                  {(videoMode === 'text' || !videoInfo?.has_video) && (
+                  {videoMode === 'text' && (
                     <div className="space-y-3">
                       {selectedDoc.segments?.map((seg, idx) => (
                         <div key={idx} className="p-3 rounded-lg border border-gray-100 hover:border-red-200 transition-colors">
