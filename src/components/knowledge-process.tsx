@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
-import { Loader2, CheckCircle2, XCircle, ChevronRight, Clock, BookOpen, Sparkles, Upload, Film, Music } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Loader2, CheckCircle2, XCircle, ChevronRight, Clock, BookOpen, Sparkles, Upload, Film, Music, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ProcessStep {
   step: string;
@@ -29,6 +30,15 @@ const stepLabels: Record<string, string> = {
   error: '处理出错',
 };
 
+const stepIcons: Record<string, React.ReactNode> = {
+  upload: <Upload className="h-4 w-4" />,
+  transcribe: <Music className="h-4 w-4" />,
+  segment: <BookOpen className="h-4 w-4" />,
+  outline: <Sparkles className="h-4 w-4" />,
+  complete: <CheckCircle2 className="h-4 w-4" />,
+  error: <AlertCircle className="h-4 w-4" />,
+};
+
 export function KnowledgeProcess({ onComplete }: KnowledgeProcessProps) {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -37,7 +47,15 @@ export function KnowledgeProcess({ onComplete }: KnowledgeProcessProps) {
   const [result, setResult] = useState<any>(null);
   const [showResult, setShowResult] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const stepsContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (stepsContainerRef.current) {
+      stepsContainerRef.current.scrollTop = stepsContainerRef.current.scrollHeight;
+    }
+  }, [steps]);
 
   const handleFileSelect = (file: File) => {
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
@@ -54,6 +72,7 @@ export function KnowledgeProcess({ onComplete }: KnowledgeProcessProps) {
     setShowResult(false);
     setSteps([]);
     setProgress(0);
+    setCurrentStepIndex(0);
   };
 
   const handleProcess = async () => {
@@ -69,7 +88,9 @@ export function KnowledgeProcess({ onComplete }: KnowledgeProcessProps) {
       const formData = new FormData();
       formData.append('file', uploadFile);
 
-      setSteps([{ step: 'upload', status: 'processing', message: '正在上传文件...', progress: 5 }]);
+      const initialStep: ProcessStep = { step: 'upload', status: 'processing', message: '正在上传文件...', progress: 5 };
+      setSteps([initialStep]);
+      setCurrentStepIndex(0);
 
       const res = await fetch('/api/knowledge-base/process', {
         method: 'POST',
@@ -92,6 +113,7 @@ export function KnowledgeProcess({ onComplete }: KnowledgeProcessProps) {
 
       const decoder = new TextDecoder();
       let buffer = '';
+      let stepOrder: string[] = [];
 
       while (true) {
         const { done, value } = await reader.read();
@@ -105,18 +127,34 @@ export function KnowledgeProcess({ onComplete }: KnowledgeProcessProps) {
           if (line.startsWith('data: ')) {
             try {
               const data = JSON.parse(line.slice(6));
+              
               setSteps(prev => {
-                const existing = prev.findIndex(s => s.step === data.step);
+                const existing = prev.findIndex(s => s.step === data.step && s.status !== 'done');
                 if (existing >= 0) {
                   const updated = [...prev];
                   updated[existing] = data;
                   return updated;
                 }
+                
+                if (data.status === 'done') {
+                  const doneIndex = prev.findIndex(s => s.step === data.step && s.status === 'processing');
+                  if (doneIndex >= 0) {
+                    const updated = [...prev];
+                    updated[doneIndex] = data;
+                    return updated;
+                  }
+                }
+                
                 return [...prev, data];
               });
 
               if (data.progress !== undefined) {
                 setProgress(data.progress);
+              }
+
+              if (data.status === 'processing' && !stepOrder.includes(data.step)) {
+                stepOrder.push(data.step);
+                setCurrentStepIndex(stepOrder.length - 1);
               }
 
               if (data.step === 'complete' && data.result) {
@@ -233,32 +271,45 @@ export function KnowledgeProcess({ onComplete }: KnowledgeProcessProps) {
 
       {steps.length > 0 && (
         <div className="space-y-3 mb-4">
-          {steps.map((step, idx) => (
-            <div key={idx} className="flex items-start gap-3 text-sm">
-              {step.status === 'processing' && (
-                <Loader2 className="h-4 w-4 animate-spin text-red-500 flex-shrink-0 mt-0.5" />
-              )}
-              {step.status === 'done' && (
-                <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
-              )}
-              {step.status === 'error' && (
-                <XCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
-              )}
-              <div className="flex-1">
-                <span className={step.status === 'processing' ? 'text-red-600 font-medium' : 'text-gray-700'}>
-                  {stepLabels[step.step] || step.step}
-                </span>
-                {step.message && (
-                  <span className="text-gray-500 ml-2">{step.message}</span>
-                )}
-                {step.outlineItem && step.step === 'outline' && (
-                  <div className="mt-1 text-xs text-gray-400">
-                    正在提炼：{step.outlineItem.title?.slice(0, 50) || '...'}
+          <ScrollArea className="h-48" ref={stepsContainerRef}>
+            <div className="space-y-3 pr-4">
+              {steps.map((step, idx) => (
+                <div key={idx} className="flex items-start gap-3 text-sm">
+                  {step.status === 'processing' && (
+                    <div className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5 animate-spin">
+                      <Loader2 className="h-4 w-4" />
+                    </div>
+                  )}
+                  {step.status === 'done' && (
+                    <CheckCircle2 className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                  )}
+                  {step.status === 'error' && (
+                    <XCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
+                  )}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className={step.status === 'processing' ? 'text-red-600 font-medium' : 'text-gray-700'}>
+                        {stepLabels[step.step] || step.step}
+                      </span>
+                      {stepIcons[step.step] && (
+                        <span className="text-gray-400">
+                          {stepIcons[step.step]}
+                        </span>
+                      )}
+                    </div>
+                    {step.message && (
+                      <span className="text-gray-500 block text-xs mt-0.5">{step.message}</span>
+                    )}
+                    {step.outlineItem && step.step === 'outline' && (
+                      <div className="mt-1 text-xs text-gray-400">
+                        正在提炼：{step.outlineItem.title?.slice(0, 50) || '...'}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                </div>
+              ))}
             </div>
-          ))}
+          </ScrollArea>
         </div>
       )}
 
@@ -275,7 +326,7 @@ export function KnowledgeProcess({ onComplete }: KnowledgeProcessProps) {
 
             <div className="grid grid-cols-3 gap-3 mb-3">
               <div className="p-2 bg-gray-50 rounded text-center">
-                <p className="text-lg font-bold text-red-600">{result.segments?.length || 0}</p>
+                <p className="text-lg font-bold text-red-600">{result.segments || 0}</p>
                 <p className="text-xs text-muted-foreground">分段数</p>
               </div>
               <div className="p-2 bg-gray-50 rounded text-center">
@@ -283,10 +334,8 @@ export function KnowledgeProcess({ onComplete }: KnowledgeProcessProps) {
                 <p className="text-xs text-muted-foreground">大纲要点</p>
               </div>
               <div className="p-2 bg-gray-50 rounded text-center">
-                <p className="text-lg font-bold text-green-600">
-                  {result.totalDuration ? formatTime(result.totalDuration) : '-'}
-                </p>
-                <p className="text-xs text-muted-foreground">总时长</p>
+                <p className="text-lg font-bold text-green-600">{result.fileSize || '-'}</p>
+                <p className="text-xs text-muted-foreground">文件大小</p>
               </div>
             </div>
 
@@ -328,5 +377,3 @@ export function KnowledgeProcess({ onComplete }: KnowledgeProcessProps) {
     </div>
   );
 }
-
-import { ScrollArea } from '@/components/ui/scroll-area';

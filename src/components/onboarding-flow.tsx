@@ -137,30 +137,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     return ids;
   };
 
-  useEffect(() => {
-    const saved = localStorage.getItem('user_diagnostic');
-    if (saved) {
-      try {
-        const diagnostic = JSON.parse(saved);
-        const path = generateLearningPath({
-          roles: diagnostic.roles || [],
-          topics: diagnostic.topics || [],
-          customRequirements: diagnostic.customRequirements || undefined,
-        });
-        setGeneratedPath(path);
-        setDiagnosticRoles(diagnostic.roles || []);
-        setDiagnosticTopics(diagnostic.topics || []);
-        const nodes = getAllNodeIds(path.rootNode);
-        setHighlightedNodes(nodes);
-        const locked = getDifficultyLockedNodeIds(path.rootNode, diagnostic.difficulty || 'beginner');
-        setDifficultyLockedNodes(locked);
-        setHasCompletedDiagnostic(true);
-        setCurrentView('mindmap');
-      } catch {
-      }
-    }
-  }, []);
-
   // 从知识库API加载课程数据，替换离线课程映射
   useEffect(() => {
     fetchKnowledgeBaseCourses()
@@ -172,9 +148,56 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         }
         initTopicNodeMap();
         console.log(`[知识库] 已从API加载课程数据到公务员方向知识图谱`);
+
+        // API加载完成后，再恢复诊断结果，确保使用正确的图谱
+        const saved = localStorage.getItem('user_diagnostic');
+        if (saved) {
+          try {
+            const diagnostic = JSON.parse(saved);
+            const path = generateLearningPath({
+              roles: diagnostic.roles || [],
+              topics: diagnostic.topics || [],
+              customRequirements: diagnostic.customRequirements || undefined,
+            });
+            setGeneratedPath(path);
+            setDiagnosticRoles(diagnostic.roles || []);
+            setDiagnosticTopics(diagnostic.topics || []);
+            const nodes = getAllNodeIds(path.rootNode);
+            setHighlightedNodes(nodes);
+            const locked = getDifficultyLockedNodeIds(path.rootNode, diagnostic.difficulty || 'beginner');
+            setDifficultyLockedNodes(locked);
+            setHasCompletedDiagnostic(true);
+            setCurrentView('mindmap');
+          } catch (err) {
+            console.warn('诊断结果恢复失败:', err);
+          }
+        }
       })
       .catch(err => {
         console.warn('[知识库] API加载失败，使用离线课程数据:', err);
+        // API失败时也尝试恢复诊断结果
+        const saved = localStorage.getItem('user_diagnostic');
+        if (saved) {
+          try {
+            const diagnostic = JSON.parse(saved);
+            const path = generateLearningPath({
+              roles: diagnostic.roles || [],
+              topics: diagnostic.topics || [],
+              customRequirements: diagnostic.customRequirements || undefined,
+            });
+            setGeneratedPath(path);
+            setDiagnosticRoles(diagnostic.roles || []);
+            setDiagnosticTopics(diagnostic.topics || []);
+            const nodes = getAllNodeIds(path.rootNode);
+            setHighlightedNodes(nodes);
+            const locked = getDifficultyLockedNodeIds(path.rootNode, diagnostic.difficulty || 'beginner');
+            setDifficultyLockedNodes(locked);
+            setHasCompletedDiagnostic(true);
+            setCurrentView('mindmap');
+          } catch (err2) {
+            console.warn('诊断结果恢复失败:', err2);
+          }
+        }
       });
   }, []);
 
