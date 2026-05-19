@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { KnowledgeProcess } from '@/components/knowledge-process';
 import { useRouter } from 'next/navigation';
+import { fetchKnowledgeBaseCourses, initTopicNodeMap } from '@/lib/knowledge-graph';
 
 interface KnowledgeDoc {
   id: string;
@@ -109,6 +110,18 @@ export default function KnowledgeBasePage() {
   useEffect(() => {
     fetchDocs();
   }, [fetchDocs]);
+
+  // 初始化公务员方向动态知识图谱
+  useEffect(() => {
+    fetchKnowledgeBaseCourses()
+      .then(({ graph }) => {
+        if (graph) {
+          initTopicNodeMap();
+          console.log(`[知识库页面] 公务员方向知识图谱已初始化`);
+        }
+      })
+      .catch(err => console.warn('知识图谱初始化失败:', err));
+  }, []);
 
   const handleDocClick = async (doc: KnowledgeDoc) => {
     setDocLoading(true);

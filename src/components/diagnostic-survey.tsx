@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { diagnosticOptions, analyzeRequirements } from '@/lib/knowledge-graph';
-import { CheckCircle2, Sparkles, BookOpen, Users, Target, FileText, Lightbulb } from 'lucide-react';
+import { diagnosticOptions, getDiagnosticOptions, analyzeRequirements, initTopicNodeMap } from '@/lib/knowledge-graph';
+import { CheckCircle2, Sparkles, BookOpen, Users, Target, FileText, Lightbulb, Loader2 } from 'lucide-react';
 
 interface DiagnosticSurveyProps {
   onPathGenerated: (roles: string[], topics: string[], difficulty: string, customRequirements: string) => void;
@@ -20,9 +20,22 @@ export function DiagnosticSurvey({ onPathGenerated }: DiagnosticSurveyProps) {
   const [level, setLevel] = useState<string>('beginner');
   const [customRequirements, setCustomRequirements] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [optionsReady, setOptionsReady] = useState(false);
 
-  const roles = diagnosticOptions.filter(o => o.category === 'role');
-  const topics = diagnosticOptions.filter(o => o.category === 'topic');
+  // 动态获取主题选项（图谱加载完成后更新）
+  useEffect(() => {
+    initTopicNodeMap();
+    // 触发重新获取诊断选项
+    setOptionsReady(true);
+  }, []);
+
+  const options = useMemo(() => {
+    if (optionsReady) return getDiagnosticOptions();
+    return diagnosticOptions; // 初始回退
+  }, [optionsReady]);
+
+  const roles = options.filter(o => o.category === 'role');
+  const topics = options.filter(o => o.category === 'topic');
 
   const requirementAnalysis = customRequirements.trim() ? analyzeRequirements(customRequirements) : null;
 

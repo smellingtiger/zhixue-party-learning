@@ -83,35 +83,67 @@ const systemIdToVideoPath = buildSystemIdToVideoPathMap();
 const systemIdToNumericId = buildSystemIdToNumericIdMap();
 
 const nodeCategoryMap: Record<string, string[]> = {
-  'party-constitution': ['政治理论'],
+  // 公务员政治素养 子节点
+  'constitution-rules': ['政治理论'],
   'party-history': ['政治理论'],
   'party-theory': ['政治理论'],
-  '20th-report': ['政治理论'],
+  'current-politics': ['政治理论'],
   'chinese-modernization': ['政治理论'],
   'comprehensive-strict-governance': ['政治理论'],
-  'membership-development': ['政治理论'],
-  'party-life': ['政治理论'],
-  'mass-work': ['国家治理'],
-  'rural-policy': ['国家治理'],
-  'rural-governance': ['国家治理'],
-  'integrity-education': ['国家治理'],
-  'supervision-system': ['国家治理'],
+  'party-building-practice': ['党建实务'],
+  // 公务员行政实务 子节点
+  'social-governance': ['社会治理'],
+  'mass-work': ['社会治理'],
+  'law-basics': ['法律法规'],
+  'supervision-system': ['法律法规'],
+  'integrity-education': ['廉政建设'],
+  // 公务员经济素养 子节点
+  'macro-economy': ['经济管理'],
+  'rural-development': ['经济管理'],
+  'digital-economy': ['经济管理'],
+  // 公务员综合能力 子节点
+  'official-writing': ['业务能力'],
+  'admin-capability': ['业务能力'],
+  'cultural-confidence': ['文化建设'],
+  'ideology-work': ['文化建设'],
+  'international-relations': ['国际视野'],
+  'global-governance': ['国际视野'],
+  'united-front': ['统一战线'],
+  'deliberative-democracy': ['统一战线'],
+  'ethnic-religion': ['统一战线'],
+  'general-knowledge': ['未分类'],
 };
 
 const nodeKeywordMap: Record<string, string[]> = {
-  'party-constitution': ['党章', '章程'],
-  'party-history': ['党史', '简史', '不忘初心', '初心'],
-  'party-theory': ['思想', '理论', '马克思主义', '中国特色'],
-  '20th-report': ['二十大', '新时代'],
-  'chinese-modernization': ['现代化', '小康'],
-  'comprehensive-strict-governance': ['从严', '党建'],
-  'membership-development': ['发展党员', '党员'],
-  'party-life': ['组织生活', '政党', '组织'],
-  'mass-work': ['群众', '协商'],
-  'rural-policy': ['乡村', '振兴', '农村'],
-  'rural-governance': ['乡村治理', '基层治理', '治理'],
-  'integrity-education': ['廉政', '反腐', '作风'],
-  'supervision-system': ['监督', '审计', '问责'],
+  // 公务员政治素养 子节点
+  'constitution-rules': ['党章', '章程', '纪律', '党员', '入党'],
+  'party-history': ['党史', '简史', '不忘初心', '初心', '革命', '建国', '历史'],
+  'party-theory': ['思想', '理论', '马克思主义', '中国特色', '习近平'],
+  'current-politics': ['二十大', '新时代', '全会', '精神', '报告'],
+  'chinese-modernization': ['现代化', '小康', '高质量', '共同富裕', '改革'],
+  'comprehensive-strict-governance': ['从严', '党建', '自我革命', '政治建设'],
+  'party-building-practice': ['发展党员', '党员', '支部', '组织生活', '党课'],
+  // 公务员行政实务 子节点
+  'social-governance': ['治理', '社会', '社区', '基层', '信访', '安全', '应急'],
+  'mass-work': ['群众', '民心', '服务', '民主'],
+  'law-basics': ['法律', '法规', '法治', '依法', '宪法'],
+  'supervision-system': ['监督', '审计', '问责', '法治', '巡视'],
+  'integrity-education': ['廉政', '反腐', '作风', '八项规定', '廉洁', '腐败'],
+  // 公务员经济素养 子节点
+  'macro-economy': ['经济', '宏观', '财政', '货币', '金融', '产业'],
+  'rural-development': ['乡村', '振兴', '农村', '三农', '脱贫', '农业'],
+  'digital-economy': ['数字', '科技', '创新', '大数据', '互联网', '智能'],
+  // 公务员综合能力 子节点
+  'official-writing': ['公文', '写作', '表达', '汇报', '文书'],
+  'admin-capability': ['管理', '行政', '领导', '组织', '协调', '沟通'],
+  'cultural-confidence': ['文化', '文明', '传统', '精神', '价值'],
+  'ideology-work': ['意识形态', '宣传', '舆论', '媒体', '思想'],
+  'international-relations': ['国际', '外交', '全球', '世界', '一带一路', '人类命运共同体'],
+  'global-governance': ['全球治理', '联合国', '合作', '发展', '气候'],
+  'united-front': ['统战', '大统战', '党派', '多党合作'],
+  'deliberative-democracy': ['协商', '民主', '参政议政', '凝聚共识'],
+  'ethnic-religion': ['民族', '宗教', '意识形态', '统一'],
+  'general-knowledge': [],
 };
 
 interface RawKnowledgeCourse {
