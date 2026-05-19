@@ -4,6 +4,594 @@ function createCourse(id: string, title: string, duration: number): CourseInfo {
   return { id, title, duration };
 }
 
+// ============================================================
+//  公务员方向知识总结规则系统
+//  将知识库分类和文章按公务员考试/培训方向重新组织
+// ============================================================
+
+interface CivilServantDomain {
+  id: string;
+  name: string;
+  examTags: string[];
+  description: string;
+  prerequisites: string[];
+  difficulty: number;
+}
+
+interface SubNodeRule {
+  id: string;
+  nameTemplate: string;
+  keywords: string[];
+  examFocus: string;
+  difficulty: number;
+}
+
+const CIVIL_SERVANT_DOMAINS: Record<string, CivilServantDomain> = {
+  '政治理论': {
+    id: 'political-literacy',
+    name: '公务员政治素养',
+    examTags: ['行测常识判断', '公共基础知识', '申论理论支撑'],
+    description: '公务员考试与工作中必备的政治理论基础，涵盖党章党规、党史国史、创新理论及时政热点',
+    prerequisites: [],
+    difficulty: 1,
+  },
+  '党建实务': {
+    id: 'political-literacy',
+    name: '公务员政治素养',
+    examTags: ['行测常识判断', '公共基础知识', '申论理论支撑'],
+    description: '党务工作实际操作知识，包括发展党员、组织生活、支部建设等实务内容',
+    prerequisites: [],
+    difficulty: 1,
+  },
+  '社会治理': {
+    id: 'administrative-practice',
+    name: '公务员行政实务',
+    examTags: ['申论素材积累', '面试热点分析', '岗位实务能力'],
+    description: '聚焦公务员社会治理能力，涵盖基层治理、群众工作、公共服务等内容',
+    prerequisites: ['political-literacy'],
+    difficulty: 2,
+  },
+  '经济管理': {
+    id: 'economic-literacy',
+    name: '公务员经济素养',
+    examTags: ['行测经济常识', '申论经济分析', '宏观经济政策'],
+    description: '提升公务员经济管理知识储备，掌握宏观经济政策、产业发展与市场规律',
+    prerequisites: ['political-literacy'],
+    difficulty: 2,
+  },
+  '法律法规': {
+    id: 'administrative-practice',
+    name: '公务员行政实务',
+    examTags: ['申论素材积累', '面试热点分析', '岗位实务能力'],
+    description: '公务员依法行政必备知识，涵盖法律法规体系、法治思维与执法规范',
+    prerequisites: ['political-literacy'],
+    difficulty: 2,
+  },
+  '廉政建设': {
+    id: 'administrative-practice',
+    name: '公务员行政实务',
+    examTags: ['申论素材积累', '面试热点分析', '岗位实务能力'],
+    description: '加强党风廉政教育，掌握反腐倡廉政策法规与纪律要求',
+    prerequisites: ['political-literacy'],
+    difficulty: 2,
+  },
+  '业务能力': {
+    id: 'comprehensive-ability',
+    name: '公务员综合能力',
+    examTags: ['申论政策分析', '面试综合素质', '时政热点理解'],
+    description: '全面提升公务员岗位实务能力，包括公文写作、沟通协调、应急处理等',
+    prerequisites: ['political-literacy'],
+    difficulty: 2,
+  },
+  '文化建设': {
+    id: 'comprehensive-ability',
+    name: '公务员综合能力',
+    examTags: ['申论政策分析', '面试综合素质', '时政热点理解'],
+    description: '增强文化自信与文化建设能力，掌握意识形态工作与文化传播方法',
+    prerequisites: ['political-literacy'],
+    difficulty: 2,
+  },
+  '国际视野': {
+    id: 'comprehensive-ability',
+    name: '公务员综合能力',
+    examTags: ['申论政策分析', '面试综合素质', '时政热点理解'],
+    description: '开拓国际视野，了解国际形势、外交政策与全球治理格局',
+    prerequisites: ['political-literacy'],
+    difficulty: 3,
+  },
+  '统一战线': {
+    id: 'comprehensive-ability',
+    name: '公务员综合能力',
+    examTags: ['申论政策分析', '面试综合素质', '时政热点理解'],
+    description: '掌握统一战线理论方针，增强凝聚共识与团结协作能力',
+    prerequisites: ['political-literacy'],
+    difficulty: 2,
+  },
+  '未分类': {
+    id: 'comprehensive-ability',
+    name: '公务员综合能力',
+    examTags: ['综合知识储备', '申论素材积累'],
+    description: '通用知识储备，拓展公务员知识面的综合学习材料',
+    prerequisites: [],
+    difficulty: 1,
+  },
+};
+
+const CIVIL_SERVANT_SUB_NODE_RULES: Record<string, SubNodeRule[]> = {
+  '政治理论': [
+    {
+      id: 'constitution-rules',
+      nameTemplate: '党章党规精讲',
+      keywords: ['党章', '章程', '纪律', '党员', '入党', '组织制度', '党建'],
+      examFocus: '公基必考·行测常识',
+      difficulty: 1,
+    },
+    {
+      id: 'party-history',
+      nameTemplate: '党史国史通览',
+      keywords: ['党史', '百年', '革命', '建国', '长征', '红军', '抗战', '抗美援朝', '改革开放', '新中国', '简史', '历史'],
+      examFocus: '行测常识·申论史论',
+      difficulty: 1,
+    },
+    {
+      id: 'party-theory',
+      nameTemplate: '党的创新理论',
+      keywords: ['习近平', '新时代', '马克思主义', '中国特色', '思想', '治国理政', '理论', '两山', '生态文明'],
+      examFocus: '公基核心·申论理论',
+      difficulty: 2,
+    },
+    {
+      id: 'current-politics',
+      nameTemplate: '时政热点解读',
+      keywords: ['二十大', '全会', '报告', '精神', '大统战', '新型政党', '协商民主'],
+      examFocus: '行测时政·申论热点',
+      difficulty: 2,
+    },
+    {
+      id: 'chinese-modernization',
+      nameTemplate: '中国式现代化',
+      keywords: ['现代化', '高质量', '共同富裕', '十四五', '2035', '制度优势', '小康', '新征程', '改革'],
+      examFocus: '申论核心素材',
+      difficulty: 2,
+    },
+    {
+      id: 'comprehensive-strict-governance',
+      nameTemplate: '全面从严治党',
+      keywords: ['从严', '自我革命', '四个全面', '政治建设', '问责', '伟大工程', '干部'],
+      examFocus: '公基党建·面试热点',
+      difficulty: 3,
+    },
+  ],
+  '党建实务': [
+    {
+      id: 'party-building-practice',
+      nameTemplate: '党务工作实务',
+      keywords: ['发展党员', '入党', '党员', '支部', '组织生活', '党课', '主题党日', '三会一课', '基层'],
+      examFocus: '公基党建·岗位实务',
+      difficulty: 1,
+    },
+  ],
+  '社会治理': [
+    {
+      id: 'social-governance',
+      nameTemplate: '社会治理创新',
+      keywords: ['治理', '社会', '社区', '基层', '信访', '矛盾', '调解', '安全', '应急', '灾害'],
+      examFocus: '申论治理·面试热点',
+      difficulty: 2,
+    },
+    {
+      id: 'mass-work',
+      nameTemplate: '群众工作方法',
+      keywords: ['群众', '民心', '服务', '民主', '协商'],
+      examFocus: '面试实务·基层能力',
+      difficulty: 1,
+    },
+  ],
+  '经济管理': [
+    {
+      id: 'macro-economy',
+      nameTemplate: '宏观经济政策',
+      keywords: ['经济', '宏观', 'GDP', '财政', '货币', '金融', '产业', '市场'],
+      examFocus: '行测经济·申论分析',
+      difficulty: 2,
+    },
+    {
+      id: 'rural-development',
+      nameTemplate: '乡村振兴与三农',
+      keywords: ['乡村', '振兴', '三农', '农村', '农业', '农民', '脱贫', '扶贫', '精准'],
+      examFocus: '申论必考·面试高频',
+      difficulty: 1,
+    },
+    {
+      id: 'digital-economy',
+      nameTemplate: '数字经济与创新',
+      keywords: ['数字', '科技', '创新', '智能', '大数据', '互联网', '信息化', '人工智能'],
+      examFocus: '申论前沿·时政热点',
+      difficulty: 2,
+    },
+  ],
+  '法律法规': [
+    {
+      id: 'law-basics',
+      nameTemplate: '法律法规基础',
+      keywords: ['法律', '法规', '法治', '依法', '宪法', '行政法', '民法典'],
+      examFocus: '公基法律·行测常识',
+      difficulty: 2,
+    },
+    {
+      id: 'supervision-system',
+      nameTemplate: '监督执纪体系',
+      keywords: ['监督', '监察', '审计', '巡视', '制度', '纪律'],
+      examFocus: '公基法律·申论治理',
+      difficulty: 3,
+    },
+  ],
+  '廉政建设': [
+    {
+      id: 'integrity-education',
+      nameTemplate: '廉政教育警示',
+      keywords: ['廉政', '反腐', '八项规定', '作风', '四风', '廉洁', '纪律处分', '警示', '腐败'],
+      examFocus: '公基廉政·面试素养',
+      difficulty: 2,
+    },
+  ],
+  '业务能力': [
+    {
+      id: 'official-writing',
+      nameTemplate: '公文写作与表达',
+      keywords: ['公文', '写作', '表达', '汇报', '演讲', '报告', '文书'],
+      examFocus: '申论写作·岗位技能',
+      difficulty: 1,
+    },
+    {
+      id: 'admin-capability',
+      nameTemplate: '行政管理能力',
+      keywords: ['管理', '行政', '领导', '组织', '协调', '沟通', '团队', '考核'],
+      examFocus: '面试能力·岗位实务',
+      difficulty: 2,
+    },
+  ],
+  '文化建设': [
+    {
+      id: 'cultural-confidence',
+      nameTemplate: '文化自信建设',
+      keywords: ['文化', '文明', '传统', '传承', '精神', '价值', '社会主义核心价值观'],
+      examFocus: '申论文化·面试素养',
+      difficulty: 2,
+    },
+    {
+      id: 'ideology-work',
+      nameTemplate: '意识形态工作',
+      keywords: ['意识形态', '宣传', '舆论', '媒体', '网络', '思想'],
+      examFocus: '公基·申论政策',
+      difficulty: 2,
+    },
+  ],
+  '国际视野': [
+    {
+      id: 'international-relations',
+      nameTemplate: '国际关系与外交',
+      keywords: ['国际', '外交', '全球', '世界', '一带一路', '人类命运共同体', '中美', '大国'],
+      examFocus: '申论国际·时政热点',
+      difficulty: 3,
+    },
+    {
+      id: 'global-governance',
+      nameTemplate: '全球治理格局',
+      keywords: ['全球治理', '联合国', 'WTO', 'G20', '合作', '发展', '气候'],
+      examFocus: '申论视野·面试素养',
+      difficulty: 3,
+    },
+  ],
+  '统一战线': [
+    {
+      id: 'united-front',
+      nameTemplate: '统一战线工作',
+      keywords: ['统战', '大统战', '党派', '多党合作', '党外', '知识分子', '联谊'],
+      examFocus: '公基统战·政策理解',
+      difficulty: 2,
+    },
+    {
+      id: 'deliberative-democracy',
+      nameTemplate: '民主协商机制',
+      keywords: ['协商', '民主', '参政议政', '凝聚共识', '新型政党'],
+      examFocus: '申论政策·面试素养',
+      difficulty: 2,
+    },
+    {
+      id: 'ethnic-religion',
+      nameTemplate: '民族宗教政策',
+      keywords: ['民族', '宗教', '意识形态', '统一'],
+      examFocus: '公基常识·政策理解',
+      difficulty: 2,
+    },
+  ],
+  '未分类': [
+    {
+      id: 'general-knowledge',
+      nameTemplate: '综合知识储备',
+      keywords: [],
+      examFocus: '综合素养·知识拓展',
+      difficulty: 1,
+    },
+  ],
+};
+
+function generateCivilServantNodeName(domain: CivilServantDomain, rule: SubNodeRule): string {
+  const prefixMap: Record<string, string> = {
+    'political-literacy': '📖',
+    'administrative-practice': '🏛️',
+    'comprehensive-ability': '🎯',
+    'economic-literacy': '💰',
+  };
+  const prefix = prefixMap[domain.id] || '📚';
+  return `${prefix} ${rule.nameTemplate}`;
+}
+
+function generateCivilServantDescription(
+  domain: CivilServantDomain,
+  rule: SubNodeRule,
+  articles: KnowledgeBaseApiDoc[]
+): string {
+  const examFocus = rule.examFocus;
+  const count = articles.length;
+  const sampleTopics = articles.slice(0, 3).map(a => a.title.replace(/\.txt$/, '').slice(0, 20)).join('、');
+
+  if (count === 0) {
+    return `【${examFocus}】本专题暂无匹配文章，请等待知识库更新`;
+  }
+  return `【${examFocus}】本专题涵盖${count}篇核心文章，聚焦公务员考试与工作中的高频考点。包含：${sampleTopics}等`;
+}
+
+function generateCivilServantKeyPoints(articles: KnowledgeBaseApiDoc[]): string[] {
+  if (articles.length === 0) return ['暂无知识点，等待知识库更新'];
+
+  const points: string[] = [];
+  const titles = articles.map(a => a.title.replace(/\.txt$/, '').replace(/[（(][一二三四五六七八九十上中下\d]+[）)]/g, ''));
+
+  // 取前5篇文章标题作为关键知识点，转换为公务员备考要点
+  for (let i = 0; i < Math.min(titles.length, 5); i++) {
+    const title = titles[i];
+    // 将文章标题转化为备考要点表述
+    let point = title;
+    if (point.includes('党章')) point = `党章核心要点：${point}`;
+    else if (point.includes('党史') || point.includes('简史') || point.includes('历史')) point = `党史必知：${point}`;
+    else if (point.includes('习近平') || point.includes('新时代')) point = `重要思想：${point}`;
+    else if (point.includes('二十大') || point.includes('全会')) point = `时政热点：${point}`;
+    else if (point.includes('现代化') || point.includes('高质量') || point.includes('改革')) point = `发展战略：${point}`;
+    else if (point.includes('乡村') || point.includes('振兴') || point.includes('三农')) point = `乡村振兴：${point}`;
+    else if (point.includes('基层') || point.includes('治理') || point.includes('社区')) point = `基层治理：${point}`;
+    else if (point.includes('廉政') || point.includes('反腐') || point.includes('腐败')) point = `廉政建设：${point}`;
+    else if (point.includes('监督') || point.includes('监察') || point.includes('审计')) point = `监督体系：${point}`;
+    else if (point.includes('群众') || point.includes('信访') || point.includes('服务')) point = `群众工作：${point}`;
+    else if (point.includes('统战') || point.includes('协商') || point.includes('党派')) point = `统战理论：${point}`;
+    else if (point.includes('民族') || point.includes('宗教')) point = `民族宗教：${point}`;
+    else if (point.includes('经济') || point.includes('金融') || point.includes('产业')) point = `经济管理：${point}`;
+    else if (point.includes('法律') || point.includes('法规') || point.includes('法治')) point = `法律法规：${point}`;
+    else if (point.includes('数字') || point.includes('科技') || point.includes('创新')) point = `数字经济：${point}`;
+    else if (point.includes('公文') || point.includes('写作') || point.includes('表达')) point = `公文写作：${point}`;
+    else if (point.includes('文化') || point.includes('文明') || point.includes('精神')) point = `文化建设：${point}`;
+    else if (point.includes('国际') || point.includes('外交') || point.includes('全球')) point = `国际视野：${point}`;
+    else if (point.includes('意识形态') || point.includes('宣传') || point.includes('舆论')) point = `意识形态：${point}`;
+    else point = `备考要点：${point}`;
+
+    if (point.length > 40) point = point.slice(0, 37) + '...';
+    points.push(point);
+  }
+
+  return points;
+}
+
+function groupArticlesByCivilServantTopics(
+  docs: KnowledgeBaseApiDoc[]
+): Map<string, Map<string, KnowledgeBaseApiDoc[]>> {
+  // 外层: category -> 内层: subNodeId -> articles
+  const result = new Map<string, Map<string, KnowledgeBaseApiDoc[]>>();
+
+  for (const [category, rules] of Object.entries(CIVIL_SERVANT_SUB_NODE_RULES)) {
+    const subMap = new Map<string, KnowledgeBaseApiDoc[]>();
+    for (const rule of rules) {
+      subMap.set(rule.id, []);
+    }
+    result.set(category, subMap);
+  }
+
+  for (const doc of docs) {
+    const category = doc.category;
+    const rules = CIVIL_SERVANT_SUB_NODE_RULES[category];
+    if (!rules) continue;
+
+    const cleanTitle = doc.title.replace(/\.txt$/, '').replace(/[《》（）【】\s]/g, '');
+
+    let matched = false;
+    for (const rule of rules) {
+      if (rule.keywords.length === 0) continue;
+      if (rule.keywords.some(kw => cleanTitle.includes(kw))) {
+        const subMap = result.get(category);
+        if (subMap) {
+          subMap.get(rule.id)?.push(doc);
+        }
+        matched = true;
+        break;
+      }
+    }
+    if (matched) continue;
+
+    for (const rule of rules) {
+      if (rule.keywords.length === 0) {
+        const subMap = result.get(category);
+        if (subMap) {
+          subMap.get(rule.id)?.push(doc);
+        }
+        break;
+      }
+    }
+  }
+
+  return result;
+}
+
+function calculateEstimatedDuration(paragraphCount: number): number {
+  if (paragraphCount <= 0) return 30;
+  return Math.max(15, Math.min(60, paragraphCount * 2));
+}
+
+function buildDynamicKnowledgeGraph(
+  docs: KnowledgeBaseApiDoc[],
+  categoryCounts: Record<string, number>
+): KnowledgeNode {
+  const groupedArticles = groupArticlesByCivilServantTopics(docs);
+
+  // 获取知识库中有实际文章的分类
+  const availableCategories = Object.keys(categoryCounts).filter(
+    cat => CIVIL_SERVANT_DOMAINS[cat] && categoryCounts[cat] > 0
+  );
+
+  if (availableCategories.length === 0) {
+    // 如果没有数据，回退到所有已配置分类
+    availableCategories.push(...Object.keys(CIVIL_SERVANT_DOMAINS));
+  }
+
+  const level1Children: KnowledgeNode[] = [];
+
+  for (const category of availableCategories) {
+    const domain = CIVIL_SERVANT_DOMAINS[category];
+    if (!domain) continue;
+
+    const subRules = CIVIL_SERVANT_SUB_NODE_RULES[category] || [];
+    const subMap = groupedArticles.get(category);
+    const level2Children: KnowledgeNode[] = [];
+
+    for (const rule of subRules) {
+      const articles = subMap?.get(rule.id) || [];
+
+      if (articles.length === 0) continue; // 没有文章的子节点不展示
+
+      const courses: CourseInfo[] = articles.map(a => createCourse(
+        a.id,
+        a.title.replace(/\.txt$/, ''),
+        calculateEstimatedDuration(a.paragraphCount)
+      ));
+
+      level2Children.push({
+        id: rule.id,
+        name: generateCivilServantNodeName(domain, rule),
+        level: 2,
+        difficulty: rule.difficulty,
+        description: generateCivilServantDescription(domain, rule, articles),
+        keyPoints: generateCivilServantKeyPoints(articles),
+        courses,
+      });
+    }
+
+    if (level2Children.length > 0) {
+      level1Children.push({
+        id: domain.id,
+        name: domain.name,
+        level: 1,
+        description: `${domain.description}\n\n📝 考试方向：${domain.examTags.join('、')}`,
+        children: level2Children,
+        prerequisites: domain.prerequisites,
+        difficulty: domain.difficulty,
+      });
+    }
+  }
+
+  return {
+    id: 'root',
+    name: '公务员备考学习体系',
+    level: 0,
+    description: '基于知识库真实数据，按公务员考试与培训方向智能组织的学习图谱',
+    children: level1Children,
+  };
+}
+
+let dynamicGraphCache: KnowledgeNode | null = null;
+
+export function getDynamicKnowledgeGraph(): KnowledgeNode | null {
+  return dynamicGraphCache;
+}
+
+export function setDynamicKnowledgeGraph(graph: KnowledgeNode) {
+  dynamicGraphCache = graph;
+  rebuildParentAndChildrenMaps(graph);
+  rebuildDynamicKeywordIndex();
+}
+
+function rebuildDynamicKeywordIndex() {
+  if (!dynamicGraphCache) return;
+  const index = new Map<string, string[]>();
+
+  function collect(node: KnowledgeNode) {
+    if (node.id !== 'root') {
+      // 从节点名称和关键要点中提取关键词
+      const text = `${node.name} ${node.description || ''} ${(node.keyPoints || []).join(' ')}`;
+      const words = text.split(/[，。、：；！？\s,.!:;?]+/);
+      for (const word of words) {
+        if (word.length >= 2 && word.length <= 12) {
+          const existing = index.get(word);
+          if (existing) {
+            if (!existing.includes(node.id)) existing.push(node.id);
+          } else {
+            index.set(word, [node.id]);
+          }
+        }
+      }
+    }
+    if (node.children) {
+      node.children.forEach(collect);
+    }
+  }
+
+  collect(dynamicGraphCache);
+
+  // 合并课程关键词索引和动态图谱索引
+  for (const [word, nodeIds] of knowledgeBaseKeywordIndex) {
+    const existing = index.get(word);
+    if (existing) {
+      for (const nid of nodeIds) {
+        if (!existing.includes(nid)) existing.push(nid);
+      }
+    } else {
+      index.set(word, nodeIds);
+    }
+  }
+  knowledgeBaseKeywordIndex = index;
+}
+
+// 父节点映射（动态计算）
+let dynamicParentMap: Record<string, string> = {};
+let dynamicChildrenMap: Record<string, string[]> = {};
+
+function rebuildParentAndChildrenMaps(root: KnowledgeNode) {
+  const parentMap: Record<string, string> = {};
+  const childrenMap: Record<string, string[]> = {};
+
+  function traverse(node: KnowledgeNode, parentId?: string) {
+    if (parentId) {
+      parentMap[node.id] = parentId;
+    }
+    if (node.children && node.children.length > 0) {
+      childrenMap[node.id] = node.children.map(c => c.id);
+      for (const child of node.children) {
+        traverse(child, node.id);
+      }
+    }
+  }
+
+  traverse(root);
+  dynamicParentMap = parentMap;
+  dynamicChildrenMap = childrenMap;
+}
+
+export function getDynamicParentMap(): Record<string, string> {
+  return dynamicParentMap;
+}
+
+export function getDynamicChildrenMap(): Record<string, string[]> {
+  return dynamicChildrenMap;
+}
+
 const filenameNodeMapping: Record<string, string[]> = {
   // ===== 党章学习 =====
   '党章': ['party-constitution'], '章程': ['party-constitution'],
@@ -122,14 +710,14 @@ function matchFilenameToNodes(filename: string): string[] {
   return Array.from(matched);
 }
 
-const categoryToNodeMap: Record<string, string[]> = {
-  '政治理论': ['party-theory', 'party-constitution', '20th-report', 'party-history', 'chinese-modernization', 'comprehensive-strict-governance'],
-  '国家治理': ['grassroots-party-work', 'rural-policy', 'rural-governance', 'party-life', 'supervision-system', 'integrity-education', 'chinese-modernization'],
-  '统战理论': ['mass-work', 'membership-development', 'party-life', 'party-constitution'],
-};
+function matchCategoryToDynamicNodes(category: string): string[] {
+  const rules = CIVIL_SERVANT_SUB_NODE_RULES[category];
+  if (!rules) return [];
+  return rules.map(r => r.id);
+}
 
 function matchCategoryToNodes(category: string): string[] {
-  return categoryToNodeMap[category] || ['party-constitution'];
+  return matchCategoryToDynamicNodes(category);
 }
 
 export interface KnowledgeBaseApiDoc {
@@ -138,13 +726,14 @@ export interface KnowledgeBaseApiDoc {
   category: string;
   paragraphCount: number;
   fileName: string;
+  courseName?: string;
 }
 
 let courseDatabase: Record<string, CourseInfo[]> = {};
 
 export async function fetchKnowledgeBaseCourses(
   apiBase?: string
-): Promise<{ courses: Record<string, CourseInfo[]>; docs: KnowledgeBaseApiDoc[]; categoryCounts: Record<string, number> }> {
+): Promise<{ courses: Record<string, CourseInfo[]>; docs: KnowledgeBaseApiDoc[]; categoryCounts: Record<string, number>; graph: KnowledgeNode | null }> {
   try {
     const baseUrl = apiBase || '/api/knowledge-base';
     const url = `${baseUrl}?pageSize=600`;
@@ -157,7 +746,9 @@ export async function fetchKnowledgeBaseCourses(
       (d: KnowledgeBaseApiDoc) => d.id && d.title
     );
 
-    console.log(`[知识库API] 获取到 ${docs.length} 份文档, 分类: ${JSON.stringify(data.categoryCounts || {})}`);
+    const categoryCounts: Record<string, number> = data.categoryCounts || data.globalCategoryCounts || {};
+
+    console.log(`[知识库API] 获取到 ${docs.length} 份文档, 分类: ${JSON.stringify(categoryCounts)}`);
 
     const courses: Record<string, CourseInfo[]> = {};
 
@@ -176,10 +767,17 @@ export async function fetchKnowledgeBaseCourses(
     }
 
     setKnowledgeBaseCourses(courses);
-    return { courses, docs, categoryCounts: data.categoryCounts || {} };
+
+    // 构建公务员方向的动态知识图谱
+    const dynamicGraph = buildDynamicKnowledgeGraph(docs, categoryCounts);
+    setDynamicKnowledgeGraph(dynamicGraph);
+
+    console.log(`[动态图谱] 已构建公务员方向知识图谱，一级节点: ${dynamicGraph.children?.length || 0} 个`);
+
+    return { courses, docs, categoryCounts, graph: dynamicGraph };
   } catch (error) {
     console.warn('知识库API获取失败:', error);
-    return { courses: courseDatabase, docs: [], categoryCounts: {} };
+    return { courses: courseDatabase, docs: [], categoryCounts: {}, graph: null };
   }
 }
 
@@ -220,6 +818,11 @@ function rebuildKeywordIndex() {
 }
 
 export function getPartyKnowledgeGraph(): KnowledgeNode {
+  // 优先使用动态构建的公务员方向图谱
+  if (dynamicGraphCache && dynamicGraphCache.children && dynamicGraphCache.children.length > 0) {
+    return injectCoursesRecursive(dynamicGraphCache);
+  }
+  // 回退到静态图谱（兼容初始化阶段和离线状态）
   return injectCoursesRecursive(partyKnowledgeGraph);
 }
 
@@ -646,36 +1249,97 @@ export const partyKnowledgeGraph: KnowledgeNode = {
 };
 
 // 诊断问卷选项
-export const diagnosticOptions: DiagnosticOption[] = [
-  // 身份角色（公务员身份）
-  { id: 'r1', label: '厅局级干部', category: 'role', tags: ['领导力提升'] },
-  { id: 'r2', label: '县处级干部', category: 'role', tags: ['行政管理'] },
-  { id: 'r3', label: '乡科级干部', category: 'role', tags: ['基层治理'] },
-  { id: 'r4', label: '科员', category: 'role', tags: ['基础学习'] },
-  { id: 'r5', label: '基层工作人员', category: 'role', tags: ['实务操作'] },
-  { id: 'r6', label: '事业单位人员', category: 'role', tags: ['综合学习'] },
-  // 学习主题（公务员培训方向）
-  { id: 't1', label: '政策理论学习', category: 'topic', tags: ['理论学习'] },
-  { id: 't2', label: '行政管理能力', category: 'topic', tags: ['行政管理'] },
-  { id: 't3', label: '基层治理实务', category: 'topic', tags: ['基层实务'] },
-  { id: 't4', label: '乡村振兴与区域发展', category: 'topic', tags: ['政策解读'] },
-  { id: 't5', label: '廉政教育与纪律建设', category: 'topic', tags: ['警示教育'] },
-  { id: 't6', label: '数字经济与科技创新', category: 'topic', tags: ['前沿专题'] },
-  { id: 't7', label: '公文写作与表达能力', category: 'topic', tags: ['职业技能'] },
-  { id: 't8', label: '法律法规与依法行政', category: 'topic', tags: ['法治专题'] },
-];
+export function getDiagnosticOptions(): DiagnosticOption[] {
+  const roleOptions: DiagnosticOption[] = [
+    { id: 'r1', label: '厅局级干部', category: 'role', tags: ['领导力提升'] },
+    { id: 'r2', label: '县处级干部', category: 'role', tags: ['行政管理'] },
+    { id: 'r3', label: '乡科级干部', category: 'role', tags: ['基层治理'] },
+    { id: 'r4', label: '科员', category: 'role', tags: ['基础学习'] },
+    { id: 'r5', label: '基层工作人员', category: 'role', tags: ['实务操作'] },
+    { id: 'r6', label: '事业单位人员', category: 'role', tags: ['综合学习'] },
+  ];
 
-// 主题映射到对应节点（一级节点）
-export const topicNodeMap: Record<string, string> = {
-  '政策理论学习': 'party-20th-congress',
-  '行政管理能力': 'party-building-basics',
-  '基层治理实务': 'grassroots-party-work',
-  '乡村振兴与区域发展': 'rural-revitalization',
-  '廉政教育与纪律建设': 'disciplinary-style',
-  '数字经济与科技创新': 'party-20th-congress',
-  '公文写作与表达能力': 'party-building-basics',
-  '法律法规与依法行政': 'disciplinary-style',
-};
+  // 从动态图谱的领域标签生成主题选项
+  if (dynamicGraphCache && dynamicGraphCache.children && dynamicGraphCache.children.length > 0) {
+    const allLabels: string[] = [];
+    for (const child of dynamicGraphCache.children) {
+      allLabels.push(...getTopicLabelsForDomain(child.id));
+    }
+    const uniqueLabels = [...new Set(allLabels)];
+    const topicOptions: DiagnosticOption[] = uniqueLabels.map((label, i) => ({
+      id: `t${i + 1}`,
+      label,
+      category: 'topic' as const,
+      tags: [label],
+    }));
+    return [...roleOptions, ...topicOptions];
+  }
+
+  // 回退：静态主题选项
+  const topicOptions: DiagnosticOption[] = [
+    { id: 't1', label: '政策理论学习', category: 'topic', tags: ['理论学习'] },
+    { id: 't2', label: '行政管理能力', category: 'topic', tags: ['行政管理'] },
+    { id: 't3', label: '基层治理实务', category: 'topic', tags: ['基层实务'] },
+    { id: 't4', label: '乡村振兴与区域发展', category: 'topic', tags: ['政策解读'] },
+    { id: 't5', label: '廉政教育与纪律建设', category: 'topic', tags: ['警示教育'] },
+    { id: 't6', label: '数字经济与科技创新', category: 'topic', tags: ['前沿专题'] },
+    { id: 't7', label: '公文写作与表达能力', category: 'topic', tags: ['职业技能'] },
+    { id: 't8', label: '法律法规与依法行政', category: 'topic', tags: ['法治专题'] },
+  ];
+  return [...roleOptions, ...topicOptions];
+}
+
+// 向后兼容: 静态导出（用于 SSR / 初始渲染）
+export const diagnosticOptions: DiagnosticOption[] = getDiagnosticOptions();
+
+// 主题映射到对应节点（一级节点）—— 公务员方向
+export function getTopicNodeMap(): Record<string, string> {
+  if (dynamicGraphCache && dynamicGraphCache.children && dynamicGraphCache.children.length > 0) {
+    const map: Record<string, string> = {};
+    for (const child of dynamicGraphCache.children) {
+      const topicLabels = getTopicLabelsForDomain(child.id);
+      for (const label of topicLabels) {
+        map[label] = child.id;
+      }
+    }
+    return map;
+  }
+  // 回退
+  return {
+    '政策理论学习': 'political-literacy',
+    '行政管理能力': 'administrative-practice',
+    '基层治理实务': 'administrative-practice',
+    '乡村振兴与区域发展': 'administrative-practice',
+    '廉政教育与纪律建设': 'administrative-practice',
+    '数字经济与科技创新': 'comprehensive-ability',
+    '公文写作与表达能力': 'comprehensive-ability',
+    '法律法规与依法行政': 'administrative-practice',
+  };
+}
+
+function getTopicLabelsForDomain(domainId: string): string[] {
+  switch (domainId) {
+    case 'political-literacy':
+      return ['政策理论学习', '党史党建学习', '时政热点研究', '政治理论基础'];
+    case 'administrative-practice':
+      return ['行政管理能力', '基层治理实务', '廉政教育与纪律建设', '法律法规与依法行政', '社会治理创新'];
+    case 'economic-literacy':
+      return ['经济管理能力', '数字经济与科技创新', '乡村振兴与区域发展', '宏观经济政策'];
+    case 'comprehensive-ability':
+      return ['综合能力提升', '公文写作与表达能力', '统战理论学习', '国际视野拓展', '文化建设素养'];
+    default:
+      return [];
+  }
+}
+
+export const topicNodeMap: Record<string, string> = {};
+
+export function initTopicNodeMap() {
+  const map = getTopicNodeMap();
+  for (const [k, v] of Object.entries(map)) {
+    (topicNodeMap as Record<string, string>)[k] = v;
+  }
+}
 
 // 递归查找节点
 export function getNodeById(id: string, node: KnowledgeNode): KnowledgeNode | null {
@@ -814,7 +1478,7 @@ function filterNodes(
   selectedIds: Set<string>
 ): KnowledgeNode | null {
   // 递归过滤子节点
-  let filteredChildren = node.children
+  const filteredChildren = node.children
     ?.map(child => filterNodes(child, selectedIds))
     .filter((child): child is KnowledgeNode => child !== null);
 
@@ -847,67 +1511,72 @@ function filterNodes(
 
 // 角色到节点的映射（导出供诊断结果展示使用）
 export const roleNodeMap: Record<string, string[]> = {
-  '厅局级干部': ['grassroots-party-work', 'party-life'],
-  '县处级干部': ['grassroots-party-work', 'membership-development'],
-  '乡科级干部': ['party-constitution', 'party-history'],
-  '科员': ['party-constitution', 'membership-development'],
-  '基层工作人员': ['party-theory', 'integrity-education'],
-  '事业单位人员': ['party-constitution', 'party-history'],
+  '厅局级干部': ['admin-capability', 'social-governance', 'international-relations'],
+  '县处级干部': ['admin-capability', 'social-governance', 'macro-economy'],
+  '乡科级干部': ['social-governance', 'mass-work', 'rural-development'],
+  '科员': ['official-writing', 'constitution-rules', 'party-theory'],
+  '基层工作人员': ['mass-work', 'social-governance', 'party-theory'],
+  '事业单位人员': ['admin-capability', 'official-writing', 'law-basics'],
 };
 
 // 文本需求关键词匹配词典（公务员培训方向）
 const requirementKeywords: Record<string, { topics: string[]; nodes: string[] }> = {
-  '政策': { topics: ['政策理论学习'], nodes: ['20th-report', 'chinese-modernization'] },
-  '理论': { topics: ['政策理论学习'], nodes: ['party-theory', 'party-constitution'] },
-  '二十大': { topics: ['政策理论学习'], nodes: ['20th-report'] },
+  '政策': { topics: ['政策理论学习'], nodes: ['current-politics', 'chinese-modernization'] },
+  '理论': { topics: ['政策理论学习'], nodes: ['party-theory', 'constitution-rules'] },
+  '二十大': { topics: ['政策理论学习'], nodes: ['current-politics'] },
   '现代化': { topics: ['政策理论学习', '数字经济与科技创新'], nodes: ['chinese-modernization'] },
-  '管理': { topics: ['行政管理能力'], nodes: ['party-life', 'grassroots-party-work'] },
-  '行政': { topics: ['行政管理能力', '法律法规与依法行政'], nodes: ['party-life'] },
-  '领导': { topics: ['行政管理能力'], nodes: ['party-life'] },
-  '基层': { topics: ['基层治理实务'], nodes: ['grassroots-party-work', 'mass-work', 'rural-governance'] },
-  '治理': { topics: ['基层治理实务', '法律法规与依法行政'], nodes: ['grassroots-party-work', 'rural-governance'] },
-  '乡村': { topics: ['乡村振兴与区域发展'], nodes: ['rural-policy', 'rural-governance'] },
-  '振兴': { topics: ['乡村振兴与区域发展'], nodes: ['rural-revitalization', 'rural-policy'] },
-  '三农': { topics: ['乡村振兴与区域发展'], nodes: ['rural-policy', 'rural-governance'] },
-  '区域': { topics: ['乡村振兴与区域发展'], nodes: ['rural-policy'] },
+  '管理': { topics: ['行政管理能力'], nodes: ['admin-capability', 'social-governance'] },
+  '行政': { topics: ['行政管理能力', '法律法规与依法行政'], nodes: ['admin-capability'] },
+  '领导': { topics: ['行政管理能力'], nodes: ['admin-capability'] },
+  '基层': { topics: ['基层治理实务'], nodes: ['social-governance', 'mass-work'] },
+  '治理': { topics: ['基层治理实务', '法律法规与依法行政'], nodes: ['social-governance'] },
+  '乡村': { topics: ['乡村振兴与区域发展'], nodes: ['rural-development'] },
+  '振兴': { topics: ['乡村振兴与区域发展'], nodes: ['rural-development'] },
+  '三农': { topics: ['乡村振兴与区域发展'], nodes: ['rural-development'] },
+  '区域': { topics: ['乡村振兴与区域发展'], nodes: ['rural-development'] },
   '廉政': { topics: ['廉政教育与纪律建设'], nodes: ['integrity-education', 'supervision-system'] },
   '纪律': { topics: ['廉政教育与纪律建设'], nodes: ['integrity-education'] },
   '反腐': { topics: ['廉政教育与纪律建设'], nodes: ['integrity-education', 'supervision-system'] },
   '作风': { topics: ['廉政教育与纪律建设'], nodes: ['integrity-education'] },
-  '数字': { topics: ['数字经济与科技创新'], nodes: ['chinese-modernization'] },
-  '经济': { topics: ['数字经济与科技创新', '乡村振兴与区域发展'], nodes: ['chinese-modernization', 'rural-policy'] },
-  '科技': { topics: ['数字经济与科技创新'], nodes: ['chinese-modernization'] },
-  '创新': { topics: ['数字经济与科技创新'], nodes: ['chinese-modernization'] },
-  '智能': { topics: ['数字经济与科技创新'], nodes: ['chinese-modernization'] },
-  '公文': { topics: ['公文写作与表达能力'], nodes: ['party-life'] },
-  '写作': { topics: ['公文写作与表达能力'], nodes: ['party-life'] },
-  '表达': { topics: ['公文写作与表达能力'], nodes: ['party-life'] },
-  '法律': { topics: ['法律法规与依法行政'], nodes: ['supervision-system'] },
-  '法规': { topics: ['法律法规与依法行政'], nodes: ['supervision-system'] },
-  '依法': { topics: ['法律法规与依法行政'], nodes: ['supervision-system'] },
-  '法治': { topics: ['法律法规与依法行政'], nodes: ['supervision-system'] },
-  '党建': { topics: ['政策理论学习', '行政管理能力'], nodes: ['party-constitution', 'party-history', 'party-building-basics'] },
-  '组织': { topics: ['行政管理能力'], nodes: ['party-life', 'membership-development'] },
-  '人事': { topics: ['行政管理能力'], nodes: ['party-life'] },
-  '考核': { topics: ['行政管理能力'], nodes: ['party-life'] },
-  '应急': { topics: ['行政管理能力', '基层治理实务'], nodes: ['grassroots-party-work'] },
+  '数字': { topics: ['数字经济与科技创新'], nodes: ['digital-economy'] },
+  '经济': { topics: ['数字经济与科技创新', '乡村振兴与区域发展'], nodes: ['macro-economy', 'rural-development'] },
+  '科技': { topics: ['数字经济与科技创新'], nodes: ['digital-economy'] },
+  '创新': { topics: ['数字经济与科技创新'], nodes: ['digital-economy'] },
+  '智能': { topics: ['数字经济与科技创新'], nodes: ['digital-economy'] },
+  '公文': { topics: ['公文写作与表达能力'], nodes: ['official-writing'] },
+  '写作': { topics: ['公文写作与表达能力'], nodes: ['official-writing'] },
+  '表达': { topics: ['公文写作与表达能力'], nodes: ['official-writing'] },
+  '法律': { topics: ['法律法规与依法行政'], nodes: ['law-basics'] },
+  '法规': { topics: ['法律法规与依法行政'], nodes: ['law-basics'] },
+  '依法': { topics: ['法律法规与依法行政'], nodes: ['law-basics'] },
+  '法治': { topics: ['法律法规与依法行政'], nodes: ['law-basics'] },
+  '党建': { topics: ['政策理论学习', '行政管理能力'], nodes: ['constitution-rules', 'party-history', 'party-building-practice'] },
+  '组织': { topics: ['行政管理能力'], nodes: ['admin-capability', 'party-building-practice'] },
+  '人事': { topics: ['行政管理能力'], nodes: ['admin-capability'] },
+  '考核': { topics: ['行政管理能力'], nodes: ['admin-capability'] },
+  '应急': { topics: ['行政管理能力', '基层治理实务'], nodes: ['social-governance'] },
   '信访': { topics: ['基层治理实务', '法律法规与依法行政'], nodes: ['mass-work'] },
-  '民生': { topics: ['基层治理实务', '乡村振兴与区域发展'], nodes: ['mass-work', 'rural-policy'] },
-  '服务': { topics: ['基层治理实务', '行政管理能力'], nodes: ['mass-work', 'party-life'] },
-  '统战': { topics: ['政策理论学习', '行政管理能力'], nodes: ['party-life', 'membership-development', 'party-constitution'] },
-  '协商民主': { topics: ['政策理论学习', '行政管理能力'], nodes: ['party-life', 'party-constitution'] },
-  '新型政党': { topics: ['政策理论学习'], nodes: ['party-theory', 'party-constitution'] },
-  '意识形态': { topics: ['政策理论学习', '公文写作与表达能力'], nodes: ['mass-work', 'party-theory'] },
+  '民生': { topics: ['基层治理实务', '乡村振兴与区域发展'], nodes: ['mass-work', 'rural-development'] },
+  '服务': { topics: ['基层治理实务', '行政管理能力'], nodes: ['mass-work', 'admin-capability'] },
+  '统战': { topics: ['政策理论学习', '统战理论学习'], nodes: ['united-front', 'deliberative-democracy'] },
+  '协商民主': { topics: ['政策理论学习', '统战理论学习'], nodes: ['deliberative-democracy'] },
+  '新型政党': { topics: ['政策理论学习'], nodes: ['party-theory', 'united-front'] },
+  '意识形态': { topics: ['政策理论学习', '公文写作与表达能力'], nodes: ['ideology-work', 'party-theory'] },
   '国家安全': { topics: ['政策理论学习', '法律法规与依法行政'], nodes: ['supervision-system'] },
-  '培训班': { topics: ['行政管理能力', '基层治理实务'], nodes: ['party-life', 'grassroots-party-work'] },
-  '参政议政': { topics: ['政策理论学习'], nodes: ['party-life', 'party-theory'] },
-  '生态文明': { topics: ['政策理论学习', '乡村振兴与区域发展'], nodes: ['party-theory', 'rural-policy'] },
-  '共同富裕': { topics: ['乡村振兴与区域发展', '政策理论学习'], nodes: ['rural-policy', 'chinese-modernization'] },
-  '脱贫攻坚': { topics: ['乡村振兴与区域发展'], nodes: ['rural-policy'] },
-  '扫黑除恶': { topics: ['基层治理实务', '法律法规与依法行政'], nodes: ['party-life', 'supervision-system'] },
-  '疫情防控': { topics: ['行政管理能力', '基层治理实务'], nodes: ['party-life'] },
-  '干部教育': { topics: ['行政管理能力', '政策理论学习'], nodes: ['party-life', 'party-theory'] },
-  '党员领导': { topics: ['行政管理能力'], nodes: ['party-life'] },
+  '培训班': { topics: ['行政管理能力', '基层治理实务'], nodes: ['admin-capability', 'social-governance'] },
+  '参政议政': { topics: ['政策理论学习'], nodes: ['deliberative-democracy'] },
+  '生态文明': { topics: ['政策理论学习', '乡村振兴与区域发展'], nodes: ['party-theory', 'rural-development'] },
+  '共同富裕': { topics: ['乡村振兴与区域发展', '政策理论学习'], nodes: ['rural-development', 'chinese-modernization'] },
+  '脱贫攻坚': { topics: ['乡村振兴与区域发展'], nodes: ['rural-development'] },
+  '扫黑除恶': { topics: ['基层治理实务', '法律法规与依法行政'], nodes: ['social-governance', 'law-basics'] },
+  '疫情防控': { topics: ['行政管理能力', '基层治理实务'], nodes: ['admin-capability'] },
+  '干部教育': { topics: ['行政管理能力', '政策理论学习'], nodes: ['admin-capability', 'party-theory'] },
+  '党员领导': { topics: ['行政管理能力'], nodes: ['admin-capability'] },
+  '国际': { topics: ['国际视野拓展'], nodes: ['international-relations', 'global-governance'] },
+  '外交': { topics: ['国际视野拓展'], nodes: ['international-relations'] },
+  '文化': { topics: ['文化建设素养'], nodes: ['cultural-confidence', 'ideology-work'] },
+  '统战理论': { topics: ['统战理论学习'], nodes: ['united-front'] },
+  '民主协商': { topics: ['统战理论学习'], nodes: ['deliberative-democracy'] },
 };
 
 // 分析用户文本需求，匹配知识图谱节点和主题
@@ -951,12 +1620,13 @@ export interface KnowledgeBaseNodeSummary {
 }
 
 export function getKnowledgeBaseCoverage(): KnowledgeBaseNodeSummary[] {
+  const effectiveGraph = dynamicGraphCache || partyKnowledgeGraph;
   const nodeNameMap: Record<string, string> = {};
   function collectNames(node: KnowledgeNode) {
     nodeNameMap[node.id] = node.name;
     if (node.children) node.children.forEach(collectNames);
   }
-  collectNames(partyKnowledgeGraph);
+  collectNames(effectiveGraph);
 
   const summaries: KnowledgeBaseNodeSummary[] = [];
 
@@ -1004,46 +1674,51 @@ export function generateLearningPath(profile: {
   });
 
   allTopics.forEach(topic => {
-    const nodeId = topicNodeMap[topic];
+    const effectiveTopicMap = Object.keys(topicNodeMap).length > 0 ? topicNodeMap : getTopicNodeMap();
+    const nodeId = effectiveTopicMap[topic];
     if (nodeId) selectedIds.add(nodeId);
   });
 
   // 添加父节点
-  const parentMap: Record<string, string> = {
-    'party-constitution': 'party-building-basics',
-    'party-history': 'party-building-basics',
-    'party-theory': 'party-building-basics',
-    '20th-report': 'party-20th-congress',
-    'chinese-modernization': 'party-20th-congress',
-    'comprehensive-strict-governance': 'party-20th-congress',
-    'membership-development': 'grassroots-party-work',
-    'party-life': 'grassroots-party-work',
-    'mass-work': 'grassroots-party-work',
-    'rural-policy': 'rural-revitalization',
-    'rural-governance': 'rural-revitalization',
-    'integrity-education': 'disciplinary-style',
-    'supervision-system': 'disciplinary-style',
-  };
+  const effectiveParentMap = Object.keys(dynamicParentMap).length > 0
+    ? dynamicParentMap
+    : {
+        'party-constitution': 'party-building-basics',
+        'party-history': 'party-building-basics',
+        'party-theory': 'party-building-basics',
+        '20th-report': 'party-20th-congress',
+        'chinese-modernization': 'party-20th-congress',
+        'comprehensive-strict-governance': 'party-20th-congress',
+        'membership-development': 'grassroots-party-work',
+        'party-life': 'grassroots-party-work',
+        'mass-work': 'grassroots-party-work',
+        'rural-policy': 'rural-revitalization',
+        'rural-governance': 'rural-revitalization',
+        'integrity-education': 'disciplinary-style',
+        'supervision-system': 'disciplinary-style',
+      };
   
   selectedIds.forEach(id => {
-    const parentId = parentMap[id];
+    const parentId = effectiveParentMap[id];
     if (parentId) {
       selectedIds.add(parentId);
     }
   });
   
   // 添加子节点（当选中父节点时，自动包含其子节点）
-  const childrenMap: Record<string, string[]> = {
-    'rural-revitalization': ['rural-policy', 'rural-governance'],
-    'party-20th-congress': ['20th-report', 'chinese-modernization', 'comprehensive-strict-governance'],
-    'grassroots-party-work': ['membership-development', 'party-life', 'mass-work'],
-    'party-building-basics': ['party-constitution', 'party-history', 'party-theory'],
-    'disciplinary-style': ['integrity-education', 'supervision-system'],
-  };
+  const effectiveChildrenMap = Object.keys(dynamicChildrenMap).length > 0
+    ? dynamicChildrenMap
+    : {
+        'rural-revitalization': ['rural-policy', 'rural-governance'],
+        'party-20th-congress': ['20th-report', 'chinese-modernization', 'comprehensive-strict-governance'],
+        'grassroots-party-work': ['membership-development', 'party-life', 'mass-work'],
+        'party-building-basics': ['party-constitution', 'party-history', 'party-theory'],
+        'disciplinary-style': ['integrity-education', 'supervision-system'],
+      };
   
   const idsToAdd: string[] = [];
   selectedIds.forEach(id => {
-    const children = childrenMap[id];
+    const children = effectiveChildrenMap[id];
     if (children) {
       children.forEach(childId => {
         if (!selectedIds.has(childId)) {
@@ -1054,8 +1729,24 @@ export function generateLearningPath(profile: {
   });
   idsToAdd.forEach(id => selectedIds.add(id));
   
-  // 筛选并构建学习路径（不进行难度筛选）
-  const filteredRoot = filterNodes(partyKnowledgeGraph, selectedIds);
+  // 筛选并构建学习路径（根据难度进行筛选）
+  const effectiveGraph = dynamicGraphCache || partyKnowledgeGraph;
+  let filteredRoot = filterNodes(effectiveGraph, selectedIds);
+
+  // 根据难度筛选节点：入门级保留难度1，进阶级保留≤2，深入级保留全部
+  if (filteredRoot && profile.level) {
+    const difficultyFilter = (node: KnowledgeNode): KnowledgeNode | null => {
+      const maxDifficulty = profile.level === 'beginner' ? 1 : profile.level === 'intermediate' ? 2 : 99;
+      if (node.difficulty && node.difficulty > maxDifficulty) return null;
+      if (!node.children) return node;
+      const filteredChildren = node.children
+        .map(difficultyFilter)
+        .filter((c): c is KnowledgeNode => c !== null);
+      if (filteredChildren.length === 0 && node.level > 0) return null;
+      return { ...node, children: filteredChildren };
+    };
+    filteredRoot = difficultyFilter(filteredRoot);
+  }
   
   // 计算总时长
   let totalDuration = 0;
@@ -1071,20 +1762,49 @@ export function generateLearningPath(profile: {
     calcDuration(filteredRoot);
   }
   
-  // 生成标题
+  // 生成标题和描述（含诊断详情）
   const selectedRole = profile.roles[0] || '干部';
   const selectedTopic = allTopics[0] || '综合学习';
   const hasCustomReq = profile.customRequirements && profile.customRequirements.trim();
-  
+  const levelLabel = profile.level === 'beginner' ? '入门级' : profile.level === 'intermediate' ? '进阶级' : '深入级';
+
+  // 统计匹配节点数和课程数
+  let matchedNodeCount = 0;
+  let matchedCourseCount = 0;
+  const matchedNodeNames: string[] = [];
+  function countNodes(node: KnowledgeNode) {
+    matchedNodeCount++;
+    if (node.name) matchedNodeNames.push(node.name);
+    if (node.courses && node.courses.length > 0) {
+      matchedCourseCount += node.courses.length;
+    }
+    if (node.children) node.children.forEach(countNodes);
+  }
+  if (filteredRoot) countNodes(filteredRoot);
+
+  // 生成包含诊断信息的描述
+  let description = `学习深度: ${levelLabel}`;
+  if (hasCustomReq) {
+    description += ` | 需求分析: 「${profile.customRequirements!.slice(0, 40)}${profile.customRequirements!.length > 40 ? '...' : ''}」`;
+    const analysis = analyzeRequirements(profile.customRequirements!);
+    if (analysis.keywords.length > 0) {
+      description += `\n识别关键词: ${analysis.keywords.join('、')}`;
+      description += `\n匹配方向: ${analysis.matchedTopics.join('、')}`;
+    }
+  }
+  description += `\n匹配知识节点: ${matchedNodeCount}个 | 关联课程: ${matchedCourseCount}门`;
+
   return {
     id: `path-${Date.now()}`,
     title: `${selectedRole} · ${selectedTopic}${hasCustomReq ? '（个性化定制）' : ''}`,
-    description: hasCustomReq
-      ? `根据您的身份、主题偏好及学习需求「${profile.customRequirements!.slice(0, 30)}${profile.customRequirements!.length > 30 ? '...' : ''}」，为您智能规划个性化学习方案`
-      : `基于您的选择，为您规划个性化学习方案`,
-    rootNode: injectCoursesRecursive(filteredRoot || partyKnowledgeGraph),
+    description,
+    rootNode: injectCoursesRecursive(filteredRoot || effectiveGraph),
     totalDuration: totalDuration || 120,
-    difficulty: (profile.level as 'beginner' | 'intermediate' | 'advanced') || 'beginner'
+    difficulty: (profile.level as 'beginner' | 'intermediate' | 'advanced') || 'beginner',
+    matchedNodeCount,
+    matchedCourseCount,
+    matchedTopics: allTopics,
+    matchedNodes: Array.from(selectedIds).slice(0, 20),
   };
 }
 
@@ -1096,20 +1816,28 @@ export function analyzeIntent(userInput: string): { keywords: string[]; matchedP
   
   // 关键词匹配
   const keywordMap: Record<string, string> = {
-    '入党': 'membership-development',
-    '党员': 'party-constitution',
-    '发展': 'membership-development',
-    '二十大': '20th-report',
+    '入党': 'party-building-practice',
+    '党员': 'party-building-practice',
+    '发展': 'party-building-practice',
+    '二十大': 'current-politics',
     '现代化': 'chinese-modernization',
-    '乡村': 'rural-revitalization',
-    '振兴': 'rural-policy',
+    '乡村': 'rural-development',
+    '振兴': 'rural-development',
     '廉政': 'integrity-education',
     '监督': 'supervision-system',
     '党史': 'party-history',
-    '党章': 'party-constitution',
+    '党章': 'constitution-rules',
     '群众': 'mass-work',
-    '组织': 'party-life',
-    '支部': 'party-life',
+    '组织': 'admin-capability',
+    '支部': 'party-building-practice',
+    '经济': 'macro-economy',
+    '法律': 'law-basics',
+    '国际': 'international-relations',
+    '文化': 'cultural-confidence',
+    '公文': 'official-writing',
+    '数字': 'digital-economy',
+    '基层': 'social-governance',
+    '统战': 'united-front',
   };
   
   for (const [keyword, path] of Object.entries(keywordMap)) {
@@ -1124,5 +1852,6 @@ export function analyzeIntent(userInput: string): { keywords: string[]; matchedP
 
 // 获取节点详情
 export function getNodeDetails(nodeId: string): KnowledgeNode | null {
-  return getNodeById(nodeId, partyKnowledgeGraph);
+  const effectiveGraph = dynamicGraphCache || partyKnowledgeGraph;
+  return getNodeById(nodeId, effectiveGraph);
 }

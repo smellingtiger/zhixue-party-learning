@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
 
     const docs = paged.map((f: any) => ({
       id: f.id,
+      title: f.title,
       courseName: f.title,
       category: f.category,
       paragraphCount: f.paragraph_count,

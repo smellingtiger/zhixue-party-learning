@@ -51,6 +51,10 @@ export interface LearningPath {
   rootNode: KnowledgeNode;
   totalDuration: number;
   difficulty: 'beginner' | 'intermediate' | 'advanced';
+  matchedNodeCount?: number;
+  matchedCourseCount?: number;
+  matchedTopics?: string[];
+  matchedNodes?: string[];
 }
 
 // 用户画像
