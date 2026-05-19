@@ -1,0 +1,4918 @@
+{
+  "totalCourses": 5447,
+  "apiDocCount": 565,
+  "matchedCount": 437,
+  "unmatchedCount": 5010,
+  "treeStructure": {
+    "id": "root",
+    "name": "精英在线智能学习体系",
+    "children": [
+      {
+        "id": "party-building-basics",
+        "name": "党建基础理论",
+        "children": [
+          {
+            "id": "party-constitution",
+            "name": "党章学习"
+          },
+          {
+            "id": "party-history",
+            "name": "党史学习"
+          },
+          {
+            "id": "party-theory",
+            "name": "党的创新理论"
+          }
+        ]
+      },
+      {
+        "id": "party-20th-congress",
+        "name": "二十大精神学习",
+        "children": [
+          {
+            "id": "20th-report",
+            "name": "二十大报告解读"
+          },
+          {
+            "id": "chinese-modernization",
+            "name": "中国式现代化"
+          },
+          {
+            "id": "comprehensive-strict-governance",
+            "name": "全面从严治党"
+          }
+        ]
+      },
+      {
+        "id": "grassroots-party-work",
+        "name": "基层党务工作",
+        "children": [
+          {
+            "id": "membership-development",
+            "name": "发展党员工作"
+          },
+          {
+            "id": "party-life",
+            "name": "党的组织生活"
+          },
+          {
+            "id": "mass-work",
+            "name": "群众工作方法"
+          }
+        ]
+      },
+      {
+        "id": "rural-revitalization",
+        "name": "乡村振兴战略",
+        "children": [
+          {
+            "id": "rural-policy",
+            "name": "乡村振兴政策"
+          },
+          {
+            "id": "rural-governance",
+            "name": "乡村治理现代化"
+          }
+        ]
+      },
+      {
+        "id": "disciplinary-style",
+        "name": "党风廉政建设",
+        "children": [
+          {
+            "id": "integrity-education",
+            "name": "廉政教育"
+          },
+          {
+            "id": "supervision-system",
+            "name": "监督执纪体系"
+          }
+        ]
+      }
+    ]
+  },
+  "treeResult": {
+    "party-building-basics": {
+      "nodeId": "party-building-basics",
+      "nodeName": "党建基础理论",
+      "parentName": "精英在线智能学习体系",
+      "courses": 0,
+      "matchedApiDocs": [],
+      "sampleCourses": []
+    },
+    "party-constitution": {
+      "nodeId": "party-constitution",
+      "nodeName": "党章学习",
+      "parentName": "党建基础理论",
+      "courses": 1513,
+      "matchedApiDocs": [
+        {
+          "id": "e190dbc4-0eed-5ff8-8cbd-0aeee7d28b2d",
+          "courseName": "NGC02I0419035_1904",
+          "category": "国家治理",
+          "paragraphCount": 19,
+          "fileName": "中国海外利益的发展布局.txt"
+        },
+        {
+          "id": "4225acee-00be-5a92-b76b-a5bf5201892f",
+          "courseName": "NGC02I0519035_1904",
+          "category": "国家治理",
+          "paragraphCount": 19,
+          "fileName": "中国海外利益的拓展与维护.txt"
+        },
+        {
+          "id": "e3b72243-ff53-5443-9e4f-75468ecd936b",
+          "courseName": "GC03I0216015_1604",
+          "category": "国家治理",
+          "paragraphCount": 21,
+          "fileName": "当前境外涉华舆情新变化与应对思路.txt"
+        },
+        {
+          "id": "ff948f34-eaa4-5d4c-9a1c-fd20d03df0ac",
+          "courseName": "GC03I0316015_1604",
+          "category": "国家治理",
+          "paragraphCount": 11,
+          "fileName": "当前朝鲜半岛形势及中国的应对.txt"
+        },
+        {
+          "id": "4c9515e7-7cfc-5c8e-a355-f7d20f2012ed",
+          "courseName": "GC03A0816085_1608",
+          "category": "国家治理",
+          "paragraphCount": 19,
+          "fileName": "《中国制造2025》与智能制造：战略要点与政策思路（上）.txt"
+        },
+        {
+          "id": "bf470a28-7cc9-5a80-80ac-88935e1c064b",
+          "courseName": "GC03A0916085_1608",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "《中国制造2025》与智能制造：战略要点与政策思路（下）.txt"
+        },
+        {
+          "id": "01973197-061c-5414-aa9d-2994311585be",
+          "courseName": "GC03C0616015_1610",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "解读南海问题.txt"
+        },
+        {
+          "id": "0b7c7eeb-d854-5b6f-89be-d90cced7c099",
+          "courseName": "GC03C0816055_1611",
+          "category": "国家治理",
+          "paragraphCount": 13,
+          "fileName": "透视“中等收入陷阱”.txt"
+        },
+        {
+          "id": "76782814-5e3f-5aba-9838-768d4fcf1eef",
+          "courseName": "GC03A0218065_1808",
+          "category": "国家治理",
+          "paragraphCount": 8,
+          "fileName": "地方债及其风险.txt"
+        },
+        {
+          "id": "05583534-6c23-5791-84d3-5f71344b696d",
+          "courseName": "NGC03I0324025_2402",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "发展新质生产力，激发产业新活力、锻造产业竞争力（上）.txt"
+        },
+        {
+          "id": "67da1e56-1738-51f6-8c3c-3bb9925c017a",
+          "courseName": "NGC03I0424025_2402",
+          "category": "国家治理",
+          "paragraphCount": 14,
+          "fileName": "发展新质生产力，激发产业新活力、锻造产业竞争力（中）.txt"
+        },
+        {
+          "id": "8774c285-12e2-505d-9ce2-512d5d5c2da8",
+          "courseName": "NGC03I0524025_2402",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "发展新质生产力，激发产业新活力、锻造产业竞争力（下）.txt"
+        },
+        {
+          "id": "d37d90b7-899a-5d20-9533-8f6b1d2207c7",
+          "courseName": "GC03I2016015_1602",
+          "category": "政治理论",
+          "paragraphCount": 16,
+          "fileName": "中国道路与中国梦（上）.txt"
+        },
+        {
+          "id": "6aa867c7-4a9a-53a6-b169-a4477ce03262",
+          "courseName": "GC03I2116015_1602",
+          "category": "政治理论",
+          "paragraphCount": 26,
+          "fileName": "中国道路与中国梦（下）.txt"
+        },
+        {
+          "id": "4653967f-9b96-5e0b-8477-3f41eb556f2b",
+          "courseName": "GC04I1216105_1611",
+          "category": "国家治理",
+          "paragraphCount": 20,
+          "fileName": "中国力量与智慧引领世界可持续发展.txt"
+        },
+        {
+          "id": "96d3c727-566b-5148-94ca-85eec5682dba",
+          "courseName": "GC04K1516015_1611",
+          "category": "国家治理",
+          "paragraphCount": 9,
+          "fileName": "司法体制改革的回顾与反思（上）.txt"
+        },
+        {
+          "id": "a2cd13ba-69c8-53aa-b26e-c76e20733389",
+          "courseName": "GC04K1616015_1611",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "司法体制改革的回顾与反思（下）.txt"
+        },
+        {
+          "id": "3f123b9e-6ea7-5319-856b-f169bd264623",
+          "courseName": "HGC05I0621075_2108",
+          "category": "国家治理",
+          "paragraphCount": 11,
+          "fileName": "敢于斗争：勇于依靠斗争去赢得未来（上）.txt"
+        },
+        {
+          "id": "e99451cd-4e01-5566-958f-218c356378ee",
+          "courseName": "HGC05I0721075_2108",
+          "category": "国家治理",
+          "paragraphCount": 14,
+          "fileName": "敢于斗争：勇于依靠斗争去赢得未来（下）.txt"
+        },
+        {
+          "id": "5e9039af-ea23-5bac-b95b-fe96a903349a",
+          "courseName": "DSPTXYZY20073123",
+          "category": "国家治理",
+          "paragraphCount": 27,
+          "fileName": "贯彻行政诉讼法推进依法行政.txt"
+        },
+        {
+          "id": "c20499c6-c79f-5494-b606-0ddd5cf26d83",
+          "courseName": "GC06I0419105_1911",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "坚决打好防范化解重大风险攻坚战.txt"
+        },
+        {
+          "id": "f803479d-1508-59a8-af12-dc85f7d34ed3",
+          "courseName": "HGC07I0920115_2012",
+          "category": "国家治理",
+          "paragraphCount": 14,
+          "fileName": "深刻把握规律，一体推进“三不”建设（上）.txt"
+        },
+        {
+          "id": "7d0c3c5a-064a-5c90-b796-5e4561beb60b",
+          "courseName": "HGC07I1020115_2012",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "深刻把握规律，一体推进“三不”建设（下）.txt"
+        },
+        {
+          "id": "3ebd8c7c-5186-599c-8065-12d2bcfd2217",
+          "courseName": "GC09N2416095_1610",
+          "category": "政治理论",
+          "paragraphCount": 23,
+          "fileName": "中国道路的价值底蕴.txt"
+        },
+        {
+          "id": "75f911f1-16f1-5881-8744-4ecf1dd6080e",
+          "courseName": "GC09N2318065_1806",
+          "category": "政治理论",
+          "paragraphCount": 23,
+          "fileName": "历史虚无主义思潮的根源、表现及危害.txt"
+        },
+        {
+          "id": "51d66fa5-89e2-5689-9851-160eb7d031b0",
+          "courseName": "GC09A3118105_1810",
+          "category": "统战理论",
+          "paragraphCount": 10,
+          "fileName": "推动构建新型政商关系.txt"
+        },
+        {
+          "id": "a227e8c0-0785-5675-a485-00af6f2fe9ef",
+          "courseName": "GC09I2218115_1812",
+          "category": "政治理论",
+          "paragraphCount": 23,
+          "fileName": "五大发展理念的丰富内涵和相互关系.txt"
+        },
+        {
+          "id": "adadf0f4-30aa-5cfb-9a3d-8fcf5f2254e0",
+          "courseName": "GC09N0519095_1910",
+          "category": "政治理论",
+          "paragraphCount": 11,
+          "fileName": "政党的基本知识（上）.txt"
+        },
+        {
+          "id": "2061218b-58f3-558d-ae10-8dce92ae55b1",
+          "courseName": "GC09N0619095_1910",
+          "category": "政治理论",
+          "paragraphCount": 12,
+          "fileName": "政党的基本知识（下）.txt"
+        },
+        {
+          "id": "5b9237fb-4796-5931-8c00-55f06bd39bd5",
+          "courseName": "NGC09I1319115_1912",
+          "category": "统战理论",
+          "paragraphCount": 5,
+          "fileName": "以正确义利观加强同发展中国家团结合作（上）.txt"
+        },
+        {
+          "id": "49ab778a-e3f3-5128-a5cc-162e42293d15",
+          "courseName": "NGC09I1419115_1912",
+          "category": "统战理论",
+          "paragraphCount": 8,
+          "fileName": "以正确义利观加强同发展中国家团结合作（下）.txt"
+        },
+        {
+          "id": "ab7ae001-d178-5b6e-9482-ad02741cb4bc",
+          "courseName": "GC13I1915065_1508",
+          "category": "国家治理",
+          "paragraphCount": 23,
+          "fileName": "城乡发展一体化问题研究.txt"
+        },
+        {
+          "id": "cfae47a9-e241-5ee8-8135-64d913221348",
+          "courseName": "GC14A2119015_1901",
+          "category": "国家治理",
+          "paragraphCount": 6,
+          "fileName": "如何打破城市化速度制约.txt"
+        },
+        {
+          "id": "ca672c19-9079-5b9d-b183-7bf89de28bef",
+          "courseName": "GC16I2915015_1503",
+          "category": "政治理论",
+          "paragraphCount": 14,
+          "fileName": "宪法学的基本知识（上）.txt"
+        },
+        {
+          "id": "0a6bb89a-fe97-5149-8e78-8642f2acd83a",
+          "courseName": "GC16I3015015_1503",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "宪法学的基本知识（下）.txt"
+        },
+        {
+          "id": "7dcf740b-0093-54c9-8b1e-454f925a8e32",
+          "courseName": "HGC16I0921035_2105",
+          "category": "统战理论",
+          "paragraphCount": 6,
+          "fileName": "《中国共产党统一战线工作条例》解读（上）.txt"
+        },
+        {
+          "id": "cefc05f8-b0a1-575a-ab84-fe7829016350",
+          "courseName": "HGC16I1021035_2105",
+          "category": "统战理论",
+          "paragraphCount": 11,
+          "fileName": "《中国共产党统一战线工作条例》解读（中）.txt"
+        },
+        {
+          "id": "984fac29-9984-502a-b69d-ff1bd8e0738e",
+          "courseName": "HGC16I1121035_2105",
+          "category": "统战理论",
+          "paragraphCount": 8,
+          "fileName": "《中国共产党统一战线工作条例》解读（下）.txt"
+        },
+        {
+          "id": "05dd0804-70f1-533e-8aa7-586be32a5fe9",
+          "courseName": "GC22I4215095_1510",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "国有企业改革若干问题.txt"
+        },
+        {
+          "id": "db698461-9cca-583b-adee-6f3367c28733",
+          "courseName": "GC36I4715125_1512",
+          "category": "国家治理",
+          "paragraphCount": 24,
+          "fileName": "21世纪海上丝绸之路与海洋强国梦.txt"
+        },
+        {
+          "id": "875abf9a-e3d2-5374-8b9d-96ff0c3935d0",
+          "courseName": "GC39I0515115_1511",
+          "category": "政治理论",
+          "paragraphCount": 35,
+          "fileName": "“十三五”发展新理念之协调：协调发展战略和重点.txt"
+        },
+        {
+          "id": "d4ab8144-64b9-5885-a91c-0256e8f7c8d7",
+          "courseName": "GC39I0815115_1511",
+          "category": "政治理论",
+          "paragraphCount": 32,
+          "fileName": "“十三五”发展新理念之开放：深化对改革发展的理念认识.txt"
+        },
+        {
+          "id": "4debf55d-fb50-5047-adc1-b40d3628b279",
+          "courseName": "GC44N4216085_1609",
+          "category": "政治理论",
+          "paragraphCount": 17,
+          "fileName": "执政党为何要坚持“赶考”，如何做好长期执政“考试”的课题.txt"
+        },
+        {
+          "id": "42e3c2c2-c6d0-5785-b3fa-4c7b53d18932",
+          "courseName": "GC44I4416085_1609",
+          "category": "政治理论",
+          "paragraphCount": 25,
+          "fileName": "回顾历史、坚定信念，不忘初心、继续前进——学习习近平总书记“七一”重要讲话（上）.txt"
+        },
+        {
+          "id": "dd41e293-3d35-562e-907a-551ac1088210",
+          "courseName": "GC44I4516085_1609",
+          "category": "政治理论",
+          "paragraphCount": 25,
+          "fileName": "回顾历史、坚定信念，不忘初心、继续前进——学习习近平总书记“七一”重要讲话（下）.txt"
+        },
+        {
+          "id": "61e2527d-e355-5f41-907b-619a00053ff4",
+          "courseName": "DSPTXYZY20073106",
+          "category": "国家治理",
+          "paragraphCount": 29,
+          "fileName": "2018年政府工作报告.txt"
+        },
+        {
+          "id": "2a9eaa26-2ad8-54bd-a1b9-abc257e3cd2f",
+          "courseName": "DSPTXYZY20041713",
+          "category": "政治理论",
+          "paragraphCount": 6,
+          "fileName": "学习习近平总书记在深化党和国家机构改革总结会议上的重要讲话.txt"
+        },
+        {
+          "id": "b474955b-330b-5a5e-80e6-f7719e4f6293",
+          "courseName": "GC71I2519065_1907",
+          "category": "政治理论",
+          "paragraphCount": 10,
+          "fileName": "旗帜鲜明，坚决反对历史虚无主义.txt"
+        },
+        {
+          "id": "010cfaa3-abea-5e53-a856-084c2fbcb4c9",
+          "courseName": "NGC71I3019065_1907",
+          "category": "政治理论",
+          "paragraphCount": 11,
+          "fileName": "伟大斗争：进行伟大斗争时代和历史特点（上）.txt"
+        },
+        {
+          "id": "776f8268-aa69-54f1-933b-f0bd6337c758",
+          "courseName": "NGC71I3119065_1907",
+          "category": "政治理论",
+          "paragraphCount": 17,
+          "fileName": "伟大斗争：进行伟大斗争时代和历史特点（下）.txt"
+        },
+        {
+          "id": "1f6d62ce-76f7-5810-9f73-8237bd4cf002",
+          "courseName": "GC71I3219075_1908",
+          "category": "政治理论",
+          "paragraphCount": 11,
+          "fileName": "深刻理解习近平总书记关于“不忘初心、牢记使命”的重要论述（上）.txt"
+        },
+        {
+          "id": "fd2d35b6-443f-530a-9d5c-2215fdd3cce7",
+          "courseName": "GC71I3319075_1908",
+          "category": "政治理论",
+          "paragraphCount": 16,
+          "fileName": "深刻理解习近平总书记关于“不忘初心、牢记使命”的重要论述（下）.txt"
+        },
+        {
+          "id": "49689921-b7c3-56ce-bb5e-f25349d89377",
+          "courseName": "NGC71I4519095_1910",
+          "category": "政治理论",
+          "paragraphCount": 16,
+          "fileName": "中国道路为什么“好”（上）.txt"
+        },
+        {
+          "id": "e34868b7-55e3-587b-bb39-285c2d1a7ee5",
+          "courseName": "NGC71I4619095_1910",
+          "category": "政治理论",
+          "paragraphCount": 10,
+          "fileName": "中国道路为什么“好”（下）.txt"
+        },
+        {
+          "id": "955b6048-f5d2-5504-9b9a-af38bab84a44",
+          "courseName": "NGC71I4719095_1910",
+          "category": "政治理论",
+          "paragraphCount": 9,
+          "fileName": "中国共产党为什么“能”（上）.txt"
+        },
+        {
+          "id": "d98b2a45-2432-5725-bafc-87838e5444d5",
+          "courseName": "NGC71I4819095_1910",
+          "category": "政治理论",
+          "paragraphCount": 9,
+          "fileName": "中国共产党为什么“能”（下）.txt"
+        },
+        {
+          "id": "28ed260d-ba20-55f4-a160-a38b7a7521bd",
+          "courseName": "GC71N1519125_2001",
+          "category": "政治理论",
+          "paragraphCount": 10,
+          "fileName": "中国共产党何以能够生机勃勃（上）.txt"
+        },
+        {
+          "id": "4115bde4-393f-5abb-b3d1-36ccb6a2d7b0",
+          "courseName": "GC71N1619125_2001",
+          "category": "政治理论",
+          "paragraphCount": 18,
+          "fileName": "中国共产党何以能够生机勃勃（下）.txt"
+        },
+        {
+          "id": "b2229e32-333a-5012-bf51-d8e8d535bbd0",
+          "courseName": "HGC20111903",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "加强党的全面领导，健全规划制定和落实机制（上）.txt"
+        },
+        {
+          "id": "4a8ca115-3a9c-5abb-b8e6-c1b652ffe7ad",
+          "courseName": "HGC20111904",
+          "category": "政治理论",
+          "paragraphCount": 18,
+          "fileName": "加强党的全面领导，健全规划制定和落实机制（下）.txt"
+        },
+        {
+          "id": "7de3eec0-402f-5804-9278-7782f9f7c7ed",
+          "courseName": "HGC92I4121095_2110",
+          "category": "国家治理",
+          "paragraphCount": 13,
+          "fileName": "严守规矩、不逾底线——干部要心存敬畏、修身自律（上）.txt"
+        },
+        {
+          "id": "3b2dc73b-3d87-5c23-8942-d45d21d5d7dc",
+          "courseName": "HGC92I4221095_2110",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "严守规矩、不逾底线——干部要心存敬畏、修身自律（下）.txt"
+        },
+        {
+          "id": "2fd6feaa-e21b-577e-9979-3a84c96234cb",
+          "courseName": "NGC92I4421095_2110",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "终身课题、常炼常修——干部的修养修炼没有休止符（上）.txt"
+        },
+        {
+          "id": "8182af07-0059-542a-b56f-bb8b1dda4ea5",
+          "courseName": "NGC92I4521095_2110",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "终身课题、常炼常修——干部的修养修炼没有休止符（下）.txt"
+        },
+        {
+          "id": "e2b516eb-f980-537a-8ba1-d3cc61381517",
+          "courseName": "NGC95I2822125_2301",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "深刻领悟“两个确立”的决定性意义（上）.txt"
+        },
+        {
+          "id": "ec0f95d4-d4a5-59c8-984b-ae3b20e4f926",
+          "courseName": "NGC95I2922125_2301",
+          "category": "政治理论",
+          "paragraphCount": 11,
+          "fileName": "深刻领悟“两个确立”的决定性意义（下）.txt"
+        },
+        {
+          "id": "41c9732b-b55e-5e15-847f-f3240c96c236",
+          "courseName": "NGC100I0624085_2408",
+          "category": "国家治理",
+          "paragraphCount": 14,
+          "fileName": "深刻理解进一步全面深化改革的重大意义.txt"
+        },
+        {
+          "id": "c8baf68c-73bd-5bbd-995f-ef737af1b657",
+          "courseName": "GC49I3418115_1901",
+          "category": "统战理论",
+          "paragraphCount": 12,
+          "fileName": "中国和平发展的潜在危机与战略应对.txt"
+        }
+      ],
+      "sampleCourses": [
+        {
+          "code": "GC00I0318115_1812",
+          "name": "树立山水林田湖草是生命共同体的综合治理观",
+          "teacher": "郭兆晖",
+          "duration": 43,
+          "format": "精品三分屏",
+          "description": "本课程由中央党校（国家行政学院）经济学教研部副教授郭兆晖主讲，主要内容有：一、资源性产品；二、可再生能源；三、生态产品；四、可再生生物资源；五、废弃物吸收能力。",
+          "createdAt": 2018.11,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-constitution"
+          ]
+        },
+        {
+          "code": "NGC00I0219035_1903",
+          "name": "推动落实《2030年可持续发展议程》",
+          "teacher": "郭兆晖",
+          "duration": 29,
+          "format": "专家讲授精制视频",
+          "description": "本课程由中共中央党校（国家行政学院）经济学教研部副教授郭兆晖主讲，主要内容有：一、什么是《2030年可持续发展议程》；二、落实2030年可持续发展议程中方立场文件；三、中国落实2030年可持续发展议程",
+          "createdAt": 2019.3,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-constitution"
+          ]
+        },
+        {
+          "code": "GC00I0219045_1905",
+          "name": "坚决打好污染防治攻坚战",
+          "teacher": "郭兆晖",
+          "duration": 37,
+          "format": "精品三分屏",
+          "description": "本课程由中央党校（国家行政学院）社会和生态文明部生态文明建设室副主任郭兆晖副教授主讲，主要内容有：一、污染防治攻坚战面临的形势；二、完成污染防治攻坚战各项任务。",
+          "createdAt": "2019.4\r\n",
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-constitution"
+          ]
+        }
+      ]
+    },
+    "party-history": {
+      "nodeId": "party-history",
+      "nodeName": "党史学习",
+      "parentName": "党建基础理论",
+      "courses": 286,
+      "matchedApiDocs": [
+        {
+          "id": "671f49b1-95c8-5de7-8430-a45ca652a2b2",
+          "courseName": "NGC02I0319045_1905",
+          "category": "统战理论",
+          "paragraphCount": 8,
+          "fileName": "用习近平外交思想把握百年未有之大变局的航向（上）.txt"
+        },
+        {
+          "id": "4ec868d1-1040-5366-a092-72fe028d610d",
+          "courseName": "NGC02I0419045_1905",
+          "category": "统战理论",
+          "paragraphCount": 8,
+          "fileName": "用习近平外交思想把握百年未有之大变局的航向（下）.txt"
+        },
+        {
+          "id": "5afcb312-4319-580b-959d-170d856715b0",
+          "courseName": "NGC03I0819085_1909",
+          "category": "政治理论",
+          "paragraphCount": 16,
+          "fileName": "从新中国到新时代：民族复兴的道路自信.txt"
+        },
+        {
+          "id": "6f5fd2a3-7a79-58de-8045-cd01940b79e8",
+          "courseName": "GC06I0715055_1506",
+          "category": "政治理论",
+          "paragraphCount": 20,
+          "fileName": "全面从严治党的基本功：思想建党、制度治党、法治权钱.txt"
+        },
+        {
+          "id": "c3ad5b7a-3a83-5b03-9f65-df14ed9f1dbb",
+          "courseName": "DSPTXYZY20073101",
+          "category": "政治理论",
+          "paragraphCount": 58,
+          "fileName": "庆祝改革开放40周年大会.txt"
+        },
+        {
+          "id": "2aec8515-57d6-5705-936f-1922907acba0",
+          "courseName": "GC68I1319125_2001",
+          "category": "政治理论",
+          "paragraphCount": 11,
+          "fileName": "新中国70年协商民主的进展与宝贵经验（上）.txt"
+        },
+        {
+          "id": "ba1b32e2-0ceb-54b2-bc96-f7fecde00314",
+          "courseName": "NGC71I4019065_1907",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "伟大工程：推进党的建设新的伟大工程（上）.txt"
+        },
+        {
+          "id": "c8f72946-4eb3-5dad-a77d-6a80145dad1e",
+          "courseName": "NGC71I4119065_1907",
+          "category": "政治理论",
+          "paragraphCount": 9,
+          "fileName": "伟大工程：推进党的建设新的伟大工程（下）.txt"
+        },
+        {
+          "id": "3490fb3e-930d-560c-a84e-a4ecfd9e1057",
+          "courseName": "GC72N2919115_1912",
+          "category": "政治理论",
+          "paragraphCount": 9,
+          "fileName": "推进新时代改革开放：化制度优势为治理效能（上）.txt"
+        },
+        {
+          "id": "c3f3bff5-aa1d-5919-acf7-7b319cb352b3",
+          "courseName": "GC72N3019115_1912",
+          "category": "政治理论",
+          "paragraphCount": 5,
+          "fileName": "推进新时代改革开放：化制度优势为治理效能（下）.txt"
+        }
+      ],
+      "sampleCourses": [
+        {
+          "code": "GC02I1115105_1512",
+          "name": "美国革命",
+          "teacher": "周诗茵",
+          "duration": 57,
+          "format": "精品三分屏",
+          "description": "本课程由中央党校历史学系硕士周诗茵主讲，主要内容有：一、美国革命的具体阶段；二、美国革命的重要人物；三、美国人民为什么要独立；四、美国建国；五、《美国宪法》确立的原则；六、美国革命做到了什么；七、什么",
+          "createdAt": 2015.1,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-history"
+          ]
+        },
+        {
+          "code": "GC02I1215105_1512",
+          "name": "英国革命",
+          "teacher": "周诗茵",
+          "duration": 57,
+          "format": "精品三分屏",
+          "description": "本课程由中央党校历史学系硕士周诗茵主讲，主要内容有：一、英国革命的阶段；二、英国革命的重要人物；三、英国革命的原因；四、英国革命的过程；五、革命的几个层次。",
+          "createdAt": 2015.1,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-history"
+          ]
+        },
+        {
+          "code": "GC02N0116095_1610",
+          "name": "新中国六十多年来社会建设的成就、经验和展望",
+          "teacher": "李文",
+          "duration": 50,
+          "format": "精品三分屏",
+          "description": "本课程由中国社会科学院当代中国所研究员李文主讲，主要内容有：一、六十余年社会建设历程的主线和分期；二、分阶段看社会建设的主要成就；三、横向对比显示的成绩和不足；四、新中国社会建设的经验与展望。",
+          "createdAt": 2016.9,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-history"
+          ]
+        }
+      ]
+    },
+    "party-theory": {
+      "nodeId": "party-theory",
+      "nodeName": "党的创新理论",
+      "parentName": "党建基础理论",
+      "courses": 1485,
+      "matchedApiDocs": [
+        {
+          "id": "344d1f24-4de0-5b85-9537-3922d2974819",
+          "courseName": "DSPTXYZY20073102",
+          "category": "政治理论",
+          "paragraphCount": 21,
+          "fileName": "以习近平总书记生态文明思想为指导推进新时代浙江生态文明建设和生态环境保护工作.txt"
+        },
+        {
+          "id": "2d0e1a69-accb-5d1a-926e-962d5fce946a",
+          "courseName": "GC00I0119045_1905",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "学习领会习近平生态文明思想.txt"
+        },
+        {
+          "id": "ae731ffb-0e2e-54c6-bcf5-c7e15359ce62",
+          "courseName": "GC09I3114095_1410",
+          "category": "政治理论",
+          "paragraphCount": 17,
+          "fileName": "培育和践行社会主义核心价值观.txt"
+        },
+        {
+          "id": "671f49b1-95c8-5de7-8430-a45ca652a2b2",
+          "courseName": "NGC02I0319045_1905",
+          "category": "统战理论",
+          "paragraphCount": 8,
+          "fileName": "用习近平外交思想把握百年未有之大变局的航向（上）.txt"
+        },
+        {
+          "id": "4ec868d1-1040-5366-a092-72fe028d610d",
+          "courseName": "NGC02I0419045_1905",
+          "category": "统战理论",
+          "paragraphCount": 8,
+          "fileName": "用习近平外交思想把握百年未有之大变局的航向（下）.txt"
+        },
+        {
+          "id": "40719601-0167-58bd-8258-5908c9b4d2c1",
+          "courseName": "GC03I0716015_1602",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "当前国际形势与中国国家安全环境（上）.txt"
+        },
+        {
+          "id": "be5c3e12-ad5d-5576-bb93-0fdcc48acaf3",
+          "courseName": "GC03I0816015_1602",
+          "category": "国家治理",
+          "paragraphCount": 27,
+          "fileName": "当前国际形势与中国国家安全环境（下）.txt"
+        },
+        {
+          "id": "55a2248b-85eb-5f3f-9165-c7b84f5756e2",
+          "courseName": "GC03N0416085_1608",
+          "category": "政治理论",
+          "paragraphCount": 12,
+          "fileName": "论精准扶贫与国家扶贫治理体系完善和优化.txt"
+        },
+        {
+          "id": "11fba37b-ed56-5df6-a623-b4d808ee5099",
+          "courseName": "GC03N0516085_1608",
+          "category": "政治理论",
+          "paragraphCount": 12,
+          "fileName": "农村精准扶贫：理论基础与实践情势探析.txt"
+        },
+        {
+          "id": "3cc94419-f3fc-51ff-87c3-eb1762f24f7d",
+          "courseName": "GC03N0918065_1806",
+          "category": "国家治理",
+          "paragraphCount": 22,
+          "fileName": "推动数字产业化与产业数字化——学习习近平总书记全国网信工作会议重要讲话.txt"
+        },
+        {
+          "id": "7573db63-7127-580d-aa7c-6cb1330c11b4",
+          "courseName": "GC03I0218075_1809",
+          "category": "政治理论",
+          "paragraphCount": 20,
+          "fileName": "新时代两步走战略的内涵与实现路径.txt"
+        },
+        {
+          "id": "bf70819d-84f4-5195-86e2-446512424936",
+          "courseName": "GC03N0718095_1810",
+          "category": "国家治理",
+          "paragraphCount": 19,
+          "fileName": "新经济产业功能区规划理论与实践.txt"
+        },
+        {
+          "id": "ed00672a-a03a-504e-b8da-834115506db4",
+          "courseName": "GC03I0619035_1904",
+          "category": "国家治理",
+          "paragraphCount": 8,
+          "fileName": "优化营商环境，打造良好发展软环境（上）.txt"
+        },
+        {
+          "id": "8d377704-5955-50e8-8283-70c45f7e4e69",
+          "courseName": "GC03I0719035_1904",
+          "category": "国家治理",
+          "paragraphCount": 8,
+          "fileName": "优化营商环境，打造良好发展软环境（下）.txt"
+        },
+        {
+          "id": "7dfbc660-ad57-5447-a21f-b3182cd0d74d",
+          "courseName": "NGC03I1619035_1904",
+          "category": "政治理论",
+          "paragraphCount": 22,
+          "fileName": "新时代坚持和发展中国特色社会主义的总目标、总任务（上）.txt"
+        },
+        {
+          "id": "6f1f647e-cf34-517f-9abf-b84a2c6c5d09",
+          "courseName": "NGC03I1719035_1904",
+          "category": "政治理论",
+          "paragraphCount": 19,
+          "fileName": "新时代坚持和发展中国特色社会主义的总目标、总任务（下）.txt"
+        },
+        {
+          "id": "5afcb312-4319-580b-959d-170d856715b0",
+          "courseName": "NGC03I0819085_1909",
+          "category": "政治理论",
+          "paragraphCount": 16,
+          "fileName": "从新中国到新时代：民族复兴的道路自信.txt"
+        },
+        {
+          "id": "208b479e-a5ab-5578-98db-fd77d508d143",
+          "courseName": "GC03I1916015_1602",
+          "category": "政治理论",
+          "paragraphCount": 23,
+          "fileName": "习近平全球经济治理新思想.txt"
+        },
+        {
+          "id": "4dc9412e-8011-5bfa-bf06-1bea3269dd19",
+          "courseName": "GC04I1116105_1611",
+          "category": "政治理论",
+          "paragraphCount": 24,
+          "fileName": "坚持和发展中国特色社会主义宗教理论.txt"
+        },
+        {
+          "id": "7f84bf01-e6cb-5c13-86e3-6fe0800c1c32",
+          "courseName": "GC04I1618075_1809",
+          "category": "统战理论",
+          "paragraphCount": 6,
+          "fileName": "中国特色大国外交之中俄、中欧关系.txt"
+        },
+        {
+          "id": "7ee1909e-220d-589a-b4ff-1cfdae849a00",
+          "courseName": "NGC04I0319125_2001",
+          "category": "统战理论",
+          "paragraphCount": 5,
+          "fileName": "新时代的中国外交（上）.txt"
+        },
+        {
+          "id": "e7e7abe9-ff03-5bd3-a1c6-971abe6ad779",
+          "courseName": "NGC04I0419125_2001",
+          "category": "统战理论",
+          "paragraphCount": 6,
+          "fileName": "新时代的中国外交（下）.txt"
+        },
+        {
+          "id": "c689e3fa-c556-56a0-8621-65d8ee76c838",
+          "courseName": "GC05I2015025_1505",
+          "category": "政治理论",
+          "paragraphCount": 25,
+          "fileName": "党政领导干部选拔任用制度分析.txt"
+        },
+        {
+          "id": "6e94b184-763a-5c5c-90a5-7f2a9b4994b8",
+          "courseName": "GC05A1718055_1806",
+          "category": "国家治理",
+          "paragraphCount": 16,
+          "fileName": "建构“互联网+”行政执法的新生态（上）.txt"
+        },
+        {
+          "id": "6ed86fd5-f326-5d69-ba40-20b5a84ae895",
+          "courseName": "GC05A1818055_1806",
+          "category": "国家治理",
+          "paragraphCount": 19,
+          "fileName": "建构“互联网+”行政执法的新生态（下）.txt"
+        },
+        {
+          "id": "45e83dbe-5ebf-51d7-9e1d-ad524e1e58d7",
+          "courseName": "DSPTXYZY21061907",
+          "category": "政治理论",
+          "paragraphCount": 42,
+          "fileName": "习近平新时代中国特色社会主义思想.txt"
+        },
+        {
+          "id": "a6124024-9acc-5e76-8453-d843f46192dd",
+          "courseName": "GC05I1718075_1808",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "马克思主义主要思想工作方法解读.txt"
+        },
+        {
+          "id": "0843b7f1-7c6d-5aa3-819a-2ab1458d8938",
+          "courseName": "GC06I1514125_1501",
+          "category": "国家治理",
+          "paragraphCount": 13,
+          "fileName": "提升政府冲突治理能力.txt"
+        },
+        {
+          "id": "4c09c5cd-e888-53f2-9b44-90e3ca81be89",
+          "courseName": "GC06I1614125_1501",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "网络舆情视野下的思想政治教育工作.txt"
+        },
+        {
+          "id": "ecdfc077-99a0-51a6-b630-7625d8aff550",
+          "courseName": "GC06I2115015_1503",
+          "category": "国家治理",
+          "paragraphCount": 28,
+          "fileName": "权力制约与监督理论研究.txt"
+        },
+        {
+          "id": "6f5fd2a3-7a79-58de-8045-cd01940b79e8",
+          "courseName": "GC06I0715055_1506",
+          "category": "政治理论",
+          "paragraphCount": 20,
+          "fileName": "全面从严治党的基本功：思想建党、制度治党、法治权钱.txt"
+        },
+        {
+          "id": "7f1a8194-bc7a-5662-9f28-a89d2f5eda10",
+          "courseName": "GC06I2919035_1904",
+          "category": "政治理论",
+          "paragraphCount": 18,
+          "fileName": "把以人民为中心的发展思想贯穿到政府的各项工作中（上）.txt"
+        },
+        {
+          "id": "d0ac37c3-ecad-5b81-b40f-e275da8e49ea",
+          "courseName": "GC06I3019035_1904",
+          "category": "政治理论",
+          "paragraphCount": 13,
+          "fileName": "把以人民为中心的发展思想贯穿到政府的各项工作中（中）.txt"
+        },
+        {
+          "id": "a1b7ecde-7ce9-566a-be97-6d967d6a367c",
+          "courseName": "GC06I3119035_1904",
+          "category": "政治理论",
+          "paragraphCount": 17,
+          "fileName": "把以人民为中心的发展思想贯穿到政府的各项工作中（下）.txt"
+        },
+        {
+          "id": "0e9b052d-4b6b-5c64-98b9-11f266ab2269",
+          "courseName": "GC07I0620035_2004",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "领导干部廉洁从政从业风险防范（上）.txt"
+        },
+        {
+          "id": "5b59822f-3879-5c8a-bbbf-325000896dc5",
+          "courseName": "GC07I0720035_2004",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "领导干部廉洁从政从业风险防范（中）.txt"
+        },
+        {
+          "id": "63313893-7faa-5ca6-a1e6-3335389437b1",
+          "courseName": "GC07I0820035_2004",
+          "category": "国家治理",
+          "paragraphCount": 5,
+          "fileName": "领导干部廉洁从政从业风险防范（下）.txt"
+        },
+        {
+          "id": "7bc60b53-f9a5-5f65-aed3-f5d385f7dacb",
+          "courseName": "HGC07I0920035_2004",
+          "category": "政治理论",
+          "paragraphCount": 14,
+          "fileName": "学习政党理论，推进全面从严治党（上）.txt"
+        },
+        {
+          "id": "93f61f01-3efa-53bd-8173-71e85dca526d",
+          "courseName": "HGC07I1020035_2004",
+          "category": "政治理论",
+          "paragraphCount": 8,
+          "fileName": "学习政党理论，推进全面从严治党（下）.txt"
+        },
+        {
+          "id": "3ddc33f5-9bc7-54f8-aad1-da3dd25fcb20",
+          "courseName": "GC08A1519095_1909",
+          "category": "国家治理",
+          "paragraphCount": 13,
+          "fileName": "新时代国家应急管理体制的创新发展.txt"
+        },
+        {
+          "id": "5e82f5e1-3759-5e6c-a3a3-a7dd378e3b5c",
+          "courseName": "GC09I2516065_1607",
+          "category": "政治理论",
+          "paragraphCount": 20,
+          "fileName": "习近平总书记在哲学社会科学工作座谈会上的重要讲话.txt"
+        },
+        {
+          "id": "eb271c82-c76a-5bf2-baa1-253fb3082ee0",
+          "courseName": "GC09I2616065_1607",
+          "category": "政治理论",
+          "paragraphCount": 31,
+          "fileName": "习近平总书记谈正确认识和处理当代中国的民族问题.txt"
+        },
+        {
+          "id": "e8a157dc-654d-5e68-8253-c3f12af63f06",
+          "courseName": "GC72N3219115_1911",
+          "category": "政治理论",
+          "paragraphCount": 16,
+          "fileName": "坚持和完善中国特色社会主义法治体系，提高党依法治国、依法执政能力（上）.txt"
+        },
+        {
+          "id": "d59364d7-ea14-52a9-8067-030e5e8a6eb5",
+          "courseName": "GC09I3219035_1904",
+          "category": "统战理论",
+          "paragraphCount": 8,
+          "fileName": "习近平总书记构建人类命运共同体思想的渊源和发展.txt"
+        },
+        {
+          "id": "5cdbc094-56d6-536b-abe9-b29324cc20a0",
+          "courseName": "NGC09I0919115_1912",
+          "category": "政治理论",
+          "paragraphCount": 20,
+          "fileName": "全面推进中国特色大国外交（上）.txt"
+        },
+        {
+          "id": "410d580d-2077-58bd-ae07-670ef62184b7",
+          "courseName": "NGC09I1019115_1912",
+          "category": "统战理论",
+          "paragraphCount": 11,
+          "fileName": "全面推进中国特色大国外交（下）.txt"
+        },
+        {
+          "id": "86186937-9511-595a-9ab5-ad8d96d0e388",
+          "courseName": "HGC09I1121105_2111",
+          "category": "政治理论",
+          "paragraphCount": 11,
+          "fileName": "习近平总书记关于社会主义政治建设重要论述（上）.txt"
+        },
+        {
+          "id": "fe7771d0-cd81-595c-914d-37ba6630e13d",
+          "courseName": "HGC09I1221105_2111",
+          "category": "政治理论",
+          "paragraphCount": 7,
+          "fileName": "习近平总书记关于社会主义政治建设重要论述（下）.txt"
+        },
+        {
+          "id": "524351d2-f9c7-5eae-8cc0-83674ff06730",
+          "courseName": "GC13A3018055_1806",
+          "category": "国家治理",
+          "paragraphCount": 17,
+          "fileName": "以习近平新时代中国特色社会主义经济思想为指导，引领经济高质量发展（上）.txt"
+        },
+        {
+          "id": "5d70eea7-7929-582c-9fc6-e7ce601ddcf5",
+          "courseName": "GC13A3118055_1806",
+          "category": "国家治理",
+          "paragraphCount": 19,
+          "fileName": "以习近平新时代中国特色社会主义经济思想为指导，引领经济高质量发展（下）.txt"
+        },
+        {
+          "id": "c1257835-32e4-542a-a532-ff118225610f",
+          "courseName": "GC31I3215045_1506",
+          "category": "政治理论",
+          "paragraphCount": 33,
+          "fileName": "习近平治国理政生态文明思想.txt"
+        },
+        {
+          "id": "664825ad-feae-59ab-8c41-2b0929009cb0",
+          "courseName": "GC39I0115115_1511",
+          "category": "政治理论",
+          "paragraphCount": 39,
+          "fileName": "“十三五”规划建议解读之发展目标、指导思想及战略重点.txt"
+        },
+        {
+          "id": "e65c9fe5-fbc1-59a9-a726-311e4323fe17",
+          "courseName": "GC39I0615115_1511",
+          "category": "政治理论",
+          "paragraphCount": 25,
+          "fileName": "“十三五”发展新理念之绿色：坚持绿色发展，建设美丽中国（上）.txt"
+        },
+        {
+          "id": "63684b35-b5db-565f-8253-163b4b841120",
+          "courseName": "GC39I0715115_1511",
+          "category": "政治理论",
+          "paragraphCount": 30,
+          "fileName": "“十三五”发展新理念之绿色：坚持绿色发展，建设美丽中国（下）.txt"
+        },
+        {
+          "id": "bea2e747-f869-50d4-89c6-075c1cde85a2",
+          "courseName": "GC41I3116035_1604",
+          "category": "政治理论",
+          "paragraphCount": 23,
+          "fileName": "习近平总书记关于全面深化改革的经济思想（上）.txt"
+        },
+        {
+          "id": "cc80dd49-629f-5491-a99c-3271bd0bbbee",
+          "courseName": "GC41I3216035_1604",
+          "category": "政治理论",
+          "paragraphCount": 20,
+          "fileName": "习近平总书记关于全面深化改革的经济思想（下）.txt"
+        },
+        {
+          "id": "cdb0a38d-47cd-5150-995a-fc9c9fedc6dc",
+          "courseName": "GC41I3316035_1604",
+          "category": "政治理论",
+          "paragraphCount": 26,
+          "fileName": "习近平总书记全面从严治党新思路.txt"
+        },
+        {
+          "id": "aa8c33d4-d746-5323-807e-2b31b82eaf6d",
+          "courseName": "GC41I3716035_1604",
+          "category": "政治理论",
+          "paragraphCount": 35,
+          "fileName": "习近平总书记全面建成小康社会的战略思想.txt"
+        },
+        {
+          "id": "6b8896b0-04ab-5949-ad15-380359d5e3da",
+          "courseName": "GC41I3916035_1604",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "习近平主席中国特色中东外交.txt"
+        },
+        {
+          "id": "9f228089-67d3-5a70-a23f-4e45322aba11",
+          "courseName": "GC41I4016035_1604",
+          "category": "政治理论",
+          "paragraphCount": 23,
+          "fileName": "用习近平总书记系列重要讲话精神武装头脑、指导实践.txt"
+        },
+        {
+          "id": "b5178cfb-0b15-5376-8c9a-b373eabccca9",
+          "courseName": "GC41I4516035_1604",
+          "category": "政治理论",
+          "paragraphCount": 20,
+          "fileName": "科学掌握习近平总书记系列重要讲话的思想真谛.txt"
+        },
+        {
+          "id": "b655189c-b398-5be5-a709-4edb84274292",
+          "courseName": "GC44N4016075_1607",
+          "category": "政治理论",
+          "paragraphCount": 31,
+          "fileName": "习近平总书记“七一”重要讲话为何强调“文化自信”.txt"
+        },
+        {
+          "id": "42e3c2c2-c6d0-5785-b3fa-4c7b53d18932",
+          "courseName": "GC44I4416085_1609",
+          "category": "政治理论",
+          "paragraphCount": 25,
+          "fileName": "回顾历史、坚定信念，不忘初心、继续前进——学习习近平总书记“七一”重要讲话（上）.txt"
+        },
+        {
+          "id": "dd41e293-3d35-562e-907a-551ac1088210",
+          "courseName": "GC44I4516085_1609",
+          "category": "政治理论",
+          "paragraphCount": 25,
+          "fileName": "回顾历史、坚定信念，不忘初心、继续前进——学习习近平总书记“七一”重要讲话（下）.txt"
+        },
+        {
+          "id": "b652e7d7-f747-5283-bc77-887e086f8bdc",
+          "courseName": "GC16I2615045_1506",
+          "category": "政治理论",
+          "paragraphCount": 28,
+          "fileName": "全面推进依法治国.txt"
+        },
+        {
+          "id": "c0e459b6-573b-59ab-991a-77ba28d64fe7",
+          "courseName": "GC58A3818065_1807",
+          "category": "统战理论",
+          "paragraphCount": 6,
+          "fileName": "新时代中国特色社会主义与“一国两制”理论和实践（上）.txt"
+        },
+        {
+          "id": "ddec2c63-abeb-5e83-a03f-48a25df0fcbd",
+          "courseName": "GC58A3918065_1807",
+          "category": "统战理论",
+          "paragraphCount": 3,
+          "fileName": "新时代中国特色社会主义与“一国两制”理论和实践（中）.txt"
+        },
+        {
+          "id": "552bb038-64b0-56e6-8605-3ed013e658bd",
+          "courseName": "GC58A4018065_1807",
+          "category": "统战理论",
+          "paragraphCount": 6,
+          "fileName": "新时代中国特色社会主义与“一国两制”理论和实践（下）.txt"
+        },
+        {
+          "id": "c4ce793e-e570-5e57-b8ee-b4814800467b",
+          "courseName": "GC59I3118115_1811",
+          "category": "统战理论",
+          "paragraphCount": 8,
+          "fileName": "民企、中小企业地位将显著提高——习近平总书记广东讲话精神学习.txt"
+        },
+        {
+          "id": "c3ad5b7a-3a83-5b03-9f65-df14ed9f1dbb",
+          "courseName": "DSPTXYZY20073101",
+          "category": "政治理论",
+          "paragraphCount": 58,
+          "fileName": "庆祝改革开放40周年大会.txt"
+        },
+        {
+          "id": "54de40e4-e358-5efa-b61c-e8d79924677c",
+          "courseName": "GC69A1519065_1907",
+          "category": "国家治理",
+          "paragraphCount": 2,
+          "fileName": "构建新型基层社会治理体系，打造扫黑除恶坚固防线（上）.txt"
+        },
+        {
+          "id": "5c0e530d-86c9-5175-bcb0-caf625314883",
+          "courseName": "GC69A1619065_1907",
+          "category": "国家治理",
+          "paragraphCount": 20,
+          "fileName": "构建新型基层社会治理体系，打造扫黑除恶坚固防线（中）.txt"
+        },
+        {
+          "id": "c324514d-9e55-5750-939a-55da7562a1ae",
+          "courseName": "GC69A1719065_1907",
+          "category": "国家治理",
+          "paragraphCount": 9,
+          "fileName": "构建新型基层社会治理体系，打造扫黑除恶坚固防线（下）.txt"
+        },
+        {
+          "id": "134ca493-f362-5321-9e70-6ca2604fcb86",
+          "courseName": "NGC71I3619065_1907",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "伟大事业：坚持和发展中国特色社会主义（上）.txt"
+        },
+        {
+          "id": "4f0b28ea-bf3b-59be-8cea-e43196731c1f",
+          "courseName": "NGC71I3719065_1907",
+          "category": "政治理论",
+          "paragraphCount": 12,
+          "fileName": "伟大事业：坚持和发展中国特色社会主义（下）.txt"
+        },
+        {
+          "id": "1f6d62ce-76f7-5810-9f73-8237bd4cf002",
+          "courseName": "GC71I3219075_1908",
+          "category": "政治理论",
+          "paragraphCount": 11,
+          "fileName": "深刻理解习近平总书记关于“不忘初心、牢记使命”的重要论述（上）.txt"
+        },
+        {
+          "id": "fd2d35b6-443f-530a-9d5c-2215fdd3cce7",
+          "courseName": "GC71I3319075_1908",
+          "category": "政治理论",
+          "paragraphCount": 16,
+          "fileName": "深刻理解习近平总书记关于“不忘初心、牢记使命”的重要论述（下）.txt"
+        },
+        {
+          "id": "ee119cd6-2dbc-584a-b9cb-29a38b629e7c",
+          "courseName": "GC71A4519095_1909",
+          "category": "政治理论",
+          "paragraphCount": 23,
+          "fileName": "坚定信念、不辱使命，努力上好思政课——学习习近平总书记在学校思想政治理论课教师座谈会上的讲话.txt"
+        },
+        {
+          "id": "790a9406-6dff-51df-a2dd-953d579e9bde",
+          "courseName": "NGC71I4919095_1910",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "中国特色社会主义为什么“好”(上).txt"
+        },
+        {
+          "id": "323b3a7f-3e7e-565c-b26e-6d1b229f0a1b",
+          "courseName": "NGC71I5019095_1910",
+          "category": "政治理论",
+          "paragraphCount": 14,
+          "fileName": "中国特色社会主义为什么“好”(下).txt"
+        },
+        {
+          "id": "dde3d2e0-c655-54f1-8994-e94054dc6928",
+          "courseName": "GC72N3319115_1911",
+          "category": "政治理论",
+          "paragraphCount": 24,
+          "fileName": "坚持和完善中国特色社会主义法治体系，提高党依法治国、依法执政能力（下）.txt"
+        },
+        {
+          "id": "401c6351-4edc-55d9-93c5-66f05a561f81",
+          "courseName": "GC72N3819115_1911",
+          "category": "政治理论",
+          "paragraphCount": 8,
+          "fileName": "坚持和完善中国特色社会主义制度的几个关键问题（上）.txt"
+        },
+        {
+          "id": "37b0627c-c267-5024-90fa-e42fcc898fc2",
+          "courseName": "GC72N3919115_1911",
+          "category": "政治理论",
+          "paragraphCount": 13,
+          "fileName": "坚持和完善中国特色社会主义制度的几个关键问题（下）.txt"
+        },
+        {
+          "id": "3490fb3e-930d-560c-a84e-a4ecfd9e1057",
+          "courseName": "GC72N2919115_1912",
+          "category": "政治理论",
+          "paragraphCount": 9,
+          "fileName": "推进新时代改革开放：化制度优势为治理效能（上）.txt"
+        },
+        {
+          "id": "c3f3bff5-aa1d-5919-acf7-7b319cb352b3",
+          "courseName": "GC72N3019115_1912",
+          "category": "政治理论",
+          "paragraphCount": 5,
+          "fileName": "推进新时代改革开放：化制度优势为治理效能（下）.txt"
+        },
+        {
+          "id": "0969e863-19e6-55fd-8de7-1faf3fe699fc",
+          "courseName": "GC72I2119125_2001",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "坚持和完善中国特色社会主义行政体制（上）.txt"
+        },
+        {
+          "id": "4cc181e2-6290-5dcb-bc6d-1c7fb3ed1314",
+          "courseName": "GC72I2219125_2001",
+          "category": "国家治理",
+          "paragraphCount": 24,
+          "fileName": "坚持和完善中国特色社会主义行政体制（下）.txt"
+        },
+        {
+          "id": "ef6de734-61cc-5faa-b1a1-9b78399439ec",
+          "courseName": "NGC75I4219125_2001",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "中国特色公共安全之路——学习习近平总书记公共安全重要论述（一）.txt"
+        },
+        {
+          "id": "9782b19b-10c8-50fe-ae57-78653ae2954c",
+          "courseName": "NGC75I4319125_2001",
+          "category": "国家治理",
+          "paragraphCount": 6,
+          "fileName": "中国特色公共安全之路——学习习近平总书记公共安全重要论述（二）.txt"
+        },
+        {
+          "id": "2157a77b-4a17-5daa-8b09-405f2a361337",
+          "courseName": "NGC75I4419125_2001",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "中国特色公共安全之路——学习习近平总书记公共安全重要论述（三）.txt"
+        },
+        {
+          "id": "167f76e7-637c-545b-93b5-7bcc9a2ef963",
+          "courseName": "NGC75I4519125_2001",
+          "category": "国家治理",
+          "paragraphCount": 5,
+          "fileName": "中国特色公共安全之路——学习习近平总书记公共安全重要论述（四）.txt"
+        },
+        {
+          "id": "1734140c-2054-541d-9218-9f3e6468e288",
+          "courseName": "NGC85A2321041_2105",
+          "category": "政治理论",
+          "paragraphCount": 9,
+          "fileName": "意识形态工作如何凝民心聚共识——习近平总书记关于意识形态工作重要讲话精神解读（上）.txt"
+        },
+        {
+          "id": "ef3e7892-a7c9-59fe-834b-13bd02edb4cb",
+          "courseName": "NGC85A2421041_2105",
+          "category": "政治理论",
+          "paragraphCount": 11,
+          "fileName": "意识形态工作如何凝民心聚共识——习近平总书记关于意识形态工作重要讲话精神解读（中）.txt"
+        },
+        {
+          "id": "e9217caa-a065-5901-924e-e060e7ec0d0a",
+          "courseName": "NGC85A2521041_2105",
+          "category": "政治理论",
+          "paragraphCount": 9,
+          "fileName": "意识形态工作如何凝民心聚共识——习近平总书记关于意识形态工作重要讲话精神解读（下）.txt"
+        },
+        {
+          "id": "7bdf57b5-6561-51f6-939b-5c1cce57f98f",
+          "courseName": "HGC87I2821035_2105",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "习近平法治思想的理论创见（上）.txt"
+        },
+        {
+          "id": "3b7c878b-8b86-567a-9dc1-fe326dddaff3",
+          "courseName": "HGC87I2921035_2105",
+          "category": "政治理论",
+          "paragraphCount": 6,
+          "fileName": "习近平法治思想的理论创见（下）.txt"
+        },
+        {
+          "id": "7de3eec0-402f-5804-9278-7782f9f7c7ed",
+          "courseName": "HGC92I4121095_2110",
+          "category": "国家治理",
+          "paragraphCount": 13,
+          "fileName": "严守规矩、不逾底线——干部要心存敬畏、修身自律（上）.txt"
+        },
+        {
+          "id": "3b2dc73b-3d87-5c23-8942-d45d21d5d7dc",
+          "courseName": "HGC92I4221095_2110",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "严守规矩、不逾底线——干部要心存敬畏、修身自律（下）.txt"
+        },
+        {
+          "id": "0eade7b3-9e5f-5cf6-a4fe-707502691cf9",
+          "courseName": "HGC92I4321105_2110",
+          "category": "国家治理",
+          "paragraphCount": 24,
+          "fileName": "勤学苦练、增强本领——干部要边干边学、边学边干.txt"
+        },
+        {
+          "id": "2fd6feaa-e21b-577e-9979-3a84c96234cb",
+          "courseName": "NGC92I4421095_2110",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "终身课题、常炼常修——干部的修养修炼没有休止符（上）.txt"
+        },
+        {
+          "id": "8182af07-0059-542a-b56f-bb8b1dda4ea5",
+          "courseName": "NGC92I4521095_2110",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "终身课题、常炼常修——干部的修养修炼没有休止符（下）.txt"
+        },
+        {
+          "id": "45db49ee-1d7c-5aa7-8bfc-29c8e90a9455",
+          "courseName": "NGC95I2922105_2210",
+          "category": "政治理论",
+          "paragraphCount": 18,
+          "fileName": "高举中国特色社会主义伟大旗帜——学习贯彻党的二十大精神（上）.txt"
+        },
+        {
+          "id": "e4cbbe13-0a29-5e29-b3ae-2f95999540a0",
+          "courseName": "NGC95I3022105_2210",
+          "category": "政治理论",
+          "paragraphCount": 17,
+          "fileName": "高举中国特色社会主义伟大旗帜——学习贯彻党的二十大精神（下）.txt"
+        },
+        {
+          "id": "fc468b79-9266-5918-9d10-ef60e13c2508",
+          "courseName": "NGC95I3122105_2210",
+          "category": "国家治理",
+          "paragraphCount": 19,
+          "fileName": "过去五年的工作和新时代十年的伟大变革——学习贯彻党的二十大精神（上）.txt"
+        },
+        {
+          "id": "e2853553-4a1f-5d07-8b15-8b6c39b8fd65",
+          "courseName": "NGC95I3222105_2210",
+          "category": "国家治理",
+          "paragraphCount": 14,
+          "fileName": "过去五年的工作和新时代十年的伟大变革——学习贯彻党的二十大精神（下）.txt"
+        },
+        {
+          "id": "8c378a0a-970e-5173-932e-3f1c4f6e7f17",
+          "courseName": "NGC95N4522105_2210",
+          "category": "国家治理",
+          "paragraphCount": 4,
+          "fileName": "从生态角度解读党的二十大报告——强化外来物种入侵防治的法治保障（上）.txt"
+        },
+        {
+          "id": "0954c8c5-fbdf-5952-b35a-7460b64ce5c5",
+          "courseName": "NGC95N4622105_2210",
+          "category": "国家治理",
+          "paragraphCount": 3,
+          "fileName": "从生态角度解读党的二十大报告——强化外来物种入侵防治的法治保障（中）.txt"
+        },
+        {
+          "id": "a4a215eb-da87-5e79-be0a-2dc1b27b49ec",
+          "courseName": "NGC95N4722105_2210",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "从生态角度解读党的二十大报告——强化外来物种入侵防治的法治保障（下）.txt"
+        },
+        {
+          "id": "5f8a96c7-5138-55dd-b0a3-cf68b651c29c",
+          "courseName": "NGC97I4023115_2311",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "坚持以习近平文化思想为指引，切实担负起新时代新的文化使命（一）.txt"
+        },
+        {
+          "id": "ae6f5b54-223f-5ead-8af4-3616b933fdbd",
+          "courseName": "NGC97I4123115_2311",
+          "category": "政治理论",
+          "paragraphCount": 13,
+          "fileName": "坚持以习近平文化思想为指引，切实担负起新时代新的文化使命（二）.txt"
+        },
+        {
+          "id": "c8eca280-761e-55b5-8ad6-637653617741",
+          "courseName": "NGC97I4223115_2311",
+          "category": "政治理论",
+          "paragraphCount": 10,
+          "fileName": "坚持以习近平文化思想为指引，切实担负起新时代新的文化使命（三）.txt"
+        },
+        {
+          "id": "9e0627d3-6517-5405-8455-41f8b7ee8d27",
+          "courseName": "NGC97I4323115_2311",
+          "category": "政治理论",
+          "paragraphCount": 8,
+          "fileName": "坚持以习近平文化思想为指引，切实担负起新时代新的文化使命（四）.txt"
+        },
+        {
+          "id": "af9d3c7d-6c30-5635-ba3f-02c753d06489",
+          "courseName": "NGC97I3823115_2312",
+          "category": "政治理论",
+          "paragraphCount": 14,
+          "fileName": "深入学习领会习近平总书记关于中国式现代化的重要论述（上）.txt"
+        },
+        {
+          "id": "5f81ace4-e217-5d69-98b6-b6386f8f3d0c",
+          "courseName": "NGC97I3923115_2312",
+          "category": "政治理论",
+          "paragraphCount": 19,
+          "fileName": "深入学习领会习近平总书记关于中国式现代化的重要论述（下）.txt"
+        },
+        {
+          "id": "e2de1555-da9a-5e2b-a979-b485109de157",
+          "courseName": "NGC97I2125105_2510",
+          "category": "政治理论",
+          "paragraphCount": 12,
+          "fileName": "《习近平谈治国理政》：五卷是一个有机整体（上）.txt"
+        },
+        {
+          "id": "ac32895f-9f91-5e4d-a9b4-5af80f3cc900",
+          "courseName": "NGC97I2225105_2510",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "《习近平谈治国理政》：五卷是一个有机整体（下）.txt"
+        },
+        {
+          "id": "56d6fb16-9415-5b2b-9a06-8216c41c3c0b",
+          "courseName": "NGC97I2325105_2510",
+          "category": "政治理论",
+          "paragraphCount": 12,
+          "fileName": "《习近平谈治国理政》第五卷的主要内容（上）.txt"
+        },
+        {
+          "id": "f73135c7-2dd4-5f51-9d6a-5bd944a8238b",
+          "courseName": "NGC97I2425105_2510",
+          "category": "政治理论",
+          "paragraphCount": 21,
+          "fileName": "《习近平谈治国理政》第五卷的主要内容（下）.txt"
+        },
+        {
+          "id": "408c9ad4-1e91-5288-9c9f-9e43893fa7a5",
+          "courseName": "NGC100I0524085_2408",
+          "category": "国家治理",
+          "paragraphCount": 28,
+          "fileName": "深刻认识新时代全面深化改革伟大成就，持续推进中国式现代化.txt"
+        },
+        {
+          "id": "692ac583-4fb3-5c05-be16-43055b660039",
+          "courseName": "NGC100I1024085_2408",
+          "category": "国家治理",
+          "paragraphCount": 24,
+          "fileName": "全面深化生态文明体制改革的任务举措.txt"
+        },
+        {
+          "id": "f9f495da-e26a-58e9-a078-4e395de6a810",
+          "courseName": "NGC100I1324085_2408",
+          "category": "国家治理",
+          "paragraphCount": 17,
+          "fileName": "学习党的二十届三中全会精神和习近平总书记关于基层治理重要论述.txt"
+        }
+      ],
+      "sampleCourses": [
+        {
+          "code": "GC00B0115075_1601",
+          "name": "京津冀协同发展背景下的生态环境问题研究（上）",
+          "teacher": "宋强",
+          "duration": 50,
+          "format": "精品三分屏",
+          "description": "本课程是《京津冀协同发展背景下的生态环境问题研究》系列课程的上半部分，由北京市环境保护科学院院长宋强主讲，主要内容有：一、有关生态环境问题的规律性认识；二、京津冀区域生态环境现状。",
+          "createdAt": 2015.7,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-theory"
+          ]
+        },
+        {
+          "code": "GC00B0215075_1601",
+          "name": "京津冀协同发展背景下的生态环境问题研究（下）",
+          "teacher": "宋强",
+          "duration": 50,
+          "format": "精品三分屏",
+          "description": "本课程是《京津冀协同发展背景下的生态环境问题研究》系列课程的下半部分，由北京市环境保护科学院院长宋强主讲，主要内容有：京津冀地区面临的环境发展形势；协调发展中生态环境如何率先突破。",
+          "createdAt": 2015.7,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-theory"
+          ]
+        },
+        {
+          "code": "GC00I0116035_1604",
+          "name": "坚持绿色发展 建设生态文明",
+          "teacher": "钱俊生",
+          "duration": 68,
+          "format": "精品三分屏",
+          "description": "本课程由中央党校科技哲学教研室主任、教授钱俊生主讲，主要内容有：一、什么是绿色发展；二、为什么要提出绿色发展；三、如何实现绿色发展。",
+          "createdAt": 2016.3,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-theory"
+          ]
+        }
+      ]
+    },
+    "party-20th-congress": {
+      "nodeId": "party-20th-congress",
+      "nodeName": "二十大精神学习",
+      "parentName": "精英在线智能学习体系",
+      "courses": 0,
+      "matchedApiDocs": [],
+      "sampleCourses": []
+    },
+    "20th-report": {
+      "nodeId": "20th-report",
+      "nodeName": "二十大报告解读",
+      "parentName": "二十大精神学习",
+      "courses": 111,
+      "matchedApiDocs": [
+        {
+          "id": "41e7a766-391b-50fc-adbe-22f91d9c6716",
+          "courseName": "GC72A4019115_1912",
+          "category": "政治理论",
+          "paragraphCount": 20,
+          "fileName": "开创“中国之治”新境界——党的十九届四中全会总体精神解读（上）.txt"
+        },
+        {
+          "id": "28cbb232-1c46-5268-9fdd-abf4db6c1ed0",
+          "courseName": "GC72A4119115_1912",
+          "category": "政治理论",
+          "paragraphCount": 20,
+          "fileName": "开创“中国之治”新境界——党的十九届四中全会总体精神解读（中）.txt"
+        },
+        {
+          "id": "f587e5bd-bb44-5eb1-bcb0-570ed46898d5",
+          "courseName": "GC72A4219115_1912",
+          "category": "政治理论",
+          "paragraphCount": 12,
+          "fileName": "开创“中国之治”新境界——党的十九届四中全会总体精神解读（下）.txt"
+        },
+        {
+          "id": "447bc1da-7008-5254-a6d9-fa5c2a34e0be",
+          "courseName": "HGC20111001",
+          "category": "政治理论",
+          "paragraphCount": 26,
+          "fileName": "深入学习贯彻党的十九届五中全会精神，开启全面建设社会主义现代化国家新征程（上）.txt"
+        },
+        {
+          "id": "ef7a197b-e546-5460-99b5-1db010bfe32c",
+          "courseName": "HGC20111002",
+          "category": "政治理论",
+          "paragraphCount": 21,
+          "fileName": "深入学习贯彻党的十九届五中全会精神，开启全面建设社会主义现代化国家新征程（下）.txt"
+        },
+        {
+          "id": "00ff967f-0daf-5d2b-96e7-126865e1fad7",
+          "courseName": "HGC20111003",
+          "category": "政治理论",
+          "paragraphCount": 17,
+          "fileName": "党的十九届五中全会关于2035年远景目标的战略构想（上）.txt"
+        },
+        {
+          "id": "2fad77df-ccb7-53b8-a5c1-53193339e8b0",
+          "courseName": "HGC20111004",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "党的十九届五中全会关于2035年远景目标的战略构想（下）.txt"
+        },
+        {
+          "id": "ca2aaf43-2dd1-55e6-9bab-929c10c53123",
+          "courseName": "NGC20110301",
+          "category": "政治理论",
+          "paragraphCount": 18,
+          "fileName": "夺取全面建设社会主义现代化强国新胜利——深入学习党的十九届五中全会精神（上）.txt"
+        },
+        {
+          "id": "2cb50c12-9bd5-546c-a8f7-5a4b212527a4",
+          "courseName": "NGC20110302",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "夺取全面建设社会主义现代化强国新胜利——深入学习党的十九届五中全会精神（下）.txt"
+        },
+        {
+          "id": "45db49ee-1d7c-5aa7-8bfc-29c8e90a9455",
+          "courseName": "NGC95I2922105_2210",
+          "category": "政治理论",
+          "paragraphCount": 18,
+          "fileName": "高举中国特色社会主义伟大旗帜——学习贯彻党的二十大精神（上）.txt"
+        },
+        {
+          "id": "e4cbbe13-0a29-5e29-b3ae-2f95999540a0",
+          "courseName": "NGC95I3022105_2210",
+          "category": "政治理论",
+          "paragraphCount": 17,
+          "fileName": "高举中国特色社会主义伟大旗帜——学习贯彻党的二十大精神（下）.txt"
+        },
+        {
+          "id": "fc468b79-9266-5918-9d10-ef60e13c2508",
+          "courseName": "NGC95I3122105_2210",
+          "category": "国家治理",
+          "paragraphCount": 19,
+          "fileName": "过去五年的工作和新时代十年的伟大变革——学习贯彻党的二十大精神（上）.txt"
+        },
+        {
+          "id": "e2853553-4a1f-5d07-8b15-8b6c39b8fd65",
+          "courseName": "NGC95I3222105_2210",
+          "category": "国家治理",
+          "paragraphCount": 14,
+          "fileName": "过去五年的工作和新时代十年的伟大变革——学习贯彻党的二十大精神（下）.txt"
+        },
+        {
+          "id": "92bdc24f-8252-5a4e-a8b7-87445167b9c0",
+          "courseName": "NGC95I3322105_2210",
+          "category": "政治理论",
+          "paragraphCount": 14,
+          "fileName": "发展全过程人民民主，保障人民当家作主——党的二十大报告解读（上）.txt"
+        },
+        {
+          "id": "6d827e7f-afe0-5c69-84c2-355a94eeb4f0",
+          "courseName": "NGC95I3422105_2210",
+          "category": "政治理论",
+          "paragraphCount": 13,
+          "fileName": "发展全过程人民民主，保障人民当家作主——党的二十大报告解读（中）.txt"
+        },
+        {
+          "id": "dbd5c321-2fc7-5f81-8883-c61b2fac1541",
+          "courseName": "NGC95I3522105_2210",
+          "category": "政治理论",
+          "paragraphCount": 19,
+          "fileName": "发展全过程人民民主，保障人民当家作主——党的二十大报告解读（下）.txt"
+        },
+        {
+          "id": "0ee4222c-21bb-5175-954f-942b5976868b",
+          "courseName": "NGC95I3622105_2210",
+          "category": "国家治理",
+          "paragraphCount": 6,
+          "fileName": "坚持全面依法治国，推进法治中国建设——党的二十大报告解读（上）.txt"
+        },
+        {
+          "id": "217ff325-0d01-52da-bdeb-3afef8f4cf5a",
+          "courseName": "NGC95I3722105_2210",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "坚持全面依法治国，推进法治中国建设——党的二十大报告解读（中）.txt"
+        },
+        {
+          "id": "dc6e9aa2-f010-5619-84cd-df38543b7d38",
+          "courseName": "NGC95I3822105_2210",
+          "category": "国家治理",
+          "paragraphCount": 5,
+          "fileName": "坚持全面依法治国，推进法治中国建设——党的二十大报告解读（下）.txt"
+        },
+        {
+          "id": "f75d50b5-6139-5dff-824c-5617011d0302",
+          "courseName": "NGC95N3922105_2210",
+          "category": "国家治理",
+          "paragraphCount": 11,
+          "fileName": "党的二十大报告解读——全面推进乡村振兴（上）.txt"
+        },
+        {
+          "id": "41cd1329-ef96-55c9-8fe0-83942daaf362",
+          "courseName": "NGC95N4022105_2210",
+          "category": "国家治理",
+          "paragraphCount": 6,
+          "fileName": "党的二十大报告解读——全面推进乡村振兴（中）.txt"
+        },
+        {
+          "id": "bbf617fd-3255-5c45-b1e8-ceae84a8e907",
+          "courseName": "NGC95N4122105_2210",
+          "category": "国家治理",
+          "paragraphCount": 8,
+          "fileName": "党的二十大报告解读——全面推进乡村振兴（下）.txt"
+        },
+        {
+          "id": "8c378a0a-970e-5173-932e-3f1c4f6e7f17",
+          "courseName": "NGC95N4522105_2210",
+          "category": "国家治理",
+          "paragraphCount": 4,
+          "fileName": "从生态角度解读党的二十大报告——强化外来物种入侵防治的法治保障（上）.txt"
+        },
+        {
+          "id": "0954c8c5-fbdf-5952-b35a-7460b64ce5c5",
+          "courseName": "NGC95N4622105_2210",
+          "category": "国家治理",
+          "paragraphCount": 3,
+          "fileName": "从生态角度解读党的二十大报告——强化外来物种入侵防治的法治保障（中）.txt"
+        },
+        {
+          "id": "a4a215eb-da87-5e79-be0a-2dc1b27b49ec",
+          "courseName": "NGC95N4722105_2210",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "从生态角度解读党的二十大报告——强化外来物种入侵防治的法治保障（下）.txt"
+        },
+        {
+          "id": "f9f495da-e26a-58e9-a078-4e395de6a810",
+          "courseName": "NGC100I1324085_2408",
+          "category": "国家治理",
+          "paragraphCount": 17,
+          "fileName": "学习党的二十届三中全会精神和习近平总书记关于基层治理重要论述.txt"
+        },
+        {
+          "id": "0b8e7044-4089-519b-be9c-4006eb621bb4",
+          "courseName": "NGC100I1424085_2408",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "学习党的二十届三中全会精神，构建共建共治共享的基层治理新格局.txt"
+        },
+        {
+          "id": "e79e2822-c078-5edc-86a6-da42d0fb632a",
+          "courseName": "NGC100I1824085_2408",
+          "category": "国家治理",
+          "paragraphCount": 7,
+          "fileName": "党的二十届三中全会《决定》关于经济体制改革的突破性亮点.txt"
+        }
+      ],
+      "sampleCourses": [
+        {
+          "code": "GC03N0118025_1803",
+          "name": "我国经济社会发展的基本现状——党的十九大报告解读（上）",
+          "teacher": "张昊",
+          "duration": 30,
+          "format": "精品三分屏",
+          "description": "本课程是《我国经济社会发展的基本现状——党的十九大报告解读》系列课程的上半部分，由中国社会科学院财经战略研究院副研究员张昊主讲，围绕“十八大以来五年的工作和历史性变革”这一话题，重点阐述了以下内容：党",
+          "createdAt": 2018.2,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-theory",
+            "20th-report",
+            "chinese-modernization",
+            "rural-policy"
+          ]
+        },
+        {
+          "code": "GC03N0218025_1803",
+          "name": "我国经济社会发展的基本现状——党的十九大报告解读（下）",
+          "teacher": "张昊",
+          "duration": 40,
+          "format": "精品三分屏",
+          "description": "本课程是《我国经济社会发展的基本现状——党的十九大报告解读》系列课程的下半部分，由中国社会科学院财经战略研究院副研究员张昊主讲，主要内容有：二、对我国发展所处历史方位的新判断；三、习近平新时代中国特色",
+          "createdAt": 2018.2,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-theory",
+            "20th-report",
+            "chinese-modernization",
+            "rural-policy"
+          ]
+        },
+        {
+          "code": "NGC04I0525045_2504",
+          "name": "全面落实全国科技大会精神 加快建设科技强国（上）",
+          "teacher": "阚和庆",
+          "duration": 29,
+          "format": "专家讲授精制视频",
+          "description": "新时代新征程，科技创新已成为国家发展的核心动力。中国式现代化要以科技现代化作支撑，实现高质量发展要靠科技创新培育新动能。2024年全国科技大会的召开，为我们指明了前进的方向，明确了建设科技强国的战略目",
+          "createdAt": 2025.4,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "20th-report",
+            "chinese-modernization"
+          ]
+        }
+      ]
+    },
+    "chinese-modernization": {
+      "nodeId": "chinese-modernization",
+      "nodeName": "中国式现代化",
+      "parentName": "二十大精神学习",
+      "courses": 1761,
+      "matchedApiDocs": [
+        {
+          "id": "57a12550-90c8-57a8-b4ec-403743eecadd",
+          "courseName": "GC02I0215015_1504",
+          "category": "国家治理",
+          "paragraphCount": 29,
+          "fileName": "认识新常态，适应新常态.txt"
+        },
+        {
+          "id": "7f84bf01-e6cb-5c13-86e3-6fe0800c1c32",
+          "courseName": "GC04I1618075_1809",
+          "category": "统战理论",
+          "paragraphCount": 6,
+          "fileName": "中国特色大国外交之中俄、中欧关系.txt"
+        },
+        {
+          "id": "f57a4008-f7b9-5947-8f43-c95bf8a6bc3b",
+          "courseName": "GC02A1116015_1606",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "中国新外交：机遇、挑战与目标（上）.txt"
+        },
+        {
+          "id": "f74a0f6b-4d86-5719-9fd1-3e3a94e5099d",
+          "courseName": "GC02A1216015_1606",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "中国新外交：机遇、挑战与目标（下）.txt"
+        },
+        {
+          "id": "671f49b1-95c8-5de7-8430-a45ca652a2b2",
+          "courseName": "NGC02I0319045_1905",
+          "category": "统战理论",
+          "paragraphCount": 8,
+          "fileName": "用习近平外交思想把握百年未有之大变局的航向（上）.txt"
+        },
+        {
+          "id": "4ec868d1-1040-5366-a092-72fe028d610d",
+          "courseName": "NGC02I0419045_1905",
+          "category": "统战理论",
+          "paragraphCount": 8,
+          "fileName": "用习近平外交思想把握百年未有之大变局的航向（下）.txt"
+        },
+        {
+          "id": "3009fdf8-31ba-5268-9d1a-4372e3645c04",
+          "courseName": "GC03I1015065_1507",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "中国全面深化经济体制改革若干思考.txt"
+        },
+        {
+          "id": "40719601-0167-58bd-8258-5908c9b4d2c1",
+          "courseName": "GC03I0716015_1602",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "当前国际形势与中国国家安全环境（上）.txt"
+        },
+        {
+          "id": "be5c3e12-ad5d-5576-bb93-0fdcc48acaf3",
+          "courseName": "GC03I0816015_1602",
+          "category": "国家治理",
+          "paragraphCount": 27,
+          "fileName": "当前国际形势与中国国家安全环境（下）.txt"
+        },
+        {
+          "id": "5f37f7b3-9cfb-5630-9bf5-f74a52d26df6",
+          "courseName": "GC03I1316035_1606",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "供给侧结构性改革：重大抉择和战略作用.txt"
+        },
+        {
+          "id": "7280803c-aeb0-5a4a-9744-4b55730cec01",
+          "courseName": "GC03A0416055_1609",
+          "category": "国家治理",
+          "paragraphCount": 11,
+          "fileName": "如何应对供给侧结构性改革带来的社会冲击（上）.txt"
+        },
+        {
+          "id": "83ef0ee8-9e1a-5a3f-a064-027ada814330",
+          "courseName": "GC03A0516055_1609",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "如何应对供给侧结构性改革带来的社会冲击（下）.txt"
+        },
+        {
+          "id": "5340f9f0-4d2c-5bd3-aec2-f02994fb14eb",
+          "courseName": "GC03N0116105_1611",
+          "category": "国家治理",
+          "paragraphCount": 14,
+          "fileName": "共享经济与共享金融变革.txt"
+        },
+        {
+          "id": "3cc94419-f3fc-51ff-87c3-eb1762f24f7d",
+          "courseName": "GC03N0918065_1806",
+          "category": "国家治理",
+          "paragraphCount": 22,
+          "fileName": "推动数字产业化与产业数字化——学习习近平总书记全国网信工作会议重要讲话.txt"
+        },
+        {
+          "id": "157c9288-f23f-527a-9d00-0c23e2349355",
+          "courseName": "GC03N0818075_1807",
+          "category": "国家治理",
+          "paragraphCount": 25,
+          "fileName": "深化供给侧结构性改革是实现现代化强国的关键一招.txt"
+        },
+        {
+          "id": "ea2049f6-28cc-5797-9d33-1e7a6b93a764",
+          "courseName": "GC03A0118065_1808",
+          "category": "国家治理",
+          "paragraphCount": 8,
+          "fileName": "金融风险与财政的关系.txt"
+        },
+        {
+          "id": "0a21490e-55c9-5bbc-a02a-fbe85c7d9956",
+          "courseName": "GC03A0318065_1808",
+          "category": "国家治理",
+          "paragraphCount": 5,
+          "fileName": "加强财政能力建设，防控金融风险.txt"
+        },
+        {
+          "id": "bf70819d-84f4-5195-86e2-446512424936",
+          "courseName": "GC03N0718095_1810",
+          "category": "国家治理",
+          "paragraphCount": 19,
+          "fileName": "新经济产业功能区规划理论与实践.txt"
+        },
+        {
+          "id": "d74b5366-0482-5490-8323-e2e491f2dffa",
+          "courseName": "GC03A0319015_1901",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "振兴实体经济面临的形势和任务.txt"
+        },
+        {
+          "id": "c0eebc95-46e1-5f69-be9f-e1871eb7b894",
+          "courseName": "GC03I0518125_1901",
+          "category": "政治理论",
+          "paragraphCount": 17,
+          "fileName": "小康社会：中国式现代化阶段性战略目标.txt"
+        },
+        {
+          "id": "447bc1da-7008-5254-a6d9-fa5c2a34e0be",
+          "courseName": "HGC20111001",
+          "category": "政治理论",
+          "paragraphCount": 26,
+          "fileName": "深入学习贯彻党的十九届五中全会精神，开启全面建设社会主义现代化国家新征程（上）.txt"
+        },
+        {
+          "id": "fda50f7f-fdc9-5641-952f-a043333e8e5d",
+          "courseName": "GC03N0219015_1902",
+          "category": "统战理论",
+          "paragraphCount": 7,
+          "fileName": "人类命运共同体概念下的国际政治格局.txt"
+        },
+        {
+          "id": "1f5783ed-a4f6-5e73-acc9-3a9376111eea",
+          "courseName": "GC03I0619015_1902",
+          "category": "国家治理",
+          "paragraphCount": 17,
+          "fileName": "建设世界一流军队，为民族复兴保驾护航.txt"
+        },
+        {
+          "id": "ed00672a-a03a-504e-b8da-834115506db4",
+          "courseName": "GC03I0619035_1904",
+          "category": "国家治理",
+          "paragraphCount": 8,
+          "fileName": "优化营商环境，打造良好发展软环境（上）.txt"
+        },
+        {
+          "id": "8d377704-5955-50e8-8283-70c45f7e4e69",
+          "courseName": "GC03I0719035_1904",
+          "category": "国家治理",
+          "paragraphCount": 8,
+          "fileName": "优化营商环境，打造良好发展软环境（下）.txt"
+        },
+        {
+          "id": "04b1bff0-844a-54d6-b7a0-db30526a75ed",
+          "courseName": "GC03I1019035_1904",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "深入推进供给侧结构性改革.txt"
+        },
+        {
+          "id": "031c4edb-2507-5eb8-a640-2cfbb179ba54",
+          "courseName": "NGC03I2019035_1904",
+          "category": "政治理论",
+          "paragraphCount": 18,
+          "fileName": "全面开启社会主义现代化国家新征程（上）.txt"
+        },
+        {
+          "id": "05d5aac6-841e-55ee-82a3-e2244a6d8b1c",
+          "courseName": "NGC03I2119035_1904",
+          "category": "政治理论",
+          "paragraphCount": 16,
+          "fileName": "全面开启社会主义现代化国家新征程（下）.txt"
+        },
+        {
+          "id": "21ebf2fe-d1a0-5b39-ac69-ca246dac9018",
+          "courseName": "NGC03I0423035_2304",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "正确理解和大力推进中国式现代化（一）.txt"
+        },
+        {
+          "id": "9e0b49a9-605f-5e32-8c23-bdcf881e4736",
+          "courseName": "NGC03I0523035_2304",
+          "category": "国家治理",
+          "paragraphCount": 20,
+          "fileName": "正确理解和大力推进中国式现代化（二）.txt"
+        },
+        {
+          "id": "2f3f40b1-f596-50ec-88fa-56235140a5fe",
+          "courseName": "NGC03I0623035_2304",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "正确理解和大力推进中国式现代化（三）.txt"
+        },
+        {
+          "id": "50fbc7a2-c8f5-55b4-8ef3-bd0a185b48a7",
+          "courseName": "NGC03I0723035_2304",
+          "category": "国家治理",
+          "paragraphCount": 13,
+          "fileName": "正确理解和大力推进中国式现代化（四）.txt"
+        },
+        {
+          "id": "429e4f61-ee17-5398-9a9e-29b4a22576f7",
+          "courseName": "NGC03I0823115_2312",
+          "category": "统战理论",
+          "paragraphCount": 7,
+          "fileName": "构建亲清政商关系，发展壮大民营经济（上）.txt"
+        },
+        {
+          "id": "2aed9356-0be1-5cca-94a8-cfc2af7362ed",
+          "courseName": "NGC03I0923115_2312",
+          "category": "统战理论",
+          "paragraphCount": 6,
+          "fileName": "构建亲清政商关系，发展壮大民营经济（中）.txt"
+        },
+        {
+          "id": "260419c1-4b20-5a05-82da-28586a7312bc",
+          "courseName": "NGC03I1023115_2312",
+          "category": "统战理论",
+          "paragraphCount": 5,
+          "fileName": "构建亲清政商关系，发展壮大民营经济（下）.txt"
+        },
+        {
+          "id": "208b479e-a5ab-5578-98db-fd77d508d143",
+          "courseName": "GC03I1916015_1602",
+          "category": "政治理论",
+          "paragraphCount": 23,
+          "fileName": "习近平全球经济治理新思想.txt"
+        },
+        {
+          "id": "316519b6-ebb2-563f-841b-354e7a97f440",
+          "courseName": "GC04N1916055_1606",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "理解分享经济.txt"
+        },
+        {
+          "id": "6136d043-521e-5515-91c4-ffc686447778",
+          "courseName": "NGC09I1519115_1912",
+          "category": "统战理论",
+          "paragraphCount": 9,
+          "fileName": "推动构建人类命运共同体（上）.txt"
+        },
+        {
+          "id": "96c7cb1b-6adf-5c0c-8f73-fe1678b296ba",
+          "courseName": "NGC09I1619115_1912",
+          "category": "统战理论",
+          "paragraphCount": 6,
+          "fileName": "推动构建人类命运共同体（下）.txt"
+        },
+        {
+          "id": "7258cf8b-416d-59df-92f6-bd23d4af7ecf",
+          "courseName": "GC04A0918065_1807",
+          "category": "统战理论",
+          "paragraphCount": 7,
+          "fileName": "激发和保护企业家精神，为高质量发展注入活力（上）.txt"
+        },
+        {
+          "id": "14f69a96-c056-516b-a977-8c748e05778c",
+          "courseName": "GC04A1018065_1807",
+          "category": "统战理论",
+          "paragraphCount": 15,
+          "fileName": "激发和保护企业家精神，为高质量发展注入活力（下）.txt"
+        },
+        {
+          "id": "c972fea7-5f26-5170-9425-e7464c8fb783",
+          "courseName": "GC04N1418115_1812",
+          "category": "国家治理",
+          "paragraphCount": 21,
+          "fileName": "全面推进国防与军队现代化建设.txt"
+        },
+        {
+          "id": "7ee1909e-220d-589a-b4ff-1cfdae849a00",
+          "courseName": "NGC04I0319125_2001",
+          "category": "统战理论",
+          "paragraphCount": 5,
+          "fileName": "新时代的中国外交（上）.txt"
+        },
+        {
+          "id": "e7e7abe9-ff03-5bd3-a1c6-971abe6ad779",
+          "courseName": "NGC04I0419125_2001",
+          "category": "统战理论",
+          "paragraphCount": 6,
+          "fileName": "新时代的中国外交（下）.txt"
+        },
+        {
+          "id": "6e94b184-763a-5c5c-90a5-7f2a9b4994b8",
+          "courseName": "GC05A1718055_1806",
+          "category": "国家治理",
+          "paragraphCount": 16,
+          "fileName": "建构“互联网+”行政执法的新生态（上）.txt"
+        },
+        {
+          "id": "6ed86fd5-f326-5d69-ba40-20b5a84ae895",
+          "courseName": "GC05A1818055_1806",
+          "category": "国家治理",
+          "paragraphCount": 19,
+          "fileName": "建构“互联网+”行政执法的新生态（下）.txt"
+        },
+        {
+          "id": "0843b7f1-7c6d-5aa3-819a-2ab1458d8938",
+          "courseName": "GC06I1514125_1501",
+          "category": "国家治理",
+          "paragraphCount": 13,
+          "fileName": "提升政府冲突治理能力.txt"
+        },
+        {
+          "id": "4c09c5cd-e888-53f2-9b44-90e3ca81be89",
+          "courseName": "GC06I1614125_1501",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "网络舆情视野下的思想政治教育工作.txt"
+        },
+        {
+          "id": "b8fbcda0-dc27-5fb4-a94f-5f9f5567cf65",
+          "courseName": "GC07N1816095_1610",
+          "category": "政治理论",
+          "paragraphCount": 8,
+          "fileName": "论十八大以来党风廉政建设和反腐败工作的创新.txt"
+        },
+        {
+          "id": "3ddc33f5-9bc7-54f8-aad1-da3dd25fcb20",
+          "courseName": "GC08A1519095_1909",
+          "category": "国家治理",
+          "paragraphCount": 13,
+          "fileName": "新时代国家应急管理体制的创新发展.txt"
+        },
+        {
+          "id": "d59364d7-ea14-52a9-8067-030e5e8a6eb5",
+          "courseName": "GC09I3219035_1904",
+          "category": "统战理论",
+          "paragraphCount": 8,
+          "fileName": "习近平总书记构建人类命运共同体思想的渊源和发展.txt"
+        },
+        {
+          "id": "5cdbc094-56d6-536b-abe9-b29324cc20a0",
+          "courseName": "NGC09I0919115_1912",
+          "category": "政治理论",
+          "paragraphCount": 20,
+          "fileName": "全面推进中国特色大国外交（上）.txt"
+        },
+        {
+          "id": "410d580d-2077-58bd-ae07-670ef62184b7",
+          "courseName": "NGC09I1019115_1912",
+          "category": "统战理论",
+          "paragraphCount": 11,
+          "fileName": "全面推进中国特色大国外交（下）.txt"
+        },
+        {
+          "id": "ea0c89d5-3ec4-564c-836e-087490135ff2",
+          "courseName": "GC10I1315095_1511",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "全球网络安全问题及对策.txt"
+        },
+        {
+          "id": "fdab55a8-4ad2-5d04-ad3f-ddef8f272378",
+          "courseName": "GC13L2415050_1507",
+          "category": "国家治理",
+          "paragraphCount": 19,
+          "fileName": "新型城镇化与深化改革（上）.txt"
+        },
+        {
+          "id": "ed1501b7-be63-5d87-aa4a-e5de5c9e7413",
+          "courseName": "GC13L2515050_1507",
+          "category": "国家治理",
+          "paragraphCount": 19,
+          "fileName": "新型城镇化与深化改革（下）.txt"
+        },
+        {
+          "id": "d3423101-b91b-537d-b6c1-a5b389af1c6f",
+          "courseName": "GC13A3416065_1610",
+          "category": "国家治理",
+          "paragraphCount": 21,
+          "fileName": "“互联网+”激发农村经济新活力（上）.txt"
+        },
+        {
+          "id": "888afaa0-cacd-5dec-929b-8610b694550a",
+          "courseName": "GC13A3516065_1610",
+          "category": "国家治理",
+          "paragraphCount": 22,
+          "fileName": "“互联网+”激发农村经济新活力（下）.txt"
+        },
+        {
+          "id": "524351d2-f9c7-5eae-8cc0-83674ff06730",
+          "courseName": "GC13A3018055_1806",
+          "category": "国家治理",
+          "paragraphCount": 17,
+          "fileName": "以习近平新时代中国特色社会主义经济思想为指导，引领经济高质量发展（上）.txt"
+        },
+        {
+          "id": "5d70eea7-7929-582c-9fc6-e7ce601ddcf5",
+          "courseName": "GC13A3118055_1806",
+          "category": "国家治理",
+          "paragraphCount": 19,
+          "fileName": "以习近平新时代中国特色社会主义经济思想为指导，引领经济高质量发展（下）.txt"
+        },
+        {
+          "id": "ebda8979-664e-5940-b3cf-af15a2411fc5",
+          "courseName": "GC39I0315115_1511",
+          "category": "政治理论",
+          "paragraphCount": 21,
+          "fileName": "“十三五”发展新理念之创新：创新发展战略和重点.txt"
+        },
+        {
+          "id": "581b575f-1bcc-5452-9956-9b403e59e9d2",
+          "courseName": "GC39I0415115_1511",
+          "category": "政治理论",
+          "paragraphCount": 21,
+          "fileName": "“十三五”发展新理念之创新：创新发展，加快发展现代农业.txt"
+        },
+        {
+          "id": "0f26f6cd-4878-5065-a923-9d03c48e6bae",
+          "courseName": "GC39I0915115_1511",
+          "category": "政治理论",
+          "paragraphCount": 19,
+          "fileName": "“十三五”发展新理念之开放：“十三五”规划昭示未来五年中国经济外交大格局.txt"
+        },
+        {
+          "id": "bea2e747-f869-50d4-89c6-075c1cde85a2",
+          "courseName": "GC41I3116035_1604",
+          "category": "政治理论",
+          "paragraphCount": 23,
+          "fileName": "习近平总书记关于全面深化改革的经济思想（上）.txt"
+        },
+        {
+          "id": "cc80dd49-629f-5491-a99c-3271bd0bbbee",
+          "courseName": "GC41I3216035_1604",
+          "category": "政治理论",
+          "paragraphCount": 20,
+          "fileName": "习近平总书记关于全面深化改革的经济思想（下）.txt"
+        },
+        {
+          "id": "6b8896b0-04ab-5949-ad15-380359d5e3da",
+          "courseName": "GC41I3916035_1604",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "习近平主席中国特色中东外交.txt"
+        },
+        {
+          "id": "c5986769-8b61-5bce-ad52-e2d32ae19f3a",
+          "courseName": "HC48I1320125_2101",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "“十四五”时期全球发展大势分析.txt"
+        },
+        {
+          "id": "3fa259de-de89-581e-be7f-31e0a398ca18",
+          "courseName": "NGC48I2924015_2401",
+          "category": "国家治理",
+          "paragraphCount": 13,
+          "fileName": "稳中求进、以进促稳、先立后破——学习贯彻中央经济工作会议精神（一）.txt"
+        },
+        {
+          "id": "60bec827-f411-5941-8ee2-1bd6ad734dd0",
+          "courseName": "NGC48I3024015_2401",
+          "category": "国家治理",
+          "paragraphCount": 17,
+          "fileName": "稳中求进、以进促稳、先立后破——学习贯彻中央经济工作会议精神（二）.txt"
+        },
+        {
+          "id": "a6015172-c5a6-515c-ae97-3417c1b6791d",
+          "courseName": "NGC48I3124015_2401",
+          "category": "国家治理",
+          "paragraphCount": 8,
+          "fileName": "稳中求进、以进促稳、先立后破——学习贯彻中央经济工作会议精神（三）.txt"
+        },
+        {
+          "id": "77c62c9e-5a9a-5903-a2ec-7598a7e0aa10",
+          "courseName": "NGC48I3224015_2401",
+          "category": "国家治理",
+          "paragraphCount": 14,
+          "fileName": "稳中求进、以进促稳、先立后破——学习贯彻中央经济工作会议精神（四）.txt"
+        },
+        {
+          "id": "45e83dbe-5ebf-51d7-9e1d-ad524e1e58d7",
+          "courseName": "DSPTXYZY21061907",
+          "category": "政治理论",
+          "paragraphCount": 42,
+          "fileName": "习近平新时代中国特色社会主义思想.txt"
+        },
+        {
+          "id": "61e2527d-e355-5f41-907b-619a00053ff4",
+          "courseName": "DSPTXYZY20073106",
+          "category": "国家治理",
+          "paragraphCount": 29,
+          "fileName": "2018年政府工作报告.txt"
+        },
+        {
+          "id": "b9a4e9d5-830a-5db9-97f0-85a80babd496",
+          "courseName": "GC72N3619115_1911",
+          "category": "政治理论",
+          "paragraphCount": 18,
+          "fileName": "在守正创新中坚定制度自信（上）.txt"
+        },
+        {
+          "id": "11a121af-7390-5704-9051-1038c22fee1b",
+          "courseName": "GC72N3719115_1911",
+          "category": "政治理论",
+          "paragraphCount": 7,
+          "fileName": "在守正创新中坚定制度自信（下）.txt"
+        },
+        {
+          "id": "3490fb3e-930d-560c-a84e-a4ecfd9e1057",
+          "courseName": "GC72N2919115_1912",
+          "category": "政治理论",
+          "paragraphCount": 9,
+          "fileName": "推进新时代改革开放：化制度优势为治理效能（上）.txt"
+        },
+        {
+          "id": "c3f3bff5-aa1d-5919-acf7-7b319cb352b3",
+          "courseName": "GC72N3019115_1912",
+          "category": "政治理论",
+          "paragraphCount": 5,
+          "fileName": "推进新时代改革开放：化制度优势为治理效能（下）.txt"
+        },
+        {
+          "id": "c21f70fb-b48a-55e8-8a0f-d6b2bd819907",
+          "courseName": "GC20031203",
+          "category": "国家治理",
+          "paragraphCount": 7,
+          "fileName": "如何发挥我国制度优势打赢疫情防控阻击战（上）.txt"
+        },
+        {
+          "id": "1a8e943f-4101-549a-bc9f-675d37dfc91e",
+          "courseName": "GC20031204",
+          "category": "国家治理",
+          "paragraphCount": 6,
+          "fileName": "如何发挥我国制度优势打赢疫情防控阻击战（下）.txt"
+        },
+        {
+          "id": "ef7a197b-e546-5460-99b5-1db010bfe32c",
+          "courseName": "HGC20111002",
+          "category": "政治理论",
+          "paragraphCount": 21,
+          "fileName": "深入学习贯彻党的十九届五中全会精神，开启全面建设社会主义现代化国家新征程（下）.txt"
+        },
+        {
+          "id": "00ff967f-0daf-5d2b-96e7-126865e1fad7",
+          "courseName": "HGC20111003",
+          "category": "政治理论",
+          "paragraphCount": 17,
+          "fileName": "党的十九届五中全会关于2035年远景目标的战略构想（上）.txt"
+        },
+        {
+          "id": "2fad77df-ccb7-53b8-a5c1-53193339e8b0",
+          "courseName": "HGC20111004",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "党的十九届五中全会关于2035年远景目标的战略构想（下）.txt"
+        },
+        {
+          "id": "9b4719ec-8d04-5e80-a770-10be8a39ab6d",
+          "courseName": "HGC20111009",
+          "category": "政治理论",
+          "paragraphCount": 13,
+          "fileName": "形成强大国内市场，构建新发展格局（上）.txt"
+        },
+        {
+          "id": "612f44ba-cf15-5f40-bae8-a9266146cd3b",
+          "courseName": "HGC20111010",
+          "category": "政治理论",
+          "paragraphCount": 12,
+          "fileName": "形成强大国内市场，构建新发展格局（下）.txt"
+        },
+        {
+          "id": "ca2aaf43-2dd1-55e6-9bab-929c10c53123",
+          "courseName": "NGC20110301",
+          "category": "政治理论",
+          "paragraphCount": 18,
+          "fileName": "夺取全面建设社会主义现代化强国新胜利——深入学习党的十九届五中全会精神（上）.txt"
+        },
+        {
+          "id": "2cb50c12-9bd5-546c-a8f7-5a4b212527a4",
+          "courseName": "NGC20110302",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "夺取全面建设社会主义现代化强国新胜利——深入学习党的十九届五中全会精神（下）.txt"
+        },
+        {
+          "id": "c6e206c2-fbe2-5733-9436-356b9700f214",
+          "courseName": "HGC72I3520115_2012",
+          "category": "国家治理",
+          "paragraphCount": 11,
+          "fileName": "“十四五”规划与现代化国家的战略谋划（上）.txt"
+        },
+        {
+          "id": "4b39ef57-57f3-571c-859b-692ff6605c44",
+          "courseName": "HGC72I3620115_2012",
+          "category": "国家治理",
+          "paragraphCount": 11,
+          "fileName": "“十四五”规划与现代化国家的战略谋划（下）.txt"
+        },
+        {
+          "id": "8e000189-99c6-5859-b674-cc8dea2b6f00",
+          "courseName": "HGC85I2521055_2106",
+          "category": "政治理论",
+          "paragraphCount": 12,
+          "fileName": "2035年的中国愿景与改革选择（上）.txt"
+        },
+        {
+          "id": "e653f0e5-b004-5136-a744-92285adf1f9c",
+          "courseName": "HGC85I2621055_2106",
+          "category": "政治理论",
+          "paragraphCount": 14,
+          "fileName": "2035年的中国愿景与改革选择（中）.txt"
+        },
+        {
+          "id": "cd0ed1de-b7fd-56d3-87c8-4e90a1683a16",
+          "courseName": "HGC85I2721055_2106",
+          "category": "政治理论",
+          "paragraphCount": 13,
+          "fileName": "2035年的中国愿景与改革选择（下）.txt"
+        },
+        {
+          "id": "07700eda-1356-5626-b9b3-84ba37aa37dd",
+          "courseName": "NGC95N4222105_2210",
+          "category": "国家治理",
+          "paragraphCount": 19,
+          "fileName": "全面建设社会主义现代化国家的宏伟蓝图（上）.txt"
+        },
+        {
+          "id": "1938be14-ea09-59d7-8010-700a0473a91f",
+          "courseName": "NGC95N4322105_2210",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "全面建设社会主义现代化国家的宏伟蓝图（中）.txt"
+        },
+        {
+          "id": "b50b6bfd-6cab-552a-96b0-85a76329a1ef",
+          "courseName": "NGC95N4422105_2210",
+          "category": "国家治理",
+          "paragraphCount": 16,
+          "fileName": "全面建设社会主义现代化国家的宏伟蓝图（下）.txt"
+        },
+        {
+          "id": "c85a7a0f-db66-59f2-aa2f-901978f91255",
+          "courseName": "NGC96I4223035_2303",
+          "category": "国家治理",
+          "paragraphCount": 8,
+          "fileName": "有效防范化解重大经济金融风险（上）.txt"
+        },
+        {
+          "id": "ec3ef12c-ae73-5633-83c5-66a0ee8ed330",
+          "courseName": "NGC96I4323035_2303",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "有效防范化解重大经济金融风险（下）.txt"
+        },
+        {
+          "id": "af9d3c7d-6c30-5635-ba3f-02c753d06489",
+          "courseName": "NGC97I3823115_2312",
+          "category": "政治理论",
+          "paragraphCount": 14,
+          "fileName": "深入学习领会习近平总书记关于中国式现代化的重要论述（上）.txt"
+        },
+        {
+          "id": "5f81ace4-e217-5d69-98b6-b6386f8f3d0c",
+          "courseName": "NGC97I3923115_2312",
+          "category": "政治理论",
+          "paragraphCount": 19,
+          "fileName": "深入学习领会习近平总书记关于中国式现代化的重要论述（下）.txt"
+        },
+        {
+          "id": "50f8cd58-8714-57c4-85c9-ec08459dd762",
+          "courseName": "NGC100I2524075_2407",
+          "category": "国家治理",
+          "paragraphCount": 5,
+          "fileName": "以进一步全面深化改革，开辟中国式现代化广阔前景.txt"
+        },
+        {
+          "id": "35e22706-e2ea-5618-9bbd-cbc99aadc9e2",
+          "courseName": "NGC100I2624075_2407",
+          "category": "国家治理",
+          "paragraphCount": 6,
+          "fileName": "进一步全面深化改革、推进中国式现代化的战略意义.txt"
+        },
+        {
+          "id": "c84e2a7a-5839-52ac-9bd3-f4275547aad0",
+          "courseName": "NGC100I2724075_2407",
+          "category": "国家治理",
+          "paragraphCount": 9,
+          "fileName": "进一步全面深化改革、推进中国式现代化的总体要求.txt"
+        },
+        {
+          "id": "06d4bd54-1ef1-5532-944e-d17573abf4e9",
+          "courseName": "NGC100I2824075_2407",
+          "category": "国家治理",
+          "paragraphCount": 11,
+          "fileName": "进一步全面深化改革、推进中国式现代化的系统部署.txt"
+        },
+        {
+          "id": "408c9ad4-1e91-5288-9c9f-9e43893fa7a5",
+          "courseName": "NGC100I0524085_2408",
+          "category": "国家治理",
+          "paragraphCount": 28,
+          "fileName": "深刻认识新时代全面深化改革伟大成就，持续推进中国式现代化.txt"
+        },
+        {
+          "id": "258acab1-25bc-5c74-8bb7-db82a1e7848a",
+          "courseName": "NGC100I0724085_2408",
+          "category": "国家治理",
+          "paragraphCount": 16,
+          "fileName": "紧紧围绕推进中国式现代化进一步全面深化改革.txt"
+        },
+        {
+          "id": "e79e2822-c078-5edc-86a6-da42d0fb632a",
+          "courseName": "NGC100I1824085_2408",
+          "category": "国家治理",
+          "paragraphCount": 7,
+          "fileName": "党的二十届三中全会《决定》关于经济体制改革的突破性亮点.txt"
+        },
+        {
+          "id": "5de8d6a9-8427-5c71-b6fc-6e8bc5e9e52a",
+          "courseName": "NGC49I4223085_2309",
+          "category": "国家治理",
+          "paragraphCount": 8,
+          "fileName": "当前宏观经济形势与应对（上）.txt"
+        },
+        {
+          "id": "1efc533e-df11-5fa1-bd84-9b3628a5076b",
+          "courseName": "NGC49I4323085_2309",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "当前宏观经济形势与应对（中）.txt"
+        },
+        {
+          "id": "fa9398e0-a202-58f1-8408-e256cd12d6ee",
+          "courseName": "NGC49I4423085_2309",
+          "category": "国家治理",
+          "paragraphCount": 11,
+          "fileName": "当前宏观经济形势与应对（下）.txt"
+        }
+      ],
+      "sampleCourses": [
+        {
+          "code": "GC00I0118115_1811",
+          "name": "生态文明建设的共同富裕观和人类福祉观",
+          "teacher": "郭兆晖",
+          "duration": 14,
+          "format": "精品三分屏",
+          "description": "本课程由中央党校（国家行政学院）经济学教研部副教授郭兆晖主讲，主要内容有：一、良好生态环境是最普惠的民生福祉的共同富裕观；二、共谋全球生态文明建设的人类福祉观。",
+          "createdAt": 2018.11,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-theory",
+            "chinese-modernization"
+          ]
+        },
+        {
+          "code": "GC00A0518105_1811",
+          "name": "马克思、恩格斯生态文明思想在中国传承与创新的逻辑必然",
+          "teacher": "赵建军",
+          "duration": 16,
+          "format": "精品三分屏",
+          "description": "本课程由中央党校哲学部教授赵建军主讲，主要内容包括：一、中国优秀传统文化奠定了理论基础；二、中国面临诸多环境问题提供了现实动力；三、西方文化面对生态问题无能为力为中国提供了契机。",
+          "createdAt": 2018.1,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-theory",
+            "chinese-modernization"
+          ]
+        },
+        {
+          "code": "NGC00I0119035_1903",
+          "name": "绿色“一带一路”与2030年可持续发展议程",
+          "teacher": "郭兆晖",
+          "duration": 31,
+          "format": "专家讲授精制视频",
+          "description": "本课程由中共中央党校（国家行政学院）经济学教研部副教授郭兆晖主讲，主要内容有：一、绿色“一带一路”；二、绿色“一带一路”有利于2030年可持续发展议程的实现；三、关于推进绿色“一带一路”建设的指导意见",
+          "createdAt": 2019.3,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-theory",
+            "chinese-modernization"
+          ]
+        }
+      ]
+    },
+    "comprehensive-strict-governance": {
+      "nodeId": "comprehensive-strict-governance",
+      "nodeName": "全面从严治党",
+      "parentName": "二十大精神学习",
+      "courses": 315,
+      "matchedApiDocs": [
+        {
+          "id": "ab0e085d-01ad-5b3b-a8d3-610f3ebd9141",
+          "courseName": "NGC03I0819035_1903",
+          "category": "政治理论",
+          "paragraphCount": 12,
+          "fileName": "协调推进“四个全面”战略布局（上）.txt"
+        },
+        {
+          "id": "9c69e352-4b92-5f75-9d35-5d376c58f977",
+          "courseName": "NGC03I0919035_1903",
+          "category": "政治理论",
+          "paragraphCount": 3,
+          "fileName": "协调推进“四个全面”战略布局（下）.txt"
+        },
+        {
+          "id": "901411bc-986e-53a7-a024-0556dd3725a6",
+          "courseName": "GC04I0916105_1611",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "当前完善政府问责制度的热点重点难点问题.txt"
+        },
+        {
+          "id": "c689e3fa-c556-56a0-8621-65d8ee76c838",
+          "courseName": "GC05I2015025_1505",
+          "category": "政治理论",
+          "paragraphCount": 25,
+          "fileName": "党政领导干部选拔任用制度分析.txt"
+        },
+        {
+          "id": "2ed9803e-0c2a-5750-8508-abaadfde3ea0",
+          "courseName": "GC05I1716105_1611",
+          "category": "国家治理",
+          "paragraphCount": 23,
+          "fileName": "全面推行政府权力清单制度.txt"
+        },
+        {
+          "id": "6f5fd2a3-7a79-58de-8045-cd01940b79e8",
+          "courseName": "GC06I0715055_1506",
+          "category": "政治理论",
+          "paragraphCount": 20,
+          "fileName": "全面从严治党的基本功：思想建党、制度治党、法治权钱.txt"
+        },
+        {
+          "id": "b60e4cb1-2b7b-5a98-b5fc-0a2e6a186ec0",
+          "courseName": "GC06I2118075_1808",
+          "category": "政治理论",
+          "paragraphCount": 11,
+          "fileName": "协商民主的制度化发展与党的领导.txt"
+        },
+        {
+          "id": "7bc60b53-f9a5-5f65-aed3-f5d385f7dacb",
+          "courseName": "HGC07I0920035_2004",
+          "category": "政治理论",
+          "paragraphCount": 14,
+          "fileName": "学习政党理论，推进全面从严治党（上）.txt"
+        },
+        {
+          "id": "93f61f01-3efa-53bd-8173-71e85dca526d",
+          "courseName": "HGC07I1020035_2004",
+          "category": "政治理论",
+          "paragraphCount": 8,
+          "fileName": "学习政党理论，推进全面从严治党（下）.txt"
+        },
+        {
+          "id": "c4c73709-7754-5343-9978-6dd2f108309c",
+          "courseName": "HGC07I0720115_2012",
+          "category": "国家治理",
+          "paragraphCount": 13,
+          "fileName": "强化政治监督，保障制度执行（上）.txt"
+        },
+        {
+          "id": "648bb7ef-70f1-57ea-a88c-beb576e3a5a3",
+          "courseName": "HGC07I0820115_2012",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "强化政治监督，保障制度执行（下）.txt"
+        },
+        {
+          "id": "f96bc215-6fcf-5ab6-bce3-580b285ec0cf",
+          "courseName": "GC09I2415035_1504",
+          "category": "政治理论",
+          "paragraphCount": 29,
+          "fileName": "“四个全面”战略布局的新思路新要求.txt"
+        },
+        {
+          "id": "86186937-9511-595a-9ab5-ad8d96d0e388",
+          "courseName": "HGC09I1121105_2111",
+          "category": "政治理论",
+          "paragraphCount": 11,
+          "fileName": "习近平总书记关于社会主义政治建设重要论述（上）.txt"
+        },
+        {
+          "id": "fe7771d0-cd81-595c-914d-37ba6630e13d",
+          "courseName": "HGC09I1221105_2111",
+          "category": "政治理论",
+          "paragraphCount": 7,
+          "fileName": "习近平总书记关于社会主义政治建设重要论述（下）.txt"
+        },
+        {
+          "id": "aa638e43-7542-5db2-8009-0efbef0de6ca",
+          "courseName": "GC16I3116085_1609",
+          "category": "政治理论",
+          "paragraphCount": 18,
+          "fileName": "解读《中国共产党问责条例》：问责主体、对象、内容、方式与程序.txt"
+        },
+        {
+          "id": "eaa755c6-822b-5a71-899f-a751aac53547",
+          "courseName": "GC16I3316085_1609",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "《中国共产党问责条例》：全面从严治党、依规治党的新举措.txt"
+        },
+        {
+          "id": "4eec3661-94bb-5c73-a012-1a85b656cea9",
+          "courseName": "GC34I2415015_1502",
+          "category": "国家治理",
+          "paragraphCount": 20,
+          "fileName": "加强对权力运行的制约和监督，把权力关进制度的笼子里.txt"
+        },
+        {
+          "id": "cdb0a38d-47cd-5150-995a-fc9c9fedc6dc",
+          "courseName": "GC41I3316035_1604",
+          "category": "政治理论",
+          "paragraphCount": 26,
+          "fileName": "习近平总书记全面从严治党新思路.txt"
+        },
+        {
+          "id": "ba1b32e2-0ceb-54b2-bc96-f7fecde00314",
+          "courseName": "NGC71I4019065_1907",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "伟大工程：推进党的建设新的伟大工程（上）.txt"
+        },
+        {
+          "id": "c8f72946-4eb3-5dad-a77d-6a80145dad1e",
+          "courseName": "NGC71I4119065_1907",
+          "category": "政治理论",
+          "paragraphCount": 9,
+          "fileName": "伟大工程：推进党的建设新的伟大工程（下）.txt"
+        },
+        {
+          "id": "248c0947-389a-5251-a47f-38fe23499d2d",
+          "courseName": "GC72I3019115_1911",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "坚持和完善共建共治共享的社会治理制度（上）.txt"
+        },
+        {
+          "id": "7fa80892-f103-5c53-a27e-5f53acc51663",
+          "courseName": "GC72I3119115_1911",
+          "category": "国家治理",
+          "paragraphCount": 9,
+          "fileName": "坚持和完善共建共治共享的社会治理制度（下）.txt"
+        },
+        {
+          "id": "b9a4e9d5-830a-5db9-97f0-85a80babd496",
+          "courseName": "GC72N3619115_1911",
+          "category": "政治理论",
+          "paragraphCount": 18,
+          "fileName": "在守正创新中坚定制度自信（上）.txt"
+        },
+        {
+          "id": "11a121af-7390-5704-9051-1038c22fee1b",
+          "courseName": "GC72N3719115_1911",
+          "category": "政治理论",
+          "paragraphCount": 7,
+          "fileName": "在守正创新中坚定制度自信（下）.txt"
+        },
+        {
+          "id": "401c6351-4edc-55d9-93c5-66f05a561f81",
+          "courseName": "GC72N3819115_1911",
+          "category": "政治理论",
+          "paragraphCount": 8,
+          "fileName": "坚持和完善中国特色社会主义制度的几个关键问题（上）.txt"
+        },
+        {
+          "id": "37b0627c-c267-5024-90fa-e42fcc898fc2",
+          "courseName": "GC72N3919115_1911",
+          "category": "政治理论",
+          "paragraphCount": 13,
+          "fileName": "坚持和完善中国特色社会主义制度的几个关键问题（下）.txt"
+        },
+        {
+          "id": "88b0c767-7e97-5d2b-aaa9-31e5682c52ef",
+          "courseName": "NGC72I4019115_1911",
+          "category": "政治理论",
+          "paragraphCount": 11,
+          "fileName": "坚持和完善人民代表大会制度体系（上）.txt"
+        },
+        {
+          "id": "745fec91-5f61-5891-9777-aedb9da4d994",
+          "courseName": "NGC72I4119115_1911",
+          "category": "政治理论",
+          "paragraphCount": 9,
+          "fileName": "坚持和完善人民代表大会制度体系（下）.txt"
+        },
+        {
+          "id": "3490fb3e-930d-560c-a84e-a4ecfd9e1057",
+          "courseName": "GC72N2919115_1912",
+          "category": "政治理论",
+          "paragraphCount": 9,
+          "fileName": "推进新时代改革开放：化制度优势为治理效能（上）.txt"
+        },
+        {
+          "id": "c3f3bff5-aa1d-5919-acf7-7b319cb352b3",
+          "courseName": "GC72N3019115_1912",
+          "category": "政治理论",
+          "paragraphCount": 5,
+          "fileName": "推进新时代改革开放：化制度优势为治理效能（下）.txt"
+        },
+        {
+          "id": "1945da79-c7da-5be5-b9ba-effc9a9db847",
+          "courseName": "GC72A3619115_1912",
+          "category": "国家治理",
+          "paragraphCount": 25,
+          "fileName": "发挥好“显著优势”，坚持和完善统筹城乡的民生保障制度，满足人民日益增长的美好生活需要（上）.txt"
+        },
+        {
+          "id": "6d819439-6f3c-5f57-82bf-149ca0b5e2c8",
+          "courseName": "GC72A3719115_1912",
+          "category": "国家治理",
+          "paragraphCount": 34,
+          "fileName": "发挥好“显著优势”，坚持和完善统筹城乡的民生保障制度，满足人民日益增长的美好生活需要（下）.txt"
+        },
+        {
+          "id": "0b8e4586-2c44-5fba-aefb-32aaa3dfecfe",
+          "courseName": "NGC72I2519125_2001",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "坚持和完善党的领导制度体系（上）.txt"
+        },
+        {
+          "id": "5f9bb75d-773e-573f-af5a-bd2c3ff25745",
+          "courseName": "NGC72I2619125_2001",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "坚持和完善党的领导制度体系（下）.txt"
+        },
+        {
+          "id": "c21f70fb-b48a-55e8-8a0f-d6b2bd819907",
+          "courseName": "GC20031203",
+          "category": "国家治理",
+          "paragraphCount": 7,
+          "fileName": "如何发挥我国制度优势打赢疫情防控阻击战（上）.txt"
+        },
+        {
+          "id": "1a8e943f-4101-549a-bc9f-675d37dfc91e",
+          "courseName": "GC20031204",
+          "category": "国家治理",
+          "paragraphCount": 6,
+          "fileName": "如何发挥我国制度优势打赢疫情防控阻击战（下）.txt"
+        },
+        {
+          "id": "58523283-51d1-5f54-990a-b4665fb9c9a8",
+          "courseName": "NGC100I1624085_2408",
+          "category": "国家治理",
+          "paragraphCount": 32,
+          "fileName": "健全保障和改善民生制度体系.txt"
+        }
+      ],
+      "sampleCourses": [
+        {
+          "code": "GC00A0118055_1806",
+          "name": "《生态环境损害赔偿制度改革方案》解读（上）",
+          "teacher": "於方",
+          "duration": 45,
+          "format": "精品三分屏",
+          "description": "本课程是“《生态环境损害赔偿制度改革方案》解读”系列课程的上半部分，由生态环境部环境规划院环境风险与损害鉴定评估研究中心主任於方主讲，重点讲述了《生态环境损害赔偿制度改革方案》的总体要求和目标；工作原",
+          "createdAt": 2018.5,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-theory",
+            "comprehensive-strict-governance",
+            "supervision-system"
+          ]
+        },
+        {
+          "code": "GC00A0218055_1806",
+          "name": "《生态环境损害赔偿制度改革方案》解读（下）",
+          "teacher": "於方",
+          "duration": 60,
+          "format": "精品三分屏",
+          "description": "本课程是“《生态环境损害赔偿制度改革方案》解读”系列课程的下半部分，由生态环境部环境规划院环境风险与损害鉴定评估研究中心主任於方主讲，主要内容有：二、生态环境损害赔偿工作要点分析；三、环境损害鉴定评估",
+          "createdAt": 2018.5,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-theory",
+            "comprehensive-strict-governance",
+            "supervision-system"
+          ]
+        },
+        {
+          "code": "GC00A0318055_1806",
+          "name": "完善绿色消费的制度设计，扩大生态产品的有效和优质供给（上）",
+          "teacher": "周宏春",
+          "duration": 39,
+          "format": "精品三分屏",
+          "description": "本课程是《完善绿色消费的制度设计，扩大生态产品的有效和优质供给》系列课程的上半部分，由国务院发展研究中心社会发展研究部室主任周宏春主讲，主要内容有：一、绿色消费内涵及现状评价；二、共享发展理念与分享经",
+          "createdAt": 2018.5,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-theory",
+            "comprehensive-strict-governance",
+            "supervision-system"
+          ]
+        }
+      ]
+    },
+    "grassroots-party-work": {
+      "nodeId": "grassroots-party-work",
+      "nodeName": "基层党务工作",
+      "parentName": "精英在线智能学习体系",
+      "courses": 0,
+      "matchedApiDocs": [],
+      "sampleCourses": []
+    },
+    "membership-development": {
+      "nodeId": "membership-development",
+      "nodeName": "发展党员工作",
+      "parentName": "基层党务工作",
+      "courses": 0,
+      "matchedApiDocs": [],
+      "sampleCourses": []
+    },
+    "party-life": {
+      "nodeId": "party-life",
+      "nodeName": "党的组织生活",
+      "parentName": "基层党务工作",
+      "courses": 587,
+      "matchedApiDocs": [
+        {
+          "id": "40719601-0167-58bd-8258-5908c9b4d2c1",
+          "courseName": "GC03I0716015_1602",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "当前国际形势与中国国家安全环境（上）.txt"
+        },
+        {
+          "id": "be5c3e12-ad5d-5576-bb93-0fdcc48acaf3",
+          "courseName": "GC03I0816015_1602",
+          "category": "国家治理",
+          "paragraphCount": 27,
+          "fileName": "当前国际形势与中国国家安全环境（下）.txt"
+        },
+        {
+          "id": "c689e3fa-c556-56a0-8621-65d8ee76c838",
+          "courseName": "GC05I2015025_1505",
+          "category": "政治理论",
+          "paragraphCount": 25,
+          "fileName": "党政领导干部选拔任用制度分析.txt"
+        },
+        {
+          "id": "4c09c5cd-e888-53f2-9b44-90e3ca81be89",
+          "courseName": "GC06I1614125_1501",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "网络舆情视野下的思想政治教育工作.txt"
+        },
+        {
+          "id": "0e9b052d-4b6b-5c64-98b9-11f266ab2269",
+          "courseName": "GC07I0620035_2004",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "领导干部廉洁从政从业风险防范（上）.txt"
+        },
+        {
+          "id": "5b59822f-3879-5c8a-bbbf-325000896dc5",
+          "courseName": "GC07I0720035_2004",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "领导干部廉洁从政从业风险防范（中）.txt"
+        },
+        {
+          "id": "63313893-7faa-5ca6-a1e6-3335389437b1",
+          "courseName": "GC07I0820035_2004",
+          "category": "国家治理",
+          "paragraphCount": 5,
+          "fileName": "领导干部廉洁从政从业风险防范（下）.txt"
+        },
+        {
+          "id": "456a6f90-7b60-562d-a7df-6390898af393",
+          "courseName": "GC08I2515015_1503",
+          "category": "国家治理",
+          "paragraphCount": 31,
+          "fileName": "社会稳定突出问题与应急管理.txt"
+        },
+        {
+          "id": "9818ff58-6ba1-51b8-8a77-d220a8ea7fa1",
+          "courseName": "GC08A1318065_1807",
+          "category": "国家治理",
+          "paragraphCount": 9,
+          "fileName": "减轻灾害风险提升基层减灾综合防范能力（上）.txt"
+        },
+        {
+          "id": "7f590502-3f79-5ec4-b220-0633bf09e0f7",
+          "courseName": "GC08A1418065_1807",
+          "category": "国家治理",
+          "paragraphCount": 22,
+          "fileName": "减轻灾害风险提升基层减灾综合防范能力（下）.txt"
+        },
+        {
+          "id": "3ddc33f5-9bc7-54f8-aad1-da3dd25fcb20",
+          "courseName": "GC08A1519095_1909",
+          "category": "国家治理",
+          "paragraphCount": 13,
+          "fileName": "新时代国家应急管理体制的创新发展.txt"
+        },
+        {
+          "id": "ea0c89d5-3ec4-564c-836e-087490135ff2",
+          "courseName": "GC10I1315095_1511",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "全球网络安全问题及对策.txt"
+        },
+        {
+          "id": "ef6de734-61cc-5faa-b1a1-9b78399439ec",
+          "courseName": "NGC75I4219125_2001",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "中国特色公共安全之路——学习习近平总书记公共安全重要论述（一）.txt"
+        },
+        {
+          "id": "9782b19b-10c8-50fe-ae57-78653ae2954c",
+          "courseName": "NGC75I4319125_2001",
+          "category": "国家治理",
+          "paragraphCount": 6,
+          "fileName": "中国特色公共安全之路——学习习近平总书记公共安全重要论述（二）.txt"
+        },
+        {
+          "id": "2157a77b-4a17-5daa-8b09-405f2a361337",
+          "courseName": "NGC75I4419125_2001",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "中国特色公共安全之路——学习习近平总书记公共安全重要论述（三）.txt"
+        },
+        {
+          "id": "167f76e7-637c-545b-93b5-7bcc9a2ef963",
+          "courseName": "NGC75I4519125_2001",
+          "category": "国家治理",
+          "paragraphCount": 5,
+          "fileName": "中国特色公共安全之路——学习习近平总书记公共安全重要论述（四）.txt"
+        },
+        {
+          "id": "c21f70fb-b48a-55e8-8a0f-d6b2bd819907",
+          "courseName": "GC20031203",
+          "category": "国家治理",
+          "paragraphCount": 7,
+          "fileName": "如何发挥我国制度优势打赢疫情防控阻击战（上）.txt"
+        },
+        {
+          "id": "1a8e943f-4101-549a-bc9f-675d37dfc91e",
+          "courseName": "GC20031204",
+          "category": "国家治理",
+          "paragraphCount": 6,
+          "fileName": "如何发挥我国制度优势打赢疫情防控阻击战（下）.txt"
+        },
+        {
+          "id": "7de3eec0-402f-5804-9278-7782f9f7c7ed",
+          "courseName": "HGC92I4121095_2110",
+          "category": "国家治理",
+          "paragraphCount": 13,
+          "fileName": "严守规矩、不逾底线——干部要心存敬畏、修身自律（上）.txt"
+        },
+        {
+          "id": "3b2dc73b-3d87-5c23-8942-d45d21d5d7dc",
+          "courseName": "HGC92I4221095_2110",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "严守规矩、不逾底线——干部要心存敬畏、修身自律（下）.txt"
+        },
+        {
+          "id": "0eade7b3-9e5f-5cf6-a4fe-707502691cf9",
+          "courseName": "HGC92I4321105_2110",
+          "category": "国家治理",
+          "paragraphCount": 24,
+          "fileName": "勤学苦练、增强本领——干部要边干边学、边学边干.txt"
+        },
+        {
+          "id": "2fd6feaa-e21b-577e-9979-3a84c96234cb",
+          "courseName": "NGC92I4421095_2110",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "终身课题、常炼常修——干部的修养修炼没有休止符（上）.txt"
+        },
+        {
+          "id": "8182af07-0059-542a-b56f-bb8b1dda4ea5",
+          "courseName": "NGC92I4521095_2110",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "终身课题、常炼常修——干部的修养修炼没有休止符（下）.txt"
+        },
+        {
+          "id": "45e83dbe-5ebf-51d7-9e1d-ad524e1e58d7",
+          "courseName": "DSPTXYZY21061907",
+          "category": "政治理论",
+          "paragraphCount": 42,
+          "fileName": "习近平新时代中国特色社会主义思想.txt"
+        },
+        {
+          "id": "f9f495da-e26a-58e9-a078-4e395de6a810",
+          "courseName": "NGC100I1324085_2408",
+          "category": "国家治理",
+          "paragraphCount": 17,
+          "fileName": "学习党的二十届三中全会精神和习近平总书记关于基层治理重要论述.txt"
+        },
+        {
+          "id": "0b8e7044-4089-519b-be9c-4006eb621bb4",
+          "courseName": "NGC100I1424085_2408",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "学习党的二十届三中全会精神，构建共建共治共享的基层治理新格局.txt"
+        }
+      ],
+      "sampleCourses": [
+        {
+          "code": "GC00N0618115_1812",
+          "name": "如何加强环境保护和提高自然灾害防治能力",
+          "teacher": "李萌",
+          "duration": 34,
+          "format": "精品三分屏",
+          "description": "本课程由中国社会科学院城市发展与环境研究所副研究员李萌主讲，主要内容有：一、目前中国自然灾害防治能力总体水平；二、党和国家高度重视提升自然灾害防治能力和水平；三、建立高效科学的自然灾害防治体系；四、目",
+          "createdAt": 2018.11,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-life",
+            "party-theory"
+          ]
+        },
+        {
+          "code": "GC02I0215085_1508",
+          "name": "中国外交践行新安全观的理论与路径",
+          "teacher": "任晶晶",
+          "duration": 43,
+          "format": "精品三分屏",
+          "description": "本课程由中国社会科学院当代中国研究所副研究员任晶晶主讲，主要内容包括：一、新安全观概念的提出与演进；二、新安全观的内涵分析与原则阐释；三、中国新安全观外交的实践路径。",
+          "createdAt": 2015.8,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-theory",
+            "party-life",
+            "supervision-system",
+            "chinese-modernization"
+          ]
+        },
+        {
+          "code": "GC02I0915115_1512",
+          "name": "抓紧运筹新时期中国国家安全战略",
+          "teacher": "陈向阳",
+          "duration": 51,
+          "format": "精品三分屏",
+          "description": "本课程由中国现代国际关系研究院世界政治所副所长、研究员陈向阳主讲，主要内容有：一、当前国家安全环境；二、战略原则与战略目标；三、国家安全战略布局与战略重点。",
+          "createdAt": 2015.11,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-theory",
+            "party-life",
+            "supervision-system"
+          ]
+        }
+      ]
+    },
+    "mass-work": {
+      "nodeId": "mass-work",
+      "nodeName": "群众工作方法",
+      "parentName": "基层党务工作",
+      "courses": 480,
+      "matchedApiDocs": [
+        {
+          "id": "1f5783ed-a4f6-5e73-acc9-3a9376111eea",
+          "courseName": "GC03I0619015_1902",
+          "category": "国家治理",
+          "paragraphCount": 17,
+          "fileName": "建设世界一流军队，为民族复兴保驾护航.txt"
+        },
+        {
+          "id": "7986c8a8-42ca-5a34-8b3c-0995b41b7ecf",
+          "courseName": "GC03I0619045_1905",
+          "category": "国家治理",
+          "paragraphCount": 11,
+          "fileName": "保障基本民生、推进基本公共服务均等化的问题与对策措施.txt"
+        },
+        {
+          "id": "5afcb312-4319-580b-959d-170d856715b0",
+          "courseName": "NGC03I0819085_1909",
+          "category": "政治理论",
+          "paragraphCount": 16,
+          "fileName": "从新中国到新时代：民族复兴的道路自信.txt"
+        },
+        {
+          "id": "adcf6e41-e59e-5e76-8299-cf0b3ebce7f3",
+          "courseName": "GC04I1016105_1611",
+          "category": "统战理论",
+          "paragraphCount": 11,
+          "fileName": "正确认识和处理当代中国的宗教问题.txt"
+        },
+        {
+          "id": "4dc9412e-8011-5bfa-bf06-1bea3269dd19",
+          "courseName": "GC04I1116105_1611",
+          "category": "政治理论",
+          "paragraphCount": 24,
+          "fileName": "坚持和发展中国特色社会主义宗教理论.txt"
+        },
+        {
+          "id": "c77b83cd-4b9d-598f-b1c7-ce552e23a317",
+          "courseName": "GC06I1918075_1808",
+          "category": "政治理论",
+          "paragraphCount": 11,
+          "fileName": "推动协商民主多层发展.txt"
+        },
+        {
+          "id": "8758f497-0352-546c-a0f8-d84ca1c244d4",
+          "courseName": "GC06I2018075_1808",
+          "category": "政治理论",
+          "paragraphCount": 12,
+          "fileName": "推动协商民主广泛发展.txt"
+        },
+        {
+          "id": "b60e4cb1-2b7b-5a98-b5fc-0a2e6a186ec0",
+          "courseName": "GC06I2118075_1808",
+          "category": "政治理论",
+          "paragraphCount": 11,
+          "fileName": "协商民主的制度化发展与党的领导.txt"
+        },
+        {
+          "id": "664c4844-f4a2-5323-8eea-f38b37d95070",
+          "courseName": "GC06I2218075_1808",
+          "category": "政治理论",
+          "paragraphCount": 8,
+          "fileName": "协商民主是我国社会主义民主政治的独特优势.txt"
+        },
+        {
+          "id": "eb271c82-c76a-5bf2-baa1-253fb3082ee0",
+          "courseName": "GC09I2616065_1607",
+          "category": "政治理论",
+          "paragraphCount": 31,
+          "fileName": "习近平总书记谈正确认识和处理当代中国的民族问题.txt"
+        },
+        {
+          "id": "e0aa1fa9-57fe-5749-a564-d84d15282451",
+          "courseName": "GC16A2619035_1903",
+          "category": "统战理论",
+          "paragraphCount": 6,
+          "fileName": "《宗教事务条例》（新修订）解读（上）.txt"
+        },
+        {
+          "id": "2df62408-9816-5e60-9b83-7d5c123a28f4",
+          "courseName": "GC16A2719035_1903",
+          "category": "统战理论",
+          "paragraphCount": 6,
+          "fileName": "《宗教事务条例》（新修订）解读（下）.txt"
+        },
+        {
+          "id": "4be97604-ea19-5997-a1ad-a435fd66b34e",
+          "courseName": "GC39I1015115_1511",
+          "category": "政治理论",
+          "paragraphCount": 27,
+          "fileName": "“十三五”发展新理念之共享：坚持共享发展，切实保障基本民生.txt"
+        },
+        {
+          "id": "70360e79-fca0-5622-9304-0b1c7103ffd9",
+          "courseName": "GC39I1215115_1511",
+          "category": "政治理论",
+          "paragraphCount": 26,
+          "fileName": "“十三五”发展新理念之共享：共享发展，进一步保障和改善民生.txt"
+        },
+        {
+          "id": "b655189c-b398-5be5-a709-4edb84274292",
+          "courseName": "GC44N4016075_1607",
+          "category": "政治理论",
+          "paragraphCount": 31,
+          "fileName": "习近平总书记“七一”重要讲话为何强调“文化自信”.txt"
+        },
+        {
+          "id": "45e83dbe-5ebf-51d7-9e1d-ad524e1e58d7",
+          "courseName": "DSPTXYZY21061907",
+          "category": "政治理论",
+          "paragraphCount": 42,
+          "fileName": "习近平新时代中国特色社会主义思想.txt"
+        },
+        {
+          "id": "61e2527d-e355-5f41-907b-619a00053ff4",
+          "courseName": "DSPTXYZY20073106",
+          "category": "国家治理",
+          "paragraphCount": 29,
+          "fileName": "2018年政府工作报告.txt"
+        },
+        {
+          "id": "a086d29f-8228-5ae0-a2ee-fb722e807bcc",
+          "courseName": "NGC65I3719015_1902",
+          "category": "政治理论",
+          "paragraphCount": 23,
+          "fileName": "我国社会主要矛盾的变化是关系全局的历史性变化（上）.txt"
+        },
+        {
+          "id": "a98a0d28-edfb-5d55-8616-d3f73676459b",
+          "courseName": "NGC65I3819015_1902",
+          "category": "政治理论",
+          "paragraphCount": 12,
+          "fileName": "我国社会主要矛盾的变化是关系全局的历史性变化（下）.txt"
+        },
+        {
+          "id": "2aec8515-57d6-5705-936f-1922907acba0",
+          "courseName": "GC68I1319125_2001",
+          "category": "政治理论",
+          "paragraphCount": 11,
+          "fileName": "新中国70年协商民主的进展与宝贵经验（上）.txt"
+        },
+        {
+          "id": "dd77a810-a87e-54d6-856e-f9aa0a816a1f",
+          "courseName": "NGC71I3219065_1907",
+          "category": "政治理论",
+          "paragraphCount": 17,
+          "fileName": "伟大梦想：实现中华民族伟大复兴中国梦（上）.txt"
+        },
+        {
+          "id": "4d8eb633-0f40-5a89-b7a7-c6eb87351bfa",
+          "courseName": "NGC71I3319065_1907",
+          "category": "政治理论",
+          "paragraphCount": 17,
+          "fileName": "伟大梦想：实现中华民族伟大复兴中国梦（下）.txt"
+        },
+        {
+          "id": "1945da79-c7da-5be5-b9ba-effc9a9db847",
+          "courseName": "GC72A3619115_1912",
+          "category": "国家治理",
+          "paragraphCount": 25,
+          "fileName": "发挥好“显著优势”，坚持和完善统筹城乡的民生保障制度，满足人民日益增长的美好生活需要（上）.txt"
+        },
+        {
+          "id": "6d819439-6f3c-5f57-82bf-149ca0b5e2c8",
+          "courseName": "GC72A3719115_1912",
+          "category": "国家治理",
+          "paragraphCount": 34,
+          "fileName": "发挥好“显著优势”，坚持和完善统筹城乡的民生保障制度，满足人民日益增长的美好生活需要（下）.txt"
+        },
+        {
+          "id": "941bdb09-f03a-5b4b-ba57-12afa9923f8d",
+          "courseName": "GC20031201",
+          "category": "国家治理",
+          "paragraphCount": 9,
+          "fileName": "强信心、暖人心、聚民心——切实做好战“疫”中的宣教和舆论工作（上）.txt"
+        },
+        {
+          "id": "1986b601-399f-58f8-89b1-c8d03236dcfe",
+          "courseName": "GC20031202",
+          "category": "国家治理",
+          "paragraphCount": 4,
+          "fileName": "强信心、暖人心、聚民心——切实做好战“疫”中的宣教和舆论工作（下）.txt"
+        },
+        {
+          "id": "1734140c-2054-541d-9218-9f3e6468e288",
+          "courseName": "NGC85A2321041_2105",
+          "category": "政治理论",
+          "paragraphCount": 9,
+          "fileName": "意识形态工作如何凝民心聚共识——习近平总书记关于意识形态工作重要讲话精神解读（上）.txt"
+        },
+        {
+          "id": "ef3e7892-a7c9-59fe-834b-13bd02edb4cb",
+          "courseName": "NGC85A2421041_2105",
+          "category": "政治理论",
+          "paragraphCount": 11,
+          "fileName": "意识形态工作如何凝民心聚共识——习近平总书记关于意识形态工作重要讲话精神解读（中）.txt"
+        },
+        {
+          "id": "e9217caa-a065-5901-924e-e060e7ec0d0a",
+          "courseName": "NGC85A2521041_2105",
+          "category": "政治理论",
+          "paragraphCount": 9,
+          "fileName": "意识形态工作如何凝民心聚共识——习近平总书记关于意识形态工作重要讲话精神解读（下）.txt"
+        },
+        {
+          "id": "92bdc24f-8252-5a4e-a8b7-87445167b9c0",
+          "courseName": "NGC95I3322105_2210",
+          "category": "政治理论",
+          "paragraphCount": 14,
+          "fileName": "发展全过程人民民主，保障人民当家作主——党的二十大报告解读（上）.txt"
+        },
+        {
+          "id": "6d827e7f-afe0-5c69-84c2-355a94eeb4f0",
+          "courseName": "NGC95I3422105_2210",
+          "category": "政治理论",
+          "paragraphCount": 13,
+          "fileName": "发展全过程人民民主，保障人民当家作主——党的二十大报告解读（中）.txt"
+        },
+        {
+          "id": "dbd5c321-2fc7-5f81-8883-c61b2fac1541",
+          "courseName": "NGC95I3522105_2210",
+          "category": "政治理论",
+          "paragraphCount": 19,
+          "fileName": "发展全过程人民民主，保障人民当家作主——党的二十大报告解读（下）.txt"
+        },
+        {
+          "id": "5f8a96c7-5138-55dd-b0a3-cf68b651c29c",
+          "courseName": "NGC97I4023115_2311",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "坚持以习近平文化思想为指引，切实担负起新时代新的文化使命（一）.txt"
+        },
+        {
+          "id": "ae6f5b54-223f-5ead-8af4-3616b933fdbd",
+          "courseName": "NGC97I4123115_2311",
+          "category": "政治理论",
+          "paragraphCount": 13,
+          "fileName": "坚持以习近平文化思想为指引，切实担负起新时代新的文化使命（二）.txt"
+        },
+        {
+          "id": "c8eca280-761e-55b5-8ad6-637653617741",
+          "courseName": "NGC97I4223115_2311",
+          "category": "政治理论",
+          "paragraphCount": 10,
+          "fileName": "坚持以习近平文化思想为指引，切实担负起新时代新的文化使命（三）.txt"
+        },
+        {
+          "id": "9e0627d3-6517-5405-8455-41f8b7ee8d27",
+          "courseName": "NGC97I4323115_2311",
+          "category": "政治理论",
+          "paragraphCount": 8,
+          "fileName": "坚持以习近平文化思想为指引，切实担负起新时代新的文化使命（四）.txt"
+        },
+        {
+          "id": "58523283-51d1-5f54-990a-b4665fb9c9a8",
+          "courseName": "NGC100I1624085_2408",
+          "category": "国家治理",
+          "paragraphCount": 32,
+          "fileName": "健全保障和改善民生制度体系.txt"
+        }
+      ],
+      "sampleCourses": [
+        {
+          "code": "GC02I0315015_1503",
+          "name": "隋唐多民族国家的多元人才体系及其管理",
+          "teacher": "王水涣",
+          "duration": 60,
+          "format": "精品三分屏",
+          "description": "本课程由北京大学博士候选人、西北大学文化产业研究院研究员王水涣主讲，主要内容有：一、唐朝前中期三位帝王选才、用材的历史实践；二、佛教人性论对唐代人才观的影响；三、中唐“朋党之争”与人才群体分化；四、唐",
+          "createdAt": 2015.1,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "mass-work"
+          ]
+        },
+        {
+          "code": "GC02I0415015_1503",
+          "name": "中华优秀传统文化是涵养社会主义核心价值观的源泉",
+          "teacher": "李勇刚",
+          "duration": 61,
+          "format": "精品三分屏",
+          "description": "本课程由中央社会主义学院中华文化教研部教师李勇刚主讲，主要内容包括：一、核心价值观与中华文化；二、讲仁爱、重民本、守诚信、崇正义、尚和合、求大同；三、结语。",
+          "createdAt": 2015.1,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-theory",
+            "mass-work"
+          ]
+        },
+        {
+          "code": "GC02I0415025_1505",
+          "name": "中华文化在国际政治中的地位和作用",
+          "teacher": "李道湘",
+          "duration": 60,
+          "format": "精品三分屏",
+          "description": "本课程由中央社会主义学院中华文化教研部主任李道湘教授主讲，主要内容包括：一、要保持中华文化的民族特色；二、“文明冲突论”对中国文化的挑战和遏制策论；三、建构多元世界文化体系；四、加强与西方文化的联系。",
+          "createdAt": 2015.2,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "chinese-modernization",
+            "party-theory",
+            "mass-work"
+          ]
+        }
+      ]
+    },
+    "rural-revitalization": {
+      "nodeId": "rural-revitalization",
+      "nodeName": "乡村振兴战略",
+      "parentName": "精英在线智能学习体系",
+      "courses": 0,
+      "matchedApiDocs": [],
+      "sampleCourses": []
+    },
+    "rural-policy": {
+      "nodeId": "rural-policy",
+      "nodeName": "乡村振兴政策",
+      "parentName": "乡村振兴战略",
+      "courses": 810,
+      "matchedApiDocs": [
+        {
+          "id": "e3bf0309-9def-53f3-b37a-f69795900d16",
+          "courseName": "GC39I0215115_1511",
+          "category": "政治理论",
+          "paragraphCount": 35,
+          "fileName": "“十三五”规划建议解读之全面建成小康社会新的目标要求.txt"
+        },
+        {
+          "id": "3009fdf8-31ba-5268-9d1a-4372e3645c04",
+          "courseName": "GC03I1015065_1507",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "中国全面深化经济体制改革若干思考.txt"
+        },
+        {
+          "id": "55a2248b-85eb-5f3f-9165-c7b84f5756e2",
+          "courseName": "GC03N0416085_1608",
+          "category": "政治理论",
+          "paragraphCount": 12,
+          "fileName": "论精准扶贫与国家扶贫治理体系完善和优化.txt"
+        },
+        {
+          "id": "11fba37b-ed56-5df6-a623-b4d808ee5099",
+          "courseName": "GC03N0516085_1608",
+          "category": "政治理论",
+          "paragraphCount": 12,
+          "fileName": "农村精准扶贫：理论基础与实践情势探析.txt"
+        },
+        {
+          "id": "5340f9f0-4d2c-5bd3-aec2-f02994fb14eb",
+          "courseName": "GC03N0116105_1611",
+          "category": "国家治理",
+          "paragraphCount": 14,
+          "fileName": "共享经济与共享金融变革.txt"
+        },
+        {
+          "id": "bf70819d-84f4-5195-86e2-446512424936",
+          "courseName": "GC03N0718095_1810",
+          "category": "国家治理",
+          "paragraphCount": 19,
+          "fileName": "新经济产业功能区规划理论与实践.txt"
+        },
+        {
+          "id": "d74b5366-0482-5490-8323-e2e491f2dffa",
+          "courseName": "GC03A0319015_1901",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "振兴实体经济面临的形势和任务.txt"
+        },
+        {
+          "id": "c0eebc95-46e1-5f69-be9f-e1871eb7b894",
+          "courseName": "GC03I0518125_1901",
+          "category": "政治理论",
+          "paragraphCount": 17,
+          "fileName": "小康社会：中国式现代化阶段性战略目标.txt"
+        },
+        {
+          "id": "7bcd5724-0978-5b60-8275-60a46692b891",
+          "courseName": "GC03I0719015_1902",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "打赢决胜全面小康三大攻坚战.txt"
+        },
+        {
+          "id": "7986c8a8-42ca-5a34-8b3c-0995b41b7ecf",
+          "courseName": "GC03I0619045_1905",
+          "category": "国家治理",
+          "paragraphCount": 11,
+          "fileName": "保障基本民生、推进基本公共服务均等化的问题与对策措施.txt"
+        },
+        {
+          "id": "429e4f61-ee17-5398-9a9e-29b4a22576f7",
+          "courseName": "NGC03I0823115_2312",
+          "category": "统战理论",
+          "paragraphCount": 7,
+          "fileName": "构建亲清政商关系，发展壮大民营经济（上）.txt"
+        },
+        {
+          "id": "2aed9356-0be1-5cca-94a8-cfc2af7362ed",
+          "courseName": "NGC03I0923115_2312",
+          "category": "统战理论",
+          "paragraphCount": 6,
+          "fileName": "构建亲清政商关系，发展壮大民营经济（中）.txt"
+        },
+        {
+          "id": "260419c1-4b20-5a05-82da-28586a7312bc",
+          "courseName": "NGC03I1023115_2312",
+          "category": "统战理论",
+          "paragraphCount": 5,
+          "fileName": "构建亲清政商关系，发展壮大民营经济（下）.txt"
+        },
+        {
+          "id": "208b479e-a5ab-5578-98db-fd77d508d143",
+          "courseName": "GC03I1916015_1602",
+          "category": "政治理论",
+          "paragraphCount": 23,
+          "fileName": "习近平全球经济治理新思想.txt"
+        },
+        {
+          "id": "316519b6-ebb2-563f-841b-354e7a97f440",
+          "courseName": "GC04N1916055_1606",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "理解分享经济.txt"
+        },
+        {
+          "id": "6c57d865-aeb7-50d8-bcb7-5628bdc8e100",
+          "courseName": "NC06T0520125_2101",
+          "category": "国家治理",
+          "paragraphCount": 8,
+          "fileName": "法治建设护航乡村振兴的“余村样板”.txt"
+        },
+        {
+          "id": "581b575f-1bcc-5452-9956-9b403e59e9d2",
+          "courseName": "GC39I0415115_1511",
+          "category": "政治理论",
+          "paragraphCount": 21,
+          "fileName": "“十三五”发展新理念之创新：创新发展，加快发展现代农业.txt"
+        },
+        {
+          "id": "6ad134b1-4af6-5af3-915f-3bd8c9608337",
+          "courseName": "GC13A2116055_1609",
+          "category": "国家治理",
+          "paragraphCount": 26,
+          "fileName": "农业农村关键领域改革情况及思考（上）.txt"
+        },
+        {
+          "id": "dd88de97-5457-541d-b574-4101d72f61b6",
+          "courseName": "GC13A2216055_1609",
+          "category": "国家治理",
+          "paragraphCount": 9,
+          "fileName": "农业农村关键领域改革情况及思考（下）.txt"
+        },
+        {
+          "id": "d3423101-b91b-537d-b6c1-a5b389af1c6f",
+          "courseName": "GC13A3416065_1610",
+          "category": "国家治理",
+          "paragraphCount": 21,
+          "fileName": "“互联网+”激发农村经济新活力（上）.txt"
+        },
+        {
+          "id": "888afaa0-cacd-5dec-929b-8610b694550a",
+          "courseName": "GC13A3516065_1610",
+          "category": "国家治理",
+          "paragraphCount": 22,
+          "fileName": "“互联网+”激发农村经济新活力（下）.txt"
+        },
+        {
+          "id": "524351d2-f9c7-5eae-8cc0-83674ff06730",
+          "courseName": "GC13A3018055_1806",
+          "category": "国家治理",
+          "paragraphCount": 17,
+          "fileName": "以习近平新时代中国特色社会主义经济思想为指导，引领经济高质量发展（上）.txt"
+        },
+        {
+          "id": "5d70eea7-7929-582c-9fc6-e7ce601ddcf5",
+          "courseName": "GC13A3118055_1806",
+          "category": "国家治理",
+          "paragraphCount": 19,
+          "fileName": "以习近平新时代中国特色社会主义经济思想为指导，引领经济高质量发展（下）.txt"
+        },
+        {
+          "id": "d8b84fc1-2b0d-54e4-b059-29e41fabe06c",
+          "courseName": "GC13N1818075_1807",
+          "category": "国家治理",
+          "paragraphCount": 33,
+          "fileName": "实施乡村振兴战略，着力推进“五个振兴”.txt"
+        },
+        {
+          "id": "84e5270c-1d90-5ba5-9664-d89315706fdc",
+          "courseName": "GC13N1918075_1807",
+          "category": "国家治理",
+          "paragraphCount": 26,
+          "fileName": "实施乡村振兴战略的七条之路.txt"
+        },
+        {
+          "id": "994c135b-6e22-57b5-9ba5-6be48412856f",
+          "courseName": "GC13I0819055_1906",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "大力实施乡村振兴战略（上）.txt"
+        },
+        {
+          "id": "8866d8de-32c4-5e56-aed1-b04573316afc",
+          "courseName": "GC13I0919055_1906",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "大力实施乡村振兴战略（下）.txt"
+        },
+        {
+          "id": "0f26f6cd-4878-5065-a923-9d03c48e6bae",
+          "courseName": "GC39I0915115_1511",
+          "category": "政治理论",
+          "paragraphCount": 19,
+          "fileName": "“十三五”发展新理念之开放：“十三五”规划昭示未来五年中国经济外交大格局.txt"
+        },
+        {
+          "id": "4be97604-ea19-5997-a1ad-a435fd66b34e",
+          "courseName": "GC39I1015115_1511",
+          "category": "政治理论",
+          "paragraphCount": 27,
+          "fileName": "“十三五”发展新理念之共享：坚持共享发展，切实保障基本民生.txt"
+        },
+        {
+          "id": "70360e79-fca0-5622-9304-0b1c7103ffd9",
+          "courseName": "GC39I1215115_1511",
+          "category": "政治理论",
+          "paragraphCount": 26,
+          "fileName": "“十三五”发展新理念之共享：共享发展，进一步保障和改善民生.txt"
+        },
+        {
+          "id": "bea2e747-f869-50d4-89c6-075c1cde85a2",
+          "courseName": "GC41I3116035_1604",
+          "category": "政治理论",
+          "paragraphCount": 23,
+          "fileName": "习近平总书记关于全面深化改革的经济思想（上）.txt"
+        },
+        {
+          "id": "cc80dd49-629f-5491-a99c-3271bd0bbbee",
+          "courseName": "GC41I3216035_1604",
+          "category": "政治理论",
+          "paragraphCount": 20,
+          "fileName": "习近平总书记关于全面深化改革的经济思想（下）.txt"
+        },
+        {
+          "id": "aa8c33d4-d746-5323-807e-2b31b82eaf6d",
+          "courseName": "GC41I3716035_1604",
+          "category": "政治理论",
+          "paragraphCount": 35,
+          "fileName": "习近平总书记全面建成小康社会的战略思想.txt"
+        },
+        {
+          "id": "3fa259de-de89-581e-be7f-31e0a398ca18",
+          "courseName": "NGC48I2924015_2401",
+          "category": "国家治理",
+          "paragraphCount": 13,
+          "fileName": "稳中求进、以进促稳、先立后破——学习贯彻中央经济工作会议精神（一）.txt"
+        },
+        {
+          "id": "60bec827-f411-5941-8ee2-1bd6ad734dd0",
+          "courseName": "NGC48I3024015_2401",
+          "category": "国家治理",
+          "paragraphCount": 17,
+          "fileName": "稳中求进、以进促稳、先立后破——学习贯彻中央经济工作会议精神（二）.txt"
+        },
+        {
+          "id": "a6015172-c5a6-515c-ae97-3417c1b6791d",
+          "courseName": "NGC48I3124015_2401",
+          "category": "国家治理",
+          "paragraphCount": 8,
+          "fileName": "稳中求进、以进促稳、先立后破——学习贯彻中央经济工作会议精神（三）.txt"
+        },
+        {
+          "id": "77c62c9e-5a9a-5903-a2ec-7598a7e0aa10",
+          "courseName": "NGC48I3224015_2401",
+          "category": "国家治理",
+          "paragraphCount": 14,
+          "fileName": "稳中求进、以进促稳、先立后破——学习贯彻中央经济工作会议精神（四）.txt"
+        },
+        {
+          "id": "45e83dbe-5ebf-51d7-9e1d-ad524e1e58d7",
+          "courseName": "DSPTXYZY21061907",
+          "category": "政治理论",
+          "paragraphCount": 42,
+          "fileName": "习近平新时代中国特色社会主义思想.txt"
+        },
+        {
+          "id": "61e2527d-e355-5f41-907b-619a00053ff4",
+          "courseName": "DSPTXYZY20073106",
+          "category": "国家治理",
+          "paragraphCount": 29,
+          "fileName": "2018年政府工作报告.txt"
+        },
+        {
+          "id": "1945da79-c7da-5be5-b9ba-effc9a9db847",
+          "courseName": "GC72A3619115_1912",
+          "category": "国家治理",
+          "paragraphCount": 25,
+          "fileName": "发挥好“显著优势”，坚持和完善统筹城乡的民生保障制度，满足人民日益增长的美好生活需要（上）.txt"
+        },
+        {
+          "id": "6d819439-6f3c-5f57-82bf-149ca0b5e2c8",
+          "courseName": "GC72A3719115_1912",
+          "category": "国家治理",
+          "paragraphCount": 34,
+          "fileName": "发挥好“显著优势”，坚持和完善统筹城乡的民生保障制度，满足人民日益增长的美好生活需要（下）.txt"
+        },
+        {
+          "id": "f75d50b5-6139-5dff-824c-5617011d0302",
+          "courseName": "NGC95N3922105_2210",
+          "category": "国家治理",
+          "paragraphCount": 11,
+          "fileName": "党的二十大报告解读——全面推进乡村振兴（上）.txt"
+        },
+        {
+          "id": "41cd1329-ef96-55c9-8fe0-83942daaf362",
+          "courseName": "NGC95N4022105_2210",
+          "category": "国家治理",
+          "paragraphCount": 6,
+          "fileName": "党的二十大报告解读——全面推进乡村振兴（中）.txt"
+        },
+        {
+          "id": "bbf617fd-3255-5c45-b1e8-ceae84a8e907",
+          "courseName": "NGC95N4122105_2210",
+          "category": "国家治理",
+          "paragraphCount": 8,
+          "fileName": "党的二十大报告解读——全面推进乡村振兴（下）.txt"
+        },
+        {
+          "id": "c85a7a0f-db66-59f2-aa2f-901978f91255",
+          "courseName": "NGC96I4223035_2303",
+          "category": "国家治理",
+          "paragraphCount": 8,
+          "fileName": "有效防范化解重大经济金融风险（上）.txt"
+        },
+        {
+          "id": "ec3ef12c-ae73-5633-83c5-66a0ee8ed330",
+          "courseName": "NGC96I4323035_2303",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "有效防范化解重大经济金融风险（下）.txt"
+        },
+        {
+          "id": "58523283-51d1-5f54-990a-b4665fb9c9a8",
+          "courseName": "NGC100I1624085_2408",
+          "category": "国家治理",
+          "paragraphCount": 32,
+          "fileName": "健全保障和改善民生制度体系.txt"
+        },
+        {
+          "id": "e79e2822-c078-5edc-86a6-da42d0fb632a",
+          "courseName": "NGC100I1824085_2408",
+          "category": "国家治理",
+          "paragraphCount": 7,
+          "fileName": "党的二十届三中全会《决定》关于经济体制改革的突破性亮点.txt"
+        },
+        {
+          "id": "5de8d6a9-8427-5c71-b6fc-6e8bc5e9e52a",
+          "courseName": "NGC49I4223085_2309",
+          "category": "国家治理",
+          "paragraphCount": 8,
+          "fileName": "当前宏观经济形势与应对（上）.txt"
+        },
+        {
+          "id": "1efc533e-df11-5fa1-bd84-9b3628a5076b",
+          "courseName": "NGC49I4323085_2309",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "当前宏观经济形势与应对（中）.txt"
+        },
+        {
+          "id": "fa9398e0-a202-58f1-8408-e256cd12d6ee",
+          "courseName": "NGC49I4423085_2309",
+          "category": "国家治理",
+          "paragraphCount": 11,
+          "fileName": "当前宏观经济形势与应对（下）.txt"
+        }
+      ],
+      "sampleCourses": [
+        {
+          "code": "GC02I0315015_1504",
+          "name": "创新经济政策引领新常态",
+          "teacher": "王小广",
+          "duration": 62,
+          "format": "精品三分屏",
+          "description": "本课程由国家行政学院决策咨询部副主任王小广博士主讲，主要内容包括：一、宏观调控政策创新；二、调结构政策；三、新改革政策。",
+          "createdAt": 2015.1,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "chinese-modernization",
+            "rural-policy"
+          ]
+        },
+        {
+          "code": "GC02M0116015_1602",
+          "name": "关于当前中国经济的几个思考",
+          "teacher": "姚洋",
+          "duration": 17,
+          "format": "精品三分屏",
+          "description": "本课程由北京大学国家发展研究院院长姚洋教授主讲，主要内容包括：一、关于经济下行的问题；二、关于需求和投资的问题；三、关于财政政策的问题。",
+          "createdAt": 2016.1,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "chinese-modernization",
+            "rural-policy"
+          ]
+        },
+        {
+          "code": "GC02M0416015_1602",
+          "name": "新常态下经济发展的主要矛盾与供给侧改革",
+          "teacher": "逄锦聚",
+          "duration": 17,
+          "format": "精品三分屏",
+          "description": "本课程由南开大学原副校长逄锦聚教授主讲，主要内容包括：一、分析矛盾的两种方法；二、对我国经济发展新常态下主要矛盾的判断；三、新常态下经济改革发展主要任务、思路和政策措施。",
+          "createdAt": 2016.1,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "chinese-modernization",
+            "mass-work",
+            "rural-policy"
+          ]
+        }
+      ]
+    },
+    "rural-governance": {
+      "nodeId": "rural-governance",
+      "nodeName": "乡村治理现代化",
+      "parentName": "乡村振兴战略",
+      "courses": 205,
+      "matchedApiDocs": [
+        {
+          "id": "bf243907-c5c6-52bc-99a1-09c36ef2d3b2",
+          "courseName": "GC03I0615025_1504",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "基层社会治理问题研究.txt"
+        },
+        {
+          "id": "d6c14064-5836-5f22-a965-bc20bd3116d3",
+          "courseName": "GC03I0918115_1811",
+          "category": "国家治理",
+          "paragraphCount": 7,
+          "fileName": "打造共建共治共享的社会治理格局.txt"
+        },
+        {
+          "id": "d74b5366-0482-5490-8323-e2e491f2dffa",
+          "courseName": "GC03A0319015_1901",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "振兴实体经济面临的形势和任务.txt"
+        },
+        {
+          "id": "6c57d865-aeb7-50d8-bcb7-5628bdc8e100",
+          "courseName": "NC06T0520125_2101",
+          "category": "国家治理",
+          "paragraphCount": 8,
+          "fileName": "法治建设护航乡村振兴的“余村样板”.txt"
+        },
+        {
+          "id": "ffb00fc2-3f39-58aa-abd8-3e4e1c9e34b0",
+          "courseName": "GC08N1716085_1609",
+          "category": "国家治理",
+          "paragraphCount": 30,
+          "fileName": "国外国家与社会治理的经验与启示.txt"
+        },
+        {
+          "id": "d8b84fc1-2b0d-54e4-b059-29e41fabe06c",
+          "courseName": "GC13N1818075_1807",
+          "category": "国家治理",
+          "paragraphCount": 33,
+          "fileName": "实施乡村振兴战略，着力推进“五个振兴”.txt"
+        },
+        {
+          "id": "84e5270c-1d90-5ba5-9664-d89315706fdc",
+          "courseName": "GC13N1918075_1807",
+          "category": "国家治理",
+          "paragraphCount": 26,
+          "fileName": "实施乡村振兴战略的七条之路.txt"
+        },
+        {
+          "id": "994c135b-6e22-57b5-9ba5-6be48412856f",
+          "courseName": "GC13I0819055_1906",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "大力实施乡村振兴战略（上）.txt"
+        },
+        {
+          "id": "8866d8de-32c4-5e56-aed1-b04573316afc",
+          "courseName": "GC13I0919055_1906",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "大力实施乡村振兴战略（下）.txt"
+        },
+        {
+          "id": "31f60cb2-02fc-5669-828c-29c4ada46619",
+          "courseName": "GC39I1115115_1511",
+          "category": "政治理论",
+          "paragraphCount": 18,
+          "fileName": "“十三五”发展新理念之共享：推进社会治理精细化，构建全民共建共享的社会治理格局.txt"
+        },
+        {
+          "id": "61e2527d-e355-5f41-907b-619a00053ff4",
+          "courseName": "DSPTXYZY20073106",
+          "category": "国家治理",
+          "paragraphCount": 29,
+          "fileName": "2018年政府工作报告.txt"
+        },
+        {
+          "id": "54de40e4-e358-5efa-b61c-e8d79924677c",
+          "courseName": "GC69A1519065_1907",
+          "category": "国家治理",
+          "paragraphCount": 2,
+          "fileName": "构建新型基层社会治理体系，打造扫黑除恶坚固防线（上）.txt"
+        },
+        {
+          "id": "5c0e530d-86c9-5175-bcb0-caf625314883",
+          "courseName": "GC69A1619065_1907",
+          "category": "国家治理",
+          "paragraphCount": 20,
+          "fileName": "构建新型基层社会治理体系，打造扫黑除恶坚固防线（中）.txt"
+        },
+        {
+          "id": "c324514d-9e55-5750-939a-55da7562a1ae",
+          "courseName": "GC69A1719065_1907",
+          "category": "国家治理",
+          "paragraphCount": 9,
+          "fileName": "构建新型基层社会治理体系，打造扫黑除恶坚固防线（下）.txt"
+        },
+        {
+          "id": "248c0947-389a-5251-a47f-38fe23499d2d",
+          "courseName": "GC72I3019115_1911",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "坚持和完善共建共治共享的社会治理制度（上）.txt"
+        },
+        {
+          "id": "7fa80892-f103-5c53-a27e-5f53acc51663",
+          "courseName": "GC72I3119115_1911",
+          "category": "国家治理",
+          "paragraphCount": 9,
+          "fileName": "坚持和完善共建共治共享的社会治理制度（下）.txt"
+        },
+        {
+          "id": "f75d50b5-6139-5dff-824c-5617011d0302",
+          "courseName": "NGC95N3922105_2210",
+          "category": "国家治理",
+          "paragraphCount": 11,
+          "fileName": "党的二十大报告解读——全面推进乡村振兴（上）.txt"
+        },
+        {
+          "id": "41cd1329-ef96-55c9-8fe0-83942daaf362",
+          "courseName": "NGC95N4022105_2210",
+          "category": "国家治理",
+          "paragraphCount": 6,
+          "fileName": "党的二十大报告解读——全面推进乡村振兴（中）.txt"
+        },
+        {
+          "id": "bbf617fd-3255-5c45-b1e8-ceae84a8e907",
+          "courseName": "NGC95N4122105_2210",
+          "category": "国家治理",
+          "paragraphCount": 8,
+          "fileName": "党的二十大报告解读——全面推进乡村振兴（下）.txt"
+        },
+        {
+          "id": "f9f495da-e26a-58e9-a078-4e395de6a810",
+          "courseName": "NGC100I1324085_2408",
+          "category": "国家治理",
+          "paragraphCount": 17,
+          "fileName": "学习党的二十届三中全会精神和习近平总书记关于基层治理重要论述.txt"
+        },
+        {
+          "id": "0b8e7044-4089-519b-be9c-4006eb621bb4",
+          "courseName": "NGC100I1424085_2408",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "学习党的二十届三中全会精神，构建共建共治共享的基层治理新格局.txt"
+        }
+      ],
+      "sampleCourses": [
+        {
+          "code": "GC02I0315095_1510",
+          "name": "南斯拉夫的“社会主义自治制度”",
+          "teacher": "郇雷",
+          "duration": 59,
+          "format": "精品三分屏",
+          "description": "本课程由中央党校科社部博士郇雷主讲，主要内容有：一、南斯拉夫“社会主义自治制度”的确立；二、南斯拉夫“社会主义自治制度”的成效与问题；三、南斯拉夫社会主义联盟解体的原因分析。",
+          "createdAt": 2015.9,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "rural-governance",
+            "comprehensive-strict-governance",
+            "supervision-system"
+          ]
+        },
+        {
+          "code": "GC03I1114125_1501",
+          "name": "社会转型与社会治理创新",
+          "teacher": "王道勇",
+          "duration": 67,
+          "format": "精品三分屏",
+          "description": "本课程由中共中央党校科社部社会学教研室王道勇教授主讲，主要内容包括：一、社会加速转型对社会治理的挑战；二、社会转型期社会治理的基本途径。",
+          "createdAt": 2014.12,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "rural-governance",
+            "chinese-modernization"
+          ]
+        },
+        {
+          "code": "GC03I0615025_1504",
+          "name": "基层社会治理问题研究",
+          "teacher": "陶元浩",
+          "duration": 63,
+          "format": "精品三分屏",
+          "description": "本课程由中共中央党校党建教研部教师陶元浩主讲，主要内容有：一、体验政治时代的到来；二、基层社会维稳问题的起因；三、社区衰落的原因与后果；四、重建城乡社区，改善“用户体验”。",
+          "createdAt": 2015.2,
+          "apiDocId": "bf243907-c5c6-52bc-99a1-09c36ef2d3b2",
+          "apiDocFileName": "基层社会治理问题研究",
+          "apiCategory": "国家治理",
+          "matchedNodes": [
+            "rural-governance"
+          ]
+        }
+      ]
+    },
+    "disciplinary-style": {
+      "nodeId": "disciplinary-style",
+      "nodeName": "党风廉政建设",
+      "parentName": "精英在线智能学习体系",
+      "courses": 0,
+      "matchedApiDocs": [],
+      "sampleCourses": []
+    },
+    "integrity-education": {
+      "nodeId": "integrity-education",
+      "nodeName": "廉政教育",
+      "parentName": "党风廉政建设",
+      "courses": 138,
+      "matchedApiDocs": [
+        {
+          "id": "d8f154bc-f031-5ea0-8b28-51b2c587d95b",
+          "courseName": "DSPTXYZY21031101",
+          "category": "政治理论",
+          "paragraphCount": 19,
+          "fileName": "党员领导干部要在执行党的纪律中作表率.txt"
+        },
+        {
+          "id": "087728a3-f362-572d-acc2-0bc75aa9e80a",
+          "courseName": "GC07I1515125_1601",
+          "category": "国家治理",
+          "paragraphCount": 25,
+          "fileName": "当前反腐败形势与治理对策.txt"
+        },
+        {
+          "id": "b8fbcda0-dc27-5fb4-a94f-5f9f5567cf65",
+          "courseName": "GC07N1816095_1610",
+          "category": "政治理论",
+          "paragraphCount": 8,
+          "fileName": "论十八大以来党风廉政建设和反腐败工作的创新.txt"
+        },
+        {
+          "id": "0e9b052d-4b6b-5c64-98b9-11f266ab2269",
+          "courseName": "GC07I0620035_2004",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "领导干部廉洁从政从业风险防范（上）.txt"
+        },
+        {
+          "id": "5b59822f-3879-5c8a-bbbf-325000896dc5",
+          "courseName": "GC07I0720035_2004",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "领导干部廉洁从政从业风险防范（中）.txt"
+        },
+        {
+          "id": "63313893-7faa-5ca6-a1e6-3335389437b1",
+          "courseName": "GC07I0820035_2004",
+          "category": "国家治理",
+          "paragraphCount": 5,
+          "fileName": "领导干部廉洁从政从业风险防范（下）.txt"
+        },
+        {
+          "id": "f6d3d405-ff07-59e2-a67b-53d8502dd48e",
+          "courseName": "HGC07I1220095_2010",
+          "category": "国家治理",
+          "paragraphCount": 5,
+          "fileName": "深入推进反腐斗争，严惩重点领域问题（上）.txt"
+        },
+        {
+          "id": "66671dbd-928f-5c38-adba-08dd2eb7a8dc",
+          "courseName": "HGC07I1320095_2010",
+          "category": "国家治理",
+          "paragraphCount": 11,
+          "fileName": "深入推进反腐斗争，严惩重点领域问题（下）.txt"
+        },
+        {
+          "id": "cc160f5b-49bf-5fd1-98a6-c0c2c052d9be",
+          "courseName": "NGC16I1524015_2402",
+          "category": "国家治理",
+          "paragraphCount": 20,
+          "fileName": "《中国共产党纪律处分条例》修订的背景、主要看点及总则（上）.txt"
+        },
+        {
+          "id": "2f4f15d3-5f54-5d42-93bf-4fc94a73a300",
+          "courseName": "NGC16I1624015_2402",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "《中国共产党纪律处分条例》修订的背景、主要看点及总则（下）.txt"
+        },
+        {
+          "id": "61e2527d-e355-5f41-907b-619a00053ff4",
+          "courseName": "DSPTXYZY20073106",
+          "category": "国家治理",
+          "paragraphCount": 29,
+          "fileName": "2018年政府工作报告.txt"
+        }
+      ],
+      "sampleCourses": [
+        {
+          "code": "GC05I1415025_1504",
+          "name": "持续深入改进作风",
+          "teacher": "陶元浩",
+          "duration": 61,
+          "format": "精品三分屏",
+          "description": "本课程由中共中央党校党建教研部教师陶元浩主讲，主要内容有：一、加强作风建设的重要性；二、当前作风建设存在的问题；三、深入改进作风的举措；四、实现作风建设常态化。",
+          "createdAt": 2015.2,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "integrity-education"
+          ]
+        },
+        {
+          "code": "GC05I1715025_1505",
+          "name": "作风建设永远在路上——艰苦奋斗",
+          "teacher": "孙林",
+          "duration": 66,
+          "format": "精品三分屏",
+          "description": "本课程由中央党校党建部讲师孙林主讲，主要内容有：一、艰苦奋斗是我们党的优良传统；二、艰苦奋斗是实现中国梦的要求；三、在新时期继续保持艰苦风斗的作风。",
+          "createdAt": 2015.2,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "integrity-education"
+          ]
+        },
+        {
+          "code": "GC05I1815025_1505",
+          "name": "作风建设永远在路上——深入群众",
+          "teacher": "张弛",
+          "duration": 65,
+          "format": "精品三分屏",
+          "description": "本课程由中共中央党校党的建设教研部博士张弛主讲，主要内容有：一、着力解决人民群众反映强烈的突出问题；二、如何理解“群众路线”；三、传统中国文化中的群众；四、中国共产党的群众路线发展历程；五、新形势下的",
+          "createdAt": 2015.2,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "mass-work",
+            "integrity-education"
+          ]
+        }
+      ]
+    },
+    "supervision-system": {
+      "nodeId": "supervision-system",
+      "nodeName": "监督执纪体系",
+      "parentName": "党风廉政建设",
+      "courses": 649,
+      "matchedApiDocs": [
+        {
+          "id": "40719601-0167-58bd-8258-5908c9b4d2c1",
+          "courseName": "GC03I0716015_1602",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "当前国际形势与中国国家安全环境（上）.txt"
+        },
+        {
+          "id": "be5c3e12-ad5d-5576-bb93-0fdcc48acaf3",
+          "courseName": "GC03I0816015_1602",
+          "category": "国家治理",
+          "paragraphCount": 27,
+          "fileName": "当前国际形势与中国国家安全环境（下）.txt"
+        },
+        {
+          "id": "788fd090-e832-54ac-b79e-c927e37b7e57",
+          "courseName": "GC04I1115015_1504",
+          "category": "国家治理",
+          "paragraphCount": 11,
+          "fileName": "构建决策科学、执行坚决、监督有力的决策体制.txt"
+        },
+        {
+          "id": "b652e7d7-f747-5283-bc77-887e086f8bdc",
+          "courseName": "GC16I2615045_1506",
+          "category": "政治理论",
+          "paragraphCount": 28,
+          "fileName": "全面推进依法治国.txt"
+        },
+        {
+          "id": "901411bc-986e-53a7-a024-0556dd3725a6",
+          "courseName": "GC04I0916105_1611",
+          "category": "国家治理",
+          "paragraphCount": 18,
+          "fileName": "当前完善政府问责制度的热点重点难点问题.txt"
+        },
+        {
+          "id": "c689e3fa-c556-56a0-8621-65d8ee76c838",
+          "courseName": "GC05I2015025_1505",
+          "category": "政治理论",
+          "paragraphCount": 25,
+          "fileName": "党政领导干部选拔任用制度分析.txt"
+        },
+        {
+          "id": "2ed9803e-0c2a-5750-8508-abaadfde3ea0",
+          "courseName": "GC05I1716105_1611",
+          "category": "国家治理",
+          "paragraphCount": 23,
+          "fileName": "全面推行政府权力清单制度.txt"
+        },
+        {
+          "id": "d8f154bc-f031-5ea0-8b28-51b2c587d95b",
+          "courseName": "DSPTXYZY21031101",
+          "category": "政治理论",
+          "paragraphCount": 19,
+          "fileName": "党员领导干部要在执行党的纪律中作表率.txt"
+        },
+        {
+          "id": "ecdfc077-99a0-51a6-b630-7625d8aff550",
+          "courseName": "GC06I2115015_1503",
+          "category": "国家治理",
+          "paragraphCount": 28,
+          "fileName": "权力制约与监督理论研究.txt"
+        },
+        {
+          "id": "6f5fd2a3-7a79-58de-8045-cd01940b79e8",
+          "courseName": "GC06I0715055_1506",
+          "category": "政治理论",
+          "paragraphCount": 20,
+          "fileName": "全面从严治党的基本功：思想建党、制度治党、法治权钱.txt"
+        },
+        {
+          "id": "b60e4cb1-2b7b-5a98-b5fc-0a2e6a186ec0",
+          "courseName": "GC06I2118075_1808",
+          "category": "政治理论",
+          "paragraphCount": 11,
+          "fileName": "协商民主的制度化发展与党的领导.txt"
+        },
+        {
+          "id": "6c57d865-aeb7-50d8-bcb7-5628bdc8e100",
+          "courseName": "NC06T0520125_2101",
+          "category": "国家治理",
+          "paragraphCount": 8,
+          "fileName": "法治建设护航乡村振兴的“余村样板”.txt"
+        },
+        {
+          "id": "087728a3-f362-572d-acc2-0bc75aa9e80a",
+          "courseName": "GC07I1515125_1601",
+          "category": "国家治理",
+          "paragraphCount": 25,
+          "fileName": "当前反腐败形势与治理对策.txt"
+        },
+        {
+          "id": "b8fbcda0-dc27-5fb4-a94f-5f9f5567cf65",
+          "courseName": "GC07N1816095_1610",
+          "category": "政治理论",
+          "paragraphCount": 8,
+          "fileName": "论十八大以来党风廉政建设和反腐败工作的创新.txt"
+        },
+        {
+          "id": "4eec3661-94bb-5c73-a012-1a85b656cea9",
+          "courseName": "GC34I2415015_1502",
+          "category": "国家治理",
+          "paragraphCount": 20,
+          "fileName": "加强对权力运行的制约和监督，把权力关进制度的笼子里.txt"
+        },
+        {
+          "id": "e4b0e311-3e70-54f5-8766-f6233f445d32",
+          "courseName": "GC07I0319095_1910",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "正确把握和深化运用监督执纪“四种形态”（上）.txt"
+        },
+        {
+          "id": "ffa581de-25c9-57d5-a762-848472f8d669",
+          "courseName": "GC07I0419095_1910",
+          "category": "国家治理",
+          "paragraphCount": 22,
+          "fileName": "正确把握和深化运用监督执纪“四种形态”（下）.txt"
+        },
+        {
+          "id": "f6d3d405-ff07-59e2-a67b-53d8502dd48e",
+          "courseName": "HGC07I1220095_2010",
+          "category": "国家治理",
+          "paragraphCount": 5,
+          "fileName": "深入推进反腐斗争，严惩重点领域问题（上）.txt"
+        },
+        {
+          "id": "66671dbd-928f-5c38-adba-08dd2eb7a8dc",
+          "courseName": "HGC07I1320095_2010",
+          "category": "国家治理",
+          "paragraphCount": 11,
+          "fileName": "深入推进反腐斗争，严惩重点领域问题（下）.txt"
+        },
+        {
+          "id": "c4c73709-7754-5343-9978-6dd2f108309c",
+          "courseName": "HGC07I0720115_2012",
+          "category": "国家治理",
+          "paragraphCount": 13,
+          "fileName": "强化政治监督，保障制度执行（上）.txt"
+        },
+        {
+          "id": "648bb7ef-70f1-57ea-a88c-beb576e3a5a3",
+          "courseName": "HGC07I0820115_2012",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "强化政治监督，保障制度执行（下）.txt"
+        },
+        {
+          "id": "e8a157dc-654d-5e68-8253-c3f12af63f06",
+          "courseName": "GC72N3219115_1911",
+          "category": "政治理论",
+          "paragraphCount": 16,
+          "fileName": "坚持和完善中国特色社会主义法治体系，提高党依法治国、依法执政能力（上）.txt"
+        },
+        {
+          "id": "2169dce7-51e7-5c0e-a18b-1f4f62b2b00f",
+          "courseName": "NGC09I1119115_1912",
+          "category": "政治理论",
+          "paragraphCount": 12,
+          "fileName": "全面依法治国，建设社会主义法治国家（上）.txt"
+        },
+        {
+          "id": "47c0bba7-b5d2-5573-8b45-a15ad58df142",
+          "courseName": "NGC09I1219115_1912",
+          "category": "政治理论",
+          "paragraphCount": 5,
+          "fileName": "全面依法治国，建设社会主义法治国家（下）.txt"
+        },
+        {
+          "id": "ea0c89d5-3ec4-564c-836e-087490135ff2",
+          "courseName": "GC10I1315095_1511",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "全球网络安全问题及对策.txt"
+        },
+        {
+          "id": "cc160f5b-49bf-5fd1-98a6-c0c2c052d9be",
+          "courseName": "NGC16I1524015_2402",
+          "category": "国家治理",
+          "paragraphCount": 20,
+          "fileName": "《中国共产党纪律处分条例》修订的背景、主要看点及总则（上）.txt"
+        },
+        {
+          "id": "2f4f15d3-5f54-5d42-93bf-4fc94a73a300",
+          "courseName": "NGC16I1624015_2402",
+          "category": "国家治理",
+          "paragraphCount": 15,
+          "fileName": "《中国共产党纪律处分条例》修订的背景、主要看点及总则（下）.txt"
+        },
+        {
+          "id": "61e2527d-e355-5f41-907b-619a00053ff4",
+          "courseName": "DSPTXYZY20073106",
+          "category": "国家治理",
+          "paragraphCount": 29,
+          "fileName": "2018年政府工作报告.txt"
+        },
+        {
+          "id": "4fafd433-4169-52e3-852a-dc9fc39fb953",
+          "courseName": "NGC65I3419015_1902",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "学习贯彻宪法及宪法修正案，全面依法治国（上）.txt"
+        },
+        {
+          "id": "a1b9b2c2-c879-54af-ade3-34a31c9d2052",
+          "courseName": "NGC65I3519015_1902",
+          "category": "政治理论",
+          "paragraphCount": 18,
+          "fileName": "学习贯彻宪法及宪法修正案，全面依法治国（中）.txt"
+        },
+        {
+          "id": "fbb7b473-544f-575e-afdc-3aa904572ae6",
+          "courseName": "NGC65I3619015_1902",
+          "category": "政治理论",
+          "paragraphCount": 9,
+          "fileName": "学习贯彻宪法及宪法修正案，全面依法治国（下）.txt"
+        },
+        {
+          "id": "248c0947-389a-5251-a47f-38fe23499d2d",
+          "courseName": "GC72I3019115_1911",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "坚持和完善共建共治共享的社会治理制度（上）.txt"
+        },
+        {
+          "id": "7fa80892-f103-5c53-a27e-5f53acc51663",
+          "courseName": "GC72I3119115_1911",
+          "category": "国家治理",
+          "paragraphCount": 9,
+          "fileName": "坚持和完善共建共治共享的社会治理制度（下）.txt"
+        },
+        {
+          "id": "dde3d2e0-c655-54f1-8994-e94054dc6928",
+          "courseName": "GC72N3319115_1911",
+          "category": "政治理论",
+          "paragraphCount": 24,
+          "fileName": "坚持和完善中国特色社会主义法治体系，提高党依法治国、依法执政能力（下）.txt"
+        },
+        {
+          "id": "b9a4e9d5-830a-5db9-97f0-85a80babd496",
+          "courseName": "GC72N3619115_1911",
+          "category": "政治理论",
+          "paragraphCount": 18,
+          "fileName": "在守正创新中坚定制度自信（上）.txt"
+        },
+        {
+          "id": "11a121af-7390-5704-9051-1038c22fee1b",
+          "courseName": "GC72N3719115_1911",
+          "category": "政治理论",
+          "paragraphCount": 7,
+          "fileName": "在守正创新中坚定制度自信（下）.txt"
+        },
+        {
+          "id": "401c6351-4edc-55d9-93c5-66f05a561f81",
+          "courseName": "GC72N3819115_1911",
+          "category": "政治理论",
+          "paragraphCount": 8,
+          "fileName": "坚持和完善中国特色社会主义制度的几个关键问题（上）.txt"
+        },
+        {
+          "id": "37b0627c-c267-5024-90fa-e42fcc898fc2",
+          "courseName": "GC72N3919115_1911",
+          "category": "政治理论",
+          "paragraphCount": 13,
+          "fileName": "坚持和完善中国特色社会主义制度的几个关键问题（下）.txt"
+        },
+        {
+          "id": "88b0c767-7e97-5d2b-aaa9-31e5682c52ef",
+          "courseName": "NGC72I4019115_1911",
+          "category": "政治理论",
+          "paragraphCount": 11,
+          "fileName": "坚持和完善人民代表大会制度体系（上）.txt"
+        },
+        {
+          "id": "745fec91-5f61-5891-9777-aedb9da4d994",
+          "courseName": "NGC72I4119115_1911",
+          "category": "政治理论",
+          "paragraphCount": 9,
+          "fileName": "坚持和完善人民代表大会制度体系（下）.txt"
+        },
+        {
+          "id": "3490fb3e-930d-560c-a84e-a4ecfd9e1057",
+          "courseName": "GC72N2919115_1912",
+          "category": "政治理论",
+          "paragraphCount": 9,
+          "fileName": "推进新时代改革开放：化制度优势为治理效能（上）.txt"
+        },
+        {
+          "id": "c3f3bff5-aa1d-5919-acf7-7b319cb352b3",
+          "courseName": "GC72N3019115_1912",
+          "category": "政治理论",
+          "paragraphCount": 5,
+          "fileName": "推进新时代改革开放：化制度优势为治理效能（下）.txt"
+        },
+        {
+          "id": "1945da79-c7da-5be5-b9ba-effc9a9db847",
+          "courseName": "GC72A3619115_1912",
+          "category": "国家治理",
+          "paragraphCount": 25,
+          "fileName": "发挥好“显著优势”，坚持和完善统筹城乡的民生保障制度，满足人民日益增长的美好生活需要（上）.txt"
+        },
+        {
+          "id": "6d819439-6f3c-5f57-82bf-149ca0b5e2c8",
+          "courseName": "GC72A3719115_1912",
+          "category": "国家治理",
+          "paragraphCount": 34,
+          "fileName": "发挥好“显著优势”，坚持和完善统筹城乡的民生保障制度，满足人民日益增长的美好生活需要（下）.txt"
+        },
+        {
+          "id": "501f1391-5502-5de6-9899-93b6a83e71de",
+          "courseName": "GC72I2319125_2001",
+          "category": "政治理论",
+          "paragraphCount": 19,
+          "fileName": "坚持和完善党和国家监督体系，强化对权力运行的制约和监督（上）.txt"
+        },
+        {
+          "id": "b1524a8d-0010-5c70-b002-02a9323ba612",
+          "courseName": "GC72I2419125_2001",
+          "category": "政治理论",
+          "paragraphCount": 17,
+          "fileName": "坚持和完善党和国家监督体系，强化对权力运行的制约和监督（下）.txt"
+        },
+        {
+          "id": "0b8e4586-2c44-5fba-aefb-32aaa3dfecfe",
+          "courseName": "NGC72I2519125_2001",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "坚持和完善党的领导制度体系（上）.txt"
+        },
+        {
+          "id": "5f9bb75d-773e-573f-af5a-bd2c3ff25745",
+          "courseName": "NGC72I2619125_2001",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "坚持和完善党的领导制度体系（下）.txt"
+        },
+        {
+          "id": "ef6de734-61cc-5faa-b1a1-9b78399439ec",
+          "courseName": "NGC75I4219125_2001",
+          "category": "国家治理",
+          "paragraphCount": 12,
+          "fileName": "中国特色公共安全之路——学习习近平总书记公共安全重要论述（一）.txt"
+        },
+        {
+          "id": "9782b19b-10c8-50fe-ae57-78653ae2954c",
+          "courseName": "NGC75I4319125_2001",
+          "category": "国家治理",
+          "paragraphCount": 6,
+          "fileName": "中国特色公共安全之路——学习习近平总书记公共安全重要论述（二）.txt"
+        },
+        {
+          "id": "2157a77b-4a17-5daa-8b09-405f2a361337",
+          "courseName": "NGC75I4419125_2001",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "中国特色公共安全之路——学习习近平总书记公共安全重要论述（三）.txt"
+        },
+        {
+          "id": "167f76e7-637c-545b-93b5-7bcc9a2ef963",
+          "courseName": "NGC75I4519125_2001",
+          "category": "国家治理",
+          "paragraphCount": 5,
+          "fileName": "中国特色公共安全之路——学习习近平总书记公共安全重要论述（四）.txt"
+        },
+        {
+          "id": "c21f70fb-b48a-55e8-8a0f-d6b2bd819907",
+          "courseName": "GC20031203",
+          "category": "国家治理",
+          "paragraphCount": 7,
+          "fileName": "如何发挥我国制度优势打赢疫情防控阻击战（上）.txt"
+        },
+        {
+          "id": "1a8e943f-4101-549a-bc9f-675d37dfc91e",
+          "courseName": "GC20031204",
+          "category": "国家治理",
+          "paragraphCount": 6,
+          "fileName": "如何发挥我国制度优势打赢疫情防控阻击战（下）.txt"
+        },
+        {
+          "id": "7bdf57b5-6561-51f6-939b-5c1cce57f98f",
+          "courseName": "HGC87I2821035_2105",
+          "category": "政治理论",
+          "paragraphCount": 15,
+          "fileName": "习近平法治思想的理论创见（上）.txt"
+        },
+        {
+          "id": "3b7c878b-8b86-567a-9dc1-fe326dddaff3",
+          "courseName": "HGC87I2921035_2105",
+          "category": "政治理论",
+          "paragraphCount": 6,
+          "fileName": "习近平法治思想的理论创见（下）.txt"
+        },
+        {
+          "id": "0ee4222c-21bb-5175-954f-942b5976868b",
+          "courseName": "NGC95I3622105_2210",
+          "category": "国家治理",
+          "paragraphCount": 6,
+          "fileName": "坚持全面依法治国，推进法治中国建设——党的二十大报告解读（上）.txt"
+        },
+        {
+          "id": "217ff325-0d01-52da-bdeb-3afef8f4cf5a",
+          "courseName": "NGC95I3722105_2210",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "坚持全面依法治国，推进法治中国建设——党的二十大报告解读（中）.txt"
+        },
+        {
+          "id": "dc6e9aa2-f010-5619-84cd-df38543b7d38",
+          "courseName": "NGC95I3822105_2210",
+          "category": "国家治理",
+          "paragraphCount": 5,
+          "fileName": "坚持全面依法治国，推进法治中国建设——党的二十大报告解读（下）.txt"
+        },
+        {
+          "id": "8c378a0a-970e-5173-932e-3f1c4f6e7f17",
+          "courseName": "NGC95N4522105_2210",
+          "category": "国家治理",
+          "paragraphCount": 4,
+          "fileName": "从生态角度解读党的二十大报告——强化外来物种入侵防治的法治保障（上）.txt"
+        },
+        {
+          "id": "0954c8c5-fbdf-5952-b35a-7460b64ce5c5",
+          "courseName": "NGC95N4622105_2210",
+          "category": "国家治理",
+          "paragraphCount": 3,
+          "fileName": "从生态角度解读党的二十大报告——强化外来物种入侵防治的法治保障（中）.txt"
+        },
+        {
+          "id": "a4a215eb-da87-5e79-be0a-2dc1b27b49ec",
+          "courseName": "NGC95N4722105_2210",
+          "category": "国家治理",
+          "paragraphCount": 10,
+          "fileName": "从生态角度解读党的二十大报告——强化外来物种入侵防治的法治保障（下）.txt"
+        },
+        {
+          "id": "58523283-51d1-5f54-990a-b4665fb9c9a8",
+          "courseName": "NGC100I1624085_2408",
+          "category": "国家治理",
+          "paragraphCount": 32,
+          "fileName": "健全保障和改善民生制度体系.txt"
+        }
+      ],
+      "sampleCourses": [
+        {
+          "code": "GC00A0118055_1806",
+          "name": "《生态环境损害赔偿制度改革方案》解读（上）",
+          "teacher": "於方",
+          "duration": 45,
+          "format": "精品三分屏",
+          "description": "本课程是“《生态环境损害赔偿制度改革方案》解读”系列课程的上半部分，由生态环境部环境规划院环境风险与损害鉴定评估研究中心主任於方主讲，重点讲述了《生态环境损害赔偿制度改革方案》的总体要求和目标；工作原",
+          "createdAt": 2018.5,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-theory",
+            "comprehensive-strict-governance",
+            "supervision-system"
+          ]
+        },
+        {
+          "code": "GC00A0218055_1806",
+          "name": "《生态环境损害赔偿制度改革方案》解读（下）",
+          "teacher": "於方",
+          "duration": 60,
+          "format": "精品三分屏",
+          "description": "本课程是“《生态环境损害赔偿制度改革方案》解读”系列课程的下半部分，由生态环境部环境规划院环境风险与损害鉴定评估研究中心主任於方主讲，主要内容有：二、生态环境损害赔偿工作要点分析；三、环境损害鉴定评估",
+          "createdAt": 2018.5,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-theory",
+            "comprehensive-strict-governance",
+            "supervision-system"
+          ]
+        },
+        {
+          "code": "GC00A0318055_1806",
+          "name": "完善绿色消费的制度设计，扩大生态产品的有效和优质供给（上）",
+          "teacher": "周宏春",
+          "duration": 39,
+          "format": "精品三分屏",
+          "description": "本课程是《完善绿色消费的制度设计，扩大生态产品的有效和优质供给》系列课程的上半部分，由国务院发展研究中心社会发展研究部室主任周宏春主讲，主要内容有：一、绿色消费内涵及现状评价；二、共享发展理念与分享经",
+          "createdAt": 2018.5,
+          "apiDocId": "",
+          "apiDocFileName": "",
+          "apiCategory": "",
+          "matchedNodes": [
+            "party-theory",
+            "comprehensive-strict-governance",
+            "supervision-system"
+          ]
+        }
+      ]
+    },
+    "unmatched": {
+      "nodeId": "unmatched",
+      "nodeName": "未匹配",
+      "parentName": "",
+      "courses": 0,
+      "matchedApiDocs": [],
+      "sampleCourses": []
+    }
+  }
+}

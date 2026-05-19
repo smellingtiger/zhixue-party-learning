@@ -17,7 +17,7 @@ if (-not (Test-Path $ServerPath)) {
 Write-Host "正在启动服务..." -ForegroundColor Green
 Write-Host ""
 Write-Host "启动后你可以在浏览器中访问:" -ForegroundColor Yellow
-Write-Host "  本机: http://localhost:8080" -ForegroundColor White
+Write-Host "  本机: http://192.168.1.212:8080" -ForegroundColor White
 Write-Host "  局域网: http://$((Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -notlike '*Loopback*' -and $_.PrefixOrigin -ne 'WellKnownObject 'Dhcp' }).IPAddress):8080" -ForegroundColor White
 Write-Host ""
 Write-Host "按 Ctrl+C 停止服务" -ForegroundColor Yellow

@@ -3,7 +3,7 @@ import { resolveKnowledgeVideoId } from '@/lib/title-video-mapping';
 
 export const dynamic = 'force-dynamic';
 
-const KNOWLEDGE_SERVICE_URL = process.env.KNOWLEDGE_SERVICE_URL || 'http://localhost:8080';
+const KNOWLEDGE_SERVICE_URL = process.env.KNOWLEDGE_SERVICE_URL || 'http://192.168.1.212:8080';
 
 export async function GET(
   request: NextRequest,
