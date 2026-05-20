@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { getCachePath, cacheVideo } from '@/lib/video-cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,68 +42,88 @@ const MIME_TYPES: Record<string, string> = {
   '.avi': 'video/x-msvideo',
 };
 
+function streamVideoFile(
+  filePath: string,
+  fileSize: number,
+  mimeType: string,
+  range: string | null
+): NextResponse {
+  if (range) {
+    const parts = range.replace(/bytes=/, '').split('-');
+    const start = parseInt(parts[0], 10);
+    const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+    const chunkSize = (end - start) + 1;
+
+    const fileStream = fs.createReadStream(filePath, { start, end });
+
+    const headers = new Headers({
+      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': chunkSize.toString(),
+      'Content-Type': mimeType,
+      'Cache-Control': 'public, max-age=3600',
+    });
+
+    return new NextResponse(fileStream as any, {
+      status: 206,
+      headers,
+    });
+  } else {
+    const fileStream = fs.createReadStream(filePath);
+
+    const headers = new Headers({
+      'Content-Length': fileSize.toString(),
+      'Content-Type': mimeType,
+      'Accept-Ranges': 'bytes',
+      'Cache-Control': 'public, max-age=3600',
+    });
+
+    return new NextResponse(fileStream as any, {
+      status: 200,
+      headers,
+    });
+  }
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ courseCode: string }> }
 ) {
   try {
     const { courseCode } = await params;
-    
+
     const nasMapping = loadNasMapping();
-    
+
     if (!(courseCode in nasMapping)) {
       return NextResponse.json({ error: '视频不存在' }, { status: 404 });
     }
-    
+
     const item = nasMapping[courseCode];
-    const videoPath = item.nas_path;
-    
-    if (!fs.existsSync(videoPath)) {
+    const nasPath = item.nas_path;
+
+    const range = request.headers.get('range');
+
+    // 优先使用本地缓存
+    const cachedPath = getCachePath(courseCode);
+    if (cachedPath) {
+      const stat = fs.statSync(cachedPath);
+      const ext = path.extname(cachedPath).toLowerCase();
+      const mimeType = MIME_TYPES[ext] || 'video/mp4';
+      return streamVideoFile(cachedPath, stat.size, mimeType, range);
+    }
+
+    // 缓存未命中，从NAS读取
+    if (!fs.existsSync(nasPath)) {
       return NextResponse.json({ error: '视频文件不存在' }, { status: 404 });
     }
-    
-    const stat = fs.statSync(videoPath);
-    const fileSize = stat.size;
-    const ext = path.extname(videoPath).toLowerCase();
+
+    // 后台异步缓存到本地
+    cacheVideo(courseCode, nasPath);
+
+    const stat = fs.statSync(nasPath);
+    const ext = path.extname(nasPath).toLowerCase();
     const mimeType = MIME_TYPES[ext] || 'video/mp4';
-    
-    const range = request.headers.get('range');
-    
-    if (range) {
-      const parts = range.replace(/bytes=/, '').split('-');
-      const start = parseInt(parts[0], 10);
-      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-      const chunkSize = (end - start) + 1;
-      
-      const fileStream = fs.createReadStream(videoPath, { start, end });
-      
-      const headers = new Headers({
-        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-        'Accept-Ranges': 'bytes',
-        'Content-Length': chunkSize.toString(),
-        'Content-Type': mimeType,
-        'Cache-Control': 'public, max-age=3600',
-      });
-      
-      return new NextResponse(fileStream as any, {
-        status: 206,
-        headers,
-      });
-    } else {
-      const fileStream = fs.createReadStream(videoPath);
-      
-      const headers = new Headers({
-        'Content-Length': fileSize.toString(),
-        'Content-Type': mimeType,
-        'Accept-Ranges': 'bytes',
-        'Cache-Control': 'public, max-age=3600',
-      });
-      
-      return new NextResponse(fileStream as any, {
-        status: 200,
-        headers,
-      });
-    }
+    return streamVideoFile(nasPath, stat.size, mimeType, range);
   } catch (error) {
     console.error('[知识库视频流] 错误:', error);
     return NextResponse.json({ error: '视频文件读取失败' }, { status: 500 });

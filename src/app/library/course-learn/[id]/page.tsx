@@ -169,29 +169,26 @@ interface ChapterData {
   videoUrl?: string; // 章节视频 URL
 }
 
-// 多样化的参考来源库
+// 多样化的参考来源库 - 乡村振兴主题
 const REFERENCE_SOURCES: ReferenceItem[] = [
-  { title: '首个人形机器人与具身智能标准体系发布', source: '新华网', relevance: 'high' },
-  { title: '中国深化"人工智能+"打造增长新引擎', source: '新华网', relevance: 'high' },
-  { title: '"具身智能"如何走向未来？', source: '人民网科普', relevance: 'high' },
-  { title: '首入《政府工作报告》，具身智能何以竞速未来', source: '人民日报', relevance: 'high' },
-  { title: '具身智能迈向标准引领新阶段', source: '人民网经济·科技', relevance: 'high' },
-  { title: '具身智能新浪潮与落地要点', source: '人民网经济·科技', relevance: 'medium' },
-  { title: '具身世界模型报道', source: '人民网经济·科技', relevance: 'medium' },
-  { title: '产业侧共识：跑得快更要跑得稳', source: '人民网经济·科技', relevance: 'medium' },
-  { title: '具身智能走向更多生活场景', source: '人民网经济·科技', relevance: 'medium' },
-  { title: '规范与能力建设', source: '人民网教育', relevance: 'medium' },
-  { title: '以未来产业塑造产业未来', source: '人民网时评', relevance: 'medium' },
-  { title: '具身智能大有可为', source: '共产党员网', relevance: 'high' },
-  { title: '具身智能发展报告（2025年）', source: '中国信通院', relevance: 'high' },
-  { title: '2026中国具身智能大会官网', source: 'CEAI/CAAI', relevance: 'high' },
-  { title: '大会资料/白皮书 PDF', source: 'CEAI', relevance: 'high' },
-  { title: '术语与前沿论坛', source: '智源社区', relevance: 'medium' },
-  { title: '具身专题', source: 'GAITC 2025', relevance: 'medium' },
-  { title: '标准体系助推产业规范化', source: 'CCTV', relevance: 'high' },
-  { title: '标准体系（2026', source: '百度百科', relevance: 'medium' },
-  { title: '中国具身智能大会词条', source: '百度百科', relevance: 'medium' },
-  { title: '具身智能赋能应急管理产业', source: '赛迪顾问', relevance: 'high' },
+  { title: '中央一号文件：关于实施乡村振兴战略的意见', source: '新华网', relevance: 'high' },
+  { title: '全面推进乡村振兴 加快建设农业强国', source: '人民日报', relevance: 'high' },
+  { title: '学习运用"千万工程"经验 推进乡村振兴', source: '求是', relevance: 'high' },
+  { title: '乡村振兴促进法解读', source: '中国政府网', relevance: 'high' },
+  { title: '山东省党员培训分级开发与分类授课经验', source: '共产党员网', relevance: 'high' },
+  { title: '"红石榴+"行动：民族工作与乡村振兴融合', source: '人民网', relevance: 'medium' },
+  { title: '党支部领办合作社的潍坊实践', source: '大众日报', relevance: 'high' },
+  { title: '九部门"春雨润苗"专项行动', source: '国家税务总局', relevance: 'medium' },
+  { title: '乡村振兴项目论证与评估指南', source: '农业农村部', relevance: 'high' },
+  { title: '农村集体经济发展典型案例', source: '农民日报', relevance: 'medium' },
+  { title: '绿水青山就是金山银山的实践路径', source: '中国环境报', relevance: 'medium' },
+  { title: '乡村人才振兴与能人返乡创业', source: '人民日报', relevance: 'high' },
+  { title: '2025年中央农村工作会议精神解读', source: '新华网', relevance: 'high' },
+  { title: '乡村振兴"五大振兴"协同推进机制', source: '求是', relevance: 'high' },
+  { title: '从脱贫攻坚到乡村振兴的战略转段', source: '共产党员网', relevance: 'high' },
+  { title: '乡村振兴政策汇编与实践案例', source: '农业农村部', relevance: 'medium' },
+  { title: '乡村治理有效与基层组织建设', source: '中国社会报', relevance: 'medium' },
+  { title: '农村一二三产业融合发展路径', source: '农民日报', relevance: 'medium' },
   { title: '相关政策解读', source: '人民日报', relevance: 'high' },
   { title: '专题学习资料', source: '共产党员网', relevance: 'high' },
   { title: '权威解读', source: '人民网', relevance: 'medium' },
@@ -232,15 +229,13 @@ function getRejectedContents(content: string, title: string, seed: number): Reje
   
   // 根据内容类型生成相关的审核未通过示例
   let rejected: RejectedContent[] = [
-    { content: '具身智能是最重要的技术，没有之一', reason: '表述过于绝对化', type: 'too_radical' },
-    { content: '具身智能发展前途渺茫，没有实际价值', reason: '观点错误，不符合政策方向', type: 'inaccurate' },
-    { content: '具身智能一定要追求"人形"机器人', reason: '不够客观，人形只是载体之一', type: 'inaccurate' },
-    { content: '具身智能就是"人形机器人"', reason: '观点错误，理解片面', type: 'inaccurate' },
-    { content: '具身智能就是大模型的升级', reason: '观点错误，认知不全', type: 'inaccurate' },
-    { content: '传统机器人已经够了，不需要发展具身智能', reason: '观点错误，没有认识到具身智能的价值', type: 'inaccurate' },
-    { content: '具身智能就是AI加个外壳', reason: '理解片面，没有认识到闭环的重要性', type: 'inaccurate' },
-    { content: '这个方法肯定能解决所有问题', reason: '表述过于绝对化', type: 'too_radical' },
-    { content: '照搬其他地区的方法就行', reason: '不够具体，没有考虑本地实际', type: 'no_meaning' },
+    { content: '乡村振兴就是给农民发补贴', reason: '理解片面，乡村振兴强调内生发展动力', type: 'inaccurate' },
+    { content: '乡村振兴等于把农村变成城市', reason: '观点错误，乡村振兴强调各美其美', type: 'inaccurate' },
+    { content: '乡村振兴就是搞农业', reason: '认知不全，产业兴旺包含多元化路径', type: 'inaccurate' },
+    { content: '只要投入足够资金就能振兴', reason: '观点错误，忽视产业可持续和群众参与', type: 'inaccurate' },
+    { content: '照搬其他地区的模式就行', reason: '不够具体，没有考虑本地实际', type: 'no_meaning' },
+    { content: '乡村振兴是农业农村部门的事', reason: '理解片面，需要多部门协同推进', type: 'inaccurate' },
+    { content: '这个项目肯定能成功', reason: '表述过于绝对化', type: 'too_radical' },
     { content: '大家都懂的', reason: '内容空洞无实际信息', type: 'no_meaning' },
   ];
   
@@ -255,14 +250,14 @@ function getRejectedContents(content: string, title: string, seed: number): Reje
     rejected.unshift({ content: '这个比什么都重要', reason: '表述过于绝对化', type: 'too_radical' });
   }
   
-  // 如果是关于机器人或载体的内容
-  if (content.includes('机器人') || content.includes('人形')) {
-    rejected.unshift({ content: '不是人形机器人就不算具身智能', reason: '理解片面，人形只是载体之一', type: 'inaccurate' });
+  // 如果是关于合作社或产业的内容
+  if (content.includes('合作社') || content.includes('产业')) {
+    rejected.unshift({ content: '合作社就是形式主义', reason: '理解片面，合作社是关键制度创新', type: 'inaccurate' });
   }
   
-  // 如果是关于大模型的内容
-  if (content.includes('模型') || content.includes('大模型')) {
-    rejected.unshift({ content: '具身智能就是大模型的升级', reason: '观点错误，认知不全', type: 'inaccurate' });
+  // 如果是关于群众或参与的内容
+  if (content.includes('群众') || content.includes('参与')) {
+    rejected.unshift({ content: '群众参与不重要，政府主导就行', reason: '观点错误，群众主体是核心', type: 'inaccurate' });
   }
   
   // 使用种子打乱并返回2个
@@ -342,7 +337,7 @@ function getCourseData(courseId?: string): any {
                     description: '整理学习目标，确保清晰明确可衡量',
                     rejectedContents: [
                       {
-                        content: '学完这章就懂具身智能了',
+                        content: '学完这章就懂乡村振兴了',
                         reason: '目标太模糊，不可衡量',
                         type: 'no_meaning',
                       },
@@ -767,7 +762,7 @@ export default function CourseLearnPage() {
   const course = getCourseData(courseId);
 
   useEffect(() => {
-    loadCourseScript().then(script => {
+    loadCourseScript(course?.name).then(script => {
       if (script) {
         setSpeechContents(script.chapters);
       }
@@ -1947,6 +1942,26 @@ export default function CourseLearnPage() {
                                 </li>
                               </>
                             )}
+                            {chapter.title.includes('第3章') && chapter.title.includes('扶贫') && chapter.title.includes('振兴') && (
+                              <>
+                                <li className="text-xs text-white font-semibold flex items-center gap-2">
+                                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                                  扶贫 ≠ 振兴
+                                </li>
+                                <li className="text-xs text-gray-300 flex items-center gap-2">
+                                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                  扶贫是"送"，振兴是"造"
+                                </li>
+                                <li className="text-xs text-gray-300 flex items-center gap-2">
+                                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                  振兴 = 产业、人才、文化、生态、组织协同推进
+                                </li>
+                                <li className="text-xs text-gray-300 flex items-center gap-2">
+                                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                  面向基层，必须可落地、可评估、可推广
+                                </li>
+                              </>
+                            )}
                             {chapter.title.includes('第5章') && chapter.title.includes('世界模型') && (
                               <>
                                 <li className="text-xs text-white font-semibold flex items-center gap-2">
@@ -1967,6 +1982,26 @@ export default function CourseLearnPage() {
                                 </li>
                               </>
                             )}
+                            {chapter.title.includes('第5章') && chapter.title.includes('合作社') && (
+                              <>
+                                <li className="text-xs text-white font-semibold flex items-center gap-2">
+                                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                                  合作社 = 党建引领 × 群众参与 × 市场对接
+                                </li>
+                                <li className="text-xs text-gray-300 flex items-center gap-2">
+                                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                  从单打独斗到抱团发展
+                                </li>
+                                <li className="text-xs text-gray-300 flex items-center gap-2">
+                                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                  因地制宜、因村施策，没有标准答案但有通用逻辑
+                                </li>
+                                <li className="text-xs text-gray-300 flex items-center gap-2">
+                                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                  合作社模式：乡村振兴的关键制度创新
+                                </li>
+                              </>
+                            )}
                             {chapter.title.includes('第7章') && chapter.title.includes('可解释') && chapter.title.includes('可评估') && chapter.title.includes('可监管') && (
                               <>
                                 <li className="text-xs text-white font-semibold flex items-center gap-2">
@@ -1984,6 +2019,26 @@ export default function CourseLearnPage() {
                                 <li className="text-xs text-gray-300 flex items-center gap-2">
                                   <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
                                   先治理后扩展，先试点再推广
+                                </li>
+                              </>
+                            )}
+                            {chapter.title.includes('第7章') && chapter.title.includes('可落地') && chapter.title.includes('可评估') && chapter.title.includes('可推广') && (
+                              <>
+                                <li className="text-xs text-white font-semibold flex items-center gap-2">
+                                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                                  可落地：从纸面到地面，从蓝图到实景
+                                </li>
+                                <li className="text-xs text-gray-300 flex items-center gap-2">
+                                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                  可评估：指标量化、数据说话
+                                </li>
+                                <li className="text-xs text-gray-300 flex items-center gap-2">
+                                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                  可推广：做成一个、带动一片
+                                </li>
+                                <li className="text-xs text-gray-300 flex items-center gap-2">
+                                  <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                                  先试点后推广，先组织后放活
                                 </li>
                               </>
                             )}
