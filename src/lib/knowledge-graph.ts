@@ -862,11 +862,11 @@ export async function fetchKnowledgeBaseCourses(
 
     const categoryCounts: Record<string, number> = data.categoryCounts || data.globalCategoryCounts || {};
 
-    console.log(`[知识库API] 获取到 ${allDocs.length} 份文档, 分类: ${JSON.stringify(categoryCounts)}`);
+    console.log(`[知识库API] 获取到 ${docs.length} 份文档, 分类: ${JSON.stringify(categoryCounts)}`);
 
     const courses: Record<string, CourseInfo[]> = {};
 
-    for (const doc of allDocs) {
+    for (const doc of docs) {
       if (!hasChineseText(doc.title)) {
         console.log(`[过滤] 跳过无中文名的课程: ${doc.title}`);
         continue;
@@ -892,7 +892,7 @@ export async function fetchKnowledgeBaseCourses(
 
     setKnowledgeBaseCourses(courses);
 
-    const validDocs = allDocs.filter(doc => 
+    const validDocs = docs.filter(doc => 
       hasChineseText(doc.title) && doc.videoId
     );
 
@@ -900,7 +900,7 @@ export async function fetchKnowledgeBaseCourses(
     setDynamicKnowledgeGraph(dynamicGraph);
 
     console.log(`[动态图谱] 已构建公务员方向知识图谱，一级节点: ${dynamicGraph.children?.length || 0} 个`);
-    console.log(`[课程过滤] 原始: ${allDocs.length} -> 有效(有中文名+视频): ${validDocs.length}`);
+    console.log(`[课程过滤] 原始: ${docs.length} -> 有效(有中文名+视频): ${validDocs.length}`);
     console.log(`[课程统计] 共 ${Object.values(courses).reduce((sum, c) => sum + c.length, 0)} 门课程已注入知识图谱`);
 
     return { courses, docs: validDocs, categoryCounts, graph: dynamicGraph };

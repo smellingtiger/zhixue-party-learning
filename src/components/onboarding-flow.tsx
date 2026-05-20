@@ -10,10 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import MindMap from '@/components/mind-map';
 import { DiagnosticSurvey } from '@/components/diagnostic-survey';
 import { AIIntentChat } from '@/components/ai-intent-chat';
-import { QuizComponent } from '@/components/quiz-component';
 import { partyKnowledgeGraph, generateLearningPath, roleNodeMap, topicNodeMap, getNodeById, getDynamicKnowledgeGraph, getDifficultyLockedNodeIds, injectCoursesRecursive, fetchKnowledgeBaseCourses, initTopicNodeMap, analyzeRequirements, getTopicNodeMap, filterNodes, getNodeDisplayName, getDynamicParentMap } from '@/lib/knowledge-graph';
-import { generateQuizSet, generateConfigFromLearningPath } from '@/lib/question-generator';
-import { LearningPath, KnowledgeNode, LearningProgress, QuizSet } from '@/lib/types';
+import { LearningPath, KnowledgeNode, LearningProgress } from '@/lib/types';
 import {
   BrainCircuit,
   GraduationCap,
@@ -83,7 +81,7 @@ function TypewriterText({ text, onComplete }: { text: string; onComplete?: () =>
 }
 
 export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
-  const [currentView, setCurrentView] = useState<'home' | 'diagnostic' | 'mindmap' | 'ai' | 'quiz'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'diagnostic' | 'mindmap' | 'ai'>('home');
   const [activeAgent, setActiveAgent] = useState<number | null>(null);
   const [generatedPath, setGeneratedPath] = useState<LearningPath | null>(null);
   const [highlightedNodes, setHighlightedNodes] = useState<string[]>([]);
@@ -104,7 +102,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [knowledgeBaseGraph, setKnowledgeBaseGraph] = useState<KnowledgeNode | null>(null);
   const [graphLoaded, setGraphLoaded] = useState(false);
   const [savedDiagnostic, setSavedDiagnostic] = useState<any>(null);
-  const [currentQuizSet, setCurrentQuizSet] = useState<QuizSet | null>(null);
 
 
 
@@ -148,7 +145,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     return ids;
   };
 
-  // 从知识库API加载课程数据，替换离线课程映射
   useEffect(() => {
     const saved = localStorage.getItem('user_diagnostic');
     if (saved) {
@@ -167,18 +163,31 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       .then(({ graph }) => {
         if (graph) {
           setKnowledgeBaseGraph(injectCoursesRecursive(graph));
+          console.log(`[知识库] ✅ 成功加载动态图谱`);
         } else {
-          // 即使API失败，也构建一个空的动态图谱，避免用旧静态图谱
-          setKnowledgeBaseGraph(getDynamicKnowledgeGraph() || injectCoursesRecursive(partyKnowledgeGraph));
+          // API返回空数据，尝试使用已缓存的动态图谱
+          const cachedGraph = getDynamicKnowledgeGraph();
+          if (cachedGraph) {
+            setKnowledgeBaseGraph(injectCoursesRecursive(cachedGraph));
+            console.log(`[知识库] ⚠️ API返回空，使用缓存的动态图谱`);
+          } else {
+            // 构建一个最小的动态图谱（基于配置，无真实数据）
+            console.warn(`[知识库] ❌ 无可用图谱，将构建默认图谱`);
+          }
         }
         initTopicNodeMap();
-        console.log(`[知识库] 已从API加载课程数据到公务员方向知识图谱`);
         setGraphLoaded(true);
       })
       .catch(err => {
-        console.warn('[知识库] API加载失败，使用动态图谱:', err);
-        // 优先用动态图谱
-        setKnowledgeBaseGraph(getDynamicKnowledgeGraph() || injectCoursesRecursive(partyKnowledgeGraph));
+        console.warn('[知识库] API加载失败:', err);
+        // 使用动态图谱缓存（不要用旧的静态图谱！）
+        const cachedGraph = getDynamicKnowledgeGraph();
+        if (cachedGraph) {
+          setKnowledgeBaseGraph(injectCoursesRecursive(cachedGraph));
+          console.log(`[知识库] ⚠️ API失败，使用缓存的动态图谱`);
+        } else {
+          console.error('[知识库] ❌ 无任何可用图谱！');
+        }
         setGraphLoaded(true);
       });
   }, []);
@@ -416,45 +425,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       setHighlightedNodes(prev => [...new Set([...prev, pathId])]);
     }
     setCurrentView('mindmap');
-  };
-
-  const handleStartQuiz = () => {
-    if (!generatedPath || highlightedNodes.length === 0) return;
-
-    const config = generateConfigFromLearningPath(
-      generatedPath.id,
-      highlightedNodes.slice(0, 8), // 取前8个高亮节点
-      diagnosticLevel as 'beginner' | 'intermediate' | 'advanced' || 'intermediate',
-      Math.min(5, highlightedNodes.length) // 生成5道题或更少
-    );
-
-    const effectiveGraph = knowledgeBaseGraph || getDynamicKnowledgeGraph() || partyKnowledgeGraph;
-    const quizSet = generateQuizSet(config, effectiveGraph);
-
-    setCurrentQuizSet(quizSet);
-    setCurrentView('quiz');
-
-    console.log('[题目考核] 已生成考核题目:', {
-      题目数量: quizSet.questions.length,
-      总分: quizSet.totalScore,
-      基于节点: config.nodeIds.length,
-      难度: config.difficulty
-    });
-  };
-
-  const handleQuizComplete = (answers: any[]) => {
-    console.log('[题目考核] 用户完成答题:', answers.length, '道题');
-    
-    localStorage.setItem('quiz_results', JSON.stringify({
-      answers,
-      completedAt: new Date().toISOString(),
-      quizId: currentQuizSet?.id
-    }));
-  };
-
-  const handleExitQuiz = () => {
-    setCurrentView('mindmap');
-    setCurrentQuizSet(null);
   };
 
   const completedCount = progress.filter(p => p.status === 'completed').length;
@@ -763,19 +733,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                     )}
                   </div>
                 </div>
-                
-                {highlightedNodes.length > 0 && (
-                  <Button
-                    onClick={handleStartQuiz}
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white gap-2 shadow-lg"
-                  >
-                    <Target className="w-4 h-4" />
-                    开始AI智能考核
-                    <Badge className="ml-1 bg-white/20 text-white border-0">
-                      {Math.min(5, highlightedNodes.length)}题
-                    </Badge>
-                  </Button>
-                )}
               </div>
 
               <div className="flex gap-4" style={{ height: 'calc(100vh - 220px)' }}>
@@ -976,7 +933,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                         <p className="font-semibold text-slate-700 mb-2">高亮节点总数: {highlightedNodes.length} 个</p>
                         <div className="flex flex-wrap gap-1">
                           {highlightedNodes.map((nid, index) => {
-                            const effectiveGraph = knowledgeBaseGraph || getDynamicKnowledgeGraph() || partyKnowledgeGraph;
+                            const effectiveGraph = knowledgeBaseGraph || getDynamicKnowledgeGraph();
                             const displayName = getNodeDisplayName(nid, effectiveGraph);
                             return (
                               <span key={index} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-100 text-blue-700 border border-blue-200">
@@ -994,11 +951,17 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 <Card className="border-0 shadow-xl overflow-hidden flex-1">
                   <MindMap
                     data={(() => {
-                      const fullGraph = knowledgeBaseGraph || getDynamicKnowledgeGraph() || partyKnowledgeGraph;
+                      const fullGraph = knowledgeBaseGraph || getDynamicKnowledgeGraph();
+                      
+                      if (!fullGraph) {
+                        console.error('[MindMap] ❌ 无可用图谱数据！');
+                        return null;
+                      }
                       
                       // 详细调试信息
                       console.log('=== 诊断报告图谱调试 ===');
                       console.log('[1] 高亮节点列表:', highlightedNodes);
+                      console.log('[2] 图谱根节点:', fullGraph.name, '一级子节点数:', fullGraph.children?.length);
                       
                       if (fullGraph) {
                         console.log('[2] 完整图谱一级节点:', fullGraph.children?.map(c => ({
@@ -1030,7 +993,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                       })));
                       
                       return filtered || fullGraph;
-                    })()}
+                    })() as KnowledgeNode}
                     progress={progress}
                     highlightedNodes={highlightedNodes}
                     interactive={!hasCompletedDiagnostic}
@@ -1104,22 +1067,6 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 </div>
                 <AIIntentChat onIntentDetected={handleIntentDetected} />
               </div>
-            </motion.div>
-          )}
-
-          {currentView === 'quiz' && currentQuizSet && (
-            <motion.div
-              key="quiz"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="py-4"
-            >
-              <QuizComponent
-                quizSet={currentQuizSet}
-                onComplete={handleQuizComplete}
-                onExit={handleExitQuiz}
-              />
             </motion.div>
           )}
         </AnimatePresence>
