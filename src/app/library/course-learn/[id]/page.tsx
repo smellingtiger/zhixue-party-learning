@@ -36,6 +36,8 @@ import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import DigitalAvatar from '@/components/digital-avatar';
 import { loadCourseScript, getChapterSpeechContent, getChapterSections, type ChapterScript } from '@/lib/course-script';
+import ChapterQuizComponent, { ChapterQuiz } from '@/components/chapter-quiz';
+import { getChapterQuiz } from '@/data/quiz-database';
 
 // 辅助函数：获取课程视频 URL
 function getCourseVideoUrl(courseId: string): string | null {
@@ -149,7 +151,7 @@ interface ThinkingStep {
 }
 
 interface ContentBlock {
-  type: 'text' | 'image' | 'mixed' | 'video' | 'learning_objective';
+  type: 'text' | 'image' | 'mixed' | 'video' | 'learning_objective' | 'quiz';
   content: string;
   imageUrl?: string;
   imageCaption?: string;
@@ -157,6 +159,7 @@ interface ContentBlock {
   aiTags?: AITag[];
   chapterTitle?: string;
   thinkingSteps?: ThinkingStep[];
+  quizData?: ChapterQuiz;
 }
 
 interface ChapterData {
@@ -634,6 +637,18 @@ function getCourseData(courseId?: string): any {
             '第8章：组织一次本地化乡村振兴项目小调研': '从调研目标、受访对象、10题短问卷到5页内评审材料模板，提供完整的本地化调研工具箱。帮助学员将调研结果落地为可操作的试点建议。',
           };
           const summaries = courseCode === '7' ? ruralSummaries : embodiedSummaries;
+          
+          // 为每章末尾添加试题页面
+          const chapterQuiz = getChapterQuiz(parsed.courseName || '', ch.id, ch.title);
+          if (chapterQuiz) {
+            slides.push({
+              type: 'quiz',
+              content: `章节测试 - ${ch.title}`,
+              chapterTitle: ch.title,
+              quizData: chapterQuiz,
+            });
+          }
+          
           return { id: ch.id, title: ch.title, totalSlides: slides.length, aiSummary: summaries[ch.title] || `${ch.title}。深入讲解核心要义，帮助您全面掌握相关知识点和实践方法。`, keyPoints: [ch.title.replace(/第.*章[：:]/, '').substring(0, 10)], videoUrl, slides };
         }),
       };
@@ -1843,8 +1858,23 @@ export default function CourseLearnPage() {
                               </figure>
                             </div>
                           )}
-                        </div>
-                      </div>
+                  </div>
+                )}
+
+                    {/* 章节试题 */}
+                    {block.type === 'quiz' && block.quizData && (
+                      <ChapterQuizComponent
+                        quiz={block.quizData}
+                        onComplete={(result) => {
+                          console.log('[章节测试] 完成:', result);
+                          setCompletedSlides(prev => new Set(prev).add(`${currentChapter}-${currentSlide}`));
+                        }}
+                        onRetry={() => {
+                          console.log('[章节测试] 重新测试');
+                        }}
+                      />
+                    )}
+                </div>
                     )}
 
                     {/* 视频播放 */}
