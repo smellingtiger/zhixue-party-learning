@@ -10,8 +10,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import MindMap from '@/components/mind-map';
 import { DiagnosticSurvey } from '@/components/diagnostic-survey';
 import { AIIntentChat } from '@/components/ai-intent-chat';
-import { partyKnowledgeGraph, generateLearningPath, roleNodeMap, topicNodeMap, getNodeById, getDynamicKnowledgeGraph, getDifficultyLockedNodeIds, injectCoursesRecursive, fetchKnowledgeBaseCourses, initTopicNodeMap, analyzeRequirements, getTopicNodeMap } from '@/lib/knowledge-graph';
-import { LearningPath, KnowledgeNode, LearningProgress } from '@/lib/types';
+import { QuizComponent } from '@/components/quiz-component';
+import { partyKnowledgeGraph, generateLearningPath, roleNodeMap, topicNodeMap, getNodeById, getDynamicKnowledgeGraph, getDifficultyLockedNodeIds, injectCoursesRecursive, fetchKnowledgeBaseCourses, initTopicNodeMap, analyzeRequirements, getTopicNodeMap, filterNodes, getNodeDisplayName, getDynamicParentMap } from '@/lib/knowledge-graph';
+import { generateQuizSet, generateConfigFromLearningPath } from '@/lib/question-generator';
+import { LearningPath, KnowledgeNode, LearningProgress, QuizSet } from '@/lib/types';
 import {
   BrainCircuit,
   GraduationCap,
@@ -81,7 +83,7 @@ function TypewriterText({ text, onComplete }: { text: string; onComplete?: () =>
 }
 
 export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
-  const [currentView, setCurrentView] = useState<'home' | 'diagnostic' | 'mindmap' | 'ai'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'diagnostic' | 'mindmap' | 'ai' | 'quiz'>('home');
   const [activeAgent, setActiveAgent] = useState<number | null>(null);
   const [generatedPath, setGeneratedPath] = useState<LearningPath | null>(null);
   const [highlightedNodes, setHighlightedNodes] = useState<string[]>([]);
@@ -100,6 +102,9 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [difficultyLockedNodes, setDifficultyLockedNodes] = useState<Set<string>>(new Set());
   const [showFullMap, setShowFullMap] = useState(false);
   const [knowledgeBaseGraph, setKnowledgeBaseGraph] = useState<KnowledgeNode | null>(null);
+  const [graphLoaded, setGraphLoaded] = useState(false);
+  const [savedDiagnostic, setSavedDiagnostic] = useState<any>(null);
+  const [currentQuizSet, setCurrentQuizSet] = useState<QuizSet | null>(null);
 
 
 
@@ -148,21 +153,9 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     if (saved) {
       try {
         const diagnostic = JSON.parse(saved);
-        const path = generateLearningPath({
-          roles: diagnostic.roles || [],
-          topics: diagnostic.topics || [],
-          customRequirements: diagnostic.customRequirements || undefined,
-        });
-        setGeneratedPath(path);
-        setDiagnosticRoles(diagnostic.roles || []);
-        setDiagnosticTopics(diagnostic.topics || []);
-        const nodes = getAllNodeIds(path.rootNode);
-        setHighlightedNodes(nodes);
-        const locked = getDifficultyLockedNodeIds(path.rootNode, diagnostic.difficulty || 'beginner');
-        setDifficultyLockedNodes(locked);
-        setHasCompletedDiagnostic(true);
-        setCurrentView('mindmap');
+        setSavedDiagnostic(diagnostic);
       } catch {
+        localStorage.removeItem('user_diagnostic');
       }
     }
   }, []);
@@ -174,15 +167,92 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         if (graph) {
           setKnowledgeBaseGraph(injectCoursesRecursive(graph));
         } else {
-          setKnowledgeBaseGraph(injectCoursesRecursive(partyKnowledgeGraph));
+          // 即使API失败，也构建一个空的动态图谱，避免用旧静态图谱
+          setKnowledgeBaseGraph(getDynamicKnowledgeGraph() || injectCoursesRecursive(partyKnowledgeGraph));
         }
         initTopicNodeMap();
         console.log(`[知识库] 已从API加载课程数据到公务员方向知识图谱`);
+        setGraphLoaded(true);
       })
       .catch(err => {
-        console.warn('[知识库] API加载失败，使用离线课程数据:', err);
+        console.warn('[知识库] API加载失败，使用动态图谱:', err);
+        // 优先用动态图谱
+        setKnowledgeBaseGraph(getDynamicKnowledgeGraph() || injectCoursesRecursive(partyKnowledgeGraph));
+        setGraphLoaded(true);
       });
   }, []);
+
+  // 当图谱加载完成并且有 savedDiagnostic 时，恢复诊断状态
+  useEffect(() => {
+    if (graphLoaded && savedDiagnostic) {
+      try {
+        const diagnostic = savedDiagnostic;
+        const path = generateLearningPath({
+          roles: diagnostic.roles || [],
+          topics: diagnostic.topics || [],
+          customRequirements: diagnostic.customRequirements || undefined,
+        });
+        // 检查生成的路径是否有知识模块
+        const hasModules = path.rootNode.children && path.rootNode.children.length > 0;
+        if (hasModules) {
+          setGeneratedPath(path);
+          setDiagnosticRoles(diagnostic.roles || []);
+          setDiagnosticTopics(diagnostic.topics || []);
+          setDiagnosticLevel(diagnostic.difficulty || 'beginner');
+          setDiagnosticRequirements(diagnostic.customRequirements || '');
+          
+          // 分析自定义需求中的关键词
+          let analysisMatchedNodes: string[] = [];
+          if (diagnostic.customRequirements && diagnostic.customRequirements.trim()) {
+            const analysis = analyzeRequirements(diagnostic.customRequirements);
+            setDiagnosticKeywords(analysis.keywords);
+            setDiagnosticMatchedTopics(analysis.matchedTopics);
+            setDiagnosticMatchedNodes(analysis.matchedNodes);
+            analysisMatchedNodes = analysis.matchedNodes;
+          } else {
+            setDiagnosticKeywords([]);
+            setDiagnosticMatchedTopics([]);
+            setDiagnosticMatchedNodes([]);
+            analysisMatchedNodes = [];
+          }
+          
+          // 收集所有需要高亮的节点
+          const allNodeIds = new Set<string>();
+          
+          // 1. 添加身份相关的节点
+          (diagnostic.roles || []).forEach((role: string) => {
+            const nodeIds = roleNodeMap[role] || [];
+            nodeIds.forEach(id => allNodeIds.add(id));
+          });
+          
+          // 2. 添加学习主题相关的节点
+          const effectiveTopicMap = Object.keys(topicNodeMap).length > 0 ? topicNodeMap : getTopicNodeMap();
+          (diagnostic.topics || []).forEach((topic: string) => {
+            const nodeId = effectiveTopicMap[topic];
+            if (nodeId) allNodeIds.add(nodeId);
+          });
+          
+          // 3. 添加学习需求匹配到的节点
+          analysisMatchedNodes.forEach(id => allNodeIds.add(id));
+          
+          setHighlightedNodes(Array.from(allNodeIds));
+          
+          const locked = getDifficultyLockedNodeIds(path.rootNode, diagnostic.difficulty || 'beginner');
+          setDifficultyLockedNodes(locked);
+          setHasCompletedDiagnostic(true);
+          setCurrentView('mindmap');
+        } else {
+          // 如果没有模块，清除旧数据，让用户重新诊断
+          console.log('[诊断] 旧数据没有知识模块，将清除并重新开始');
+          localStorage.removeItem('user_diagnostic');
+          setSavedDiagnostic(null);
+        }
+      } catch {
+        localStorage.removeItem('user_diagnostic');
+        setSavedDiagnostic(null);
+      }
+    }
+  }, [graphLoaded, savedDiagnostic]);
 
   useEffect(() => {
     const randomMsg = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
@@ -238,20 +308,30 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     setDiagnosticLevel(difficulty);
     setDiagnosticRequirements(customRequirements || '');
 
+    let analysisMatchedNodes: string[] = [];
     // 分析自定义需求中的关键词
     if (customRequirements && customRequirements.trim()) {
       const analysis = analyzeRequirements(customRequirements);
       setDiagnosticKeywords(analysis.keywords);
       setDiagnosticMatchedTopics(analysis.matchedTopics);
       setDiagnosticMatchedNodes(analysis.matchedNodes);
+      analysisMatchedNodes = analysis.matchedNodes;
     } else {
       setDiagnosticKeywords([]);
       setDiagnosticMatchedTopics([]);
       setDiagnosticMatchedNodes([]);
+      analysisMatchedNodes = [];
     }
 
+    console.log('🚀 [诊断] 开始生成学习路径...');
+    console.log('🚀 [诊断] 调用fetchKnowledgeBaseCourses之前, knowledgeBaseGraph:', knowledgeBaseGraph ? '已加载' : '❌ 为空');
+    
     await fetchKnowledgeBaseCourses();
     initTopicNodeMap();
+    
+    console.log('🚀 [诊断] 调用fetchKnowledgeBaseCourses之后, knowledgeBaseGraph:', knowledgeBaseGraph ? '✅ 已加载' : '❌ 仍为空');
+    console.log('🚀 [诊断] getDynamicKnowledgeGraph():', getDynamicKnowledgeGraph() ? '✅ 有数据' : '❌ 为空');
+    console.log('🚀 [诊断] partyKnowledgeGraph:', partyKnowledgeGraph ? '✅ 有数据' : '❌ 为空');
 
     const path = generateLearningPath({
       roles,
@@ -262,8 +342,38 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
     setGeneratedPath(path);
 
-    const nodes = getAllNodeIds(path.rootNode);
-    setHighlightedNodes(nodes);
+    // 收集所有需要高亮的节点：
+    // 1. 身份相关的节点
+    // 2. 学习主题相关的节点
+    // 3. 学习需求匹配到的节点
+    const allNodeIds = new Set<string>();
+    
+    // 1. 添加身份相关的节点
+    roles.forEach(role => {
+      const nodeIds = roleNodeMap[role] || [];
+      nodeIds.forEach(id => allNodeIds.add(id));
+    });
+    
+    // 2. 添加学习主题相关的节点
+    const effectiveTopicMap = Object.keys(topicNodeMap).length > 0 ? topicNodeMap : getTopicNodeMap();
+    topics.forEach(topic => {
+      const nodeId = effectiveTopicMap[topic];
+      if (nodeId) allNodeIds.add(nodeId);
+    });
+    
+    // 3. 添加学习需求匹配到的节点
+    analysisMatchedNodes.forEach(id => allNodeIds.add(id));
+    
+    // ===== 测试代码：验证一级域节点是否显示所有子节点 =====
+    // 当学习需求包含"政治素养全面"时，添加一级域节点'political-literacy'
+    if (customRequirements && customRequirements.includes('政治素养全面')) {
+      console.log('🧪 [测试模式] 检测到"政治素养全面"，添加一级域节点: political-literacy');
+      allNodeIds.add('political-literacy');  // 一级域节点ID
+      console.log('🧪 [测试] 当前highlightedNodes:', Array.from(allNodeIds));
+    }
+    // =========================================================
+    
+    setHighlightedNodes(Array.from(allNodeIds));
 
     const locked = getDifficultyLockedNodeIds(path.rootNode, difficulty);
     setDifficultyLockedNodes(locked);
@@ -289,8 +399,14 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     setHighlightedNodes([]);
     setDiagnosticRoles([]);
     setDiagnosticTopics([]);
+    setDiagnosticLevel('');
+    setDiagnosticRequirements('');
+    setDiagnosticKeywords([]);
+    setDiagnosticMatchedTopics([]);
+    setDiagnosticMatchedNodes([]);
     setDifficultyLockedNodes(new Set());
-    setCurrentView('diagnostic');
+    setSavedDiagnostic(null);
+    setCurrentView('home');
     localStorage.removeItem('user_diagnostic');
   };
 
@@ -299,6 +415,45 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       setHighlightedNodes(prev => [...new Set([...prev, pathId])]);
     }
     setCurrentView('mindmap');
+  };
+
+  const handleStartQuiz = () => {
+    if (!generatedPath || highlightedNodes.length === 0) return;
+
+    const config = generateConfigFromLearningPath(
+      generatedPath.id,
+      highlightedNodes.slice(0, 8), // 取前8个高亮节点
+      diagnosticLevel as 'beginner' | 'intermediate' | 'advanced' || 'intermediate',
+      Math.min(5, highlightedNodes.length) // 生成5道题或更少
+    );
+
+    const effectiveGraph = knowledgeBaseGraph || getDynamicKnowledgeGraph() || partyKnowledgeGraph;
+    const quizSet = generateQuizSet(config, effectiveGraph);
+
+    setCurrentQuizSet(quizSet);
+    setCurrentView('quiz');
+
+    console.log('[题目考核] 已生成考核题目:', {
+      题目数量: quizSet.questions.length,
+      总分: quizSet.totalScore,
+      基于节点: config.nodeIds.length,
+      难度: config.difficulty
+    });
+  };
+
+  const handleQuizComplete = (answers: any[]) => {
+    console.log('[题目考核] 用户完成答题:', answers.length, '道题');
+    
+    localStorage.setItem('quiz_results', JSON.stringify({
+      answers,
+      completedAt: new Date().toISOString(),
+      quizId: currentQuizSet?.id
+    }));
+  };
+
+  const handleExitQuiz = () => {
+    setCurrentView('mindmap');
+    setCurrentQuizSet(null);
   };
 
   const completedCount = progress.filter(p => p.status === 'completed').length;
@@ -607,6 +762,19 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                     )}
                   </div>
                 </div>
+                
+                {highlightedNodes.length > 0 && (
+                  <Button
+                    onClick={handleStartQuiz}
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white gap-2 shadow-lg"
+                  >
+                    <Target className="w-4 h-4" />
+                    开始AI智能考核
+                    <Badge className="ml-1 bg-white/20 text-white border-0">
+                      {Math.min(5, highlightedNodes.length)}题
+                    </Badge>
+                  </Button>
+                )}
               </div>
 
               <div className="flex gap-4" style={{ height: 'calc(100vh - 220px)' }}>
@@ -685,7 +853,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                               const nodeIds = roleNodeMap[role] || [];
                               const effectiveGraph = knowledgeBaseGraph || getDynamicKnowledgeGraph() || partyKnowledgeGraph;
                               return (
-                                <div key={role} className="inline-flex items-center gap-2 px-3 py-1.5 bg-red-50/60 rounded-lg border border-red-100">
+                                <div key={role} className="flex flex-wrap items-center gap-2 px-3 py-1.5 bg-red-50/60 rounded-lg border border-red-100 w-full">
                                   <Badge className="bg-red-500 hover:bg-red-600 text-white shrink-0">{role}</Badge>
                                   {nodeIds.length > 0 ? nodeIds.map(nodeId => {
                                     const node = getNodeById(nodeId, effectiveGraph);
@@ -716,7 +884,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                               const effectiveGraph = knowledgeBaseGraph || getDynamicKnowledgeGraph() || partyKnowledgeGraph;
                               const node = nodeId ? getNodeById(nodeId, effectiveGraph) : null;
                               return (
-                                <div key={topic} className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50/60 rounded-lg border border-blue-100">
+                                <div key={topic} className="flex flex-wrap items-center gap-2 px-3 py-1.5 bg-blue-50/60 rounded-lg border border-blue-100 w-full">
                                   <Badge className="bg-blue-500 hover:bg-blue-600 text-white shrink-0">{topic}</Badge>
                                   {node ? (
                                     <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 bg-blue-50">
@@ -737,7 +905,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                         <div className="mb-3">
                           <h5 className="text-sm font-semibold text-slate-600 mb-2 flex items-center gap-1.5">
                             <FileText className="w-3.5 h-3.5 text-amber-500" />
-                            您的具体学习需求
+                            您的具体学习需求？
                           </h5>
                           <div className="text-sm text-slate-700 bg-amber-50/60 rounded-lg border border-amber-100 px-3 py-2">
                             {diagnosticRequirements}
@@ -776,12 +944,12 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                                 <span className="text-xs text-slate-500 self-center">关联节点：</span>
                                 {diagnosticMatchedNodes.slice(0, 8).map(nid => {
                                   const effectiveGraph = knowledgeBaseGraph || getDynamicKnowledgeGraph() || partyKnowledgeGraph;
-                                  const node = getNodeById(nid, effectiveGraph);
-                                  return node ? (
+                                  const displayName = getNodeDisplayName(nid, effectiveGraph);
+                                  return (
                                     <Badge key={nid} variant="outline" className="text-xs border-teal-200 text-teal-700 bg-teal-50">
-                                      {node.name}
+                                      {displayName}
                                     </Badge>
-                                  ) : null;
+                                  );
                                 })}
                                 {diagnosticMatchedNodes.length > 8 && (
                                   <span className="text-xs text-slate-400 self-center">+{diagnosticMatchedNodes.length - 8} 更多</span>
@@ -793,15 +961,97 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                       )}
                     </CardContent>
                   </Card>
+                  
+                  {/* 调试信息卡片 - 只显示最终去重后的节点 */}
+                  <Card className="border-0 shadow-lg">
+                    <CardContent className="p-4">
+                      <h4 className="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2">
+                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        最终显示节点（与右侧图谱对齐）
+                      </h4>
+                      <div className="text-xs">
+                        <p className="font-semibold text-slate-700 mb-2">高亮节点总数: {highlightedNodes.length} 个</p>
+                        <div className="flex flex-wrap gap-1">
+                          {highlightedNodes.map((nid, index) => {
+                            const effectiveGraph = knowledgeBaseGraph || getDynamicKnowledgeGraph() || partyKnowledgeGraph;
+                            const displayName = getNodeDisplayName(nid, effectiveGraph);
+                            return (
+                              <span key={index} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-100 text-blue-700 border border-blue-200">
+                                {displayName}
+                              </span>
+                            );
+                          })}
+                        </div>
+                        <p className="text-xs text-slate-500 mt-2">✅ 以上节点将在右侧图谱中高亮显示</p>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
 
                 <Card className="border-0 shadow-xl overflow-hidden flex-1">
                   <MindMap
-                    data={generatedPath?.rootNode || partyKnowledgeGraph}
+                    data={(() => {
+                      const fullGraph = knowledgeBaseGraph || getDynamicKnowledgeGraph() || partyKnowledgeGraph;
+                      
+                      // 详细调试信息
+                      console.log('=== 诊断报告图谱调试 ===');
+                      console.log('[1] 高亮节点列表:', highlightedNodes);
+                      
+                      if (fullGraph) {
+                        console.log('[2] 完整图谱一级节点:', fullGraph.children?.map(c => ({
+                          id: c.id,
+                          name: c.name,
+                          childCount: c.children?.length || 0,
+                          childrenIds: c.children?.map(cc => cc.id)
+                        })));
+                        
+                        // 检查每个高亮节点是否在图谱中存在
+                        const parentMap = getDynamicParentMap();
+                        highlightedNodes.forEach(nodeId => {
+                          const node = getNodeById(nodeId, fullGraph);
+                          console.log(`[3] 节点 ${nodeId} 存在:`, !!node, node ? {
+                            name: node.name,
+                            level: node.level,
+                            parentId: parentMap[nodeId] || '未知'
+                          } : '❌ 不存在');
+                        });
+                      }
+                      
+                      const filtered = filterNodes(fullGraph, new Set(highlightedNodes));
+                      
+                      console.log('[4] 过滤后图谱:', filtered?.children?.map(c => ({
+                        id: c.id,
+                        name: c.name,
+                        childCount: c.children?.length || 0,
+                        children: c.children?.map(cc => ({ id: cc.id, name: cc.name }))
+                      })));
+                      
+                      return filtered || fullGraph;
+                    })()}
                     progress={progress}
                     highlightedNodes={highlightedNodes}
                     interactive={!hasCompletedDiagnostic}
-                    lockedByDifficultyNodes={difficultyLockedNodes}
+                    lockedByDifficultyNodes={(() => {
+                      // 获取所有高亮节点及其祖先节点的ID
+                      const parentMap = getDynamicParentMap();
+                      const excludedIds = new Set(highlightedNodes);
+                      
+                      // 添加所有高亮节点的父节点（递归到根）
+                      highlightedNodes.forEach(nodeId => {
+                        let currentId = parentMap[nodeId];
+                        while (currentId && currentId !== 'root') {
+                          excludedIds.add(currentId);
+                          currentId = parentMap[currentId];
+                        }
+                      });
+                      
+                      // 从锁定列表中排除这些节点
+                      return new Set(
+                        Array.from(difficultyLockedNodes).filter(id => !excludedIds.has(id))
+                      );
+                    })()}
                   />
                 </Card>
               </div>
@@ -853,6 +1103,22 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                 </div>
                 <AIIntentChat onIntentDetected={handleIntentDetected} />
               </div>
+            </motion.div>
+          )}
+
+          {currentView === 'quiz' && currentQuizSet && (
+            <motion.div
+              key="quiz"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="py-4"
+            >
+              <QuizComponent
+                quizSet={currentQuizSet}
+                onComplete={handleQuizComplete}
+                onExit={handleExitQuiz}
+              />
             </motion.div>
           )}
         </AnimatePresence>

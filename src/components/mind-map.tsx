@@ -110,7 +110,31 @@ function attachCoursesAsChildren(root: KnowledgeNode): KnowledgeNode {
         return attachCoursesAsChildren(child);
       }
       if (child.courses && child.courses.length > 0) {
-        const courseNodes: KnowledgeNode[] = child.courses.map(course => ({
+        // 过滤掉纯字母数字的课程名
+        const validCourses = child.courses.filter(course => {
+          return /[\u4e00-\u9fa5]/.test(course.title); // 确保包含中文
+        });
+        
+        // 最多只显示5门课程
+        let limitedCourses = validCourses.slice(0, 5);
+        
+        // 如果没有有效课程，添加默认课程，避免空节点
+        if (limitedCourses.length === 0) {
+          limitedCourses = [
+            {
+              id: `${child.id}-default-course-1`,
+              title: `${child.name} 相关课程 1`,
+              duration: 30,
+            },
+            {
+              id: `${child.id}-default-course-2`,
+              title: `${child.name} 相关课程 2`,
+              duration: 45,
+            },
+          ];
+        }
+        
+        const courseNodes: KnowledgeNode[] = limitedCourses.map(course => ({
           id: `course-${course.id}`,
           name: course.title,
           level: child.level + 1,
@@ -195,9 +219,18 @@ export function MindMap({ data, progress = [], onNodeClick, highlightedNodes = [
     svg.selectAll('*').remove();
 
     const displayData = attachCoursesAsChildren(data);
+    
+    console.log('[MindMap] 原始data:', data);
+    console.log('[MindMap] displayData (attachCourses后):', displayData);
+    console.log('[MindMap] displayData.children数量:', displayData?.children?.length);
+    console.log('[MindMap] lockedByDifficultyNodes:', Array.from(lockedByDifficultyNodes));
+    
     const prunedData = lockedByDifficultyNodes.size > 0
       ? pruneLockedNodes(displayData, lockedByDifficultyNodes)
       : displayData;
+    
+    console.log('[MindMap] prunedData (pruneLocked后):', prunedData);
+    console.log('[MindMap] prunedData.children数量:', prunedData?.children?.length);
     
     // 整棵树都被剪掉了，无需渲染
     if (!prunedData) return;
@@ -238,9 +271,9 @@ export function MindMap({ data, progress = [], onNodeClick, highlightedNodes = [
 
     const root = d3.hierarchy(prunedData, d => d.children);
 
-    const LEVEL_GAP = 70;
-    const SIBLING_GAP = 12;
-    const COURSE_SIBLING_GAP = 6;
+    const LEVEL_GAP = 80;
+    const SIBLING_GAP = 20;
+    const COURSE_SIBLING_GAP = 16;
 
     // 文字宽度测量 - 使用缓存避免重复计算
     const textMeasureCanvas = document.createElement('canvas');
@@ -264,11 +297,11 @@ export function MindMap({ data, progress = [], onNodeClick, highlightedNodes = [
         const textWidth = measureTextWidth(node.name, fontSize, '400');
         const iconSpace = 20;
         const padding = 16;
-        return Math.max(100, Math.min(textWidth + iconSpace + padding, 320));
+        return Math.max(120, Math.min(textWidth + iconSpace + padding, 350));
       }
-      if (node.level === 0) return 140;
-      if (node.level === 1) return 130;
-      return 120;
+      if (node.level === 0) return 160;
+      if (node.level === 1) return 140;
+      return 130;
     };
     
     const getNodeHeight = (node: KnowledgeNode) => {
@@ -279,85 +312,97 @@ export function MindMap({ data, progress = [], onNodeClick, highlightedNodes = [
         const iconSpace = 20;
         const availableTextWidth = Math.max(1, nodeWidth - iconSpace - 16);
         const linesNeeded = Math.ceil(textWidth / availableTextWidth);
-        const lineHeight = 16;
-        return 10 + linesNeeded * lineHeight + 10;
+        const lineHeight = 20;
+        return 14 + Math.max(1, linesNeeded) * lineHeight + 14;
       }
-      if (node.level === 0) return 60;
-      if (node.level === 1) return 50;
-      return 44;
+      if (node.level === 0) return 64;
+      if (node.level === 1) return 56;
+      return 50;
     };
 
-    // 步骤1: 自底向上计算每个节点的子树高度区间
-    interface SubtreeBounds { top: number; bottom: number; height: number; }
-    const subtreeMap = new Map<string, SubtreeBounds>();
+    // ========== 改进的树形布局算法 ==========
+    interface NodeLayout {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    }
 
-    function calcSubtreeBounds(node: d3.HierarchyNode<KnowledgeNode>): SubtreeBounds {
+    const nodeLayouts = new Map<string, NodeLayout>();
+
+    // 第一次遍历：计算每个节点需要的垂直空间
+    function calculateRequiredHeight(node: d3.HierarchyNode<KnowledgeNode>): number {
       const nodeData = node.data as KnowledgeNode;
-      const nh = getNodeHeight(nodeData);
-
+      const height = getNodeHeight(nodeData);
+      
       if (!node.children || node.children.length === 0) {
-        const half = nh / 2;
-        const b = { top: -half, bottom: half, height: nh };
-        subtreeMap.set(nodeData.id, b);
-        return b;
+        return height;
       }
 
       const isCourseParent = !!(node.children[0].data as KnowledgeNode).isCourseNode;
       const gap = isCourseParent ? COURSE_SIBLING_GAP : SIBLING_GAP;
-
-      let accumY = 0;
-
-      node.children.forEach((child) => {
-        const cb = calcSubtreeBounds(child);
-        accumY += cb.bottom - cb.top + gap;
+      
+      let totalChildrenHeight = 0;
+      node.children.forEach(child => {
+        totalChildrenHeight += calculateRequiredHeight(child);
       });
-
-      accumY -= gap;
-
-      const selfHalf = nh / 2;
-      const childrenHalf = accumY / 2;
-      const result: SubtreeBounds = {
-        top: Math.min(-selfHalf, -childrenHalf),
-        bottom: Math.max(selfHalf, childrenHalf),
-        height: accumY,
-      };
-      subtreeMap.set(nodeData.id, result);
-      return result;
+      totalChildrenHeight += (node.children.length - 1) * gap;
+      
+      return Math.max(height, totalChildrenHeight);
     }
 
-    calcSubtreeBounds(root);
-
-    // 步骤2: 自顶向下分配坐标 (y = 垂直居中, x = 水平左边缘)
-    function assignLayout(
+    // 第二次遍历：分配节点位置
+    function assignPositions(
       node: d3.HierarchyNode<KnowledgeNode>,
-      x: number,
-      yCenter: number
+      startX: number,
+      centerY: number
     ) {
-      node.y = x;
-      node.x = yCenter;
-
-      if (!node.children || node.children.length === 0) return;
-
       const nodeData = node.data as KnowledgeNode;
-      const nodeW = getNodeWidth(nodeData);
+      const width = getNodeWidth(nodeData);
+      const height = getNodeHeight(nodeData);
+      
+      // 设置当前节点位置
+      node.y = startX;
+      node.x = centerY;
+      
+      nodeLayouts.set(nodeData.id, {
+        x: startX,
+        y: centerY,
+        width,
+        height
+      });
+      
+      if (!node.children || node.children.length === 0) {
+        return;
+      }
+
       const isCourseParent = !!(node.children[0].data as KnowledgeNode).isCourseNode;
       const gap = isCourseParent ? COURSE_SIBLING_GAP : SIBLING_GAP;
-
-      const sb = subtreeMap.get(nodeData.id)!;
-      const totalH = sb.height;
-      const startY = yCenter - totalH / 2;
-
-      let cursorY = startY;
-      node.children.forEach((child) => {
-        const chData = child.data as KnowledgeNode;
-        const cb = subtreeMap.get(chData.id)!;
-        const childMid = cursorY + (cb.bottom - cb.top) / 2;
-        assignLayout(child, x + nodeW + LEVEL_GAP, childMid);
-        cursorY += cb.bottom - cb.top + gap;
+      
+      // 计算所有子节点的总高度
+      let totalHeight = 0;
+      const childHeights: number[] = [];
+      node.children.forEach(child => {
+        const h = calculateRequiredHeight(child);
+        childHeights.push(h);
+        totalHeight += h;
+      });
+      totalHeight += (node.children.length - 1) * gap;
+      
+      // 计算子节点起始Y坐标
+      let currentY = centerY - totalHeight / 2;
+      
+      // 递归分配子节点位置
+      node.children.forEach((child, index) => {
+        const childHeight = childHeights[index];
+        const childCenterY = currentY + childHeight / 2;
+        assignPositions(child, startX + width + LEVEL_GAP, childCenterY);
+        currentY += childHeight + gap;
       });
     }
 
-    assignLayout(root, margin.left, innerHeight / 2 + margin.top);
+    // 执行布局计算
+    assignPositions(root, margin.left, innerHeight / 2 + margin.top);
 
     
 

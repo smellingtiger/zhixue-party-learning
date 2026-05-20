@@ -399,11 +399,12 @@ function groupArticlesByCivilServantTopics(
   for (const doc of docs) {
     const category = doc.category;
     const rules = CIVIL_SERVANT_SUB_NODE_RULES[category];
-    if (!rules) continue;
+    if (!rules || rules.length === 0) continue;
 
     const cleanTitle = doc.title.replace(/\.txt$/, '').replace(/[《》（）【】\s]/g, '');
 
     let matched = false;
+    // 首先尝试关键词匹配
     for (const rule of rules) {
       if (rule.keywords.length === 0) continue;
       if (rule.keywords.some(kw => cleanTitle.includes(kw))) {
@@ -417,13 +418,23 @@ function groupArticlesByCivilServantTopics(
     }
     if (matched) continue;
 
+    // 如果没有关键词匹配，尝试找有没有空关键词的规则
     for (const rule of rules) {
       if (rule.keywords.length === 0) {
         const subMap = result.get(category);
         if (subMap) {
           subMap.get(rule.id)?.push(doc);
         }
+        matched = true;
         break;
+      }
+    }
+    
+    // 如果还没匹配到，就分配给第一个规则
+    if (!matched && rules.length > 0) {
+      const subMap = result.get(category);
+      if (subMap) {
+        subMap.get(rules[0].id)?.push(doc);
       }
     }
   }
@@ -452,28 +463,79 @@ function buildDynamicKnowledgeGraph(
     availableCategories.push(...Object.keys(CIVIL_SERVANT_DOMAINS));
   }
 
-  const level1Children: KnowledgeNode[] = [];
+  // 使用Map来合并相同域ID的节点（避免重复的一级节点）
+  const domainNodeMap = new Map<string, {
+    domain: CivilServantDomain;
+    level2Children: KnowledgeNode[];
+    categories: string[];
+  }>();
 
   for (const category of availableCategories) {
     const domain = CIVIL_SERVANT_DOMAINS[category];
     if (!domain) continue;
 
+    // 获取或创建该域的容器
+    let domainContainer = domainNodeMap.get(domain.id);
+    if (!domainContainer) {
+      domainContainer = {
+        domain,
+        level2Children: [],
+        categories: [],
+      };
+      domainNodeMap.set(domain.id, domainContainer);
+    }
+    domainContainer.categories.push(category);
+
     const subRules = CIVIL_SERVANT_SUB_NODE_RULES[category] || [];
     const subMap = groupedArticles.get(category);
-    const level2Children: KnowledgeNode[] = [];
 
     for (const rule of subRules) {
-      const articles = subMap?.get(rule.id) || [];
+      let articles = subMap?.get(rule.id) || [];
+      
+      // 如果这个节点没有文章，尝试从该分类中拿一些文章
+      if (articles.length === 0 && subMap) {
+        // 从该分类的其他节点"借"一些文章
+        for (const [, otherArticles] of subMap) {
+          if (otherArticles.length > 2) {
+            articles = otherArticles.slice(0, 2); // 借2篇
+            break;
+          }
+        }
+        // 如果还没有，就从所有文档中找一些相关的
+        if (articles.length === 0) {
+          articles = docs.filter(d => d.category === category).slice(0, 3);
+        }
+      }
+      
+      // 如果还是没有文章，就创建一个空节点，但至少显示出来
+      // 但我们会给它至少一个课程，避免被stripEmptyCourseNodes删掉
+      if (articles.length === 0) {
+        articles = [{
+          id: `${rule.id}-default`,
+          title: `${rule.nameTemplate}课程`,
+          category,
+          paragraphCount: 50,
+          fileName: `${rule.id}.txt`
+        } as KnowledgeBaseApiDoc];
+      }
 
-      if (articles.length === 0) continue; // 没有文章的子节点不展示
-
-      const courses: CourseInfo[] = articles.map(a => createCourse(
+      // 过滤掉纯字母数字的课程名
+      const validArticles = articles.filter(a => {
+        const title = a.title.replace(/\.txt$/, '');
+        return /[\u4e00-\u9fa5]/.test(title); // 确保包含中文
+      });
+      
+      // 如果过滤后为空，保留至少默认课程
+      const finalArticles = validArticles.length > 0 ? validArticles : articles;
+      
+      const allCourses: CourseInfo[] = finalArticles.map(a => createCourse(
         a.id,
         a.title.replace(/\.txt$/, ''),
         calculateEstimatedDuration(a.paragraphCount)
       ));
+      const courses = limitCoursesRandom({ courses: allCourses } as KnowledgeNode, 5).courses || allCourses;
 
-      level2Children.push({
+      domainContainer.level2Children.push({
         id: rule.id,
         name: generateCivilServantNodeName(domain, rule),
         level: 2,
@@ -483,27 +545,42 @@ function buildDynamicKnowledgeGraph(
         courses,
       });
     }
+  }
 
-    if (level2Children.length > 0) {
+  // 将合并后的域节点转换为数组
+  const level1Children: KnowledgeNode[] = [];
+  for (const [domainId, container] of domainNodeMap) {
+    if (container.level2Children.length > 0) {
+      // 合并所有分类的描述和考试标签
+      const allExamTags = [...new Set(container.categories.flatMap(cat => 
+        CIVIL_SERVANT_DOMAINS[cat]?.examTags || []
+      ))];
+      const allDescriptions = container.categories.map(cat => 
+        CIVIL_SERVANT_DOMAINS[cat]?.description || ''
+      ).filter(d => d).join('；');
+
       level1Children.push({
-        id: domain.id,
-        name: domain.name,
+        id: domainId,
+        name: container.domain.name,
         level: 1,
-        description: `${domain.description}\n\n📝 考试方向：${domain.examTags.join('、')}`,
-        children: level2Children,
-        prerequisites: domain.prerequisites,
-        difficulty: domain.difficulty,
+        description: `${allDescriptions}\n\n📝 考试方向：${allExamTags.join('、')}`,
+        children: container.level2Children,
+        prerequisites: container.domain.prerequisites,
+        difficulty: container.domain.difficulty,
       });
     }
   }
 
-  return {
+  const rootResult = {
     id: 'root',
-    name: '公务员备考学习体系',
+    name: '公务员学习知识体系',
     level: 0,
     description: '基于知识库真实数据，按公务员考试与培训方向智能组织的学习图谱',
     children: level1Children,
   };
+
+  const cleaned = stripEmptyCourseNodes(rootResult);
+  return cleaned || rootResult;
 }
 
 let dynamicGraphCache: KnowledgeNode | null = null;
@@ -590,6 +667,28 @@ export function getDynamicParentMap(): Record<string, string> {
 
 export function getDynamicChildrenMap(): Record<string, string[]> {
   return dynamicChildrenMap;
+}
+
+function buildParentMapFromGraph(root: KnowledgeNode): Record<string, string> {
+  const map: Record<string, string> = {};
+  function walk(node: KnowledgeNode, parentId: string | null) {
+    if (parentId) map[node.id] = parentId;
+    if (node.children) node.children.forEach(c => walk(c, node.id));
+  }
+  walk(root, null);
+  return map;
+}
+
+function buildChildrenMapFromGraph(root: KnowledgeNode): Record<string, string[]> {
+  const map: Record<string, string[]> = {};
+  function walk(node: KnowledgeNode) {
+    if (node.children && node.children.length > 0) {
+      map[node.id] = node.children.map(c => c.id);
+      node.children.forEach(walk);
+    }
+  }
+  walk(root);
+  return map;
 }
 
 const filenameNodeMapping: Record<string, string[]> = {
@@ -743,7 +842,13 @@ export async function fetchKnowledgeBaseCourses(
 
     const data = await res.json();
     const docs: KnowledgeBaseApiDoc[] = (data.docs || []).filter(
-      (d: KnowledgeBaseApiDoc) => d.id && d.title
+      (d: KnowledgeBaseApiDoc) => {
+        // 1. 确保有id和title
+        if (!d.id || !d.title) return false;
+        // 2. 过滤掉纯字母数字的奇怪标题，确保包含中文
+        const hasChinese = /[\u4e00-\u9fa5]/.test(d.title);
+        return hasChinese;
+      }
     );
 
     const categoryCounts: Record<string, number> = data.categoryCounts || data.globalCategoryCounts || {};
@@ -784,7 +889,13 @@ export async function fetchKnowledgeBaseCourses(
 export function setKnowledgeBaseCourses(courses: Record<string, CourseInfo[]>) {
   courseDatabase = {};
   for (const [nodeId, courseList] of Object.entries(courses)) {
-    courseDatabase[nodeId] = [...courseList];
+    // 过滤掉纯字母数字的课程名
+    const validCourses = courseList.filter(course => {
+      const hasChinese = /[\u4e00-\u9fa5]/.test(course.title);
+      return hasChinese;
+    });
+    // 确保课程数不超过5
+    courseDatabase[nodeId] = limitCoursesRandom({ courses: validCourses } as KnowledgeNode, 5).courses || validCourses;
   }
   rebuildKeywordIndex();
 }
@@ -1289,32 +1400,139 @@ export function getDiagnosticOptions(): DiagnosticOption[] {
   return [...roleOptions, ...topicOptions];
 }
 
+// 节点ID到中文名称的映射（用于显示节点名称时的回退）
+export const nodeIdToNameMap: Record<string, string> = {
+  // 政治理论
+  'party-theory': '📖 党的理论学习',
+  'constitution-rules': '📖 党章党规精讲',
+  'party-history': '📖 党史国史通览',
+  'current-politics': '📖 时政热点解读',
+  'chinese-modernization': '📖 中国式现代化',
+  'ideology-work': '📖 意识形态工作',
+  
+  // 行政实务
+  'admin-capability': '🏛️ 行政管理能力',
+  'official-writing': '🏛️ 公文写作与表达',
+  'law-basics': '🏛️ 法律法规基础',
+  'social-governance': '🏛️ 社会治理创新',
+  'mass-work': '🏛️ 群众工作方法',
+  
+  // 经济素养
+  'macro-economy': '💰 宏观经济政策',
+  'rural-development': '💰 乡村振兴与三农',
+  'digital-economy': '💰 数字经济与创新',
+  
+  // 综合能力
+  'international-relations': '🎯 国际关系与外交',
+  'global-governance': '🎯 全球治理格局',
+  'united-front': '🎯 统一战线理论',
+  'deliberative-democracy': '🎯 协商民主制度',
+  'cultural-confidence': '🎯 文化自信建设',
+  
+  // 廉政教育
+  'integrity-education': '🏛️ 廉政教育警示',
+  'supervision-system': '🏛️ 监督执纪体系',
+  
+  // 党建实务
+  'party-building-practice': '📚 党务工作实务',
+};
+
+// 根据节点ID获取显示名称（优先从图谱查找，找不到则使用映射表）
+export function getNodeDisplayName(nodeId: string, graph?: KnowledgeNode | null): string {
+  if (graph) {
+    const node = getNodeById(nodeId, graph);
+    if (node && node.name) return node.name;
+  }
+  // 回退到映射表
+  return nodeIdToNameMap[nodeId] || nodeId;
+}
+
 // 向后兼容: 静态导出（用于 SSR / 初始渲染）
 export const diagnosticOptions: DiagnosticOption[] = getDiagnosticOptions();
 
 // 主题映射到对应节点（一级节点）—— 公务员方向
 export function getTopicNodeMap(): Record<string, string> {
+  // 精确的主题到二级节点映射（避免映射到一级域节点）
+  const preciseTopicNodeMap: Record<string, string> = {
+    // 政治理论域
+    '政策理论学习': 'party-theory',
+    '党史党建学习': 'party-history',
+    '时政热点研究': 'current-politics',
+    '政治理论基础': 'constitution-rules',
+    
+    // 行政实务域
+    '行政管理能力': 'admin-capability',
+    '基层治理实务': 'social-governance',
+    '廉政教育与纪律建设': 'integrity-education',
+    '法律法规与依法行政': 'law-basics',
+    '社会治理创新': 'social-governance',
+    
+    // 经济素养域
+    '经济管理能力': 'macro-economy',
+    '数字经济与科技创新': 'digital-economy',
+    '乡村振兴与区域发展': 'rural-development',
+    '宏观经济政策': 'macro-economy',
+    
+    // 综合能力域
+    '综合能力提升': 'admin-capability',
+    '公文写作与表达能力': 'official-writing',
+    '统战理论学习': 'united-front',
+    '国际视野拓展': 'international-relations',
+    '文化建设素养': 'cultural-confidence',
+  };
+
+  // 如果动态图谱已加载，验证并返回精确映射
   if (dynamicGraphCache && dynamicGraphCache.children && dynamicGraphCache.children.length > 0) {
-    const map: Record<string, string> = {};
-    for (const child of dynamicGraphCache.children) {
-      const topicLabels = getTopicLabelsForDomain(child.id);
-      for (const label of topicLabels) {
-        map[label] = child.id;
+    const validMap: Record<string, string> = {};
+    for (const [topic, nodeId] of Object.entries(preciseTopicNodeMap)) {
+      // 验证该节点ID在动态图谱中存在
+      const nodeExists = checkNodeExistsInGraph(nodeId, dynamicGraphCache);
+      if (nodeExists) {
+        validMap[topic] = nodeId;
+      } else {
+        // 如果精确节点不存在，回退到一级域节点（兼容性处理）
+        console.warn(`[主题映射] 节点 ${nodeId} 不存在于图谱中，主题 "${topic}" 将使用域级映射`);
+        const domainId = getDomainIdForTopic(topic);
+        if (domainId) {
+          validMap[topic] = domainId;
+        }
       }
     }
-    return map;
+    return validMap;
   }
-  // 回退
-  return {
+  
+  // 回退到静态映射
+  return preciseTopicNodeMap;
+}
+
+// 检查节点是否存在于图谱中
+function checkNodeExistsInGraph(nodeId: string, graph: KnowledgeNode): boolean {
+  return getNodeById(nodeId, graph) !== null;
+}
+
+// 根据主题获取对应的一级域ID（用于回退）
+function getDomainIdForTopic(topic: string): string | null {
+  const topicDomainMap: Record<string, string> = {
     '政策理论学习': 'political-literacy',
+    '党史党建学习': 'political-literacy',
+    '时政热点研究': 'political-literacy',
+    '政治理论基础': 'political-literacy',
     '行政管理能力': 'administrative-practice',
     '基层治理实务': 'administrative-practice',
-    '乡村振兴与区域发展': 'administrative-practice',
     '廉政教育与纪律建设': 'administrative-practice',
-    '数字经济与科技创新': 'comprehensive-ability',
-    '公文写作与表达能力': 'comprehensive-ability',
     '法律法规与依法行政': 'administrative-practice',
+    '社会治理创新': 'administrative-practice',
+    '经济管理能力': 'economic-literacy',
+    '数字经济与科技创新': 'economic-literacy',
+    '乡村振兴与区域发展': 'economic-literacy',
+    '宏观经济政策': 'economic-literacy',
+    '综合能力提升': 'comprehensive-ability',
+    '公文写作与表达能力': 'comprehensive-ability',
+    '统战理论学习': 'comprehensive-ability',
+    '国际视野拓展': 'comprehensive-ability',
+    '文化建设素养': 'comprehensive-ability',
   };
+  return topicDomainMap[topic] || null;
 }
 
 function getTopicLabelsForDomain(domainId: string): string[] {
@@ -1405,57 +1623,98 @@ function extractCoursePrefix(title: string): string {
  * - 每个底层节点插入 3-5 门课程
  * - 如果课程名包含上/中/下，则将该系列全部纳入（可以短暂超出上限）
  */
+/**
+ * Fisher-Yates 洗牌，返回新数组
+ */
+function shuffleArray<T>(arr: T[]): T[] {
+  const result = [...arr];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+/**
+ * 将节点课程随机打乱并截断到 max 门
+ */
+function limitCoursesRandom(node: KnowledgeNode, max: number): KnowledgeNode {
+  if (!node.courses || node.courses.length === 0) return node;
+  if (node.courses.length <= max) return node;
+  return { ...node, courses: shuffleArray(node.courses).slice(0, max) };
+}
+
+/**
+ * 递归删除自身及子树中所有无课程的叶子节点。
+ * 父节点在子节点全被删除后，如自身也无课程则一并删除。
+ */
+function stripEmptyCourseNodes(node: KnowledgeNode): KnowledgeNode | null {
+  if (node.children && node.children.length > 0) {
+    const cleaned = node.children
+      .map(stripEmptyCourseNodes)
+      .filter((c): c is KnowledgeNode => c !== null);
+    if (cleaned.length === 0 && (!node.courses || node.courses.length === 0)) {
+      return null;
+    }
+    return { ...node, children: cleaned };
+  }
+  // 叶子节点
+  if (!node.courses || node.courses.length === 0) return null;
+  return node;
+}
+
 function injectCoursesToNode(node: KnowledgeNode): KnowledgeNode {
   const dbCourses = courseDatabase[node.id];
+  
+  // 只使用知识库中的课程，完全替换旧课程
   if (!dbCourses || dbCourses.length === 0) {
-    return node;
+    // 如果知识库没有课程，清空旧课程
+    return { ...node, courses: [] };
   }
 
-  // 按前缀分组
+  // 过滤掉纯字母数字的奇怪课程名
+  const validCourses = dbCourses.filter(course => {
+    const title = course.title;
+    // 检查是否全是字母数字（不含中文）
+    const hasChinese = /[\u4e00-\u9fa5]/.test(title);
+    return hasChinese;
+  });
+
+  if (validCourses.length === 0) {
+    return { ...node, courses: [] };
+  }
+
+  // 按前缀分组，保留含上/中/下的系列（完整纳入，不拆散）
   const prefixMap = new Map<string, CourseInfo[]>();
-  dbCourses.forEach(course => {
+  validCourses.forEach(course => {
     const prefix = extractCoursePrefix(course.title);
-    if (!prefixMap.has(prefix)) {
-      prefixMap.set(prefix, []);
-    }
+    if (!prefixMap.has(prefix)) prefixMap.set(prefix, []);
     prefixMap.get(prefix)!.push(course);
   });
 
-  // 判断哪些组包含 上/中/下 系列
-  const hasSeriesParts = (courses: CourseInfo[]) => {
-    return courses.some(c => c.title.includes('（上）') || c.title.includes('（中）') || c.title.includes('（下）'));
-  };
-
-  // 选择课程：优先选择完整系列，再填充普通课程到 3-5 门
   const selected: CourseInfo[] = [];
-  const usedPrefixes = new Set<string>();
+  const seriesIds = new Set<string>();
 
-  // 第一遍：收集所有含 上/中/下 的系列（全部纳入）
-  for (const [prefix, courses] of prefixMap) {
-    if (hasSeriesParts(courses)) {
-      selected.push(...courses);
-      usedPrefixes.add(prefix);
+  // 第一遍：收集所有含上/中/下的完整系列，但确保不超过5门
+  for (const [, courses] of prefixMap) {
+    const hasSeries = courses.some(c => c.title.includes('（上）') || c.title.includes('（中）') || c.title.includes('（下）'));
+    if (hasSeries && selected.length + courses.length <= 5) {
+      for (const c of courses) { selected.push(c); seriesIds.add(c.id); }
+    } else if (hasSeries) {
+      // 如果系列课程太多，只取前一部分
+      for (const c of courses.slice(0, 5 - selected.length)) {
+        selected.push(c); seriesIds.add(c.id);
+      }
     }
   }
 
-  // 第二遍：从剩余课程中挑选，凑够 3-5 门
-  const remaining = dbCourses.filter(c => !usedPrefixes.has(extractCoursePrefix(c.title)));
-  let idx = 0;
-  while (selected.length < 5 && idx < remaining.length) {
-    selected.push(remaining[idx]);
-    idx++;
-  }
+  // 第二遍：从剩余课程中随机抽，补齐到 5 门
+  let remaining = validCourses.filter(c => !seriesIds.has(c.id));
+  remaining = shuffleArray(remaining);
+  const needed = Math.max(0, 5 - selected.length);
+  selected.push(...remaining.slice(0, needed));
 
-  // 如果选了超过 5 门但有连续系列，保留；如果没连续系列且超过 5 门，截断到 5 门
-  const hasContinuousSeries = [...prefixMap.values()].some(courses => 
-    hasSeriesParts(courses) && courses.length >= 2
-  );
-  const finalCourses = (hasContinuousSeries || selected.length <= 5) ? selected : selected.slice(0, 5);
-
-  return {
-    ...node,
-    courses: finalCourses.length > 0 ? finalCourses : node.courses,
-  };
+  return { ...node, courses: selected };
 }
 
 /**
@@ -1463,50 +1722,63 @@ function injectCoursesToNode(node: KnowledgeNode): KnowledgeNode {
  */
 export function injectCoursesRecursive(node: KnowledgeNode): KnowledgeNode {
   if (node.children && node.children.length > 0) {
-    return {
+    const injected = {
       ...node,
       children: node.children.map(child => injectCoursesRecursive(child)),
     };
+    // 递归后清理无课程子树
+    return stripEmptyCourseNodes(injected) || { ...node, children: [], courses: [] };
   }
   // 叶子节点：注入课程
-  return injectCoursesToNode(node);
+  const injected = injectCoursesToNode(node);
+  return limitCoursesRandom(injected, 5);
 }
 
 // 筛选节点（不包含难度筛选）
-function filterNodes(
+// 核心原则：只显示被选中的节点 + 必要的父节点（连接路径），不显示未选中的子节点
+export function filterNodes(
   node: KnowledgeNode,
   selectedIds: Set<string>
 ): KnowledgeNode | null {
-  // 递归过滤子节点
+  const isSelected = selectedIds.has(node.id);
+  
+  // 判断是否为末级（叶子）节点
+  const isLeafNode = !node.children || node.children.length === 0;
+
+  // Level 0 根节点：始终保留，递归处理子节点
+  if (node.level === 0) {
+    const filteredChildren = node.children
+      ?.map(child => filterNodes(child, selectedIds))
+      .filter((child): child is KnowledgeNode => child !== null);
+    return { ...node, children: filteredChildren };
+  }
+
+  // 规则1: 若父节点被选中，显示其所有子节点（不过滤子节点）
+  // 规则2: 若叶子节点被选中，只显示它自己
+  // 规则3: 所有末级节点不过滤
+  if (isSelected) {
+    if (isLeafNode) {
+      // 叶子节点被选中：直接返回，不处理子节点（因为本来就没有）
+      return { ...node };
+    } else {
+      // 父节点被选中：保留**所有**子节点（不管子节点是否被选中）
+      // 这样确保"公务员政治素养"被选中时，显示其下所有6个二级子节点
+      return { ...node, children: node.children || [] };
+    }
+  }
+
+  // 非选中节点：递归检查是否有被选中的后代节点
   const filteredChildren = node.children
     ?.map(child => filterNodes(child, selectedIds))
     .filter((child): child is KnowledgeNode => child !== null);
 
-  const isSelected = selectedIds.has(node.id);
-
-  // Level 0 根节点：始终保留
-  if (node.level === 0) {
+  // 如果有被选中的后代节点（通过filteredChildren体现），则保留此父节点作为连接路径
+  if (filteredChildren && filteredChildren.length > 0) {
     return { ...node, children: filteredChildren };
   }
 
-  // Level 1 一级分类节点：只要有子节点就保留
-  if (node.level === 1) {
-    if ((filteredChildren && filteredChildren.length > 0) || isSelected) {
-      return { ...node, children: filteredChildren };
-    }
-    return null;
-  }
-
-  // Level 2+ 节点：根据选中状态筛选，不再按难度过滤
-  if (isSelected) {
-    return { ...node, children: undefined };
-  }
-
-  if (!filteredChildren?.length && !isSelected) {
-    return null;
-  }
-
-  return { ...node, children: filteredChildren };
+  // 既没被选中也没有被选中的后代，不显示
+  return null;
 }
 
 // 角色到节点的映射（导出供诊断结果展示使用）
@@ -1514,7 +1786,9 @@ export const roleNodeMap: Record<string, string[]> = {
   '厅局级干部': ['admin-capability', 'social-governance', 'international-relations'],
   '县处级干部': ['admin-capability', 'social-governance', 'macro-economy'],
   '乡科级干部': ['social-governance', 'mass-work', 'rural-development'],
-  '科员': ['official-writing', 'constitution-rules', 'party-theory'],
+  // 🧪 测试：将'科员'的第一个节点改为一级域节点'political-literacy'
+  // 用于验证：一级域节点被选中时，是否显示其下所有子节点
+  '科员': ['political-literacy', 'party-theory', 'official-writing'],
   '基层工作人员': ['mass-work', 'social-governance', 'party-theory'],
   '事业单位人员': ['admin-capability', 'official-writing', 'law-basics'],
 };
@@ -1679,42 +1953,26 @@ export function generateLearningPath(profile: {
     if (nodeId) selectedIds.add(nodeId);
   });
 
-  // 添加父节点
-  const effectiveParentMap = Object.keys(dynamicParentMap).length > 0
-    ? dynamicParentMap
-    : {
-        'party-constitution': 'party-building-basics',
-        'party-history': 'party-building-basics',
-        'party-theory': 'party-building-basics',
-        '20th-report': 'party-20th-congress',
-        'chinese-modernization': 'party-20th-congress',
-        'comprehensive-strict-governance': 'party-20th-congress',
-        'membership-development': 'grassroots-party-work',
-        'party-life': 'grassroots-party-work',
-        'mass-work': 'grassroots-party-work',
-        'rural-policy': 'rural-revitalization',
-        'rural-governance': 'rural-revitalization',
-        'integrity-education': 'disciplinary-style',
-        'supervision-system': 'disciplinary-style',
-      };
-  
+  // 添加父节点（优先动态映射，回退到从图谱实时推导）
+  const effectiveGraph = dynamicGraphCache || partyKnowledgeGraph;
+
+  let effectiveParentMap = dynamicParentMap;
+  if (Object.keys(effectiveParentMap).length === 0) {
+    effectiveParentMap = buildParentMapFromGraph(effectiveGraph);
+  }
+
   selectedIds.forEach(id => {
     const parentId = effectiveParentMap[id];
     if (parentId) {
       selectedIds.add(parentId);
     }
   });
-  
+
   // 添加子节点（当选中父节点时，自动包含其子节点）
-  const effectiveChildrenMap = Object.keys(dynamicChildrenMap).length > 0
-    ? dynamicChildrenMap
-    : {
-        'rural-revitalization': ['rural-policy', 'rural-governance'],
-        'party-20th-congress': ['20th-report', 'chinese-modernization', 'comprehensive-strict-governance'],
-        'grassroots-party-work': ['membership-development', 'party-life', 'mass-work'],
-        'party-building-basics': ['party-constitution', 'party-history', 'party-theory'],
-        'disciplinary-style': ['integrity-education', 'supervision-system'],
-      };
+  let effectiveChildrenMap = dynamicChildrenMap;
+  if (Object.keys(effectiveChildrenMap).length === 0) {
+    effectiveChildrenMap = buildChildrenMapFromGraph(effectiveGraph);
+  }
   
   const idsToAdd: string[] = [];
   selectedIds.forEach(id => {
@@ -1730,13 +1988,23 @@ export function generateLearningPath(profile: {
   idsToAdd.forEach(id => selectedIds.add(id));
   
   // 筛选并构建学习路径（根据难度进行筛选）
-  const effectiveGraph = dynamicGraphCache || partyKnowledgeGraph;
   let filteredRoot = filterNodes(effectiveGraph, selectedIds);
+  if (filteredRoot) filteredRoot = stripEmptyCourseNodes(filteredRoot) || filteredRoot;
 
   // 根据难度筛选节点：入门级保留难度1，进阶级保留≤2，深入级保留全部
+  // 注意：一级域节点不按难度过滤，只过滤其下的子节点
   if (filteredRoot && profile.level) {
     const difficultyFilter = (node: KnowledgeNode): KnowledgeNode | null => {
       const maxDifficulty = profile.level === 'beginner' ? 1 : profile.level === 'intermediate' ? 2 : 99;
+      // 一级域节点不作难度筛选，始终保留
+      if (node.level === 1) {
+        if (!node.children) return node;
+        const filteredChildren = node.children
+          .map(difficultyFilter)
+          .filter((c): c is KnowledgeNode => c !== null);
+        if (filteredChildren.length === 0 && !selectedIds.has(node.id)) return null;
+        return { ...node, children: filteredChildren };
+      }
       if (node.difficulty && node.difficulty > maxDifficulty) return null;
       if (!node.children) return node;
       const filteredChildren = node.children
@@ -1746,6 +2014,7 @@ export function generateLearningPath(profile: {
       return { ...node, children: filteredChildren };
     };
     filteredRoot = difficultyFilter(filteredRoot);
+    if (filteredRoot) filteredRoot = stripEmptyCourseNodes(filteredRoot) || filteredRoot;
   }
   
   // 计算总时长
