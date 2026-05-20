@@ -17,6 +17,7 @@ export interface SectionScript {
 
 export interface SectionMarker {
   title: string;
+  content: string;
   timeOffset: number;
 }
 
@@ -54,7 +55,7 @@ export function getChapterSections(chapter: ChapterScript): SectionMarker[] {
     const sectionContent = `${section.title}。${section.content}`;
     const sectionSentences = splitIntoSentences(sectionContent);
     cumulative += sectionSentences.reduce((sum, s) => sum + estimateDuration(s), 0);
-    return { title: section.title, timeOffset };
+    return { title: section.title, content: section.content, timeOffset };
   });
 }
 

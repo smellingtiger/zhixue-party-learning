@@ -13,6 +13,7 @@ const CHAPTER_IDS = ['preface', 'chapter1', 'chapter2', 'chapter3', 'chapter4', 
 
 interface SectionMarker {
   title: string;
+  content: string;
   timeOffset: number;
 }
 
@@ -101,7 +102,31 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
     : estimatedTotalDuration;
 
   const progressPercent = effectiveTotalDuration > 0 ? (currentTime / effectiveTotalDuration) * 100 : 0;
-  const sectionMarkers: SectionMarker[] = currentContent?.sections || [];
+
+  // Scale section markers proportionally to match actual audio duration
+  const sectionMarkers: SectionMarker[] = useMemo(() => {
+    const rawSections = currentContent?.sections || [];
+    if (rawSections.length === 0 || effectiveTotalDuration <= 0) return [];
+
+    // Compute each section's duration proportion from text content length
+    const charsPerSec = 4.25;
+    const sectionDurations = rawSections.map(section => {
+      const fullText = section.title + (section.content || '');
+      const chars = fullText.replace(/\s+/g, '').length;
+      return chars / charsPerSec;
+    });
+    const totalDur = sectionDurations.reduce((sum, d) => sum + d, 0);
+    if (totalDur <= 0) return [];
+
+    // Scale each section's proportion to the actual audio duration
+    // Last marker = start time of last section (last section's content plays after it)
+    let cumulative = 0;
+    return rawSections.map((section, i) => {
+      const timeOffset = cumulative;
+      cumulative += (sectionDurations[i] / totalDur) * effectiveTotalDuration;
+      return { title: section.title, content: section.content || '', timeOffset };
+    });
+  }, [currentContent?.sections, effectiveTotalDuration]);
 
   const updateTimeDisplay = useCallback(() => {
     if (audioRef.current && !isDraggingRef.current) {

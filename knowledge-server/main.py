@@ -7,6 +7,7 @@ import os
 import re
 import json
 import uuid
+import mimetypes
 from pathlib import Path
 from typing import Optional
 from datetime import datetime
@@ -15,6 +16,8 @@ from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, FileResponse
 import uvicorn
+
+import video_cache
 
 KNOWLEDGE_BASE_DIR = Path(r"E:\社院课程stt\knowledge_base_txt")
 PROCESSED_DIR = Path(r"E:\社院课程stt\knowledge_base_processed")
@@ -471,19 +474,27 @@ async def get_doc_video(doc_id: str):
 
 @app.get("/api/video/{course_code}")
 async def stream_video(course_code: str):
-    """代理NAS视频流"""
+    """代理NAS视频流（优先使用本地缓存）"""
     nas_mapping = load_nas_mapping()
     if course_code not in nas_mapping:
         raise HTTPException(status_code=404, detail="视频不存在")
     
     item = nas_mapping[course_code]
-    video_path = Path(item["nas_path"])
+    nas_path = str(item["nas_path"])
     
-    if not video_path.exists():
-        raise HTTPException(status_code=404, detail="视频文件不存在")
+    # 优先使用本地缓存
+    cached_path = video_cache.get_cache_path(course_code)
+    if cached_path:
+        video_file = Path(cached_path)
+    else:
+        video_file = Path(nas_path)
+        if not video_file.exists():
+            raise HTTPException(status_code=404, detail="视频文件不存在")
+        # 后台异步缓存
+        video_cache.cache_video(course_code, nas_path)
     
     return FileResponse(
-        str(video_path),
+        str(video_file),
         media_type="video/mp4",
         filename=item["video_filename"],
         headers={"Accept-Ranges": "bytes"},
@@ -492,16 +503,21 @@ async def stream_video(course_code: str):
 
 @app.get("/api/video/{course_code}/info")
 async def get_video_info(course_code: str):
-    """获取视频信息（不返回文件）"""
+    """获取视频信息（优先本地缓存）"""
     nas_mapping = load_nas_mapping()
     if course_code not in nas_mapping:
         raise HTTPException(status_code=404, detail="视频不存在")
     
     item = nas_mapping[course_code]
-    video_path = Path(item["nas_path"])
     
-    if not video_path.exists():
-        raise HTTPException(status_code=404, detail="视频文件不存在")
+    # 优先使用本地缓存
+    cached_path = video_cache.get_cache_path(course_code)
+    if cached_path:
+        video_path = Path(cached_path)
+    else:
+        video_path = Path(item["nas_path"])
+        if not video_path.exists():
+            raise HTTPException(status_code=404, detail="视频文件不存在")
     
     file_size = video_path.stat().st_size
     content_type, _ = mimetypes.guess_type(str(video_path))
@@ -513,6 +529,7 @@ async def get_video_info(course_code: str):
         "file_size": file_size,
         "file_size_display": f"{file_size / 1024 / 1024:.1f} MB",
         "content_type": content_type or "video/mp4",
+        "from_cache": cached_path is not None,
     }
 
 
@@ -530,6 +547,8 @@ async def server_info():
 
     processed_count = len(list(PROCESSED_DIR.glob("*.json"))) if PROCESSED_DIR.exists() else 0
 
+    cache_stats = video_cache.get_cache_stats()
+
     return {
         "name": SERVER_TITLE,
         "version": "1.0.0",
@@ -542,8 +561,15 @@ async def server_info():
         "total_paragraphs": total_paragraphs,
         "data_source": str(KNOWLEDGE_BASE_DIR),
         "processed_count": processed_count,
+        "video_cache": cache_stats,
         "server_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     }
+
+
+@app.get("/api/cache/stats")
+async def cache_stats():
+    """视频缓存状态"""
+    return video_cache.get_cache_stats()
 
 
 HTML_TEMPLATE = r"""<!DOCTYPE html>
@@ -946,6 +972,10 @@ if __name__ == "__main__":
     nas_map = load_nas_mapping()
     nas_count = len(nas_map)
 
+    # 初始化视频缓存
+    video_cache.init_video_cache()
+    cache_stats = video_cache.get_cache_stats()
+
     docs = scan_all_docs()
     cats, cnts = get_categories(docs)
     total_paras = sum(d.paragraph_count for d in docs)
@@ -957,6 +987,7 @@ if __name__ == "__main__":
     print(f"\n  总段落数: {total_paras}")
     print(f"  已处理课程: {processed_count}/{len(docs)}")
     print(f"  可用视频: {nas_count}/{len(docs)}")
+    print(f"  视频缓存: {cache_stats['count']} 个文件, {cache_stats['totalSize'] / (1024 * 1024):.0f}MB / {cache_stats['maxSize'] / (1024 * 1024):.0f}MB")
     print(f"\n{separator}\n")
 
     uvicorn.run(app, host=SERVER_HOST, port=SERVER_PORT, log_level="info")
