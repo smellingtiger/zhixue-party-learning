@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 import fs from 'fs';
 import path from 'path';
+import { execSync, spawn } from 'child_process';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 300;
+export const maxDuration = 600;
 
 const UPLOAD_DIR = 'E:\\社院课程stt\\uploads';
+const FUNASR_OUTPUT_DIR = 'E:\\社院课程stt\\output_funasr';
 
 const OUTLINE_PROMPT = `你是一位资深的党课课程教研专家。请对以下党课语音转写文本进行深度分析，完成以下任务：
 
@@ -37,9 +39,9 @@ const OUTLINE_PROMPT = `你是一位资深的党课课程教研专家。请对�
 - keyPoints 必须是简短的短语或短句
 - 确保整个JSON是合法可解析的`;
 
-const LLM_TIMEOUT_MS = 120000;
+const LLM_TIMEOUT_MS = 180000;
 
-async function callLLM(content: string, requestHeaders: Headers): Promise<string> {
+async function callLLM(content: string, requestHeaders: Headers, onProgress?: (chunk: string) => void): Promise<string> {
   try {
     const config = new Config();
     const customHeaders = HeaderUtils.extractForwardHeaders(requestHeaders);
@@ -59,14 +61,18 @@ async function callLLM(content: string, requestHeaders: Headers): Promise<string
     const streamPromise = (async () => {
       for await (const chunk of stream) {
         if (chunk.content) {
-          fullResponse += chunk.content;
+          const contentText = typeof chunk.content === 'string' ? chunk.content : '';
+          fullResponse += contentText;
+          if (onProgress) {
+            onProgress(contentText);
+          }
         }
       }
       return fullResponse;
     })();
 
     const timeoutPromise = new Promise<string>((_, reject) => {
-      setTimeout(() => reject(new Error('LLM调用超时（超过2分钟）')), LLM_TIMEOUT_MS);
+      setTimeout(() => reject(new Error('LLM调用超时（超过3分钟）')), LLM_TIMEOUT_MS);
     });
 
     return await Promise.race([streamPromise, timeoutPromise]);
@@ -77,28 +83,23 @@ async function callLLM(content: string, requestHeaders: Headers): Promise<string
 }
 
 function extractJsonFromResponse(response: string): any {
-  // 尝试直接解析
   try {
     return JSON.parse(response);
   } catch {
-    // 尝试提取代码块中的JSON
     const codeBlockMatch = response.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (codeBlockMatch) {
       try {
         return JSON.parse(codeBlockMatch[1].trim());
       } catch {
-        // pass
       }
     }
 
-    // 尝试找到第一个 [ 到最后一个 ] 之间的内容
     const firstBracket = response.indexOf('[');
     const lastBracket = response.lastIndexOf(']');
     if (firstBracket >= 0 && lastBracket > firstBracket) {
       try {
         return JSON.parse(response.slice(firstBracket, lastBracket + 1));
       } catch {
-        // pass
       }
     }
   }
@@ -106,24 +107,132 @@ function extractJsonFromResponse(response: string): any {
   return null;
 }
 
-function cleanTranscriptText(rawText: string): string {
-  // 去掉口语化语气词和重复内容
-  return rawText
-    .replace(/[啊呢哦吧嘛呀哎唉嗯]{2,}/g, '')
-    .replace(/(这个|那个|然后|就是|其实|好像|大概|可能|应该|或者|不过|然而)\s*/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+function checkFFmpegAvailable(): boolean {
+  try {
+    execSync('ffmpeg -version', { stdio: 'pipe' });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
-function parseRawTranscript(rawLines: string[]): string {
-  let cleaned = '';
-  for (const line of rawLines) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('【') || trimmed.includes('[时间]')) continue;
-    if (/^\d/.test(trimmed)) continue;
-    cleaned += trimmed + ' ';
-  }
-  return cleanTranscriptText(cleaned);
+function extractAudioFromVideo(videoPath: string, audioPath: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (!checkFFmpegAvailable()) {
+      console.error('FFmpeg未安装或不在系统PATH中');
+      resolve(false);
+      return;
+    }
+    
+    try {
+      console.log(`正在从视频提取音频: ${videoPath}`);
+      execSync(`ffmpeg -i "${videoPath}" -vn -acodec libmp3lame -ar 16000 -ac 1 -y "${audioPath}"`, {
+        stdio: 'pipe',
+        timeout: 300000
+      });
+      
+      if (fs.existsSync(audioPath)) {
+        console.log(`音频提取成功: ${audioPath}`);
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    } catch (error) {
+      console.error('音频提取失败:', error);
+      resolve(false);
+    }
+  });
+}
+
+async function transcribeWithFunASR(audioPath: string, outputJsonPath: string, onProgress?: (percent: number, message: string) => void): Promise<boolean> {
+  return new Promise(async (resolve) => {
+    try {
+      console.log(`开始FUNASR转写: ${audioPath}`);
+      
+      const funasrServerUrl = process.env.FUNASR_SERVER_URL || 'http://localhost:10095';
+      
+      if (onProgress) onProgress(10, '正在连接FUNASR服务...');
+      
+      const formData = new FormData();
+      const fileBuffer = fs.readFileSync(audioPath);
+      const fileName = path.basename(audioPath);
+      
+      const blob = new Blob([fileBuffer]);
+      formData.append('audio', blob, fileName);
+      formData.append('output_dir', FUNASR_OUTPUT_DIR);
+      
+      if (onProgress) onProgress(20, '正在上传音频文件...');
+      
+      const response = await fetch(`${funasrServerUrl}/api/v1/transcription`, {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`FUNASR服务返回错误: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      if (onProgress) onProgress(80, '正在保存转写结果...');
+      
+      fs.writeFileSync(outputJsonPath, JSON.stringify(result, null, 2), 'utf-8');
+      
+      if (onProgress) onProgress(100, '转写完成');
+      
+      resolve(true);
+    } catch (error) {
+      console.error('FUNASR转写失败:', error);
+      
+      const pythonScriptPath = path.join(process.cwd(), 'knowledge-server', 'funasr_transcribe.py');
+      
+      if (fs.existsSync(pythonScriptPath)) {
+        try {
+          if (onProgress) onProgress(10, '正在启动本地FUNASR转写...');
+          
+          const process = spawn('python', [
+            pythonScriptPath,
+            audioPath,
+            outputJsonPath
+          ]);
+          
+          let stdout = '';
+          let stderr = '';
+          
+          process.stdout.on('data', (data) => {
+            stdout += data.toString();
+            const progressMatch = data.toString().match(/进度[:：]\s*(\d+)%/);
+            if (progressMatch && onProgress) {
+              const percent = parseInt(progressMatch[1]);
+              onProgress(percent, `转写中... ${percent}%`);
+            }
+          });
+          
+          process.stderr.on('data', (data) => {
+            stderr += data.toString();
+            console.error('FUNASR stderr:', data.toString());
+          });
+          
+          const exitCode = await new Promise<number>((resolve) => {
+            process.on('close', (code) => resolve(code || 0));
+          });
+          
+          if (exitCode === 0 && fs.existsSync(outputJsonPath)) {
+            if (onProgress) onProgress(100, '转写完成');
+            resolve(true);
+          } else {
+            console.error('Python脚本执行失败:', stderr);
+            resolve(false);
+          }
+        } catch (pythonError) {
+          console.error('Python脚本执行异常:', pythonError);
+          resolve(false);
+        }
+      } else {
+        resolve(false);
+      }
+    }
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -155,11 +264,11 @@ export async function POST(request: NextRequest) {
           return;
         }
 
-        // 步骤1：上传文件
-        send({ step: 'upload', status: 'processing', message: '正在上传文件...', progress: 5 });
-
         if (!fs.existsSync(UPLOAD_DIR)) {
           fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+        }
+        if (!fs.existsSync(FUNASR_OUTPUT_DIR)) {
+          fs.mkdirSync(FUNASR_OUTPUT_DIR, { recursive: true });
         }
 
         const baseName = fileName.replace(/\.[^.]+$/, '');
@@ -170,6 +279,8 @@ export async function POST(request: NextRequest) {
           counter++;
         }
 
+        send({ step: 'upload', status: 'processing', message: '正在上传文件...', progress: 5 });
+
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
         fs.writeFileSync(finalPath, buffer);
@@ -178,75 +289,138 @@ export async function POST(request: NextRequest) {
           ? `${(file.size / (1024 * 1024)).toFixed(1)}MB`
           : `${(file.size / 1024).toFixed(1)}KB`;
 
-        send({ step: 'upload', status: 'done', message: `上传成功（${fileSizeStr}）`, progress: 20 });
+        send({ step: 'upload', status: 'done', message: `上传成功（${fileSizeStr}）`, progress: 15 });
 
-        // 步骤2：语音转写
-        send({ step: 'transcribe', status: 'processing', message: '正在进行语音转写（调用后端服务）...', progress: 30 });
+        let audioPath = finalPath;
+        
+        if (isVideo) {
+          send({ step: 'transcribe', status: 'processing', message: '正在从视频中提取音频...', progress: 20 });
+          
+          const audioExtractPath = path.join(UPLOAD_DIR, `${baseName}.mp3`);
+          const extractSuccess = await extractAudioFromVideo(finalPath, audioExtractPath);
+          
+          if (!extractSuccess) {
+            const ffmpegHelp = process.platform === 'win32' 
+              ? '音频提取失败。请安装FFmpeg：1) 访问 https://ffmpeg.org/download.html 2) 下载Windows版本 3) 解压并将bin目录添加到系统PATH环境变量'
+              : '音频提取失败，请安装FFmpeg (sudo apt install ffmpeg 或 brew install ffmpeg)';
+            
+            send({
+              step: 'transcribe',
+              status: 'error',
+              message: ffmpegHelp,
+              progress: 0,
+            });
+            controller.close();
+            return;
+          }
+          
+          audioPath = audioExtractPath;
+          send({ step: 'transcribe', status: 'done', message: '音频提取成功', progress: 30 });
+        }
 
-        // 这里调用后端的STT服务
-        // 暂时用提示告知用户需要配置STT服务
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        send({ step: 'transcribe', status: 'processing', message: '正在进行语音转写...', progress: 35 });
 
-        // 检查是否有对应的转写文件
-        const nameWithoutExt = fileName.replace(/\.[^.]+$/, '');
-        const sttBaseDir = 'E:\\社院课程stt';
-
+        const outputJsonPath = path.join(FUNASR_OUTPUT_DIR, `${baseName}.json`);
+        
         let transcriptText = '';
-        let transcriptFound = false;
-
-        // 尝试在已知的STT目录中查找
-        const categories = ['政治理论', '统战理论', '国家治理'];
-        for (const cat of categories) {
-          const funasrPath = path.join(sttBaseDir, cat, 'output_funasr', `${nameWithoutExt}.json`);
-          const outlinePath = path.join(sttBaseDir, cat, 'output_outline', `${nameWithoutExt}.json`);
-
-          if (fs.existsSync(funasrPath)) {
-            const rawData = JSON.parse(fs.readFileSync(funasrPath, 'utf-8'));
-            transcriptText = rawData.map((e: any) => e.content).join('\n');
-            transcriptFound = true;
-            break;
-          }
-          if (fs.existsSync(outlinePath)) {
-            const rawData = JSON.parse(fs.readFileSync(outlinePath, 'utf-8'));
-            transcriptText = rawData.map((e: any) => e.content).join('\n');
-            transcriptFound = true;
-            break;
+        let transcriptData: any[] = [];
+        
+        if (fs.existsSync(outputJsonPath)) {
+          send({ step: 'transcribe', status: 'processing', message: '发现已有转写结果，正在加载...', progress: 35 });
+          
+          const rawData = JSON.parse(fs.readFileSync(outputJsonPath, 'utf-8'));
+          transcriptData = Array.isArray(rawData) ? rawData : (rawData.data || []);
+          transcriptText = transcriptData.map((e: any) => e.content || e.text || '').filter(Boolean).join('');
+          
+          if (transcriptText) {
+            send({ step: 'transcribe', status: 'done', message: '已加载转写文本', progress: 50 });
           }
         }
-
-        if (transcriptFound && transcriptText) {
-          send({ step: 'transcribe', status: 'done', message: '找到已有转写文本', progress: 40 });
-        } else {
-          // 没有转写数据，提示用户
-          send({
-            step: 'transcribe',
-            status: 'error',
-            message: `文件已上传，但需要配置语音转写服务才能继续处理。文件已保存至：${finalPath}`,
-            progress: 0,
-            filePath: finalPath,
+        
+        if (!transcriptText) {
+          const transcribeSuccess = await transcribeWithFunASR(audioPath, outputJsonPath, (percent, message) => {
+            send({
+              step: 'transcribe',
+              status: 'processing',
+              message: message,
+              progress: 35 + (percent * 0.15),
+            });
           });
-          controller.close();
-          return;
+          
+          if (!transcribeSuccess || !fs.existsSync(outputJsonPath)) {
+            send({
+              step: 'transcribe',
+              status: 'error',
+              message: '语音转写失败，请检查FUNASR服务是否正常运行',
+              progress: 0,
+            });
+            controller.close();
+            return;
+          }
+          
+          const rawData = JSON.parse(fs.readFileSync(outputJsonPath, 'utf-8'));
+          transcriptData = Array.isArray(rawData) ? rawData : (rawData.data || []);
+          transcriptText = transcriptData.map((e: any) => e.content || e.text || '').filter(Boolean).join('');
+          
+          if (!transcriptText) {
+            send({
+              step: 'transcribe',
+              status: 'error',
+              message: '转写结果为空，请检查音频文件',
+              progress: 0,
+            });
+            controller.close();
+            return;
+          }
+          
+          send({ step: 'transcribe', status: 'done', message: `转写完成，共${transcriptData.length}段`, progress: 50 });
         }
 
-        // 步骤3：智能分段
-        send({ step: 'segment', status: 'processing', message: '正在分析内容结构，进行智能分段...', progress: 50 });
+        send({ step: 'segment', status: 'processing', message: '正在分析内容结构...', progress: 55 });
 
-        // 如果文本太长，截取前8000字给LLM
-        const textToSend = transcriptText.length > 8000 ? transcriptText.slice(0, 8000) : transcriptText;
+        const chunks: string[] = [];
+        const maxChunkSize = 6000;
+        
+        let currentChunk = '';
+        for (const segment of transcriptData) {
+          const content = segment.content || segment.text || '';
+          if (!content) continue;
+          
+          if (currentChunk.length + content.length > maxChunkSize && currentChunk.length > 0) {
+            chunks.push(currentChunk);
+            currentChunk = '';
+          }
+          currentChunk += content + ' ';
+        }
+        if (currentChunk.length > 0) {
+          chunks.push(currentChunk);
+        }
 
-        await new Promise(resolve => setTimeout(resolve, 500));
+        send({ step: 'segment', status: 'done', message: `内容分析完成，共${chunks.length}个段落`, progress: 60 });
 
-        send({ step: 'segment', status: 'done', message: '内容分析完成', progress: 60 });
+        send({ step: 'outline', status: 'processing', message: '正在调用AI提炼大纲...', progress: 65 });
 
-        // 步骤4：AI提炼大纲
-        send({ step: 'outline', status: 'processing', message: '正在调用AI提炼课程大纲...', progress: 65 });
+        const allOutlines: any[] = [];
+        let currentProgress = 65;
+        
+        for (let i = 0; i < chunks.length; i++) {
+          const chunk = chunks[i];
+          send({
+            step: 'outline',
+            status: 'processing',
+            message: `正在处理第${i + 1}/${chunks.length}段...`,
+            progress: currentProgress + (i / chunks.length) * 25,
+          });
+          
+          const llmResponse = await callLLM(chunk, request.headers);
+          const outlineData = extractJsonFromResponse(llmResponse);
+          
+          if (outlineData && Array.isArray(outlineData)) {
+            allOutlines.push(...outlineData);
+          }
+        }
 
-        const llmResponse = await callLLM(textToSend, request.headers);
-
-        const outlineData = extractJsonFromResponse(llmResponse);
-
-        if (!outlineData || !Array.isArray(outlineData)) {
+        if (allOutlines.length === 0) {
           send({
             step: 'outline',
             status: 'error',
@@ -260,42 +434,37 @@ export async function POST(request: NextRequest) {
         send({
           step: 'outline',
           status: 'done',
-          message: `AI大纲提炼完成，共 ${outlineData.length} 个要点`,
-          progress: 90,
+          message: `AI大纲提炼完成，共${allOutlines.length}个要点`,
+          progress: 95,
         });
 
-        // 步骤5：完成
-        const totalDuration = outlineData.reduce((sum: number, item: any) => {
-          const start = item.startTime || 0;
-          const end = item.endTime || 0;
-          return sum + (end - start);
-        }, 0);
+        const result = {
+          fileName: fileName,
+          fileSize: fileSizeStr,
+          segments: allOutlines.length,
+          transcriptData: transcriptData,
+          outline: allOutlines.map((item: any) => ({
+            title: item.title || '未命名',
+            description: item.description || '',
+            startTime: item.startTime,
+            endTime: item.endTime,
+            keyPoints: item.keyPoints || [],
+            content: item.content || '',
+          })),
+        };
 
         send({
           step: 'complete',
           status: 'done',
           message: '全部处理完成！',
           progress: 100,
-          result: {
-            fileName: fileName,
-            fileSize: fileSizeStr,
-            segments: outlineData.length,
-            totalDuration: totalDuration > 0 ? totalDuration : null,
-            outline: outlineData.map((item: any) => ({
-              title: item.title || '未命名',
-              description: item.description || '',
-              startTime: item.startTime,
-              endTime: item.endTime,
-              keyPoints: item.keyPoints || [],
-              content: item.content || '',
-            })),
-          },
+          result: result,
         });
 
         controller.close();
       } catch (error) {
         console.error('处理出错:', error);
-        send({ step: 'error', status: 'error', message: `处理出错：${error}`, progress: 0 });
+        send({ step: 'error', status: 'error', message: `处理出错：${error instanceof Error ? error.message : '未知错误'}`, progress: 0 });
         controller.close();
       }
     },

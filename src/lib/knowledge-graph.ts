@@ -1,7 +1,14 @@
 import { KnowledgeNode, LearningPath, DiagnosticOption, CourseInfo, RequirementAnalysis } from './types';
 
-function createCourse(id: string, title: string, duration: number): CourseInfo {
-  return { id, title, duration };
+function createCourse(id: string, title: string, duration: number, videoId?: string, videoPath?: string): CourseInfo {
+  return { id, title, duration, videoId, videoPath };
+}
+
+/**
+ * 判断课程标题是否包含中文
+ */
+function hasChineseText(text: string): boolean {
+  return /[\u4e00-\u9fa5]/.test(text);
 }
 
 // ============================================================
@@ -531,7 +538,8 @@ function buildDynamicKnowledgeGraph(
       const allCourses: CourseInfo[] = finalArticles.map(a => createCourse(
         a.id,
         a.title.replace(/\.txt$/, ''),
-        calculateEstimatedDuration(a.paragraphCount)
+        calculateEstimatedDuration(a.paragraphCount),
+        a.videoId
       ));
       const courses = limitCoursesRandom({ courses: allCourses } as KnowledgeNode, 5).courses || allCourses;
 
@@ -826,6 +834,7 @@ export interface KnowledgeBaseApiDoc {
   paragraphCount: number;
   fileName: string;
   courseName?: string;
+  videoId?: string;
 }
 
 let courseDatabase: Record<string, CourseInfo[]> = {};
@@ -853,11 +862,21 @@ export async function fetchKnowledgeBaseCourses(
 
     const categoryCounts: Record<string, number> = data.categoryCounts || data.globalCategoryCounts || {};
 
-    console.log(`[知识库API] 获取到 ${docs.length} 份文档, 分类: ${JSON.stringify(categoryCounts)}`);
+    console.log(`[知识库API] 获取到 ${allDocs.length} 份文档, 分类: ${JSON.stringify(categoryCounts)}`);
 
     const courses: Record<string, CourseInfo[]> = {};
 
-    for (const doc of docs) {
+    for (const doc of allDocs) {
+      if (!hasChineseText(doc.title)) {
+        console.log(`[过滤] 跳过无中文名的课程: ${doc.title}`);
+        continue;
+      }
+
+      if (!doc.videoId) {
+        console.log(`[过滤] 跳过无视频的课程: ${doc.title}`);
+        continue;
+      }
+
       const categoryNodes = matchCategoryToNodes(doc.category);
       const filenameNodes = matchFilenameToNodes(doc.fileName);
       const allNodeIds = Array.from(new Set([...categoryNodes, ...filenameNodes]));
@@ -866,20 +885,25 @@ export async function fetchKnowledgeBaseCourses(
       for (const nodeId of allNodeIds) {
         if (!courses[nodeId]) courses[nodeId] = [];
         if (!courses[nodeId].some(c => c.id === doc.id)) {
-          courses[nodeId].push(createCourse(doc.id, doc.fileName.replace(/\.txt$/, ''), estimatedDuration));
+          courses[nodeId].push(createCourse(doc.id, doc.title, estimatedDuration, doc.videoId));
         }
       }
     }
 
     setKnowledgeBaseCourses(courses);
 
-    // 构建公务员方向的动态知识图谱
-    const dynamicGraph = buildDynamicKnowledgeGraph(docs, categoryCounts);
+    const validDocs = allDocs.filter(doc => 
+      hasChineseText(doc.title) && doc.videoId
+    );
+
+    const dynamicGraph = buildDynamicKnowledgeGraph(validDocs, categoryCounts);
     setDynamicKnowledgeGraph(dynamicGraph);
 
     console.log(`[动态图谱] 已构建公务员方向知识图谱，一级节点: ${dynamicGraph.children?.length || 0} 个`);
+    console.log(`[课程过滤] 原始: ${allDocs.length} -> 有效(有中文名+视频): ${validDocs.length}`);
+    console.log(`[课程统计] 共 ${Object.values(courses).reduce((sum, c) => sum + c.length, 0)} 门课程已注入知识图谱`);
 
-    return { courses, docs, categoryCounts, graph: dynamicGraph };
+    return { courses, docs: validDocs, categoryCounts, graph: dynamicGraph };
   } catch (error) {
     console.warn('知识库API获取失败:', error);
     return { courses: courseDatabase, docs: [], categoryCounts: {}, graph: null };

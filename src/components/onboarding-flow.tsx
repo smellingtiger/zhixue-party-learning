@@ -148,6 +148,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     return ids;
   };
 
+  // 从知识库API加载课程数据，替换离线课程映射
   useEffect(() => {
     const saved = localStorage.getItem('user_diagnostic');
     if (saved) {
