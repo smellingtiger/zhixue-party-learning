@@ -194,14 +194,32 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   // 当图谱加载完成并且有 savedDiagnostic 时，恢复诊断状态
   useEffect(() => {
-    if (graphLoaded && savedDiagnostic) {
+    async function restoreDiagnostic() {
+      if (!graphLoaded || !savedDiagnostic) return;
+      
       try {
         const diagnostic = savedDiagnostic;
+        
+        console.log('🔄 [状态恢复] 开始恢复诊断状态...');
+        console.log('🔄 [状态恢复] diagnostic数据:', JSON.stringify(diagnostic));
+        
+        // ⚠️ 关键检查：确保知识库已加载
+        if (!knowledgeBaseGraph && !getDynamicKnowledgeGraph()) {
+          console.warn('🔄 [状态恢复] ⚠️ 知识库未加载，尝试重新加载...');
+          await fetchKnowledgeBaseCourses();
+          initTopicNodeMap();
+          console.log('🔄 [状态恢复] ✅ 知识库重新加载完成');
+        }
+        
+        console.log('🔄 [状态恢复] knowledgeBaseGraph:', knowledgeBaseGraph ? '✅ 已加载' : '❌ 为空');
+        console.log('🔄 [状态恢复] getDynamicKnowledgeGraph():', getDynamicKnowledgeGraph() ? '✅ 有缓存' : '❌ 为空');
+        
         const path = generateLearningPath({
           roles: diagnostic.roles || [],
           topics: diagnostic.topics || [],
           customRequirements: diagnostic.customRequirements || undefined,
         });
+        
         // 检查生成的路径是否有知识模块
         const hasModules = path.rootNode.children && path.rootNode.children.length > 0;
         if (hasModules) {
@@ -229,23 +247,33 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           // 收集所有需要高亮的节点
           const allNodeIds = new Set<string>();
           
+          console.log('🔄 [状态恢复] ===== 开始收集高亮节点 =====');
+          
           // 1. 添加身份相关的节点
+          console.log('🔄 [状态恢复] [1] 身份节点:');
           (diagnostic.roles || []).forEach((role: string) => {
             const nodeIds = roleNodeMap[role] || [];
+            console.log(`   - ${role}:`, nodeIds);
             nodeIds.forEach(id => allNodeIds.add(id));
           });
           
           // 2. 添加学习主题相关的节点
           const effectiveTopicMap = Object.keys(topicNodeMap).length > 0 ? topicNodeMap : getTopicNodeMap();
+          console.log('🔄 [状态恢复] [2] 主题映射 (topicNodeMap大小:', Object.keys(topicNodeMap).length, ', effectiveTopicMap大小:', Object.keys(effectiveTopicMap).length, ')');
           (diagnostic.topics || []).forEach((topic: string) => {
             const nodeId = effectiveTopicMap[topic];
+            console.log(`   - "${topic}" → ${nodeId || '❌ 未找到'}`);
             if (nodeId) allNodeIds.add(nodeId);
           });
           
-          // 3. 添加学习需求匹配到的节点
+          // 3. 添加需求匹配到的节点
+          console.log('🔄 [状态恢复] [3] 需求匹配节点:', analysisMatchedNodes);
           analysisMatchedNodes.forEach(id => allNodeIds.add(id));
           
-          setHighlightedNodes(Array.from(allNodeIds));
+          const finalNodes = Array.from(allNodeIds);
+          console.log('🔄 [状态恢复] ✅ 最终高亮节点 (' + finalNodes.length + '个):', finalNodes);
+          
+          setHighlightedNodes(finalNodes);
           
           const locked = getDifficultyLockedNodeIds(path.rootNode, diagnostic.difficulty || 'beginner');
           setDifficultyLockedNodes(locked);
@@ -257,11 +285,14 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           localStorage.removeItem('user_diagnostic');
           setSavedDiagnostic(null);
         }
-      } catch {
+      } catch (err) {
+        console.error('[状态恢复] ❌ 恢复失败:', err);
         localStorage.removeItem('user_diagnostic');
         setSavedDiagnostic(null);
       }
     }
+    
+    restoreDiagnostic();
   }, [graphLoaded, savedDiagnostic]);
 
   useEffect(() => {

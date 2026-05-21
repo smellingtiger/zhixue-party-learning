@@ -36,6 +36,9 @@ import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import DigitalAvatar from '@/components/digital-avatar';
 import { loadCourseScript, getChapterSpeechContent, getChapterSections, type ChapterScript } from '@/lib/course-script';
+import ChapterQuizComponent from '@/components/chapter-quiz';
+import { getChapterQuiz } from '@/data/quiz-database';
+import { ChapterQuiz } from '@/lib/quiz-types';
 
 // 辅助函数：获取课程视频 URL
 function getCourseVideoUrl(courseId: string): string | null {
@@ -108,6 +111,18 @@ function getCourseImageUrl(courseCode: string, chapterIndex: number, pageIndex: 
     '7-8-4': '/7-8-4.png',
     '7-8-5': '/7-8-5.png',
     '7-0-1': '/前言配图（乡村振兴）.png',
+    '8-1-1': '/6-1-1.png',
+    '8-1-2': '/6-1-2.png',
+    '8-2-1': '/6-2-1.png',
+    '8-2-2': '/6-2-2.png',
+    '8-3-1': '/6-3-1.png',
+    '8-3-2': '/6-3-2.png',
+    '8-4-1': '/6-4-1.png',
+    '8-4-2': '/6-4-2.png',
+    '8-5-1': '/6-5-1.png',
+    '8-5-2': '/6-5-2.png',
+    '8-6-1': '/6-6-1.png',
+    '8-6-2': '/6-6-2.png',
   };
   if (knownImageMap[imageKey]) {
     return knownImageMap[imageKey];
@@ -149,7 +164,7 @@ interface ThinkingStep {
 }
 
 interface ContentBlock {
-  type: 'text' | 'image' | 'mixed' | 'video' | 'learning_objective';
+  type: 'text' | 'image' | 'mixed' | 'video' | 'learning_objective' | 'quiz';
   content: string;
   imageUrl?: string;
   imageCaption?: string;
@@ -157,6 +172,7 @@ interface ContentBlock {
   aiTags?: AITag[];
   chapterTitle?: string;
   thinkingSteps?: ThinkingStep[];
+  quizData?: ChapterQuiz;
 }
 
 interface ChapterData {
@@ -267,6 +283,38 @@ function getRejectedContents(content: string, title: string, seed: number): Reje
 // 模拟课程数据（备用，当localStorage没有数据时使用）
 const mockCourseData = {};
 
+// 无localStorage依赖的静态课程数据（用于SSR同步）
+function getStaticFallbackCourseData(courseId?: string): any {
+  if (courseId) {
+    return {
+      id: courseId,
+      name: `课程 ${courseId}`,
+      description: 'AI推荐课程',
+      totalHours: 0.2,
+      chapters: [
+        {
+          id: courseId,
+          title: `课程 ${courseId}`,
+          totalSlides: 2,
+          aiSummary: 'AI根据知识图谱为您推荐此课程。',
+          keyPoints: ['核心知识点'],
+          videoUrl: null,
+          slides: [
+            {
+              type: 'text',
+              content: '欢迎学习本课程。AI知识图谱为您精选此课程，帮助您快速掌握相关知识点。',
+              aiTags: [
+                { text: 'AI推荐', type: '知识点', explanation: '此课程由AI知识图谱智能推荐' },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+  }
+  return {};
+}
+
 // 从localStorage读取AI生成的课程数据
 function getCourseData(courseId?: string): any {
   try {
@@ -283,6 +331,7 @@ function getCourseData(courseId?: string): any {
       else if (courseName.includes('党章')) courseCode = '5';
       else if (courseName.includes('基层') || courseName.includes('党务')) courseCode = '6';
       else if (courseName.includes('乡村振兴')) courseCode = '7';
+      else if (courseName.includes('内涝') || courseName.includes('洪涝') || courseName.includes('防汛') || courseName.includes('应急处置')) courseCode = '8';
       
       return {
         id: parsed.chapters?.[0]?.id || 1,
@@ -425,6 +474,14 @@ function getCourseData(courseId?: string): any {
                     type: 'video',
                     content: '',
                     videoUrl: '/video/1分钟看懂_自动_与_自主_的差别.mp4',
+                  });
+                }
+                
+                if (courseCode === '8' && ch.id === 4 && pIndex === 3) {
+                  slides.push({
+                    type: 'video',
+                    content: '',
+                    videoUrl: '/video/防内涝应急III级响应启动机制详解.mp4',
                   });
                 }
               } else {
@@ -628,9 +685,33 @@ function getCourseData(courseId?: string): any {
             '第7章："可落地、可评估、可推广"三要素': '乡村振兴治理三要素：可落地（从纸面到地面）、可评估（指标量化数据说话）、可推广（做成一个带动一片）。先试点后推广，先组织后放活。',
             '第8章：组织一次本地化乡村振兴项目小调研': '从调研目标、受访对象、10题短问卷到5页内评审材料模板，提供完整的本地化调研工具箱。帮助学员将调研结果落地为可操作的试点建议。',
           };
-          const summaries = courseCode === '7' ? ruralSummaries : embodiedSummaries;
+          const floodSummaries: Record<string, string> = {
+            '前言：课程定位与学习目标': '本课程面向洪涝应急处置岗位人员，覆盖市、区、街道三级。场景限定为城市内涝引发的排涝压力上升、积水加深、道路交通断交。学员需明确岗位定位、处置动作、阈值时限和上报路径，建立分角色SOP卡体系。',
+            '第1章：开局判断——你面对的是哪一级城市内涝': '城市内涝四色分级：蓝黄橙红对应IV到I级。IV级响应的核心原则是先控险、先排涝、先封控断交风险。从预警到响应的决策链是气象局预警、应急局研判、副市长决策、启动响应。',
+            '第2章：IV级响应——5个岗位各就各位': 'IV级响应涉及5个岗位：分管副市长、市应急局、市城管局、市交通局、属地街道。每个岗位有明确的标准作业程序卡，包含动作、内容、阈值和时限四要素。',
+            '第3章：III级响应升级——从5个岗位到7个岗位的协同': '升级采用5选3机制。新增公安、卫健、气象3个岗位形成7节点联动。副市长每30分钟向市长汇报灾情，建议是否启动II级。',
+            '第4章：II级响应升级——从7个岗位到14个岗位的全域联动': '升级采用更严格的6选3机制。新增市长、武警、供电、通信等7个岗位形成14岗位全域联动。从部门协同升级为全域战争状态。',
+            '第5章：I级响应——全域控制与国家级支援协同': '最高级别应急状态。国家防总、解放军、国家级排涝基地、跨省救援队介入，形成国家-省-市三级指挥链。市长授权非常措施。',
+            '第6章：演练与复盘——让岗位"会做、做对、能复核"': '掌握三种演练方式：桌面推演、专项演练、综合演练。学会5页复盘模板。每个学员交付岗位SOP卡，随身携带、定期更新。',
+            '第7章：分角色SOP卡速查——你的岗位在各级响应中做什么': '应急局、城管局、交通局岗位的四级速查卡。通用原则：升级即新增、时限压缩、上报升级、联动扩展。速记口诀：蓝黄橙红四级跳。',
+            '第8章：课程测试与工具包': '10道测试题覆盖四级响应核心知识点。应急工具包包含关键联系表、汛前检查清单、岗位SOP卡空白模板。每年汛前桌面推演、每季度更新。',
+          };
+          const summaries = courseCode === '7' ? ruralSummaries : courseCode === '8' ? floodSummaries : embodiedSummaries;
+          
+          // 为每章末尾添加试题页面
+          const chapterQuiz = courseCode === '8' ? null : getChapterQuiz(parsed.courseName || '', ch.id, ch.title);
+          if (chapterQuiz) {
+            slides.push({
+              type: 'quiz',
+              content: `章节测试 - ${ch.title}`,
+              chapterTitle: ch.title,
+              quizData: chapterQuiz,
+            });
+          }
+          
           return { id: ch.id, title: ch.title, totalSlides: slides.length, aiSummary: summaries[ch.title] || `${ch.title}。深入讲解核心要义，帮助您全面掌握相关知识点和实践方法。`, keyPoints: [ch.title.replace(/第.*章[：:]/, '').substring(0, 10)], videoUrl, slides };
         }),
+        testQuestions: parsed.testQuestions || [],
       };
     }
   } catch (e) {
@@ -684,15 +765,14 @@ export default function CourseLearnPage() {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const startTimeRef = useRef(Date.now());
 
-  // 获取目标章节索引：优先使用URL参数，其次使用localStorage
+  // 获取目标章节索引：优先使用URL参数
   const getInitialChapter = () => {
     try {
       const chapterParam = searchParams.get('chapter');
       if (chapterParam !== null) {
         return parseInt(chapterParam, 10);
       }
-      const saved = localStorage.getItem(`current_chapter_${courseId}`);
-      return saved ? parseInt(saved, 10) : 0;
+      return 0;
     } catch {
       return 0;
     }
@@ -701,13 +781,11 @@ export default function CourseLearnPage() {
   const [currentChapter, setCurrentChapter] = useState(getInitialChapter);
   const [currentSlide, setCurrentSlide] = useState(() => {
     try {
-      // 如果URL有chapter参数，说明是从外部指定章节进入，重置为第0页
       const chapterParam = searchParams.get('chapter');
       if (chapterParam !== null) {
         return 0;
       }
-      const saved = localStorage.getItem(`current_slide_${courseId}`);
-      return saved ? parseInt(saved, 10) : 0;
+      return 0;
     } catch {
       return 0;
     }
@@ -720,25 +798,30 @@ export default function CourseLearnPage() {
   ]);
   const [chatInput, setChatInput] = useState('');
   const [expandedChapters, setExpandedChapters] = useState<Set<number>>(new Set([0]));
-  const [completedSlides, setCompletedSlides] = useState<Set<string>>(() => {
+  const [completedSlides, setCompletedSlides] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
     try {
       const saved = localStorage.getItem(`completed_slides_${courseId}`);
       if (saved) {
-        return new Set(JSON.parse(saved));
+        setCompletedSlides(new Set(JSON.parse(saved)));
       }
     } catch {
       // ignore
     }
-    return new Set();
-  });
-  const [showAISummary, setShowAISummary] = useState(() => {
+  }, [courseId]);
+  const [showAISummary, setShowAISummary] = useState(false);
+
+  useEffect(() => {
     try {
       const saved = localStorage.getItem('ai_summary_preference');
-      return saved === 'true';
+      if (saved !== null) {
+        setShowAISummary(saved === 'true');
+      }
     } catch {
-      return false;
+      // ignore
     }
-  });
+  }, []);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
   const [videoDuration, setVideoDuration] = useState(0);
@@ -746,20 +829,37 @@ export default function CourseLearnPage() {
   const [isSeeking, setIsSeeking] = useState(false);
   const [showThinkingLogic, setShowThinkingLogic] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
-  const [slideNotes, setSlideNotes] = useState<Record<string, string>>(() => {
+  const [slideNotes, setSlideNotes] = useState<Record<string, string>>({});
+
+  useEffect(() => {
     try {
       const saved = localStorage.getItem(`slide_notes_${courseId}`);
-      return saved ? JSON.parse(saved) : {};
+      if (saved) {
+        setSlideNotes(JSON.parse(saved));
+      }
     } catch {
-      return {};
+      // ignore
     }
-  });
+  }, [courseId]);
   const [showNoteEditor, setShowNoteEditor] = useState(false);
   const [noteInput, setNoteInput] = useState('');
   const [learningSeconds, setLearningSeconds] = useState(0);
   const [speechContents, setSpeechContents] = useState<ChapterScript[]>([]);
+  const [course, setCourse] = useState<any>(() => getStaticFallbackCourseData(courseId));
+  const courseTestQuestions = course?.testQuestions || [];
+  const isCourseTestChapter = courseTestQuestions.length > 0 && currentChapter === course.chapters.length - 1;
+  const [testState, setTestState] = useState({
+    answers: {} as Record<number, string>,
+    results: null as Record<number, { score: number; comment: string }> | null,
+    isGrading: false,
+    overallFeedback: '',
+    gradingError: '',
+  });
 
-  const course = getCourseData(courseId);
+  useEffect(() => {
+    const data = getCourseData(courseId);
+    setCourse(data);
+  }, [courseId]);
 
   useEffect(() => {
     loadCourseScript(course?.name).then(script => {
@@ -768,6 +868,125 @@ export default function CourseLearnPage() {
       }
     });
   }, [course?.name]);
+
+  const handleTestAnswerChange = (questionId: number, answer: string) => {
+    setTestState(prev => ({ ...prev, answers: { ...prev.answers, [questionId]: answer } }));
+  };
+
+  const handleSubmitTest = async () => {
+    const unanswered = courseTestQuestions.filter((q: any) => !testState.answers[q.id]?.trim());
+    if (unanswered.length > 0) {
+      setTestState(prev => ({ ...prev, gradingError: `还有 ${unanswered.length} 道题未作答，请完成所有题目后再提交` }));
+      return;
+    }
+    setTestState(prev => ({ ...prev, gradingError: '', isGrading: true }));
+
+    try {
+      const prompt = `你是一个专业的防汛应急课程阅卷AI。请对以下学员答案进行评分和点评。
+
+课程名称：城市内涝洪涝应急处置岗位实训课程
+
+阅卷规则：
+1. 第1~9题为基础知识题，每道满分10分，共90分
+2. 第10题为综合案例分析题（主观题），满分30分
+3. 评分标准：答案是否准确、完整、有具体细节
+4. 主观题评分侧重：分析逻辑是否清晰、是否覆盖了所有子问题、是否有独立判断
+5. 给出每题的具体评分（整数分数）和简短评语
+6. 最后给出总分（满分120分）和总体评价
+
+题目和学员答案如下：
+
+${courseTestQuestions.map((q: any) => `
+【第${q.id}题】${q.question}
+学员答案：${testState.answers[q.id] || '未作答'}
+参考章节：${q.chapterRef}
+${q.isSubjective ? '【主观题】本题满分30分' : '【客观题】本题满分10分'}
+`).join('\n')}
+
+请按以下JSON格式输出（不要包含其他内容）：
+{
+  "scores": {
+    "1": {"score": 分数, "comment": "评语"},
+    "2": {"score": 分数, "comment": "评语"},
+    "3": {"score": 分数, "comment": "评语"},
+    "4": {"score": 分数, "comment": "评语"},
+    "5": {"score": 分数, "comment": "评语"},
+    "6": {"score": 分数, "comment": "评语"},
+    "7": {"score": 分数, "comment": "评语"},
+    "8": {"score": 分数, "comment": "评语"},
+    "9": {"score": 分数, "comment": "评语"},
+    "10": {"score": 分数, "comment": "评语"}
+  },
+  "totalScore": 总分,
+  "overallFeedback": "总体评价与改进建议"
+}`;
+
+      const response = await fetch('/api/llm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: prompt }],
+          type: 'assistant'
+        }),
+      });
+
+      if (!response.ok) throw new Error('AI阅卷服务请求失败');
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('无法读取响应流');
+
+      const decoder = new TextDecoder();
+      let fullContent = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.content) {
+                fullContent += data.content;
+              }
+            } catch {}
+          }
+        }
+      }
+
+      const jsonMatch = fullContent.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const result = JSON.parse(jsonMatch[0]);
+        setTestState(prev => ({
+          ...prev,
+          results: result.scores,
+          overallFeedback: result.overallFeedback || '',
+          isGrading: false,
+        }));
+      } else {
+        throw new Error('无法解析阅卷结果');
+      }
+    } catch (error) {
+      console.error('[AI阅卷] 错误:', error);
+      setTestState(prev => ({
+        ...prev,
+        gradingError: error instanceof Error ? error.message : 'AI阅卷失败，请稍后重试',
+        isGrading: false,
+      }));
+    }
+  };
+
+  const handleRetryTest = () => {
+    setTestState({
+      answers: {},
+      results: null,
+      isGrading: false,
+      overallFeedback: '',
+      gradingError: '',
+    });
+  };
+
   const chapter = course.chapters[currentChapter];
   const isRuralCourse = (course.name || '').includes('乡村振兴');
   const slides = chapter?.slides || [];
@@ -776,7 +995,7 @@ export default function CourseLearnPage() {
   const progress = totalSlides > 0 ? ((currentSlide + 1) / totalSlides) * 100 : 0;
   
   // 获取当前章节或幻灯片的视频 URL
-  const currentVideoUrl = chapter.videoUrl || currentSlideData.find((s: ContentBlock) => s.type === 'video')?.videoUrl || null;
+  const currentVideoUrl = chapter?.videoUrl || currentSlideData.find((s: ContentBlock) => s.type === 'video')?.videoUrl || null;
 
   // 获取当前章节的语音播报内容
   const currentSpeechContent = speechContents[currentChapter];
@@ -1121,6 +1340,17 @@ export default function CourseLearnPage() {
     const completedCount = ch.slides.filter((_: ContentBlock, slIdx: number) => completedSlides.has(`${chIdx}-${slIdx}`)).length;
     return completedCount > 0 && completedCount < ch.slides.length;
   };
+
+  if (!chapter) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-orange-50 to-white">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-red-400 border-t-red-600 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-500 font-medium">课程数据加载中...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative">
@@ -1556,9 +1786,9 @@ export default function CourseLearnPage() {
                               blockquote: ({ children }) => (
                                 <blockquote className="my-6 border-l-4 border-red-400 bg-gradient-to-r from-red-50 to-orange-50 py-4 px-6 rounded-r-xl relative shadow-sm">
                                   <div className="absolute top-2 right-4 text-red-200 text-5xl font-serif leading-none select-none">"</div>
-                                  <p className="relative z-10 text-base text-gray-700 leading-loose">
+                                  <div className="relative z-10 text-base text-gray-700 leading-loose">
                                     {children}
-                                  </p>
+                                  </div>
                                 </blockquote>
                               ),
                               hr: () => (
@@ -1760,9 +1990,9 @@ export default function CourseLearnPage() {
                             blockquote: ({ children }) => (
                               <blockquote className="my-6 border-l-4 border-red-400 bg-gradient-to-r from-red-50 to-orange-50 py-4 px-6 rounded-r-xl relative shadow-sm">
                                 <div className="absolute top-2 right-4 text-red-200 text-5xl font-serif leading-none select-none">"</div>
-                                <p className="relative z-10 text-base text-gray-700 leading-loose">
+                                <div className="relative z-10 text-base text-gray-700 leading-loose">
                                   {children}
-                                </p>
+                                </div>
                               </blockquote>
                             ),
                             hr: () => (
@@ -1838,8 +2068,22 @@ export default function CourseLearnPage() {
                               </figure>
                             </div>
                           )}
-                        </div>
+                          </div>
                       </div>
+                    )}
+
+                    {/* 章节试题 */}
+                    {block.type === 'quiz' && block.quizData && (
+                      <ChapterQuizComponent
+                        quiz={block.quizData}
+                        onComplete={(result) => {
+                          console.log('[章节测试] 完成:', result);
+                          setCompletedSlides(prev => new Set(prev).add(`${currentChapter}-${currentSlide}`));
+                        }}
+                        onRetry={() => {
+                          console.log('[章节测试] 重新测试');
+                        }}
+                      />
                     )}
 
                     {/* 视频播放 */}
@@ -2215,6 +2459,141 @@ export default function CourseLearnPage() {
               })()}
             </CardContent>
           </Card>
+
+          {/* 课程综合测试 - 交互式答题区 */}
+          {isCourseTestChapter && currentSlide === 1 && (
+            <div className="border-2 border-purple-600 bg-white p-6 relative mb-4" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+              <div className="absolute -top-3 left-4 bg-purple-600 text-white text-xs font-black px-3 py-1 border-2 border-black" style={{ boxShadow: '2px 2px 0 0 #000' }}>
+                AI智能阅卷 - 课程综合测试
+              </div>
+
+              {!testState.results ? (
+                <>
+                  <h3 className="font-black text-xl text-black mt-2 mb-2">课程综合测试（共{courseTestQuestions.length}题，满分120分）</h3>
+                  <p className="text-sm text-gray-600 mb-4">请在下方逐题作答，完成后点击"提交AI阅卷"获取评分和评语</p>
+
+                  <div className="space-y-4">
+                    {courseTestQuestions.map((q: any, qi: number) => {
+                      const isSubjective = q.isSubjective;
+                      return (
+                        <div key={q.id} className={`p-4 border-2 ${isSubjective ? 'border-purple-400 bg-purple-50' : 'border-gray-300 bg-gray-50'}`}>
+                          <div className="flex items-start gap-3 mb-2">
+                            <div className={`w-8 h-8 flex items-center justify-center text-white font-bold flex-shrink-0 border-2 border-black text-sm ${isSubjective ? 'bg-purple-600' : 'bg-purple-600'}`}>
+                              {qi + 1}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <p className="font-bold text-gray-900 text-sm leading-relaxed">{q.question}</p>
+                                {isSubjective && (
+                                  <span className="bg-purple-600 text-white text-[10px] font-bold px-2 py-0.5 border border-black flex-shrink-0">
+                                    主观题30分
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-500 mt-1">参考章节：{q.chapterRef}</p>
+                              {q.hint && <p className="text-xs text-amber-600 mt-0.5">💡 {q.hint}</p>}
+                            </div>
+                          </div>
+                          <textarea
+                            className={`w-full border-2 p-3 text-sm mt-2 bg-white ${isSubjective ? 'border-purple-300' : 'border-gray-300'}`}
+                            style={{ borderRadius: '0', minHeight: isSubjective ? '160px' : '80px' }}
+                            placeholder={isSubjective ? '请根据案例框架逐步分析回答...' : '请输入您的答案...'}
+                            value={testState.answers[q.id] || ''}
+                            onChange={(e) => handleTestAnswerChange(q.id, e.target.value)}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {testState.gradingError && (
+                    <div className="mt-4 p-3 border-2 border-red-500 bg-red-50 text-red-700 text-sm font-bold">
+                      {testState.gradingError}
+                    </div>
+                  )}
+
+                  <div className="mt-6 flex justify-end">
+                    <Button
+                      size="lg"
+                      className="bg-purple-600 text-white font-bold border-2 border-black hover:bg-purple-700"
+                      style={{ borderRadius: '0', boxShadow: '3px 3px 0 0 #000' }}
+                      onClick={handleSubmitTest}
+                      disabled={testState.isGrading}
+                    >
+                      {testState.isGrading ? (
+                        <span className="flex items-center gap-2">
+                          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          AI正在阅卷中...
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-2">
+                          <Sparkles className="h-4 w-4" />
+                          提交AI阅卷
+                        </span>
+                      )}
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h3 className="font-black text-xl text-black mt-2 mb-4">📊 阅卷结果</h3>
+
+                  <div className="space-y-4">
+                    {courseTestQuestions.map((q: any, qi: number) => {
+                      const result = testState.results![q.id];
+                      const isSubjective = q.isSubjective;
+                      const maxScore = isSubjective ? 30 : 10;
+                      const goodThreshold = isSubjective ? 21 : 7;
+                      const midThreshold = isSubjective ? 15 : 5;
+                      return (
+                        <div key={q.id} className={`p-4 border-2 ${result && result.score >= goodThreshold ? 'border-green-500 bg-green-50' : result && result.score >= midThreshold ? 'border-amber-500 bg-amber-50' : 'border-red-500 bg-red-50'}`}>
+                          <div className="flex items-start gap-2 mb-1">
+                            <span className="font-bold text-sm text-gray-900">第{qi + 1}题</span>
+                            <span className="text-xs text-gray-500">({q.chapterRef})</span>
+                            {isSubjective && <span className="bg-purple-600 text-white text-[10px] font-bold px-2 py-0.5">主观题</span>}
+                          </div>
+                          <p className="text-sm text-gray-700 mb-2">{q.question}</p>
+                          <div className="bg-white p-2 border border-gray-300 mb-2">
+                            <span className="text-xs text-gray-500 font-bold">您的答案：</span>
+                            <p className="text-sm text-gray-800 mt-0.5">{testState.answers[q.id]}</p>
+                          </div>
+                          {result && (
+                            <div className="flex items-start gap-4 mt-2">
+                              <div className={`px-3 py-1 text-white font-bold text-sm border-2 border-black ${result.score >= goodThreshold ? 'bg-green-600' : result.score >= midThreshold ? 'bg-amber-500' : 'bg-red-500'}`}>
+                                {result.score}/{maxScore}分
+                              </div>
+                              <p className="text-sm text-gray-700 flex-1">{result.comment}</p>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-6 p-5 border-2 border-purple-600 bg-purple-50">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 bg-purple-600 flex items-center justify-center border-2 border-black">
+                        <span className="text-white font-black text-lg">AI</span>
+                      </div>
+                      <h4 className="font-black text-purple-900">AI阅卷综合评价</h4>
+                    </div>
+                    <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">{testState.overallFeedback}</p>
+                  </div>
+
+                  <div className="mt-6 flex justify-end">
+                    <Button
+                      size="lg"
+                      className="bg-amber-400 text-black font-bold border-2 border-black hover:bg-amber-500"
+                      style={{ borderRadius: '0', boxShadow: '3px 3px 0 0 #000' }}
+                      onClick={handleRetryTest}
+                    >
+                      重新答题
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
 
           {/* AI数字人讲解区域 */}
           {speechContents.length > 0 && (

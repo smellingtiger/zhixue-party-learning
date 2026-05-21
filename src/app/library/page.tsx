@@ -44,6 +44,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
+import { floodCourseData } from '../ai-course/flood-course-data';
 
 // 课程分类
 const categories = [
@@ -140,21 +141,19 @@ export default function LibraryPage() {
   const [courseTopic, setCourseTopic] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [showResult, setShowResult] = useState(() => {
-    const saved = localStorage.getItem('ai_generated_course');
-    return !!saved;
-  });
-  const [generatedCourse, setGeneratedCourse] = useState<any>(() => {
+  const [showResult, setShowResult] = useState(false);
+  const [generatedCourse, setGeneratedCourse] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<string>('courses');
+
+  // 水合完成后从localStorage加载课程数据
+  useEffect(() => {
     const saved = localStorage.getItem('ai_generated_course');
     if (saved) {
-      try { return JSON.parse(saved); } catch { return null; }
+      setShowResult(true);
+      setGeneratedCourse(JSON.parse(saved));
+      setActiveTab('ai-course');
     }
-    return null;
-  });
-  const [activeTab, setActiveTab] = useState<string>(() => {
-    const saved = localStorage.getItem('ai_generated_course');
-    return saved ? 'ai-course' : 'courses';
-  });
+  }, []);
 
   // 保存AI生成课程到localStorage
   useEffect(() => {
@@ -189,22 +188,23 @@ export default function LibraryPage() {
   }, []);
   const [editMode, setEditMode] = useState(false);
   const [editedChapters, setEditedChapters] = useState<any[]>([]);
-  // 诊断数据（组件挂载时同步读取localStorage）
-  const [diagnosticData, setDiagnosticData] = useState<{ roles: string[]; topics: string[]; difficulty: string; customRequirements?: string } | null>(() => {
+  // 诊断数据
+  const [diagnosticData, setDiagnosticData] = useState<{ roles: string[]; topics: string[]; difficulty: string; customRequirements?: string } | null>(null);
+  
+  useEffect(() => {
     try {
       const saved = localStorage.getItem('user_diagnostic');
       if (saved) {
         const parsed = JSON.parse(saved);
-        return {
+        setDiagnosticData({
           roles: parsed.roles || [],
           topics: parsed.topics || [],
           difficulty: parsed.difficulty || 'intermediate',
           customRequirements: parsed.customRequirements || '',
-        };
+        });
       }
     } catch {}
-    return null;
-  });
+  }, []);
   // 生成逻辑说明（动态）
   const [generationLogic, setGenerationLogic] = useState<any>(null);
 
@@ -265,11 +265,16 @@ export default function LibraryPage() {
           '掌握从"输血"到"造血"的发展范式转变',
           '了解四大政务实践领域与六项评估指标',
           '掌握项目论证六问与加权评分方法',
-          '学会组织本地化乡村振兴项目调研',
-        ],
-      }
-    },
-  ];
+        '学会组织本地化乡村振兴项目调研',
+      ],
+    }
+  },
+  {
+    key: 'flood_emergency',
+    name: '城市内涝洪涝应急处置岗位实训',
+    data: floodCourseData,
+  },
+];
 
   const router = useRouter();
   const hasDiagnostic = diagnosticData && (diagnosticData.roles.length > 0 || diagnosticData.topics.length > 0);
@@ -756,7 +761,7 @@ export default function LibraryPage() {
                         style={{
                           borderRadius: '0',
                           boxShadow: '2px 2px 0 0 #000',
-                          backgroundColor: plan.key === 'xjp_thought' ? '#fbbf24' : plan.key === 'united_front' ? '#c084fc' : plan.key === 'rural_revitalization' ? '#22c55e' : '#fb7185',
+                          backgroundColor: plan.key === 'xjp_thought' ? '#fbbf24' : plan.key === 'united_front' ? '#c084fc' : plan.key === 'rural_revitalization' ? '#22c55e' : plan.key === 'flood_emergency' ? '#3b82f6' : '#fb7185',
                         }}
                         onClick={() => handlePresetClick(plan)}
                         disabled={isGenerating}
@@ -815,7 +820,7 @@ export default function LibraryPage() {
             </div>
 
             {/* 第二行：智能生成步骤（全宽） */}
-            <div className="border-2 border-black bg-gradient-to-b from-indigo-700 to-indigo-900 p-6 text-white mb-6" style={{ boxShadow: '4px 4px 0 0 #000' }}>
+            <div className="border-2 border-black bg-gradient-to-br from-red-600 via-red-500 to-orange-500 p-6 text-white mb-6" style={{ boxShadow: '4px 4px 0 0 #000' }}>
               <div className="flex items-center gap-4 mb-5">
                 <div className="text-6xl font-black text-amber-300" style={{ textShadow: '3px 3px 0 #000' }}>
                   {isGenerating ? `${currentStep + 1}` : `${thinkingSteps.length}`}
