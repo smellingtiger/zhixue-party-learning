@@ -1687,19 +1687,15 @@ function stripEmptyCourseNodes(node: KnowledgeNode): KnowledgeNode | null {
   return node;
 }
 
-function injectCoursesToNode(node: KnowledgeNode): KnowledgeNode {
+function injectCoursesToNode(node: KnowledgeNode, usedCourseIds: Set<string>): KnowledgeNode {
   const dbCourses = courseDatabase[node.id];
   
-  // 只使用知识库中的课程，完全替换旧课程
   if (!dbCourses || dbCourses.length === 0) {
-    // 如果知识库没有课程，清空旧课程
     return { ...node, courses: [] };
   }
 
-  // 过滤掉纯字母数字的奇怪课程名
   const validCourses = dbCourses.filter(course => {
     const title = course.title;
-    // 检查是否全是字母数字（不含中文）
     const hasChinese = /[\u4e00-\u9fa5]/.test(title);
     return hasChinese;
   });
@@ -1708,9 +1704,14 @@ function injectCoursesToNode(node: KnowledgeNode): KnowledgeNode {
     return { ...node, courses: [] };
   }
 
-  // 按前缀分组，保留含上/中/下的系列（完整纳入，不拆散）
+  const availableCourses = validCourses.filter(c => !usedCourseIds.has(c.id));
+
+  if (availableCourses.length === 0) {
+    return { ...node, courses: [] };
+  }
+
   const prefixMap = new Map<string, CourseInfo[]>();
-  validCourses.forEach(course => {
+  availableCourses.forEach(course => {
     const prefix = extractCoursePrefix(course.title);
     if (!prefixMap.has(prefix)) prefixMap.set(prefix, []);
     prefixMap.get(prefix)!.push(course);
@@ -1719,43 +1720,44 @@ function injectCoursesToNode(node: KnowledgeNode): KnowledgeNode {
   const selected: CourseInfo[] = [];
   const seriesIds = new Set<string>();
 
-  // 第一遍：收集所有含上/中/下的完整系列，但确保不超过5门
   for (const [, courses] of prefixMap) {
     const hasSeries = courses.some(c => c.title.includes('（上）') || c.title.includes('（中）') || c.title.includes('（下）'));
     if (hasSeries && selected.length + courses.length <= 5) {
       for (const c of courses) { selected.push(c); seriesIds.add(c.id); }
     } else if (hasSeries) {
-      // 如果系列课程太多，只取前一部分
       for (const c of courses.slice(0, 5 - selected.length)) {
         selected.push(c); seriesIds.add(c.id);
       }
     }
   }
 
-  // 第二遍：从剩余课程中随机抽，补齐到 5 门
-  let remaining = validCourses.filter(c => !seriesIds.has(c.id));
+  let remaining = availableCourses.filter(c => !seriesIds.has(c.id));
   remaining = shuffleArray(remaining);
   const needed = Math.max(0, 5 - selected.length);
   selected.push(...remaining.slice(0, needed));
 
+  for (const c of selected) {
+    usedCourseIds.add(c.id);
+  }
+
   return { ...node, courses: selected };
 }
 
-/**
- * 深度遍历，为所有叶子节点注入课程
- */
-export function injectCoursesRecursive(node: KnowledgeNode): KnowledgeNode {
+function injectCoursesRecursiveImpl(node: KnowledgeNode, usedCourseIds: Set<string>): KnowledgeNode {
   if (node.children && node.children.length > 0) {
     const injected = {
       ...node,
-      children: node.children.map(child => injectCoursesRecursive(child)),
+      children: node.children.map(child => injectCoursesRecursiveImpl(child, usedCourseIds)),
     };
-    // 递归后清理无课程子树
     return stripEmptyCourseNodes(injected) || { ...node, children: [], courses: [] };
   }
-  // 叶子节点：注入课程
-  const injected = injectCoursesToNode(node);
+  const injected = injectCoursesToNode(node, usedCourseIds);
   return limitCoursesRandom(injected, 5);
+}
+
+export function injectCoursesRecursive(node: KnowledgeNode): KnowledgeNode {
+  const usedCourseIds = new Set<string>();
+  return injectCoursesRecursiveImpl(node, usedCourseIds);
 }
 
 // 筛选节点（不包含难度筛选）

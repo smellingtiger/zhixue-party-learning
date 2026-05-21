@@ -33,6 +33,7 @@ const presetCourseTopics = [
   {
     key: 'embodied_ai',
     name: '具身智能基础与政务应用',
+    knowledgeBaseCourseId: '1292',
     data: {
       courseName: '具身智能基础与政务应用——从认识机制到组织调研',
       courseType: '前沿技术',
@@ -63,6 +64,7 @@ const presetCourseTopics = [
   {
     key: 'rural_revitalization',
     name: '乡村振兴基础与政务应用',
+    knowledgeBaseCourseId: '1328',
     data: {
       courseName: '乡村振兴基础与政务应用——从战略理解到落地调研',
       courseType: '政策实践',
@@ -93,6 +95,7 @@ const presetCourseTopics = [
   {
     key: 'flood_emergency',
     name: '城市内涝洪涝应急处置岗位实训',
+    knowledgeBaseCourseId: '1059',
     data: floodCourseData,
   },
 ];

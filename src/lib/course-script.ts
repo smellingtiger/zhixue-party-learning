@@ -59,19 +59,46 @@ export function getChapterSections(chapter: ChapterScript): SectionMarker[] {
   });
 }
 
-export async function loadCourseScript(courseName?: string): Promise<CourseScript | null> {
+export async function loadCourseScript(courseName?: string, courseId?: string): Promise<CourseScript | null> {
   try {
-    const scriptFile = courseName?.includes('乡村振兴')
-      ? '/course-scripts/rural-revitalization-script.json'
-      : courseName?.includes('内涝') || courseName?.includes('洪涝') || courseName?.includes('防汛') || courseName?.includes('应急处置')
-        ? '/course-scripts/flood-script.json'
-        : '/course-scripts/script.json';
-    const response = await fetch(scriptFile);
-    if (!response.ok) {
-      console.error('[课程文稿] 加载失败');
-      return null;
+    let scriptFile: string | null = null;
+    
+    if (courseName?.includes('乡村振兴')) {
+      scriptFile = '/course-scripts/rural-revitalization-script.json';
+    } else if (courseName?.includes('内涝') || courseName?.includes('洪涝') || courseName?.includes('防汛') || courseName?.includes('应急处置')) {
+      scriptFile = '/course-scripts/flood-script.json';
+    } else if (courseName?.includes('具身智能')) {
+      scriptFile = '/course-scripts/script.json';
     }
-    return await response.json();
+
+    if (scriptFile) {
+      const response = await fetch(scriptFile);
+      if (response.ok) {
+        return await response.json();
+      }
+    }
+
+    if (courseId) {
+      const kbRes = await fetch(`/api/knowledge-base/${encodeURIComponent(courseId)}`);
+      if (kbRes.ok) {
+        const kbData = await kbRes.json();
+        if (kbData.segments && kbData.segments.length > 0) {
+          return {
+            courseName: kbData.courseName || courseName || '',
+            chapters: [{
+              id: 'ch1',
+              title: kbData.courseName || courseName || '课程大纲',
+              sections: kbData.segments.map((seg: any, idx: number) => ({
+                title: seg.title || `第${idx + 1}段`,
+                content: seg.content || '',
+              })),
+            }],
+          };
+        }
+      }
+    }
+
+    return null;
   } catch (error) {
     console.error('[课程文稿] 加载异常:', error);
     return null;

@@ -17,12 +17,14 @@ interface KnowledgeDoc {
   paragraphCount: number;
   fileName: string;
   videoId: string | null;
+  hasVideo: boolean;
 }
 
 interface KnowledgeSegment {
   title: string;
   time: string;
   content: string;
+  needsTitleGeneration?: boolean;
 }
 
 interface VideoInfo {
@@ -67,6 +69,7 @@ export default function KnowledgeBasePage() {
   const [globalCategoryParagraphs, setGlobalCategoryParagraphs] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedDoc, setSelectedDoc] = useState<KnowledgeDocDetail | null>(null);
   const [docLoading, setDocLoading] = useState(false);
@@ -123,6 +126,8 @@ export default function KnowledgeBasePage() {
       .catch(err => console.warn('知识图谱初始化失败:', err));
   }, []);
 
+  const [generatingTitles, setGeneratingTitles] = useState(false);
+
   const handleDocClick = async (doc: KnowledgeDoc) => {
     setDocLoading(true);
     setSelectedDoc(null);
@@ -134,34 +139,96 @@ export default function KnowledgeBasePage() {
       const data = await res.json();
       if (data.segments) {
         setSelectedDoc(data);
+        setDocLoading(false);
+
+        const unnamedSegments = data.segments
+          .map((seg: KnowledgeSegment, idx: number) => ({ ...seg, originalIndex: idx }))
+          .filter((seg: KnowledgeSegment & { originalIndex: number }) => seg.needsTitleGeneration);
+
+        setVideoLoading(true);
+
+        if (unnamedSegments.length > 0) {
+          setGeneratingTitles(true);
+          Promise.all([
+            fetch('/api/knowledge-base/generate-segment-titles', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                courseName: data.courseName,
+                segments: unnamedSegments.map((seg: KnowledgeSegment & { originalIndex: number }) => ({
+                  index: seg.originalIndex + 1,
+                  content: seg.content,
+                })),
+              }),
+            }).then(async (titleRes) => {
+              if (titleRes.ok) {
+                const titleData = await titleRes.json();
+                if (titleData.titles && Array.isArray(titleData.titles)) {
+                  setSelectedDoc((prev: KnowledgeDocDetail | null) => {
+                    if (!prev) return prev;
+                    const updatedSegments = [...prev.segments];
+                    for (const t of titleData.titles) {
+                      const segIdx = (t.index as number) - 1;
+                      if (segIdx >= 0 && segIdx < updatedSegments.length) {
+                        updatedSegments[segIdx] = {
+                          ...updatedSegments[segIdx],
+                          title: t.title,
+                          needsTitleGeneration: false,
+                        };
+                      }
+                    }
+                    return { ...prev, segments: updatedSegments };
+                  });
+                }
+              }
+            }).catch((te) => {
+              console.error('AI生成标题失败:', te);
+            }).finally(() => {
+              setGeneratingTitles(false);
+            }),
+            fetch(`/api/knowledge-base/${encodeURIComponent(doc.id)}/video`)
+              .then(async (videoRes) => {
+                if (videoRes.ok) {
+                  const videoData = await videoRes.json();
+                  setVideoInfo(videoData);
+                }
+              })
+              .catch((ve) => {
+                console.error('加载视频信息失败:', ve);
+              })
+              .finally(() => {
+                setVideoLoading(false);
+              }),
+          ]);
+        } else {
+          fetch(`/api/knowledge-base/${encodeURIComponent(doc.id)}/video`)
+            .then(async (videoRes) => {
+              if (videoRes.ok) {
+                const videoData = await videoRes.json();
+                setVideoInfo(videoData);
+              }
+            })
+            .catch((ve) => {
+              console.error('加载视频信息失败:', ve);
+            })
+            .finally(() => {
+              setVideoLoading(false);
+            });
+        }
       } else {
         setSelectedDoc({ ...data, segments: [] });
-      }
-      
-      // 加载视频信息
-      setVideoLoading(true);
-      try {
-        const videoRes = await fetch(`/api/knowledge-base/${encodeURIComponent(doc.id)}/video`);
-        if (videoRes.ok) {
-          const videoData = await videoRes.json();
-          setVideoInfo(videoData);
-        }
-      } catch (ve) {
-        console.error('加载视频信息失败:', ve);
-      } finally {
-        setVideoLoading(false);
+        setDocLoading(false);
       }
     } catch (err) {
       console.error('加载文档详情失败:', err);
-    } finally {
       setDocLoading(false);
     }
   };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    setSearchQuery(searchInput);
     setPage(1);
-    fetchDocs();
   };
 
   const handleCategoryClick = (catId: string) => {
@@ -194,14 +261,23 @@ export default function KnowledgeBasePage() {
             <p className="text-sm text-muted-foreground">{displayTitle}</p>
           </div>
           <div className="flex items-center gap-3">
-            <form onSubmit={handleSearch} className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="搜索知识库..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-64"
-              />
+            <form onSubmit={handleSearch} className="relative flex items-center gap-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="搜索知识库..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="pl-10 w-64"
+                />
+              </div>
+              <Button type="submit" size="sm" className="bg-red-600 hover:bg-red-700 text-white" disabled={loading}>
+                {loading ? (
+                  <><Loader2 className="h-4 w-4 mr-1 animate-spin" />搜索中</>
+                ) : (
+                  <><Search className="h-4 w-4 mr-1" />搜索</>
+                )}
+              </Button>
             </form>
             <Button
               className="bg-red-600 hover:bg-red-700"
@@ -271,8 +347,12 @@ export default function KnowledgeBasePage() {
         <div className="flex-1 flex overflow-hidden">
           <div className="flex-1 overflow-y-auto p-6">
             {loading ? (
-              <div className="flex items-center justify-center h-64">
-                <Loader2 className="h-8 w-8 animate-spin text-red-500" />
+              <div className="flex flex-col items-center justify-center h-64 gap-4">
+                <Loader2 className="h-10 w-10 animate-spin text-red-500" />
+                <div className="text-center">
+                  <p className="text-sm font-medium text-gray-600">加载中，请稍等...</p>
+                  <p className="text-xs text-gray-400 mt-1">正在从知识库获取数据</p>
+                </div>
               </div>
             ) : (
               <>
@@ -334,8 +414,12 @@ export default function KnowledgeBasePage() {
                             onClick={() => handleDocClick(doc)}
                             className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
                           >
-                            <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
-                              <FileText className="h-5 w-5 text-red-600" />
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${doc.hasVideo ? 'bg-green-100' : 'bg-red-100'}`}>
+                              {doc.hasVideo ? (
+                                <Video className="h-5 w-5 text-green-600" />
+                              ) : (
+                                <FileText className="h-5 w-5 text-red-600" />
+                              )}
                             </div>
                             <div className="min-w-0">
                               <p className="font-medium text-sm truncate">{doc.courseName}</p>
@@ -343,24 +427,25 @@ export default function KnowledgeBasePage() {
                                 <span>{doc.category}</span>
                                 <span>·</span>
                                 <span>{doc.paragraphCount} 段</span>
-                                {doc.videoId && (
-                                  <>
-                                    <span>·</span>
-                                    <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 border-green-200">有视频</Badge>
-                                  </>
+                                {doc.hasVideo ? (
+                                  <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 border-green-200">
+                                    <Video className="h-3 w-3 mr-1" />有视频
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-500 border-gray-200">无视频</Badge>
                                 )}
                               </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                            {doc.videoId && (
+                            {doc.hasVideo && (
                               <Button
                                 size="sm"
                                 variant="outline"
                                 className="h-8 px-3 text-xs border-red-200 text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  router.push(`/course/${encodeURIComponent(doc.id)}?courseId=${encodeURIComponent(doc.id)}`);
+                                  router.push(`/course/${encodeURIComponent(doc.id)}?courseId=${encodeURIComponent(doc.videoId || doc.id)}`);
                                 }}
                               >
                                 <Play className="h-3 w-3 mr-1" />
@@ -403,8 +488,9 @@ export default function KnowledgeBasePage() {
               </div>
 
               {docLoading ? (
-                <div className="flex items-center justify-center h-32">
-                  <Loader2 className="h-6 w-6 animate-spin text-red-500" />
+                <div className="flex flex-col items-center justify-center h-32 gap-3">
+                  <Loader2 className="h-8 w-8 animate-spin text-red-500" />
+                  <p className="text-sm text-gray-500">加载中，请稍等...</p>
                 </div>
               ) : (
                 <div className="p-4">
@@ -451,10 +537,20 @@ export default function KnowledgeBasePage() {
                   {/* 文本内容区域 */}
                   {(videoMode === 'text' || !videoInfo?.has_video) && (
                     <div className="space-y-3">
+                      {generatingTitles && (
+                        <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                          <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                          <span className="text-xs text-blue-600">AI正在生成段落标题...</span>
+                        </div>
+                      )}
                       {selectedDoc.segments?.map((seg, idx) => (
                         <div key={idx} className="p-3 rounded-lg border border-gray-100 hover:border-red-200 transition-colors">
                           <div className="flex items-center justify-between mb-1">
-                            <h4 className="text-sm font-medium text-red-600">{seg.title}</h4>
+                            <h4 className="text-sm font-medium text-red-600">
+                              {seg.needsTitleGeneration && generatingTitles ? (
+                                <span className="text-gray-400 italic">生成中...</span>
+                              ) : seg.title || `第${idx + 1}段`}
+                            </h4>
                             {seg.time && (
                               <span className="text-xs text-gray-400 flex items-center gap-1">
                                 <Clock className="w-3 h-3" />

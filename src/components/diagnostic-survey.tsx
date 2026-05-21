@@ -10,7 +10,7 @@ import { diagnosticOptions, getDiagnosticOptions, analyzeRequirements, initTopic
 import { CheckCircle2, Sparkles, BookOpen, Users, Target, FileText, Lightbulb, Loader2 } from 'lucide-react';
 
 interface DiagnosticSurveyProps {
-  onPathGenerated: (roles: string[], topics: string[], difficulty: string, customRequirements: string) => void;
+  onPathGenerated: (roles: string[], topics: string[], difficulty: string, customRequirements: string) => Promise<void> | void;
 }
 
 export function DiagnosticSurvey({ onPathGenerated }: DiagnosticSurveyProps) {
@@ -51,12 +51,13 @@ export function DiagnosticSurvey({ onPathGenerated }: DiagnosticSurveyProps) {
     }
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     setIsGenerating(true);
-    setTimeout(() => {
-      onPathGenerated(selectedRoles, selectedTopics, level, customRequirements);
+    try {
+      await onPathGenerated(selectedRoles, selectedTopics, level, customRequirements);
+    } finally {
       setIsGenerating(false);
-    }, 1500);
+    }
   };
 
   const totalSteps = 4;

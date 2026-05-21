@@ -17,21 +17,36 @@ import {
   CheckCircle,
   Circle,
   ArrowLeft,
+  FileText,
 } from 'lucide-react';
 import { VideoOutline } from '@/components/video-outline';
 import { partyKnowledgeGraph, getPartyKnowledgeGraph } from '@/lib/knowledge-graph';
 import { courseVideoMapping } from '@/lib/video-mapping';
 import { resolveKnowledgeVideoId } from '@/lib/title-video-mapping';
+import { loadCourseScript } from '@/lib/course-script';
 import type { KnowledgeNode, LearningProgress } from '@/lib/types';
+import type { ChapterScript } from '@/lib/course-script';
 
-// 获取本地视频URL（优先使用本地视频）
 function getLocalVideoUrl(courseId: string): string | null {
   const videoPath = courseVideoMapping[courseId];
   if (videoPath) {
-    // 编码中文路径，确保浏览器正确请求
     return `/${encodeURI(videoPath)}`;
   }
   return null;
+}
+
+async function fetchNasVideoUrl(courseId: string): Promise<string | null> {
+  try {
+    const res = await fetch(`/api/knowledge-base/${encodeURIComponent(courseId)}/video`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.has_video && data.video_url) {
+      return data.video_url;
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 // 从后端获取课程详情（通过代理）
@@ -232,6 +247,8 @@ export default function CoursePage() {
   const [selectedCourseIndex, setSelectedCourseIndex] = useState(0);
   const [videoError, setVideoError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [courseSections, setCourseSections] = useState<ChapterScript[]>([]);
+  const [expandedChapters, setExpandedChapters] = useState<Set<number>>(new Set());
 
   const applyVideoSource = async (sourceUrl: string, switchSeq?: number) => {
     if (!sourceUrl) {
@@ -312,7 +329,6 @@ export default function CoursePage() {
           }
           
           console.log('匹配课程:', courseToPlay.id, courseToPlay.title);
-          // 优先使用本地视频映射
           const localUrl = getLocalVideoUrl(courseToPlay.id);
           console.log('获取到的视频URL:', localUrl);
           if (localUrl) {
@@ -322,13 +338,26 @@ export default function CoursePage() {
             await applyVideoSource(`/${encodeURI(courseToPlay.videoPath)}`);
             console.log('[课程播放] 使用知识库视频:', courseToPlay.videoPath);
           } else {
-            // 如果本地没有，再尝试从后端获取
             const targetId = courseToPlay.videoId || courseToPlay.id;
             const resolvedUrl = await fetchVideoUrl(targetId);
             if (resolvedUrl) {
               await applyVideoSource(resolvedUrl);
               console.log('[课程播放] 使用后端视频:', resolvedUrl);
+            } else {
+              const nasUrl = await fetchNasVideoUrl(courseToPlay.id);
+              if (nasUrl) {
+                await applyVideoSource(nasUrl);
+                console.log('[课程播放] 使用NAS视频:', nasUrl);
+              }
             }
+          }
+          
+          // 加载课程大纲
+          const script = await loadCourseScript(courseToPlay.title, courseToPlay.id);
+          if (script && script.chapters) {
+            setCourseSections(script.chapters);
+          } else {
+            setCourseSections([]);
           }
         } else {
           // 如果节点本身就是课程，直接用节点id查找视频
@@ -343,44 +372,85 @@ export default function CoursePage() {
             if (resolvedUrl) {
               await applyVideoSource(resolvedUrl);
               console.log('[课程播放] 使用后端视频:', resolvedUrl);
+            } else {
+              const nasUrl = await fetchNasVideoUrl(node.id);
+              if (nasUrl) {
+                await applyVideoSource(nasUrl);
+                console.log('[课程播放] 使用NAS视频:', nasUrl);
+              }
             }
+          } else {
+            const nasUrl = await fetchNasVideoUrl(node.id);
+            if (nasUrl) {
+              await applyVideoSource(nasUrl);
+              console.log('[课程播放] 使用NAS视频:', nasUrl);
+            }
+          }
+          
+          // 加载课程大纲
+          const script = await loadCourseScript(node.name, node.id);
+          if (script && script.chapters) {
+            setCourseSections(script.chapters);
+          } else {
+            setCourseSections([]);
           }
         }
       } else {
-        // 降级处理：课程ID未在知识图谱中注册，从知识库API获取videoId后播放
         console.log('[课程播放] 课程未在知识图谱中，尝试从知识库获取:', courseId);
         const localUrl = getLocalVideoUrl(courseId);
+        let videoResolved = false;
+        
         if (localUrl) {
           await applyVideoSource(localUrl);
           console.log('[课程播放] 使用本地视频:', localUrl);
-        } else {
+          videoResolved = true;
+        }
+        
+        if (!videoResolved) {
+          const nasUrl = await fetchNasVideoUrl(courseId);
+          if (nasUrl) {
+            await applyVideoSource(nasUrl);
+            console.log('[课程播放] 使用NAS视频:', nasUrl);
+            videoResolved = true;
+          }
+        }
+        
+        if (!videoResolved) {
           const mappedVideoId = resolveKnowledgeVideoId(courseId);
           if (mappedVideoId) {
             const backendVideoUrl = await fetchVideoUrl(mappedVideoId);
             if (backendVideoUrl) {
               await applyVideoSource(backendVideoUrl);
               console.log('[课程播放] 使用映射视频(via KB id):', backendVideoUrl);
+              videoResolved = true;
             }
-          } else {
+          }
+        }
+        
+        if (!videoResolved) {
           try {
             const kbRes = await fetch(`/api/knowledge-base/${encodeURIComponent(courseId)}`);
-            if (!kbRes.ok) {
-              throw new Error(`知识库详情不存在: ${kbRes.status}`);
-            }
-            const kbData = await kbRes.json();
-            const targetId = kbData.videoId || resolveKnowledgeVideoId(kbData.id, kbData.fileName, kbData.courseName);
-            if (!targetId) {
-              throw new Error('知识库课程未匹配到视频ID');
-            }
-            const backendVideoUrl = await fetchVideoUrl(targetId);
-            if (backendVideoUrl) {
-              await applyVideoSource(backendVideoUrl);
-              console.log('[课程播放] 使用后端视频(via KB):', backendVideoUrl);
+            if (kbRes.ok) {
+              const kbData = await kbRes.json();
+              const targetId = kbData.videoId || resolveKnowledgeVideoId(kbData.id, kbData.fileName, kbData.courseName);
+              if (targetId) {
+                const backendVideoUrl = await fetchVideoUrl(targetId);
+                if (backendVideoUrl) {
+                  await applyVideoSource(backendVideoUrl);
+                  console.log('[课程播放] 使用后端视频(via KB):', backendVideoUrl);
+                }
+              }
             }
           } catch (error) {
             console.error('[课程播放] 知识库课程未匹配到可播放视频:', error);
           }
-          }
+        }
+
+        const script = await loadCourseScript(undefined, courseId);
+        if (script && script.chapters) {
+          setCourseSections(script.chapters);
+        } else {
+          setCourseSections([]);
         }
       }
 
@@ -411,7 +481,6 @@ export default function CoursePage() {
     
     const course = currentNode.courses[courseIndex];
     
-    // 优先使用本地视频映射
     const localUrl = getLocalVideoUrl(course.id);
     if (localUrl) {
       if (seq === switchCourseSeqRef.current) await applyVideoSource(localUrl, seq);
@@ -420,12 +489,17 @@ export default function CoursePage() {
       if (seq === switchCourseSeqRef.current) await applyVideoSource(`/${encodeURI(course.videoPath)}`, seq);
       console.log('[课程播放] 使用知识库视频:', course.videoPath);
     } else {
-      // 如果本地没有，再尝试从后端获取
       const targetId = course.videoId || course.id;
       const fetchedUrl = await fetchVideoUrl(targetId);
       if (fetchedUrl) {
         if (seq === switchCourseSeqRef.current) await applyVideoSource(fetchedUrl, seq);
         console.log('[课程播放] 使用后端视频:', fetchedUrl);
+      } else {
+        const nasUrl = await fetchNasVideoUrl(course.id);
+        if (nasUrl && seq === switchCourseSeqRef.current) {
+          await applyVideoSource(nasUrl, seq);
+          console.log('[课程播放] 使用NAS视频:', nasUrl);
+        }
       }
     }
   };
@@ -873,7 +947,7 @@ export default function CoursePage() {
             </div>
           </div>
 
-          {/* 右侧：AI课程大纲（基于语音转写） */}
+          {/* 右侧：课程大纲 */}
           <aside className="w-80 flex-shrink-0">
             <div className="bg-white rounded-lg border-2 border-gray-200 p-5 sticky top-6">
               <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 mb-4">
@@ -881,10 +955,72 @@ export default function CoursePage() {
                 课程大纲
               </h3>
               <div className="max-h-[calc(100vh-200px)] overflow-y-auto pr-1 -mr-1">
-                <VideoOutline
-                  courseId={currentCourseId}
-                  onSeekTo={handleSeekToOutline}
-                />
+                {courseSections.length === 0 ? (
+                  <div className="text-center py-8 text-gray-400">
+                    <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">暂无大纲数据</p>
+                    <p className="text-xs mt-1">课程大纲尚未配置</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {courseSections.map((chapter, idx) => {
+                      const isExpanded = expandedChapters.has(idx);
+                      const hasSections = chapter.sections && chapter.sections.length > 0;
+                      
+                      const toggleChapter = () => {
+                        setExpandedChapters(prev => {
+                          const next = new Set(prev);
+                          if (next.has(idx)) {
+                            next.delete(idx);
+                          } else {
+                            next.add(idx);
+                          }
+                          return next;
+                        });
+                      };
+                      
+                      return (
+                        <div key={chapter.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                          <button
+                            onClick={toggleChapter}
+                            className="w-full text-left px-3 py-2.5 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center gap-2"
+                          >
+                            <div className="w-6 h-6 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 text-xs font-bold flex-shrink-0">
+                              {idx + 1}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium text-gray-800 truncate">
+                                {chapter.title}
+                              </div>
+                            </div>
+                            <ChevronRight className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                          </button>
+                          
+                          {isExpanded && hasSections && (
+                            <div className="bg-white border-t border-gray-100">
+                              {chapter.sections!.map((section, sIdx) => (
+                                <div
+                                  key={sIdx}
+                                  className="px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-700 transition-colors border-l-2 border-l-orange-300 ml-3 flex items-start gap-2"
+                                >
+                                  <div className="w-1.5 h-1.5 rounded-full bg-orange-400 mt-1.5 flex-shrink-0" />
+                                  <div>
+                                    <div className="font-medium">{section.title}</div>
+                                    {section.content && (
+                                      <div className="text-xs text-gray-400 mt-1 line-clamp-2">
+                                        {section.content.substring(0, 80)}...
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           </aside>

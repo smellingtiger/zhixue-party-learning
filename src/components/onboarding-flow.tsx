@@ -192,108 +192,116 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       });
   }, []);
 
-  // 当图谱加载完成并且有 savedDiagnostic 时，恢复诊断状态
+  // 图谱加载完成后，仅读取 savedDiagnostic，不自动恢复或跳转
   useEffect(() => {
-    async function restoreDiagnostic() {
-      if (!graphLoaded || !savedDiagnostic) return;
+    if (!graphLoaded || !savedDiagnostic) return;
+    console.log('💡 [状态恢复] 检测到历史诊断数据，等待用户主动选择是否恢复');
+  }, [graphLoaded, savedDiagnostic]);
+
+  // 用户主动点击"恢复上次诊断"按钮时触发
+  const handleRestoreDiagnostic = async () => {
+    if (!savedDiagnostic) return;
+    
+    try {
+      const diagnostic = savedDiagnostic;
       
-      try {
-        const diagnostic = savedDiagnostic;
+      console.log('🔄 [状态恢复] 开始恢复诊断状态...');
+      console.log('🔄 [状态恢复] diagnostic数据:', JSON.stringify(diagnostic));
+      
+      // ⚠️ 关键检查：确保知识库已加载
+      if (!knowledgeBaseGraph && !getDynamicKnowledgeGraph()) {
+        console.warn('🔄 [状态恢复] ⚠️ 知识库未加载，尝试重新加载...');
+        await fetchKnowledgeBaseCourses();
+        initTopicNodeMap();
+        console.log('🔄 [状态恢复] ✅ 知识库重新加载完成');
+      }
+      
+      console.log('🔄 [状态恢复] knowledgeBaseGraph:', knowledgeBaseGraph ? '✅ 已加载' : '❌ 为空');
+      console.log('🔄 [状态恢复] getDynamicKnowledgeGraph():', getDynamicKnowledgeGraph() ? '✅ 有缓存' : '❌ 为空');
+      
+      const path = generateLearningPath({
+        roles: diagnostic.roles || [],
+        topics: diagnostic.topics || [],
+        customRequirements: diagnostic.customRequirements || undefined,
+      });
+      
+      // 检查生成的路径是否有知识模块
+      const hasModules = path.rootNode.children && path.rootNode.children.length > 0;
+      if (hasModules) {
+        setGeneratedPath(path);
+        setDiagnosticRoles(diagnostic.roles || []);
+        setDiagnosticTopics(diagnostic.topics || []);
+        setDiagnosticLevel(diagnostic.difficulty || 'beginner');
+        setDiagnosticRequirements(diagnostic.customRequirements || '');
         
-        console.log('🔄 [状态恢复] 开始恢复诊断状态...');
-        console.log('🔄 [状态恢复] diagnostic数据:', JSON.stringify(diagnostic));
-        
-        // ⚠️ 关键检查：确保知识库已加载
-        if (!knowledgeBaseGraph && !getDynamicKnowledgeGraph()) {
-          console.warn('🔄 [状态恢复] ⚠️ 知识库未加载，尝试重新加载...');
-          await fetchKnowledgeBaseCourses();
-          initTopicNodeMap();
-          console.log('🔄 [状态恢复] ✅ 知识库重新加载完成');
+        // 分析自定义需求中的关键词
+        let analysisMatchedNodes: string[] = [];
+        if (diagnostic.customRequirements && diagnostic.customRequirements.trim()) {
+          const analysis = analyzeRequirements(diagnostic.customRequirements);
+          setDiagnosticKeywords(analysis.keywords);
+          setDiagnosticMatchedTopics(analysis.matchedTopics);
+          setDiagnosticMatchedNodes(analysis.matchedNodes);
+          analysisMatchedNodes = analysis.matchedNodes;
+        } else {
+          setDiagnosticKeywords([]);
+          setDiagnosticMatchedTopics([]);
+          setDiagnosticMatchedNodes([]);
+          analysisMatchedNodes = [];
         }
         
-        console.log('🔄 [状态恢复] knowledgeBaseGraph:', knowledgeBaseGraph ? '✅ 已加载' : '❌ 为空');
-        console.log('🔄 [状态恢复] getDynamicKnowledgeGraph():', getDynamicKnowledgeGraph() ? '✅ 有缓存' : '❌ 为空');
+        // 收集所有需要高亮的节点
+        const allNodeIds = new Set<string>();
         
-        const path = generateLearningPath({
-          roles: diagnostic.roles || [],
-          topics: diagnostic.topics || [],
-          customRequirements: diagnostic.customRequirements || undefined,
+        console.log('🔄 [状态恢复] ===== 开始收集高亮节点 =====');
+        
+        // 1. 添加身份相关的节点
+        console.log('🔄 [状态恢复] [1] 身份节点:');
+        (diagnostic.roles || []).forEach((role: string) => {
+          const nodeIds = roleNodeMap[role] || [];
+          console.log(`   - ${role}:`, nodeIds);
+          nodeIds.forEach(id => allNodeIds.add(id));
         });
         
-        // 检查生成的路径是否有知识模块
-        const hasModules = path.rootNode.children && path.rootNode.children.length > 0;
-        if (hasModules) {
-          setGeneratedPath(path);
-          setDiagnosticRoles(diagnostic.roles || []);
-          setDiagnosticTopics(diagnostic.topics || []);
-          setDiagnosticLevel(diagnostic.difficulty || 'beginner');
-          setDiagnosticRequirements(diagnostic.customRequirements || '');
-          
-          // 分析自定义需求中的关键词
-          let analysisMatchedNodes: string[] = [];
-          if (diagnostic.customRequirements && diagnostic.customRequirements.trim()) {
-            const analysis = analyzeRequirements(diagnostic.customRequirements);
-            setDiagnosticKeywords(analysis.keywords);
-            setDiagnosticMatchedTopics(analysis.matchedTopics);
-            setDiagnosticMatchedNodes(analysis.matchedNodes);
-            analysisMatchedNodes = analysis.matchedNodes;
-          } else {
-            setDiagnosticKeywords([]);
-            setDiagnosticMatchedTopics([]);
-            setDiagnosticMatchedNodes([]);
-            analysisMatchedNodes = [];
-          }
-          
-          // 收集所有需要高亮的节点
-          const allNodeIds = new Set<string>();
-          
-          console.log('🔄 [状态恢复] ===== 开始收集高亮节点 =====');
-          
-          // 1. 添加身份相关的节点
-          console.log('🔄 [状态恢复] [1] 身份节点:');
-          (diagnostic.roles || []).forEach((role: string) => {
-            const nodeIds = roleNodeMap[role] || [];
-            console.log(`   - ${role}:`, nodeIds);
-            nodeIds.forEach(id => allNodeIds.add(id));
-          });
-          
-          // 2. 添加学习主题相关的节点
-          const effectiveTopicMap = Object.keys(topicNodeMap).length > 0 ? topicNodeMap : getTopicNodeMap();
-          console.log('🔄 [状态恢复] [2] 主题映射 (topicNodeMap大小:', Object.keys(topicNodeMap).length, ', effectiveTopicMap大小:', Object.keys(effectiveTopicMap).length, ')');
-          (diagnostic.topics || []).forEach((topic: string) => {
-            const nodeId = effectiveTopicMap[topic];
-            console.log(`   - "${topic}" → ${nodeId || '❌ 未找到'}`);
-            if (nodeId) allNodeIds.add(nodeId);
-          });
-          
-          // 3. 添加需求匹配到的节点
-          console.log('🔄 [状态恢复] [3] 需求匹配节点:', analysisMatchedNodes);
-          analysisMatchedNodes.forEach(id => allNodeIds.add(id));
-          
-          const finalNodes = Array.from(allNodeIds);
-          console.log('🔄 [状态恢复] ✅ 最终高亮节点 (' + finalNodes.length + '个):', finalNodes);
-          
-          setHighlightedNodes(finalNodes);
-          
-          const locked = getDifficultyLockedNodeIds(path.rootNode, diagnostic.difficulty || 'beginner');
-          setDifficultyLockedNodes(locked);
-          setHasCompletedDiagnostic(true);
-          setCurrentView('mindmap');
-        } else {
-          // 如果没有模块，清除旧数据，让用户重新诊断
-          console.log('[诊断] 旧数据没有知识模块，将清除并重新开始');
-          localStorage.removeItem('user_diagnostic');
-          setSavedDiagnostic(null);
-        }
-      } catch (err) {
-        console.error('[状态恢复] ❌ 恢复失败:', err);
+        // 2. 添加学习主题相关的节点
+        const effectiveTopicMap = Object.keys(topicNodeMap).length > 0 ? topicNodeMap : getTopicNodeMap();
+        console.log('🔄 [状态恢复] [2] 主题映射 (topicNodeMap大小:', Object.keys(topicNodeMap).length, ', effectiveTopicMap大小:', Object.keys(effectiveTopicMap).length, ')');
+        (diagnostic.topics || []).forEach((topic: string) => {
+          const nodeId = effectiveTopicMap[topic];
+          console.log(`   - "${topic}" → ${nodeId || '❌ 未找到'}`);
+          if (nodeId) allNodeIds.add(nodeId);
+        });
+        
+        // 3. 添加需求匹配到的节点
+        console.log('🔄 [状态恢复] [3] 需求匹配节点:', analysisMatchedNodes);
+        analysisMatchedNodes.forEach(id => allNodeIds.add(id));
+        
+        const finalNodes = Array.from(allNodeIds);
+        console.log('🔄 [状态恢复] ✅ 最终高亮节点 (' + finalNodes.length + '个):', finalNodes);
+        
+        setHighlightedNodes(finalNodes);
+        
+        const locked = getDifficultyLockedNodeIds(path.rootNode, diagnostic.difficulty || 'beginner');
+        setDifficultyLockedNodes(locked);
+        setHasCompletedDiagnostic(true);
+        setCurrentView('mindmap');
+      } else {
+        // 如果没有模块，清除旧数据，让用户重新诊断
+        console.log('[诊断] 旧数据没有知识模块，将清除并重新开始');
         localStorage.removeItem('user_diagnostic');
         setSavedDiagnostic(null);
       }
+    } catch (err) {
+      console.error('[状态恢复] ❌ 恢复失败:', err);
+      localStorage.removeItem('user_diagnostic');
+      setSavedDiagnostic(null);
     }
-    
-    restoreDiagnostic();
-  }, [graphLoaded, savedDiagnostic]);
+  };
+
+  const handleClearDiagnostic = () => {
+    localStorage.removeItem('user_diagnostic');
+    setSavedDiagnostic(null);
+    console.log('✅ [状态恢复] 已清除历史诊断数据');
+  };
 
   useEffect(() => {
     const randomMsg = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
@@ -475,6 +483,46 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-8"
             >
+              {/* 历史诊断数据提示条 */}
+              {savedDiagnostic && graphLoaded && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-4 flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                      <FileText className="w-5 h-5 text-red-600" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-gray-800">检测到历史诊断数据</div>
+                      <div className="text-sm text-gray-600">
+                        身份：{savedDiagnostic.roles?.join('、') || '未选择'} · 
+                        主题：{savedDiagnostic.topics?.length || 0}个 · 
+                        难度：{savedDiagnostic.difficulty === 'beginner' ? '入门' : savedDiagnostic.difficulty === 'intermediate' ? '进阶' : '深入'}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-red-300 text-red-700 hover:bg-red-100"
+                      onClick={handleClearDiagnostic}
+                    >
+                      清除数据
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                      onClick={handleRestoreDiagnostic}
+                    >
+                      查看诊断报告
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+
               <div className="relative overflow-hidden rounded-3xl" style={{ backgroundImage: 'url(/welcome-bg.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
                 <div className="relative z-10 max-w-5xl mx-auto text-center py-12 px-6">
                   <motion.h2

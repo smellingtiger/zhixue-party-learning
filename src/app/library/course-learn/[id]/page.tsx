@@ -175,6 +175,11 @@ interface ContentBlock {
   quizData?: ChapterQuiz;
 }
 
+interface ChapterSection {
+  title: string;
+  content: string;
+}
+
 interface ChapterData {
   id: number;
   title: string;
@@ -183,6 +188,7 @@ interface ChapterData {
   aiSummary: string;
   keyPoints: string[];
   videoUrl?: string; // 章节视频 URL
+  sections?: ChapterSection[]; // 章节小节列表
 }
 
 // 多样化的参考来源库 - 乡村振兴主题
@@ -709,7 +715,7 @@ function getCourseData(courseId?: string): any {
             });
           }
           
-          return { id: ch.id, title: ch.title, totalSlides: slides.length, aiSummary: summaries[ch.title] || `${ch.title}。深入讲解核心要义，帮助您全面掌握相关知识点和实践方法。`, keyPoints: [ch.title.replace(/第.*章[：:]/, '').substring(0, 10)], videoUrl, slides };
+          return { id: ch.id, title: ch.title, totalSlides: slides.length, aiSummary: summaries[ch.title] || `${ch.title}。深入讲解核心要义，帮助您全面掌握相关知识点和实践方法。`, keyPoints: [ch.title.replace(/第.*章[：:]/, '').substring(0, 10)], videoUrl, slides, sections: ch.sections || [] };
         }),
         testQuestions: parsed.testQuestions || [],
       };
@@ -764,6 +770,18 @@ export default function CourseLearnPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const startTimeRef = useRef(Date.now());
+
+  // 返回上一页：如果有诊断数据则返回学习路径展示页，否则返回资源库
+  const handleBack = () => {
+    const hasDiagnostic = localStorage.getItem('user_diagnostic');
+    if (hasDiagnostic) {
+      // 有诊断数据，返回首页（OnboardingFlow会自动恢复到诊断报告视图）
+      router.replace('/home');
+    } else {
+      // 无诊断数据，返回资源库
+      router.replace('/library');
+    }
+  };
 
   // 获取目标章节索引：优先使用URL参数
   const getInitialChapter = () => {
@@ -882,91 +900,97 @@ export default function CourseLearnPage() {
     setTestState(prev => ({ ...prev, gradingError: '', isGrading: true }));
 
     try {
-      const prompt = `你是一个专业的防汛应急课程阅卷AI。请对以下学员答案进行评分和点评。
+      const localResults: Record<number, { score: number; comment: string }> = {};
+
+      courseTestQuestions.forEach((q: any) => {
+        if (q.questionType === 'single_choice' || q.questionType === 'true_false') {
+          const isCorrect = testState.answers[q.id] === q.correctAnswer;
+          localResults[q.id] = {
+            score: isCorrect ? 10 : 0,
+            comment: isCorrect ? '回答正确' : `回答错误，正确答案是「${q.correctAnswer}」`,
+          };
+        }
+      });
+
+      const subjectiveQ = courseTestQuestions.find((q: any) => q.isSubjective);
+      if (subjectiveQ) {
+        const prompt = `你是一个专业的防汛应急课程阅卷AI。请对以下学员的主观题答案进行评分和点评。
 
 课程名称：城市内涝洪涝应急处置岗位实训课程
 
 阅卷规则：
-1. 第1~9题为基础知识题，每道满分10分，共90分
-2. 第10题为综合案例分析题（主观题），满分30分
-3. 评分标准：答案是否准确、完整、有具体细节
-4. 主观题评分侧重：分析逻辑是否清晰、是否覆盖了所有子问题、是否有独立判断
-5. 给出每题的具体评分（整数分数）和简短评语
-6. 最后给出总分（满分120分）和总体评价
+1. 本题为综合案例分析题（主观题），满分30分
+2. 评分标准：分析逻辑是否清晰、是否覆盖了所有5个子问题、是否有独立判断和具体细节
+3. 给出具体评分（整数分数）和简短评语
 
 题目和学员答案如下：
 
-${courseTestQuestions.map((q: any) => `
-【第${q.id}题】${q.question}
-学员答案：${testState.answers[q.id] || '未作答'}
-参考章节：${q.chapterRef}
-${q.isSubjective ? '【主观题】本题满分30分' : '【客观题】本题满分10分'}
-`).join('\n')}
+【第10题】${subjectiveQ.question}
+学员答案：${testState.answers[subjectiveQ.id] || '未作答'}
+参考章节：${subjectiveQ.chapterRef}
+【主观题】本题满分30分
 
 请按以下JSON格式输出（不要包含其他内容）：
 {
-  "scores": {
-    "1": {"score": 分数, "comment": "评语"},
-    "2": {"score": 分数, "comment": "评语"},
-    "3": {"score": 分数, "comment": "评语"},
-    "4": {"score": 分数, "comment": "评语"},
-    "5": {"score": 分数, "comment": "评语"},
-    "6": {"score": 分数, "comment": "评语"},
-    "7": {"score": 分数, "comment": "评语"},
-    "8": {"score": 分数, "comment": "评语"},
-    "9": {"score": 分数, "comment": "评语"},
-    "10": {"score": 分数, "comment": "评语"}
-  },
-  "totalScore": 总分,
-  "overallFeedback": "总体评价与改进建议"
+  "score": 分数,
+  "comment": "评语"
 }`;
 
-      const response = await fetch('/api/llm', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [{ role: 'user', content: prompt }],
-          type: 'assistant'
-        }),
-      });
+        const response = await fetch('/api/llm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [{ role: 'user', content: prompt }],
+            type: 'assistant'
+          }),
+        });
 
-      if (!response.ok) throw new Error('AI阅卷服务请求失败');
+        if (!response.ok) throw new Error('AI阅卷服务请求失败');
 
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error('无法读取响应流');
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error('无法读取响应流');
 
-      const decoder = new TextDecoder();
-      let fullContent = '';
+        const decoder = new TextDecoder();
+        let fullContent = '';
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6));
-              if (data.content) {
-                fullContent += data.content;
-              }
-            } catch {}
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n');
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                if (data.content) {
+                  fullContent += data.content;
+                }
+              } catch {}
+            }
           }
+        }
+
+        const jsonMatch = fullContent.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const result = JSON.parse(jsonMatch[0]);
+          localResults[subjectiveQ.id] = { score: result.score, comment: result.comment };
+        } else {
+          localResults[subjectiveQ.id] = { score: 15, comment: 'AI阅卷异常，已给予基础分，建议重新提交' };
         }
       }
 
-      const jsonMatch = fullContent.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const result = JSON.parse(jsonMatch[0]);
-        setTestState(prev => ({
-          ...prev,
-          results: result.scores,
-          overallFeedback: result.overallFeedback || '',
-          isGrading: false,
-        }));
-      } else {
-        throw new Error('无法解析阅卷结果');
-      }
+      const totalScore = Object.values(localResults).reduce((sum: number, r: any) => sum + (r.score || 0), 0);
+      const correctCount = courseTestQuestions.filter((q: any) => {
+        const r = localResults[q.id];
+        return r && r.score >= (q.isSubjective ? 21 : 10);
+      }).length;
+
+      setTestState(prev => ({
+        ...prev,
+        results: localResults,
+        overallFeedback: `本次测试共${courseTestQuestions.length}题（满分120分），您获得${totalScore}分。\n\n客观题部分：共9题90分，答对${courseTestQuestions.filter((q: any) => !q.isSubjective && localResults[q.id]?.score >= 10).length}题。\n主观题部分：案例分析获得${localResults[subjectiveQ?.id]?.score || 0}/30分。\n\n${totalScore >= 100 ? '整体表现优秀，您对防汛应急知识掌握扎实！' : totalScore >= 80 ? '整体表现良好，建议针对答错的客观题回顾对应章节内容。' : totalScore >= 60 ? '整体表现尚可，建议重点复习答错题目的对应章节，加强理解和记忆。' : '整体表现有待提高，建议重新学习相关章节后再进行测试。'}`,
+        isGrading: false,
+      }));
     } catch (error) {
       console.error('[AI阅卷] 错误:', error);
       setTestState(prev => ({
@@ -1161,7 +1185,13 @@ ${q.isSubjective ? '【主观题】本题满分30分' : '【客观题】本题�
       setShowThinkingLogic(false);
     } else {
       setCompletedSlides(prev => new Set(prev).add(`${currentChapter}-${currentSlide}`));
-      router.push('/library');
+      // 课程学完后：有诊断数据返回首页，无诊断数据返回资源库
+      const hasDiagnostic = localStorage.getItem('user_diagnostic');
+      if (hasDiagnostic) {
+        router.push('/home');
+      } else {
+        router.push('/library');
+      }
     }
   }, [currentSlide, currentChapter, slides.length, course.chapters.length, router]);
 
@@ -1374,40 +1404,101 @@ ${q.isSubjective ? '【主观题】本题满分30分' : '【客观题】本题�
               const completed = isChapterCompleted(idx);
               const partiallyCompleted = isChapterPartiallyCompleted(idx);
               const isCurrent = idx === currentChapter;
+              const isExpanded = expandedChapters.has(idx);
+              const hasSections = ch.sections && ch.sections.length > 0;
+              
+              const toggleChapter = (e: React.MouseEvent) => {
+                e.stopPropagation();
+                setExpandedChapters(prev => {
+                  const next = new Set(prev);
+                  if (next.has(idx)) {
+                    next.delete(idx);
+                  } else {
+                    next.add(idx);
+                  }
+                  return next;
+                });
+              };
               
               return (
               <div key={ch.id}>
-                <button
-                  onClick={() => handleChapterSelect(idx)}
+                <div
                   className={`w-full text-left px-4 py-3 flex items-center gap-3 border-b border-gray-100 hover:bg-gray-50 transition-all ${
                     isCurrent ? 'bg-red-50 border-l-4 border-l-red-500' : ''
                   }`}
                 >
-                  <div className={`w-8 h-8 flex items-center justify-center rounded font-bold text-sm flex-shrink-0 ${
-                    completed ? 'bg-green-100 text-green-600 border border-green-300' :
-                    isCurrent ? 'bg-red-600 text-white' :
-                    partiallyCompleted ? 'bg-orange-100 text-orange-600 border border-orange-300' :
-                    'bg-gray-100 text-gray-400 border border-gray-200'
-                  }`}>
-                    {completed ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className={`text-sm font-semibold truncate ${
-                      completed ? 'text-gray-500' :
-                      isCurrent ? 'text-red-700' :
-                      partiallyCompleted ? 'text-orange-700' :
-                      'text-gray-600'
+                  <button
+                    onClick={() => handleChapterSelect(idx)}
+                    className="flex-1 min-w-0 flex items-center gap-3"
+                  >
+                    <div className={`w-8 h-8 flex items-center justify-center rounded font-bold text-sm flex-shrink-0 ${
+                      completed ? 'bg-green-100 text-green-600 border border-green-300' :
+                      isCurrent ? 'bg-red-600 text-white' :
+                      partiallyCompleted ? 'bg-orange-100 text-orange-600 border border-orange-300' :
+                      'bg-gray-100 text-gray-400 border border-gray-200'
                     }`}>
-                      {ch.title}
+                      {completed ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
                     </div>
-                    <div className="text-xs text-gray-400 mt-0.5">
-                      {ch.slides.length}页
+                    <div className="flex-1 min-w-0 text-left">
+                      <div className={`text-sm font-semibold truncate ${
+                        completed ? 'text-gray-500' :
+                        isCurrent ? 'text-red-700' :
+                        partiallyCompleted ? 'text-orange-700' :
+                        'text-gray-600'
+                      }`}>
+                        {ch.title}
+                      </div>
+                      <div className="text-xs text-gray-400 mt-0.5">
+                        {ch.slides.length}页
+                      </div>
                     </div>
-                  </div>
-                  {completed && (
-                    <span className="text-xs text-green-600 font-medium flex-shrink-0">已学</span>
+                    {completed && (
+                      <span className="text-xs text-green-600 font-medium flex-shrink-0">已学</span>
+                    )}
+                  </button>
+                  {hasSections && (
+                    <button
+                      onClick={toggleChapter}
+                      className="flex-shrink-0 p-1 hover:bg-gray-200 rounded transition-colors"
+                    >
+                      {isExpanded ? (
+                        <ChevronUp className="h-4 w-4 text-gray-400" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4 text-gray-400" />
+                      )}
+                    </button>
                   )}
-                </button>
+                </div>
+                
+                {isExpanded && hasSections && (
+                  <div className="bg-gray-50 border-l-2 border-l-orange-300 ml-8">
+                    {ch.sections!.map((section: ChapterSection, sIdx: number) => {
+                      // 找到该小节对应的幻灯片索引
+                      const sectionSlideIndex = ch.slides.findIndex((slide: ContentBlock) => 
+                        slide.content.includes(section.title) || 
+                        (slide.chapterTitle && slide.chapterTitle.includes(section.title))
+                      );
+                      
+                      return (
+                        <button
+                          key={sIdx}
+                          onClick={() => {
+                            if (sectionSlideIndex >= 0) {
+                              handleChapterSelect(idx);
+                              setTimeout(() => {
+                                setCurrentSlide(sectionSlideIndex);
+                              }, 100);
+                            }
+                          }}
+                          className="w-full text-left px-4 py-2 text-xs text-gray-600 hover:bg-orange-100 hover:text-orange-700 transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-2"
+                        >
+                          <div className="w-1.5 h-1.5 rounded-full bg-orange-400 flex-shrink-0" />
+                          <span className="truncate">{section.title}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
               );
             })}
@@ -1422,7 +1513,7 @@ ${q.isSubjective ? '【主观题】本题满分30分' : '【客观题】本题�
           <div className="flex items-center justify-between">
             {/* 左侧：返回 + 课程信息 */}
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" className="border border-red-300 text-red-700 hover:bg-red-50" onClick={() => router.replace('/library')}>
+              <Button variant="ghost" size="sm" className="border border-red-300 text-red-700 hover:bg-red-50" onClick={handleBack}>
                 <ArrowLeft className="h-4 w-4 mr-1" />
                 返回
               </Button>
@@ -2475,6 +2566,7 @@ ${q.isSubjective ? '【主观题】本题满分30分' : '【客观题】本题�
                   <div className="space-y-4">
                     {courseTestQuestions.map((q: any, qi: number) => {
                       const isSubjective = q.isSubjective;
+                      const isChoice = q.questionType === 'single_choice' || q.questionType === 'true_false';
                       return (
                         <div key={q.id} className={`p-4 border-2 ${isSubjective ? 'border-purple-400 bg-purple-50' : 'border-gray-300 bg-gray-50'}`}>
                           <div className="flex items-start gap-3 mb-2">
@@ -2489,18 +2581,45 @@ ${q.isSubjective ? '【主观题】本题满分30分' : '【客观题】本题�
                                     主观题30分
                                   </span>
                                 )}
+                                {isChoice && (
+                                  <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 border border-black flex-shrink-0">
+                                    {q.questionType === 'true_false' ? '判断题10分' : '单选题10分'}
+                                  </span>
+                                )}
                               </div>
                               <p className="text-xs text-gray-500 mt-1">参考章节：{q.chapterRef}</p>
                               {q.hint && <p className="text-xs text-amber-600 mt-0.5">💡 {q.hint}</p>}
                             </div>
                           </div>
-                          <textarea
-                            className={`w-full border-2 p-3 text-sm mt-2 bg-white ${isSubjective ? 'border-purple-300' : 'border-gray-300'}`}
-                            style={{ borderRadius: '0', minHeight: isSubjective ? '160px' : '80px' }}
-                            placeholder={isSubjective ? '请根据案例框架逐步分析回答...' : '请输入您的答案...'}
-                            value={testState.answers[q.id] || ''}
-                            onChange={(e) => handleTestAnswerChange(q.id, e.target.value)}
-                          />
+                          {isChoice ? (
+                            <div className="mt-2 space-y-1">
+                              {q.options.map((opt: any) => (
+                                <label
+                                  key={opt.label}
+                                  className="flex items-center gap-2 p-2 border-2 border-gray-300 bg-white cursor-pointer hover:bg-gray-100 transition-colors"
+                                >
+                                  <input
+                                    type="radio"
+                                    name={`question_${q.id}`}
+                                    value={opt.label}
+                                    checked={testState.answers[q.id] === opt.label}
+                                    onChange={(e) => handleTestAnswerChange(q.id, e.target.value)}
+                                    className="w-4 h-4 accent-purple-600"
+                                  />
+                                  <span className="font-bold text-sm text-gray-700">{opt.label}.</span>
+                                  <span className="text-sm text-gray-800">{opt.text}</span>
+                                </label>
+                              ))}
+                            </div>
+                          ) : (
+                            <textarea
+                              className="w-full border-2 p-3 text-sm mt-2 bg-white border-purple-300"
+                              style={{ borderRadius: '0', minHeight: '160px' }}
+                              placeholder="请根据案例框架逐步分析回答..."
+                              value={testState.answers[q.id] || ''}
+                              onChange={(e) => handleTestAnswerChange(q.id, e.target.value)}
+                            />
+                          )}
                         </div>
                       );
                     })}
@@ -2542,20 +2661,30 @@ ${q.isSubjective ? '【主观题】本题满分30分' : '【客观题】本题�
                     {courseTestQuestions.map((q: any, qi: number) => {
                       const result = testState.results![q.id];
                       const isSubjective = q.isSubjective;
+                      const isChoice = q.questionType === 'single_choice' || q.questionType === 'true_false';
                       const maxScore = isSubjective ? 30 : 10;
-                      const goodThreshold = isSubjective ? 21 : 7;
-                      const midThreshold = isSubjective ? 15 : 5;
+                      const goodThreshold = isSubjective ? 21 : 10;
+                      const midThreshold = isSubjective ? 15 : 0;
+                      const userAnswer = testState.answers[q.id];
+                      const chosenOption = isChoice ? q.options?.find((o: any) => o.label === userAnswer) : null;
                       return (
                         <div key={q.id} className={`p-4 border-2 ${result && result.score >= goodThreshold ? 'border-green-500 bg-green-50' : result && result.score >= midThreshold ? 'border-amber-500 bg-amber-50' : 'border-red-500 bg-red-50'}`}>
                           <div className="flex items-start gap-2 mb-1">
                             <span className="font-bold text-sm text-gray-900">第{qi + 1}题</span>
                             <span className="text-xs text-gray-500">({q.chapterRef})</span>
                             {isSubjective && <span className="bg-purple-600 text-white text-[10px] font-bold px-2 py-0.5">主观题</span>}
+                            {isChoice && (
+                              <span className={`text-white text-[10px] font-bold px-2 py-0.5 ${result && result.score >= 10 ? 'bg-green-600' : 'bg-red-500'}`}>
+                                {result && result.score >= 10 ? '✓ 正确' : '✗ 错误'}
+                              </span>
+                            )}
                           </div>
                           <p className="text-sm text-gray-700 mb-2">{q.question}</p>
                           <div className="bg-white p-2 border border-gray-300 mb-2">
                             <span className="text-xs text-gray-500 font-bold">您的答案：</span>
-                            <p className="text-sm text-gray-800 mt-0.5">{testState.answers[q.id]}</p>
+                            <p className="text-sm text-gray-800 mt-0.5">
+                              {isChoice && chosenOption ? `${chosenOption.label}. ${chosenOption.text}` : userAnswer}
+                            </p>
                           </div>
                           {result && (
                             <div className="flex items-start gap-4 mt-2">

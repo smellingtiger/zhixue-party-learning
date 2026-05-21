@@ -1,9 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { resolveKnowledgeVideoId } from '@/lib/title-video-mapping';
+import fs from 'fs';
+import path from 'path';
 
 export const dynamic = 'force-dynamic';
 
 const KNOWLEDGE_SERVICE_URL = process.env.KNOWLEDGE_SERVICE_URL || 'http://192.168.1.212:8080';
+
+const NAS_MAPPING_FILE = path.join(process.cwd(), 'knowledge-server', 'course_nas_mapping.json');
+let nasMappingCache: Record<string, any> | null = null;
+
+function loadNasMapping(): Record<string, any> {
+  if (nasMappingCache) return nasMappingCache;
+  try {
+    if (fs.existsSync(NAS_MAPPING_FILE)) {
+      const data = JSON.parse(fs.readFileSync(NAS_MAPPING_FILE, 'utf-8'));
+      nasMappingCache = {};
+      for (const item of data.matched || []) {
+        nasMappingCache[item.course_code] = item;
+        if (item.txt_file) {
+          nasMappingCache[item.txt_file.replace(/\.txt$/, '')] = item;
+        }
+        if (item.chinese_name) {
+          nasMappingCache[item.chinese_name] = item;
+        }
+      }
+      console.log(`[知识库列表] 已加载 ${Object.keys(nasMappingCache).length} 个NAS视频映射条目`);
+    } else {
+      nasMappingCache = {};
+    }
+  } catch (error) {
+    console.error('[知识库列表] 加载NAS映射失败:', error);
+    nasMappingCache = {};
+  }
+  return nasMappingCache;
+}
+
+function checkNasVideo(filename: string, title: string): string | null {
+  const mapping = loadNasMapping();
+  const codeFromFile = filename?.replace(/\.txt$/, '') || '';
+  if (codeFromFile && mapping[codeFromFile]) {
+    return codeFromFile;
+  }
+  if (title && mapping[title]) {
+    const item = mapping[title];
+    return item.course_code || null;
+  }
+  return null;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -27,19 +70,34 @@ export async function GET(request: NextRequest) {
     const info = await infoRes.json().catch(() => ({}));
 
     const files = data.files || [];
-    const filteredCount = data.total ?? 0;
-    const start = (page - 1) * pageSize;
-    const paged = files.slice(start, start + pageSize);
+    
+    const seenTitles = new Set<string>();
+    const dedupedFiles = files.filter((f: any) => {
+      const normalizedTitle = (f.title || '').replace(/\.txt$/, '').replace(/[（(][一二三四五六七八九十上中下\d]+[）)]/g, '').trim();
+      if (seenTitles.has(normalizedTitle)) {
+        return false;
+      }
+      seenTitles.add(normalizedTitle);
+      return true;
+    });
 
-    const docs = paged.map((f: any) => ({
-      id: f.id,
-      title: f.title,
-      courseName: f.title,
-      category: f.category,
-      paragraphCount: f.paragraph_count,
-      fileName: f.filename,
-      videoId: resolveKnowledgeVideoId(f.id, f.filename, f.title),
-    }));
+    const filteredCount = dedupedFiles.length;
+    const start = (page - 1) * pageSize;
+    const paged = dedupedFiles.slice(start, start + pageSize);
+
+    const docs = paged.map((f: any) => {
+      const nasCourseCode = checkNasVideo(f.filename, f.title);
+      return {
+        id: f.id,
+        title: f.title,
+        courseName: f.title,
+        category: f.category,
+        paragraphCount: f.paragraph_count,
+        fileName: f.filename,
+        videoId: nasCourseCode,
+        hasVideo: !!nasCourseCode,
+      };
+    });
 
     const globalTotal = info.total_files ?? data.total ?? 0;
     const globalParagraphs = info.total_paragraphs || 0;
