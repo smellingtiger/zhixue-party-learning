@@ -65,6 +65,7 @@ export async function GET(
     const segments = (data.segments || []).map((seg: any, idx: number) => ({
       title: seg.title || '',
       time: seg.time || '',
+      timeEnd: seg.time_end || '',
       content: seg.content || '',
       needsTitleGeneration: !seg.title || seg.title.trim() === '' || seg.title === '未命名段落' || seg.title === '未命名',
     }));

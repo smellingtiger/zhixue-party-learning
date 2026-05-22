@@ -19,7 +19,7 @@ import {
   ArrowLeft,
   FileText,
 } from 'lucide-react';
-import { VideoOutline } from '@/components/video-outline';
+import { type SemanticOutlineEntry } from '@/components/video-outline';
 import { partyKnowledgeGraph, getPartyKnowledgeGraph } from '@/lib/knowledge-graph';
 import { courseVideoMapping } from '@/lib/video-mapping';
 import { resolveKnowledgeVideoId } from '@/lib/title-video-mapping';
@@ -249,6 +249,9 @@ export default function CoursePage() {
   const [retryCount, setRetryCount] = useState(0);
   const [courseSections, setCourseSections] = useState<ChapterScript[]>([]);
   const [expandedChapters, setExpandedChapters] = useState<Set<number>>(new Set());
+  const [outlineMarkers, setOutlineMarkers] = useState<SemanticOutlineEntry[]>([]);
+  const [hoveredMarker, setHoveredMarker] = useState<SemanticOutlineEntry | null>(null);
+  const [outlineScaled, setOutlineScaled] = useState(false);
 
   const applyVideoSource = async (sourceUrl: string, switchSeq?: number) => {
     if (!sourceUrl) {
@@ -459,6 +462,15 @@ export default function CoursePage() {
         setCourseDetail(detail);
       }
 
+      // 加载大纲时间节点
+      try {
+        const outlineRes = await fetch(`/course-outline/${encodeURIComponent(courseId)}`);
+        const outlineData = await outlineRes.json();
+        setOutlineMarkers(Array.isArray(outlineData) ? outlineData : []);
+      } catch {
+        setOutlineMarkers([]);
+      }
+
       setIsLoading(false);
     }
     
@@ -621,6 +633,59 @@ export default function CoursePage() {
     };
   }, [videoUrl]);
 
+  // 从课程大纲章节中提取进度条时间节点（当 outline 文件不存在时作为后备）
+  useEffect(() => {
+    if (outlineMarkers.length > 0) return;
+    if (courseSections.length === 0) return;
+
+    const markers: SemanticOutlineEntry[] = [];
+    let markerIndex = 0;
+
+    for (const chapter of courseSections) {
+      if (chapter.sections) {
+        for (const section of chapter.sections) {
+          if (section.timeOffset !== undefined) {
+            markers.push({
+              index: markerIndex++,
+              start_time_second: section.timeOffset,
+              end_time_second: section.timeEndOffset ?? section.timeOffset,
+              summary: section.title,
+              isEstimated: true,
+            });
+          }
+        }
+      }
+    }
+
+    if (markers.length > 0 && markers.length !== outlineMarkers.length) {
+      setOutlineMarkers(markers);
+    }
+  }, [courseSections, outlineMarkers]);
+
+  // 智能缩放：当视频时长已知且 outline 覆盖率不足时，按比例缩放时间戳
+  useEffect(() => {
+    if (outlineMarkers.length === 0 || duration <= 0) return;
+
+    const maxOutlineTime = Math.max(...outlineMarkers.map(m => m.end_time_second));
+    if (maxOutlineTime <= 0) return;
+
+    const coverage = maxOutlineTime / duration;
+    if (coverage >= 0.95) {
+      setOutlineScaled(false);
+      return;
+    }
+
+    const ratio = duration / maxOutlineTime;
+    const scaled = outlineMarkers.map(marker => ({
+      ...marker,
+      start_time_second: Math.min(marker.start_time_second * ratio, duration),
+      end_time_second: Math.min(marker.end_time_second * ratio, duration),
+      isEstimated: true,
+    }));
+    setOutlineMarkers(scaled);
+    setOutlineScaled(true);
+  }, [outlineMarkers.length, duration]);
+
   const toggleMute = () => {
     if (videoRef.current) {
       videoRef.current.muted = !isMuted;
@@ -640,6 +705,28 @@ export default function CoursePage() {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const formatTimeFull = (seconds: number): string => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    if (h > 0) {
+      return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const seekToTime = (time: number) => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = time;
+      setCurrentTime(time);
+      if (!isPlaying) {
+        videoRef.current.play()
+          .then(() => setIsPlaying(true))
+          .catch(() => {});
+      }
+    }
   };
 
   const handleNodeClick = (node: KnowledgeNode) => {
@@ -819,16 +906,66 @@ export default function CoursePage() {
               {videoUrl && (
                 <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-100 transition-opacity">
                   {/* 进度条 */}
-                  <input
-                    type="range"
-                    min={0}
-                    max={duration || 100}
-                    value={currentTime}
-                    onChange={handleSeek}
-                    className="w-full h-1 bg-gray-600 rounded-full appearance-none cursor-pointer mb-3
-                      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
-                      [&::-webkit-slider-thumb]:bg-red-500 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer"
-                  />
+                  <div className="relative mb-3 w-full">
+                    {/* 时间节点标记 */}
+                    {outlineMarkers.length > 0 && duration > 0 && (
+                      <>
+                        {outlineMarkers.map((marker) => {
+                          const position = (marker.start_time_second / duration) * 100;
+                          return (
+                            <div
+                              key={marker.index}
+                              className="absolute top-1/2 -translate-y-1/2 z-20"
+                              style={{ left: `${position}%` }}
+                            >
+                              <div
+                                className="w-3 h-3 bg-amber-400 rounded-full border-2 border-white shadow-md cursor-pointer transition-all hover:scale-150 hover:bg-amber-300 hover:shadow-lg"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (videoRef.current) {
+                                    videoRef.current.currentTime = marker.start_time_second;
+                                    setCurrentTime(marker.start_time_second);
+                                    if (!isPlaying) {
+                                      videoRef.current.play()
+                                        .then(() => setIsPlaying(true))
+                                        .catch(() => {});
+                                    }
+                                  }
+                                }}
+                                onMouseEnter={() => setHoveredMarker(marker)}
+                                onMouseLeave={() => setHoveredMarker(null)}
+                                title={`${formatTime(marker.start_time_second)} - ${marker.summary}`}
+                              />
+                            </div>
+                          );
+                        })}
+                        {/* 悬浮提示 */}
+                        {hoveredMarker && (
+                          <div
+                            className="absolute -top-10 z-30 bg-gray-900/95 text-white text-xs px-2.5 py-1.5 rounded-lg shadow-xl whitespace-nowrap pointer-events-none backdrop-blur-sm border border-gray-700"
+                            style={{ left: `${(hoveredMarker.start_time_second / duration) * 100}%`, transform: 'translateX(-50%)' }}
+                          >
+                            <span className="font-medium">{formatTime(hoveredMarker.start_time_second)}</span>
+                            <span className="text-gray-400 mx-1">-</span>
+                            <span>{hoveredMarker.summary}</span>
+                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900/95 rotate-45 border-r border-b border-gray-700" />
+                          </div>
+                        )}
+                      </>
+                    )}
+                    <input
+                      type="range"
+                      min={0}
+                      max={duration || 100}
+                      value={currentTime}
+                      onChange={handleSeek}
+                      className="w-full h-1.5 bg-gray-600/60 rounded-full appearance-none cursor-pointer relative z-10
+                        [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 
+                        [&::-webkit-slider-thumb]:bg-red-500 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer
+                        [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:shadow-red-500/30
+                        [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-125"
+                    />
+                  </div>
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -998,22 +1135,44 @@ export default function CoursePage() {
                           
                           {isExpanded && hasSections && (
                             <div className="bg-white border-t border-gray-100">
-                              {chapter.sections!.map((section, sIdx) => (
-                                <div
-                                  key={sIdx}
-                                  className="px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-700 transition-colors border-l-2 border-l-orange-300 ml-3 flex items-start gap-2"
-                                >
-                                  <div className="w-1.5 h-1.5 rounded-full bg-orange-400 mt-1.5 flex-shrink-0" />
-                                  <div>
-                                    <div className="font-medium">{section.title}</div>
-                                    {section.content && (
-                                      <div className="text-xs text-gray-400 mt-1 line-clamp-2">
-                                        {section.content.substring(0, 80)}...
-                                      </div>
-                                    )}
+                              {chapter.sections!.map((section, sIdx) => {
+                                const sectionMarker = outlineMarkers[sIdx];
+                                const timeOffset = sectionMarker?.start_time_second ?? section.timeOffset;
+                                return (
+                                  <div
+                                    key={sIdx}
+                                    onClick={() => {
+                                      if (timeOffset !== undefined) {
+                                        seekToTime(timeOffset);
+                                      }
+                                    }}
+                                    className={`px-4 py-2 text-sm transition-colors border-l-2 ml-3 flex items-start gap-2 ${
+                                      timeOffset !== undefined
+                                        ? 'cursor-pointer hover:bg-blue-50 hover:text-blue-700 border-l-orange-300'
+                                        : 'border-l-gray-200 text-gray-500'
+                                    }`}
+                                  >
+                                    <div className="w-1.5 h-1.5 rounded-full bg-orange-400 mt-1.5 flex-shrink-0" />
+                                    <div className="flex-1 min-w-0">
+                                      <div className="font-medium text-gray-700">{section.title}</div>
+                                      {timeOffset !== undefined && (
+                                        <div className="flex items-center gap-1 text-xs text-amber-500 mt-0.5">
+                                          <Clock className="w-3 h-3 flex-shrink-0" />
+                                          <span>{formatTimeFull(timeOffset)}</span>
+                                          {(sectionMarker?.isEstimated || outlineScaled) && (
+                                            <span className="text-gray-400 text-[10px] ml-0.5">估算</span>
+                                          )}
+                                        </div>
+                                      )}
+                                      {section.content && !timeOffset && (
+                                        <div className="text-xs text-gray-400 mt-1 line-clamp-2">
+                                          {section.content.substring(0, 80)}...
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
+                                );
+                              })}
                             </div>
                           )}
                         </div>

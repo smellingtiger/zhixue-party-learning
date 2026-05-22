@@ -13,6 +13,8 @@ export interface ChapterScript {
 export interface SectionScript {
   title: string;
   content: string;
+  timeOffset?: number;
+  timeEndOffset?: number;
 }
 
 export interface SectionMarker {
@@ -59,6 +61,18 @@ export function getChapterSections(chapter: ChapterScript): SectionMarker[] {
   });
 }
 
+function parseTimeToSeconds(time?: string): number | undefined {
+  if (!time) return undefined;
+  const parts = time.split(':').map(Number);
+  if (parts.length === 3 && parts.every(n => !isNaN(n))) {
+    return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  }
+  if (parts.length === 2 && parts.every(n => !isNaN(n))) {
+    return parts[0] * 60 + parts[1];
+  }
+  return undefined;
+}
+
 export async function loadCourseScript(courseName?: string, courseId?: string): Promise<CourseScript | null> {
   try {
     let scriptFile: string | null = null;
@@ -91,6 +105,8 @@ export async function loadCourseScript(courseName?: string, courseId?: string): 
               sections: kbData.segments.map((seg: any, idx: number) => ({
                 title: seg.title || `第${idx + 1}段`,
                 content: seg.content || '',
+                timeOffset: parseTimeToSeconds(seg.time),
+                timeEndOffset: parseTimeToSeconds(seg.timeEnd),
               })),
             }],
           };

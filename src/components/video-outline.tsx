@@ -3,11 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, ChevronRight, FileText } from 'lucide-react';
 
-interface SemanticOutlineEntry {
+export interface SemanticOutlineEntry {
   index: number;
   start_time_second: number;
   end_time_second: number;
   summary: string;
+  isEstimated?: boolean;
 }
 
 interface VideoOutlineProps {
