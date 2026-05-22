@@ -126,6 +126,7 @@ class CourseDoc:
                     segs.append({
                         "title": seg.get("title", ""),
                         "time": seg.get("time_start", ""),
+                        "time_end": seg.get("time_end", ""),
                         "content": seg.get("content", "")
                     })
                 self._processed = {

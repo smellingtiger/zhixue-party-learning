@@ -16,7 +16,8 @@ import {
   ChevronDown,
   ChevronUp,
   Play,
-  LogOut
+  LogOut,
+  ShieldAlert
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -31,7 +32,7 @@ const navItems = [
   { id: 'aiclass', name: 'AI智能组班', href: '/training-candidates', icon: Users },
   { id: 'knowledge', name: '知识库', href: '/knowledge-base', icon: Library },
   { id: 'ai-profile', name: 'AI画像', href: '/ai-profile', icon: PenTool },
-  { id: 'profile', name: '我的', href: '/profile', icon: User },
+  { id: 'safety', name: '安全应急培训', href: '/safety', icon: ShieldAlert },
 ];
 
 export function MainNav() {

@@ -23,9 +23,9 @@ PROGRESS_FILE = Path(__file__).parent / "generate_titles_progress.json"
 
 API_BASE_URL = "https://api.siliconflow.cn/v1"
 API_KEY = "sk-benvwygtccjxvhrnbjqbztiopkroriorvfllywtkzidbwlwb"
-MODEL_NAME = "deepseek-ai/DeepSeek-V4-Flash"
-MAX_RETRIES = 5
-REQUEST_TIMEOUT = 120
+MODEL_NAME = "deepseek-ai/DeepSeek-V3"
+MAX_RETRIES = 3
+REQUEST_TIMEOUT = 60
 BATCH_SIZE = 5
 RATE_LIMIT_DELAY = 0.3
 
