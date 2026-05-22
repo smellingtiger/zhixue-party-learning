@@ -102,6 +102,14 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [knowledgeBaseGraph, setKnowledgeBaseGraph] = useState<KnowledgeNode | null>(null);
   const [graphLoaded, setGraphLoaded] = useState(false);
   const [savedDiagnostic, setSavedDiagnostic] = useState<any>(null);
+  
+  // 初始化时立即检查是否有诊断数据，如果有则立即显示加载页（避免先显示原版界面）
+  const [isAutoLoading, setIsAutoLoading] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return !!localStorage.getItem('user_diagnostic');
+    }
+    return false;
+  });
 
 
 
@@ -192,10 +200,92 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       });
   }, []);
 
-  // 图谱加载完成后，仅读取 savedDiagnostic，不自动恢复或跳转
+  // 图谱加载完成后，自动检测诊断数据并恢复
   useEffect(() => {
     if (!graphLoaded || !savedDiagnostic) return;
-    console.log('💡 [状态恢复] 检测到历史诊断数据，等待用户主动选择是否恢复');
+    
+    console.log('💡 [状态恢复] 检测到历史诊断数据，自动加载诊断报告...');
+    setIsAutoLoading(true);
+    
+    const autoRestore = async () => {
+      try {
+        const diagnostic = savedDiagnostic;
+        
+        console.log('🔄 [自动恢复] 开始恢复诊断状态...');
+        
+        if (!knowledgeBaseGraph && !getDynamicKnowledgeGraph()) {
+          console.warn('🔄 [自动恢复] ⚠️ 知识库未加载，尝试重新加载...');
+          await fetchKnowledgeBaseCourses();
+          initTopicNodeMap();
+          console.log('🔄 [自动恢复] ✅ 知识库重新加载完成');
+        }
+        
+        const path = generateLearningPath({
+          roles: diagnostic.roles || [],
+          topics: diagnostic.topics || [],
+          customRequirements: diagnostic.customRequirements || undefined,
+        });
+        
+        const hasModules = path.rootNode.children && path.rootNode.children.length > 0;
+        if (hasModules) {
+          setGeneratedPath(path);
+          setDiagnosticRoles(diagnostic.roles || []);
+          setDiagnosticTopics(diagnostic.topics || []);
+          setDiagnosticLevel(diagnostic.difficulty || 'beginner');
+          setDiagnosticRequirements(diagnostic.customRequirements || '');
+          
+          let analysisMatchedNodes: string[] = [];
+          if (diagnostic.customRequirements && diagnostic.customRequirements.trim()) {
+            const analysis = analyzeRequirements(diagnostic.customRequirements);
+            setDiagnosticKeywords(analysis.keywords);
+            setDiagnosticMatchedTopics(analysis.matchedTopics);
+            setDiagnosticMatchedNodes(analysis.matchedNodes);
+            analysisMatchedNodes = analysis.matchedNodes;
+          } else {
+            setDiagnosticKeywords([]);
+            setDiagnosticMatchedTopics([]);
+            setDiagnosticMatchedNodes([]);
+            analysisMatchedNodes = [];
+          }
+          
+          const allNodeIds = new Set<string>();
+          
+          (diagnostic.roles || []).forEach((role: string) => {
+            const nodeIds = roleNodeMap[role] || [];
+            nodeIds.forEach(id => allNodeIds.add(id));
+          });
+          
+          const effectiveTopicMap = Object.keys(topicNodeMap).length > 0 ? topicNodeMap : getTopicNodeMap();
+          (diagnostic.topics || []).forEach((topic: string) => {
+            const nodeId = effectiveTopicMap[topic];
+            if (nodeId) allNodeIds.add(nodeId);
+          });
+          
+          analysisMatchedNodes.forEach(id => allNodeIds.add(id));
+          
+          const finalNodes = Array.from(allNodeIds);
+          setHighlightedNodes(finalNodes);
+          
+          const locked = getDifficultyLockedNodeIds(path.rootNode, diagnostic.difficulty || 'beginner');
+          setDifficultyLockedNodes(locked);
+          setHasCompletedDiagnostic(true);
+          
+          setTimeout(() => {
+            setCurrentView('mindmap');
+            setIsAutoLoading(false);
+            console.log('🔄 [自动恢复] ✅ 诊断报告已自动加载');
+          }, 800);
+        } else {
+          console.log('[自动恢复] 旧数据没有知识模块，将清除并显示原始内容');
+          setIsAutoLoading(false);
+        }
+      } catch (error) {
+        console.error('[自动恢复] 恢复失败:', error);
+        setIsAutoLoading(false);
+      }
+    };
+    
+    autoRestore();
   }, [graphLoaded, savedDiagnostic]);
 
   // 用户主动点击"恢复上次诊断"按钮时触发
@@ -472,8 +562,67 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   return (
 
-    <div className="min-h-screen bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100">
-      <main className="w-full px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100 relative">
+      {isAutoLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-red-600 via-red-500 to-orange-500">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+              className="w-20 h-20 mx-auto mb-6 border-4 border-white/30 border-t-white rounded-full"
+            />
+            <motion.h2
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-3xl font-bold text-white mb-3"
+            >
+              正在加载诊断数据
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="text-white/80 text-lg mb-2"
+            >
+              检测到历史学习诊断记录，正在为您恢复...
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="flex items-center justify-center gap-2 text-white/60 text-sm"
+            >
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>正在生成个性化学习路径</span>
+            </motion.div>
+            
+            {savedDiagnostic && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+                className="mt-8 bg-white/10 backdrop-blur-sm rounded-xl p-4 max-w-md mx-auto"
+              >
+                <div className="text-left text-white/90 text-sm space-y-1">
+                  <p><span className="text-white/60">身份角色：</span>{savedDiagnostic.roles?.join('、') || '未选择'}</p>
+                  <p><span className="text-white/60">学习主题：</span>{savedDiagnostic.topics?.length || 0} 个</p>
+                  <p><span className="text-white/60">学习深度：</span>{
+                    savedDiagnostic.difficulty === 'beginner' ? '入门级' :
+                    savedDiagnostic.difficulty === 'intermediate' ? '进阶级' : '深入级'
+                  }</p>
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
+        </div>
+      )}
+
+      <main className={`w-full px-4 py-8 ${isAutoLoading ? 'opacity-0 pointer-events-none' : ''}`}>
         <AnimatePresence mode="wait">
           {currentView === 'home' && (
             <motion.div
