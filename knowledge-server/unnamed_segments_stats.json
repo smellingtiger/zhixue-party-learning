@@ -1,0 +1,2492 @@
+{
+  "total_courses": 2324,
+  "total_segments": 48676,
+  "courses_with_unnamed": 414,
+  "total_unnamed": 8881,
+  "course_details": [
+    {
+      "name": "GC03A0317095_1710",
+      "stem": "GC03A0317095_1710",
+      "total_segs": 59,
+      "unnamed_segs": 58
+    },
+    {
+      "name": "GC04N1817015_1702",
+      "stem": "GC04N1817015_1702",
+      "total_segs": 57,
+      "unnamed_segs": 56
+    },
+    {
+      "name": "GC02B0515085_1601",
+      "stem": "GC02B0515085_1601",
+      "total_segs": 52,
+      "unnamed_segs": 51
+    },
+    {
+      "name": "GC03A1018035_1805",
+      "stem": "GC03A1018035_1805",
+      "total_segs": 52,
+      "unnamed_segs": 51
+    },
+    {
+      "name": "GC04N1216085_1609",
+      "stem": "GC04N1216085_1609",
+      "total_segs": 49,
+      "unnamed_segs": 48
+    },
+    {
+      "name": "GC04I1816125_1701",
+      "stem": "GC04I1816125_1701",
+      "total_segs": 48,
+      "unnamed_segs": 47
+    },
+    {
+      "name": "GC05I1516075_1608",
+      "stem": "GC05I1516075_1608",
+      "total_segs": 48,
+      "unnamed_segs": 47
+    },
+    {
+      "name": "GC03N0218045_1805",
+      "stem": "GC03N0218045_1805",
+      "total_segs": 47,
+      "unnamed_segs": 46
+    },
+    {
+      "name": "GC05I2717125_1712",
+      "stem": "GC05I2717125_1712",
+      "total_segs": 46,
+      "unnamed_segs": 45
+    },
+    {
+      "name": "GC03I1016015_1602",
+      "stem": "GC03I1016015_1602",
+      "total_segs": 45,
+      "unnamed_segs": 44
+    },
+    {
+      "name": "NGC00T0225095_2509",
+      "stem": "NGC00T0225095_2509",
+      "total_segs": 45,
+      "unnamed_segs": 44
+    },
+    {
+      "name": "GC02I0415015_1503",
+      "stem": "GC02I0415015_1503",
+      "total_segs": 44,
+      "unnamed_segs": 43
+    },
+    {
+      "name": "GC05I1616075_1608",
+      "stem": "GC05I1616075_1608",
+      "total_segs": 44,
+      "unnamed_segs": 43
+    },
+    {
+      "name": "GC03A0918035_1805",
+      "stem": "GC03A0918035_1805",
+      "total_segs": 43,
+      "unnamed_segs": 42
+    },
+    {
+      "name": "GC04N1916055_1606",
+      "stem": "GC04N1916055_1606",
+      "total_segs": 43,
+      "unnamed_segs": 42
+    },
+    {
+      "name": "GC03I0617065_1706",
+      "stem": "GC03I0617065_1706",
+      "total_segs": 42,
+      "unnamed_segs": 41
+    },
+    {
+      "name": "GC03N0717035_1703",
+      "stem": "GC03N0717035_1703",
+      "total_segs": 42,
+      "unnamed_segs": 41
+    },
+    {
+      "name": "GC00I0317095_1709",
+      "stem": "GC00I0317095_1709",
+      "total_segs": 41,
+      "unnamed_segs": 40
+    },
+    {
+      "name": "GC02I0415115_1512",
+      "stem": "GC02I0415115_1512",
+      "total_segs": 41,
+      "unnamed_segs": 40
+    },
+    {
+      "name": "GC04I1914125_1503",
+      "stem": "GC04I1914125_1503",
+      "total_segs": 41,
+      "unnamed_segs": 40
+    },
+    {
+      "name": "GC04N1218025_1803",
+      "stem": "GC04N1218025_1803",
+      "total_segs": 41,
+      "unnamed_segs": 40
+    },
+    {
+      "name": "GC02A0215041_1505",
+      "stem": "GC02A0215041_1505",
+      "total_segs": 40,
+      "unnamed_segs": 39
+    },
+    {
+      "name": "GC03I1515115_1512",
+      "stem": "GC03I1515115_1512",
+      "total_segs": 40,
+      "unnamed_segs": 39
+    },
+    {
+      "name": "GC04N0816085_1609",
+      "stem": "GC04N0816085_1609",
+      "total_segs": 40,
+      "unnamed_segs": 39
+    },
+    {
+      "name": "GC02I0114125_1501",
+      "stem": "GC02I0114125_1501",
+      "total_segs": 39,
+      "unnamed_segs": 38
+    },
+    {
+      "name": "GC03I0616085_1609",
+      "stem": "GC03I0616085_1609",
+      "total_segs": 39,
+      "unnamed_segs": 38
+    },
+    {
+      "name": "GC03I0715085_1508",
+      "stem": "GC03I0715085_1508",
+      "total_segs": 39,
+      "unnamed_segs": 38
+    },
+    {
+      "name": "GC03I0915065_1507",
+      "stem": "GC03I0915065_1507",
+      "total_segs": 39,
+      "unnamed_segs": 38
+    },
+    {
+      "name": "GC03I0915075_1508",
+      "stem": "GC03I0915075_1508",
+      "total_segs": 39,
+      "unnamed_segs": 38
+    },
+    {
+      "name": "GC03N0317025_1703",
+      "stem": "GC03N0317025_1703",
+      "total_segs": 39,
+      "unnamed_segs": 38
+    },
+    {
+      "name": "GC05I2817125_1712",
+      "stem": "GC05I2817125_1712",
+      "total_segs": 39,
+      "unnamed_segs": 38
+    },
+    {
+      "name": "GC02I0315015_1504",
+      "stem": "GC02I0315015_1504",
+      "total_segs": 38,
+      "unnamed_segs": 37
+    },
+    {
+      "name": "GC03I1117035_1704",
+      "stem": "GC03I1117035_1704",
+      "total_segs": 38,
+      "unnamed_segs": 37
+    },
+    {
+      "name": "GC04I1717055_1705",
+      "stem": "GC04I1717055_1705",
+      "total_segs": 38,
+      "unnamed_segs": 37
+    },
+    {
+      "name": "GC03A0617015_1702",
+      "stem": "GC03A0617015_1702",
+      "total_segs": 37,
+      "unnamed_segs": 36
+    },
+    {
+      "name": "GC03I1815115_1512",
+      "stem": "GC03I1815115_1512",
+      "total_segs": 37,
+      "unnamed_segs": 36
+    },
+    {
+      "name": "GC03N0818075_1807",
+      "stem": "GC03N0818075_1807",
+      "total_segs": 37,
+      "unnamed_segs": 36
+    },
+    {
+      "name": "GC04I1716125_1701",
+      "stem": "GC04I1716125_1701",
+      "total_segs": 37,
+      "unnamed_segs": 36
+    },
+    {
+      "name": "GC05I0615055_1506",
+      "stem": "GC05I0615055_1506",
+      "total_segs": 37,
+      "unnamed_segs": 36
+    },
+    {
+      "name": "GC48N3317015_1702",
+      "stem": "GC48N3317015_1702",
+      "total_segs": 37,
+      "unnamed_segs": 36
+    },
+    {
+      "name": "GC03A0816085_1608",
+      "stem": "GC03A0816085_1608",
+      "total_segs": 36,
+      "unnamed_segs": 35
+    },
+    {
+      "name": "GC03I1815015_1503",
+      "stem": "GC03I1815015_1503",
+      "total_segs": 36,
+      "unnamed_segs": 35
+    },
+    {
+      "name": "GC04I1115015_1504",
+      "stem": "GC04I1115015_1504",
+      "total_segs": 36,
+      "unnamed_segs": 35
+    },
+    {
+      "name": "GC04N1617015_1702",
+      "stem": "GC04N1617015_1702",
+      "total_segs": 36,
+      "unnamed_segs": 35
+    },
+    {
+      "name": "CGC04T0625105_2510",
+      "stem": "CGC04T0625105_2510",
+      "total_segs": 35,
+      "unnamed_segs": 34
+    },
+    {
+      "name": "GC02A0916015_1606",
+      "stem": "GC02A0916015_1606",
+      "total_segs": 35,
+      "unnamed_segs": 34
+    },
+    {
+      "name": "GC03C0317015_1705",
+      "stem": "GC03C0317015_1705",
+      "total_segs": 35,
+      "unnamed_segs": 34
+    },
+    {
+      "name": "GC03I0716015_1602",
+      "stem": "GC03I0716015_1602",
+      "total_segs": 35,
+      "unnamed_segs": 34
+    },
+    {
+      "name": "GC03N0318025_1803",
+      "stem": "GC03N0318025_1803",
+      "total_segs": 35,
+      "unnamed_segs": 34
+    },
+    {
+      "name": "GC04I1016085_1609",
+      "stem": "GC04I1016085_1609",
+      "total_segs": 35,
+      "unnamed_segs": 34
+    },
+    {
+      "name": "GC04I1516125_1701",
+      "stem": "GC04I1516125_1701",
+      "total_segs": 35,
+      "unnamed_segs": 34
+    },
+    {
+      "name": "GC04I1617055_1705",
+      "stem": "GC04I1617055_1705",
+      "total_segs": 35,
+      "unnamed_segs": 34
+    },
+    {
+      "name": "GC04N1717125_1712",
+      "stem": "GC04N1717125_1712",
+      "total_segs": 35,
+      "unnamed_segs": 34
+    },
+    {
+      "name": "GC02I0515015_1504",
+      "stem": "GC02I0515015_1504",
+      "total_segs": 34,
+      "unnamed_segs": 33
+    },
+    {
+      "name": "GC04N0417125_1801",
+      "stem": "GC04N0417125_1801",
+      "total_segs": 34,
+      "unnamed_segs": 33
+    },
+    {
+      "name": "NGC03T0925115_2511",
+      "stem": "NGC03T0925115_2511",
+      "total_segs": 34,
+      "unnamed_segs": 33
+    },
+    {
+      "name": "GC03A0115121_1603",
+      "stem": "GC03A0115121_1603",
+      "total_segs": 33,
+      "unnamed_segs": 32
+    },
+    {
+      "name": "GC03I0520015_2002",
+      "stem": "GC03I0520015_2002",
+      "total_segs": 33,
+      "unnamed_segs": 32
+    },
+    {
+      "name": "GC03I0815015_1504",
+      "stem": "GC03I0815015_1504",
+      "total_segs": 33,
+      "unnamed_segs": 32
+    },
+    {
+      "name": "GC03I2016015_1602",
+      "stem": "GC03I2016015_1602",
+      "total_segs": 33,
+      "unnamed_segs": 32
+    },
+    {
+      "name": "GC03N0317095_1711",
+      "stem": "GC03N0317095_1711",
+      "total_segs": 33,
+      "unnamed_segs": 32
+    },
+    {
+      "name": "GC04I0916085_1609",
+      "stem": "GC04I0916085_1609",
+      "total_segs": 33,
+      "unnamed_segs": 32
+    },
+    {
+      "name": "GC04N0318015_1802",
+      "stem": "GC04N0318015_1802",
+      "total_segs": 33,
+      "unnamed_segs": 32
+    },
+    {
+      "name": "NGC18I1921055_2106",
+      "stem": "NGC18I1921055_2106",
+      "total_segs": 33,
+      "unnamed_segs": 32
+    },
+    {
+      "name": "NGC52I3025075_2507",
+      "stem": "NGC52I3025075_2507",
+      "total_segs": 33,
+      "unnamed_segs": 32
+    },
+    {
+      "name": "GC03I0117115_1712",
+      "stem": "GC03I0117115_1712",
+      "total_segs": 32,
+      "unnamed_segs": 31
+    },
+    {
+      "name": "GC03I0416015_1603",
+      "stem": "GC03I0416015_1603",
+      "total_segs": 32,
+      "unnamed_segs": 31
+    },
+    {
+      "name": "GC03I0816025_1604",
+      "stem": "GC03I0816025_1604",
+      "total_segs": 32,
+      "unnamed_segs": 31
+    },
+    {
+      "name": "GC03I1017035_1704",
+      "stem": "GC03I1017035_1704",
+      "total_segs": 32,
+      "unnamed_segs": 31
+    },
+    {
+      "name": "GC03L1215060_1508",
+      "stem": "GC03L1215060_1508",
+      "total_segs": 32,
+      "unnamed_segs": 31
+    },
+    {
+      "name": "GC03P0217015_1708",
+      "stem": "GC03P0217015_1708",
+      "total_segs": 32,
+      "unnamed_segs": 31
+    },
+    {
+      "name": "GC04A1618035_1805",
+      "stem": "GC04A1618035_1805",
+      "total_segs": 32,
+      "unnamed_segs": 31
+    },
+    {
+      "name": "GC04I0916115_1612",
+      "stem": "GC04I0916115_1612",
+      "total_segs": 32,
+      "unnamed_segs": 31
+    },
+    {
+      "name": "GC04I1016115_1612",
+      "stem": "GC04I1016115_1612",
+      "total_segs": 32,
+      "unnamed_segs": 31
+    },
+    {
+      "name": "GC03A0915091_1510",
+      "stem": "GC03A0915091_1510",
+      "total_segs": 31,
+      "unnamed_segs": 30
+    },
+    {
+      "name": "GC03A0918035_1804",
+      "stem": "GC03A0918035_1804",
+      "total_segs": 31,
+      "unnamed_segs": 30
+    },
+    {
+      "name": "GC03I1415045_1505",
+      "stem": "GC03I1415045_1505",
+      "total_segs": 31,
+      "unnamed_segs": 30
+    },
+    {
+      "name": "GC03N1517095_1709",
+      "stem": "GC03N1517095_1709",
+      "total_segs": 31,
+      "unnamed_segs": 30
+    },
+    {
+      "name": "GC05A0717095_1710",
+      "stem": "GC05A0717095_1710",
+      "total_segs": 31,
+      "unnamed_segs": 30
+    },
+    {
+      "name": "NGC03I0624095_2409",
+      "stem": "NGC03I0624095_2409",
+      "total_segs": 31,
+      "unnamed_segs": 30
+    },
+    {
+      "name": "NGC03T0625125_2512",
+      "stem": "NGC03T0625125_2512",
+      "total_segs": 31,
+      "unnamed_segs": 30
+    },
+    {
+      "name": "NGC16I2525065_2506",
+      "stem": "NGC16I2525065_2506",
+      "total_segs": 31,
+      "unnamed_segs": 30
+    },
+    {
+      "name": "GC03A1517065_1707",
+      "stem": "GC03A1517065_1707",
+      "total_segs": 30,
+      "unnamed_segs": 29
+    },
+    {
+      "name": "GC03I0316015_1604",
+      "stem": "GC03I0316015_1604",
+      "total_segs": 30,
+      "unnamed_segs": 29
+    },
+    {
+      "name": "GC04A1018025_1803",
+      "stem": "GC04A1018025_1803",
+      "total_segs": 30,
+      "unnamed_segs": 29
+    },
+    {
+      "name": "GC04I1817035_1703",
+      "stem": "GC04I1817035_1703",
+      "total_segs": 30,
+      "unnamed_segs": 29
+    },
+    {
+      "name": "GC04N1017105_1711",
+      "stem": "GC04N1017105_1711",
+      "total_segs": 30,
+      "unnamed_segs": 29
+    },
+    {
+      "name": "GC05I1415065_1507",
+      "stem": "GC05I1415065_1507",
+      "total_segs": 29,
+      "unnamed_segs": 29
+    },
+    {
+      "name": "HGC04I0421105_2111",
+      "stem": "HGC04I0421105_2111",
+      "total_segs": 30,
+      "unnamed_segs": 29
+    },
+    {
+      "name": "HGC04I1622035_2204",
+      "stem": "HGC04I1622035_2204",
+      "total_segs": 30,
+      "unnamed_segs": 29
+    },
+    {
+      "name": "NGC03I0423055_2305",
+      "stem": "NGC03I0423055_2305",
+      "total_segs": 30,
+      "unnamed_segs": 29
+    },
+    {
+      "name": "GC02I0416055_1606",
+      "stem": "GC02I0416055_1606",
+      "total_segs": 29,
+      "unnamed_segs": 28
+    },
+    {
+      "name": "GC03I0517055_1706",
+      "stem": "GC03I0517055_1706",
+      "total_segs": 29,
+      "unnamed_segs": 28
+    },
+    {
+      "name": "GC03N0119065_1907",
+      "stem": "GC03N0119065_1907",
+      "total_segs": 29,
+      "unnamed_segs": 28
+    },
+    {
+      "name": "GC03N1417095_1709",
+      "stem": "GC03N1417095_1709",
+      "total_segs": 29,
+      "unnamed_segs": 28
+    },
+    {
+      "name": "GC04N1117105_1711",
+      "stem": "GC04N1117105_1711",
+      "total_segs": 29,
+      "unnamed_segs": 28
+    },
+    {
+      "name": "GC05A1419045_1905",
+      "stem": "GC05A1419045_1905",
+      "total_segs": 29,
+      "unnamed_segs": 28
+    },
+    {
+      "name": "GC05I1314125_1501",
+      "stem": "GC05I1314125_1501",
+      "total_segs": 29,
+      "unnamed_segs": 28
+    },
+    {
+      "name": "GC03I0116115_1612",
+      "stem": "GC03I0116115_1612",
+      "total_segs": 28,
+      "unnamed_segs": 27
+    },
+    {
+      "name": "GC03I0716085_1609",
+      "stem": "GC03I0716085_1609",
+      "total_segs": 28,
+      "unnamed_segs": 27
+    },
+    {
+      "name": "GC03I1916015_1602",
+      "stem": "GC03I1916015_1602",
+      "total_segs": 28,
+      "unnamed_segs": 27
+    },
+    {
+      "name": "GC03L0615050_1507",
+      "stem": "GC03L0615050_1507",
+      "total_segs": 28,
+      "unnamed_segs": 27
+    },
+    {
+      "name": "GC03N0317115_1712",
+      "stem": "GC03N0317115_1712",
+      "total_segs": 28,
+      "unnamed_segs": 27
+    },
+    {
+      "name": "GC04N1417015_1702",
+      "stem": "GC04N1417015_1702",
+      "total_segs": 28,
+      "unnamed_segs": 27
+    },
+    {
+      "name": "HGC17I2922055_2206",
+      "stem": "HGC17I2922055_2206",
+      "total_segs": 28,
+      "unnamed_segs": 27
+    },
+    {
+      "name": "HGC22N2422025_2203",
+      "stem": "HGC22N2422025_2203",
+      "total_segs": 28,
+      "unnamed_segs": 27
+    },
+    {
+      "name": "NGC03I0422055_2205",
+      "stem": "NGC03I0422055_2205",
+      "total_segs": 28,
+      "unnamed_segs": 27
+    },
+    {
+      "name": "NGC03T0725115_2511",
+      "stem": "NGC03T0725115_2511",
+      "total_segs": 28,
+      "unnamed_segs": 27
+    },
+    {
+      "name": "NGC06I2322085_2208",
+      "stem": "NGC06I2322085_2208",
+      "total_segs": 28,
+      "unnamed_segs": 27
+    },
+    {
+      "name": "NGC17I2925065_2506",
+      "stem": "NGC17I2925065_2506",
+      "total_segs": 28,
+      "unnamed_segs": 27
+    },
+    {
+      "name": "NGC95I2522115_2211",
+      "stem": "NGC95I2522115_2211",
+      "total_segs": 28,
+      "unnamed_segs": 27
+    },
+    {
+      "name": "GC02I0915115_1512",
+      "stem": "GC02I0915115_1512",
+      "total_segs": 27,
+      "unnamed_segs": 26
+    },
+    {
+      "name": "GC02N0316085_1609",
+      "stem": "GC02N0316085_1609",
+      "total_segs": 27,
+      "unnamed_segs": 26
+    },
+    {
+      "name": "GC03I0317055_1706",
+      "stem": "GC03I0317055_1706",
+      "total_segs": 27,
+      "unnamed_segs": 26
+    },
+    {
+      "name": "GC03I0515085_1509",
+      "stem": "GC03I0515085_1509",
+      "total_segs": 27,
+      "unnamed_segs": 26
+    },
+    {
+      "name": "GC03I0916015_1602",
+      "stem": "GC03I0916015_1602",
+      "total_segs": 27,
+      "unnamed_segs": 26
+    },
+    {
+      "name": "GC04I0815125_1601",
+      "stem": "GC04I0815125_1601",
+      "total_segs": 27,
+      "unnamed_segs": 26
+    },
+    {
+      "name": "GC04I1917015_1702",
+      "stem": "GC04I1917015_1702",
+      "total_segs": 27,
+      "unnamed_segs": 26
+    },
+    {
+      "name": "HGC13N2122055_2206",
+      "stem": "HGC13N2122055_2206",
+      "total_segs": 27,
+      "unnamed_segs": 26
+    },
+    {
+      "name": "HGC22N2522025_2203",
+      "stem": "HGC22N2522025_2203",
+      "total_segs": 27,
+      "unnamed_segs": 26
+    },
+    {
+      "name": "NGC03N0123025_2303",
+      "stem": "NGC03N0123025_2303",
+      "total_segs": 27,
+      "unnamed_segs": 26
+    },
+    {
+      "name": "NGC03T0125125_2512",
+      "stem": "NGC03T0125125_2512",
+      "total_segs": 27,
+      "unnamed_segs": 26
+    },
+    {
+      "name": "NGC04I0424075_2407",
+      "stem": "NGC04I0424075_2407",
+      "total_segs": 27,
+      "unnamed_segs": 26
+    },
+    {
+      "name": "NGC04T0925065_2506",
+      "stem": "NGC04T0925065_2506",
+      "total_segs": 27,
+      "unnamed_segs": 26
+    },
+    {
+      "name": "NGC78N3922055_2205",
+      "stem": "NGC78N3922055_2205",
+      "total_segs": 27,
+      "unnamed_segs": 26
+    },
+    {
+      "name": "GC03A0815091_1510",
+      "stem": "GC03A0815091_1510",
+      "total_segs": 26,
+      "unnamed_segs": 25
+    },
+    {
+      "name": "GC03C0315115_1605",
+      "stem": "GC03C0315115_1605",
+      "total_segs": 26,
+      "unnamed_segs": 25
+    },
+    {
+      "name": "GC03I0515095_1510",
+      "stem": "GC03I0515095_1510",
+      "total_segs": 26,
+      "unnamed_segs": 25
+    },
+    {
+      "name": "GC03N0419015_1902",
+      "stem": "GC03N0419015_1902",
+      "total_segs": 26,
+      "unnamed_segs": 25
+    },
+    {
+      "name": "GC03N0918125_1901",
+      "stem": "GC03N0918125_1901",
+      "total_segs": 26,
+      "unnamed_segs": 25
+    },
+    {
+      "name": "GC04N0317125_1801",
+      "stem": "GC04N0317125_1801",
+      "total_segs": 26,
+      "unnamed_segs": 25
+    },
+    {
+      "name": "GC04N1217125_1712",
+      "stem": "GC04N1217125_1712",
+      "total_segs": 26,
+      "unnamed_segs": 25
+    },
+    {
+      "name": "HGC31I3722035_2204",
+      "stem": "HGC31I3722035_2204",
+      "total_segs": 26,
+      "unnamed_segs": 25
+    },
+    {
+      "name": "NGC03N0923045_2305",
+      "stem": "NGC03N0923045_2305",
+      "total_segs": 26,
+      "unnamed_segs": 25
+    },
+    {
+      "name": "NGC03N1023045_2305",
+      "stem": "NGC03N1023045_2305",
+      "total_segs": 26,
+      "unnamed_segs": 25
+    },
+    {
+      "name": "NGC03T0825065_2506",
+      "stem": "NGC03T0825065_2506",
+      "total_segs": 26,
+      "unnamed_segs": 25
+    },
+    {
+      "name": "NGC11N2022065_2206",
+      "stem": "NGC11N2022065_2206",
+      "total_segs": 26,
+      "unnamed_segs": 25
+    },
+    {
+      "name": "NGC38I3322075_2207",
+      "stem": "NGC38I3322075_2207",
+      "total_segs": 26,
+      "unnamed_segs": 25
+    },
+    {
+      "name": "GC03A1318105_1810",
+      "stem": "GC03A1318105_1810",
+      "total_segs": 25,
+      "unnamed_segs": 24
+    },
+    {
+      "name": "GC03I0316105_1611",
+      "stem": "GC03I0316105_1611",
+      "total_segs": 25,
+      "unnamed_segs": 24
+    },
+    {
+      "name": "GC03I0416015_1604",
+      "stem": "GC03I0416015_1604",
+      "total_segs": 25,
+      "unnamed_segs": 24
+    },
+    {
+      "name": "GC03I0420015_2002",
+      "stem": "GC03I0420015_2002",
+      "total_segs": 25,
+      "unnamed_segs": 24
+    },
+    {
+      "name": "GC03N0718095_1810",
+      "stem": "GC03N0718095_1810",
+      "total_segs": 25,
+      "unnamed_segs": 24
+    },
+    {
+      "name": "GC04N1717015_1702",
+      "stem": "GC04N1717015_1702",
+      "total_segs": 25,
+      "unnamed_segs": 24
+    },
+    {
+      "name": "GC05A2619035_1904",
+      "stem": "GC05A2619035_1904",
+      "total_segs": 25,
+      "unnamed_segs": 24
+    },
+    {
+      "name": "HGC03I0322015_2202",
+      "stem": "HGC03I0322015_2202",
+      "total_segs": 25,
+      "unnamed_segs": 24
+    },
+    {
+      "name": "HGC04I0621105_2111",
+      "stem": "HGC04I0621105_2111",
+      "total_segs": 25,
+      "unnamed_segs": 24
+    },
+    {
+      "name": "HGC16I3122045_2204",
+      "stem": "HGC16I3122045_2204",
+      "total_segs": 25,
+      "unnamed_segs": 24
+    },
+    {
+      "name": "NGC03I0524055_2405",
+      "stem": "NGC03I0524055_2405",
+      "total_segs": 25,
+      "unnamed_segs": 24
+    },
+    {
+      "name": "NGC04I1423125_2312",
+      "stem": "NGC04I1423125_2312",
+      "total_segs": 25,
+      "unnamed_segs": 24
+    },
+    {
+      "name": "NGC10I1321125_2201",
+      "stem": "NGC10I1321125_2201",
+      "total_segs": 25,
+      "unnamed_segs": 24
+    },
+    {
+      "name": "NGC16I2425065_2506",
+      "stem": "NGC16I2425065_2506",
+      "total_segs": 25,
+      "unnamed_segs": 24
+    },
+    {
+      "name": "NGC49N4422115_2211",
+      "stem": "NGC49N4422115_2211",
+      "total_segs": 25,
+      "unnamed_segs": 24
+    },
+    {
+      "name": "NGC95I3322115_2211",
+      "stem": "NGC95I3322115_2211",
+      "total_segs": 25,
+      "unnamed_segs": 24
+    },
+    {
+      "name": "GC02I0115095_1510",
+      "stem": "GC02I0115095_1510",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "GC02I0419035_1903",
+      "stem": "GC02I0419035_1903",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "GC03A0117095_1710",
+      "stem": "GC03A0117095_1710",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "GC03A0319055_1906",
+      "stem": "GC03A0319055_1906",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "GC03A0518065_1807",
+      "stem": "GC03A0518065_1807",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "GC03N0217125_1801",
+      "stem": "GC03N0217125_1801",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "GC03N0718045_1805",
+      "stem": "GC03N0718045_1805",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "GC03N1019085_1908",
+      "stem": "GC03N1019085_1908",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "GC04A1518065_1810",
+      "stem": "GC04A1518065_1810",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "GC04I1618035_1804",
+      "stem": "GC04I1618035_1804",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "GC04I2517125_1712",
+      "stem": "GC04I2517125_1712",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "GC05I1818115_1812",
+      "stem": "GC05I1818115_1812",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "HGC17I3022045_2205",
+      "stem": "HGC17I3022045_2205",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "HGC17I3122055_2206",
+      "stem": "HGC17I3122055_2206",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "NGC00N0222085_2209",
+      "stem": "NGC00N0222085_2209",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "NGC03I0122045_2205",
+      "stem": "NGC03I0122045_2205",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "NGC03I0322045_2205",
+      "stem": "NGC03I0322045_2205",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "NGC03I1123105_2311",
+      "stem": "NGC03I1123105_2311",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "NGC04I0825045_2504",
+      "stem": "NGC04I0825045_2504",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "NGC78I3422075_2207",
+      "stem": "NGC78I3422075_2207",
+      "total_segs": 24,
+      "unnamed_segs": 23
+    },
+    {
+      "name": "GC02I0815105_1511",
+      "stem": "GC02I0815105_1511",
+      "total_segs": 23,
+      "unnamed_segs": 22
+    },
+    {
+      "name": "GC02I0817095_1709",
+      "stem": "GC02I0817095_1709",
+      "total_segs": 23,
+      "unnamed_segs": 22
+    },
+    {
+      "name": "GC02P0517035_1709",
+      "stem": "GC02P0517035_1709",
+      "total_segs": 23,
+      "unnamed_segs": 22
+    },
+    {
+      "name": "GC03C0816015_1610",
+      "stem": "GC03C0816015_1610",
+      "total_segs": 23,
+      "unnamed_segs": 22
+    },
+    {
+      "name": "GC04N2117055_1705",
+      "stem": "GC04N2117055_1705",
+      "total_segs": 23,
+      "unnamed_segs": 22
+    },
+    {
+      "name": "HGC03N0221095_2110",
+      "stem": "HGC03N0221095_2110",
+      "total_segs": 23,
+      "unnamed_segs": 22
+    },
+    {
+      "name": "HGC17I3322055_2206",
+      "stem": "HGC17I3322055_2206",
+      "total_segs": 23,
+      "unnamed_segs": 22
+    },
+    {
+      "name": "NGC02I0125015_2501",
+      "stem": "NGC02I0125015_2501",
+      "total_segs": 23,
+      "unnamed_segs": 22
+    },
+    {
+      "name": "NGC03I0320025_2003",
+      "stem": "NGC03I0320025_2003",
+      "total_segs": 23,
+      "unnamed_segs": 22
+    },
+    {
+      "name": "NGC03N0823055_2306",
+      "stem": "NGC03N0823055_2306",
+      "total_segs": 23,
+      "unnamed_segs": 22
+    },
+    {
+      "name": "NGC07I0722105_2211",
+      "stem": "NGC07I0722105_2211",
+      "total_segs": 23,
+      "unnamed_segs": 22
+    },
+    {
+      "name": "NGC101T3825065_2506",
+      "stem": "NGC101T3825065_2506",
+      "total_segs": 23,
+      "unnamed_segs": 22
+    },
+    {
+      "name": "NGC16N4322085_2209",
+      "stem": "NGC16N4322085_2209",
+      "total_segs": 23,
+      "unnamed_segs": 22
+    },
+    {
+      "name": "NGC95N1722115_2211",
+      "stem": "NGC95N1722115_2211",
+      "total_segs": 23,
+      "unnamed_segs": 22
+    },
+    {
+      "name": "GC00A0518055_1806",
+      "stem": "GC00A0518055_1806",
+      "total_segs": 22,
+      "unnamed_segs": 21
+    },
+    {
+      "name": "GC00I0219045_1905",
+      "stem": "GC00I0219045_1905",
+      "total_segs": 22,
+      "unnamed_segs": 21
+    },
+    {
+      "name": "GC02I0215105_1511",
+      "stem": "GC02I0215105_1511",
+      "total_segs": 22,
+      "unnamed_segs": 21
+    },
+    {
+      "name": "GC02I0415015_1504",
+      "stem": "GC02I0415015_1504",
+      "total_segs": 22,
+      "unnamed_segs": 21
+    },
+    {
+      "name": "GC02N0216095_1610",
+      "stem": "GC02N0216095_1610",
+      "total_segs": 22,
+      "unnamed_segs": 21
+    },
+    {
+      "name": "GC03A0319015_1901",
+      "stem": "GC03A0319015_1901",
+      "total_segs": 22,
+      "unnamed_segs": 21
+    },
+    {
+      "name": "GC03I0619015_1902",
+      "stem": "GC03I0619015_1902",
+      "total_segs": 22,
+      "unnamed_segs": 21
+    },
+    {
+      "name": "GC03N0817085_1708",
+      "stem": "GC03N0817085_1708",
+      "total_segs": 22,
+      "unnamed_segs": 21
+    },
+    {
+      "name": "HGC04N0822035_2203",
+      "stem": "HGC04N0822035_2203",
+      "total_segs": 22,
+      "unnamed_segs": 21
+    },
+    {
+      "name": "HGC06N0921085_2109",
+      "stem": "HGC06N0921085_2109",
+      "total_segs": 22,
+      "unnamed_segs": 21
+    },
+    {
+      "name": "HGC13N2422055_2205",
+      "stem": "HGC13N2422055_2205",
+      "total_segs": 22,
+      "unnamed_segs": 21
+    },
+    {
+      "name": "NGC03I0224105_2411",
+      "stem": "NGC03I0224105_2411",
+      "total_segs": 22,
+      "unnamed_segs": 21
+    },
+    {
+      "name": "NGC03I0325075_2507",
+      "stem": "NGC03I0325075_2507",
+      "total_segs": 22,
+      "unnamed_segs": 21
+    },
+    {
+      "name": "NGC03I0625095_2509",
+      "stem": "NGC03I0625095_2509",
+      "total_segs": 22,
+      "unnamed_segs": 21
+    },
+    {
+      "name": "NGC03I1223105_2311",
+      "stem": "NGC03I1223105_2311",
+      "total_segs": 22,
+      "unnamed_segs": 21
+    },
+    {
+      "name": "NGC03N0124085_2408",
+      "stem": "NGC03N0124085_2408",
+      "total_segs": 22,
+      "unnamed_segs": 21
+    },
+    {
+      "name": "NGC04I2123075_2307",
+      "stem": "NGC04I2123075_2307",
+      "total_segs": 22,
+      "unnamed_segs": 21
+    },
+    {
+      "name": "NGC16I2021125_2201",
+      "stem": "NGC16I2021125_2201",
+      "total_segs": 22,
+      "unnamed_segs": 21
+    },
+    {
+      "name": "GC02I0215085_1508",
+      "stem": "GC02I0215085_1508",
+      "total_segs": 21,
+      "unnamed_segs": 20
+    },
+    {
+      "name": "GC03A0718035_1804",
+      "stem": "GC03A0718035_1804",
+      "total_segs": 21,
+      "unnamed_segs": 20
+    },
+    {
+      "name": "GC03A1217055_1708",
+      "stem": "GC03A1217055_1708",
+      "total_segs": 21,
+      "unnamed_segs": 20
+    },
+    {
+      "name": "GC03C0616015_1610",
+      "stem": "GC03C0616015_1610",
+      "total_segs": 21,
+      "unnamed_segs": 20
+    },
+    {
+      "name": "GC03N0618095_1810",
+      "stem": "GC03N0618095_1810",
+      "total_segs": 21,
+      "unnamed_segs": 20
+    },
+    {
+      "name": "GC04I1817055_1705",
+      "stem": "GC04I1817055_1705",
+      "total_segs": 21,
+      "unnamed_segs": 20
+    },
+    {
+      "name": "HGC10N1722065_2207",
+      "stem": "HGC10N1722065_2207",
+      "total_segs": 21,
+      "unnamed_segs": 20
+    },
+    {
+      "name": "HGC87I4022045_2205",
+      "stem": "HGC87I4022045_2205",
+      "total_segs": 21,
+      "unnamed_segs": 20
+    },
+    {
+      "name": "NGC03I0523075_2308",
+      "stem": "NGC03I0523075_2308",
+      "total_segs": 21,
+      "unnamed_segs": 20
+    },
+    {
+      "name": "NGC03I0623045_2305",
+      "stem": "NGC03I0623045_2305",
+      "total_segs": 21,
+      "unnamed_segs": 20
+    },
+    {
+      "name": "NGC89T4321055_2106",
+      "stem": "NGC89T4321055_2106",
+      "total_segs": 21,
+      "unnamed_segs": 20
+    },
+    {
+      "name": "NGC95I1622115_2211",
+      "stem": "NGC95I1622115_2211",
+      "total_segs": 21,
+      "unnamed_segs": 20
+    },
+    {
+      "name": "GC03A1318085_1809",
+      "stem": "GC03A1318085_1809",
+      "total_segs": 20,
+      "unnamed_segs": 19
+    },
+    {
+      "name": "GC04I0618015_1801",
+      "stem": "GC04I0618015_1801",
+      "total_segs": 20,
+      "unnamed_segs": 19
+    },
+    {
+      "name": "GC04I1418075_1808",
+      "stem": "GC04I1418075_1808",
+      "total_segs": 20,
+      "unnamed_segs": 19
+    },
+    {
+      "name": "GC04N1217105_1711",
+      "stem": "GC04N1217105_1711",
+      "total_segs": 20,
+      "unnamed_segs": 19
+    },
+    {
+      "name": "HGC03I0420065_2007",
+      "stem": "HGC03I0420065_2007",
+      "total_segs": 20,
+      "unnamed_segs": 19
+    },
+    {
+      "name": "HGC04A0922055_2205",
+      "stem": "HGC04A0922055_2205",
+      "total_segs": 20,
+      "unnamed_segs": 19
+    },
+    {
+      "name": "HGC88I1421065_2107",
+      "stem": "HGC88I1421065_2107",
+      "total_segs": 20,
+      "unnamed_segs": 19
+    },
+    {
+      "name": "HGC93I3121125_2201",
+      "stem": "HGC93I3121125_2201",
+      "total_segs": 20,
+      "unnamed_segs": 19
+    },
+    {
+      "name": "NGC03N0425085_2508",
+      "stem": "NGC03N0425085_2508",
+      "total_segs": 20,
+      "unnamed_segs": 19
+    },
+    {
+      "name": "NGC03N0622065_2206",
+      "stem": "NGC03N0622065_2206",
+      "total_segs": 20,
+      "unnamed_segs": 19
+    },
+    {
+      "name": "NGC04N0723015_2301",
+      "stem": "NGC04N0723015_2301",
+      "total_segs": 20,
+      "unnamed_segs": 19
+    },
+    {
+      "name": "NGC04N1123085_2309",
+      "stem": "NGC04N1123085_2309",
+      "total_segs": 20,
+      "unnamed_segs": 19
+    },
+    {
+      "name": "NGC09I2122095_2210",
+      "stem": "NGC09I2122095_2210",
+      "total_segs": 19,
+      "unnamed_segs": 19
+    },
+    {
+      "name": "NGC16I4122085_2209",
+      "stem": "NGC16I4122085_2209",
+      "total_segs": 20,
+      "unnamed_segs": 19
+    },
+    {
+      "name": "NGC94I3922035_2203",
+      "stem": "NGC94I3922035_2203",
+      "total_segs": 20,
+      "unnamed_segs": 19
+    },
+    {
+      "name": "NGC95I2422115_2211",
+      "stem": "NGC95I2422115_2211",
+      "total_segs": 20,
+      "unnamed_segs": 19
+    },
+    {
+      "name": "GC00N0618115_1812",
+      "stem": "GC00N0618115_1812",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "GC03A0618035_1804",
+      "stem": "GC03A0618035_1804",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "GC03A1018035_1804",
+      "stem": "GC03A1018035_1804",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "GC03C0217015_1705",
+      "stem": "GC03C0217015_1705",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "GC03N0320095_2010",
+      "stem": "GC03N0320095_2010",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "GC05A1918085_1809",
+      "stem": "GC05A1918085_1809",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "HGC00I0121115_2111",
+      "stem": "HGC00I0121115_2111",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "HGC04I0821105_2110",
+      "stem": "HGC04I0821105_2110",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "HGC04I0822065_2206",
+      "stem": "HGC04I0822065_2206",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "HGC06I0521085_2109",
+      "stem": "HGC06I0521085_2109",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "HGC13N2322065_2206",
+      "stem": "HGC13N2322065_2206",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "NGC00I0120045_2004",
+      "stem": "NGC00I0120045_2004",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "NGC00I0323015_2302",
+      "stem": "NGC00I0323015_2302",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "NGC03I0223015_2301",
+      "stem": "NGC03I0223015_2301",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "NGC03I0423035_2304",
+      "stem": "NGC03I0423035_2304",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "NGC03I0824015_2401",
+      "stem": "NGC03I0824015_2401",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "NGC04N1722075_2208",
+      "stem": "NGC04N1722075_2208",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "NGC05I0825075_2507",
+      "stem": "NGC05I0825075_2507",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "NGC91I4421085_2109",
+      "stem": "NGC91I4421085_2109",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "NGC95I4022115_2211",
+      "stem": "NGC95I4022115_2211",
+      "total_segs": 19,
+      "unnamed_segs": 18
+    },
+    {
+      "name": "FGC16I2522095_2210",
+      "stem": "FGC16I2522095_2210",
+      "total_segs": 18,
+      "unnamed_segs": 17
+    },
+    {
+      "name": "GC03I0917065_1706",
+      "stem": "GC03I0917065_1706",
+      "total_segs": 18,
+      "unnamed_segs": 17
+    },
+    {
+      "name": "GC03N0619075_1908",
+      "stem": "GC03N0619075_1908",
+      "total_segs": 18,
+      "unnamed_segs": 17
+    },
+    {
+      "name": "GC03N0917095_1709",
+      "stem": "GC03N0917095_1709",
+      "total_segs": 18,
+      "unnamed_segs": 17
+    },
+    {
+      "name": "GC04C1615115_1605",
+      "stem": "GC04C1615115_1605",
+      "total_segs": 18,
+      "unnamed_segs": 17
+    },
+    {
+      "name": "HGC03I0922015_2202",
+      "stem": "HGC03I0922015_2202",
+      "total_segs": 18,
+      "unnamed_segs": 17
+    },
+    {
+      "name": "HGC03N0122075_2208",
+      "stem": "HGC03N0122075_2208",
+      "total_segs": 18,
+      "unnamed_segs": 17
+    },
+    {
+      "name": "HGC07I1322015_2202",
+      "stem": "HGC07I1322015_2202",
+      "total_segs": 18,
+      "unnamed_segs": 17
+    },
+    {
+      "name": "HGC11N1922065_2207",
+      "stem": "HGC11N1922065_2207",
+      "total_segs": 18,
+      "unnamed_segs": 17
+    },
+    {
+      "name": "HGC93I3021125_2201",
+      "stem": "HGC93I3021125_2201",
+      "total_segs": 18,
+      "unnamed_segs": 17
+    },
+    {
+      "name": "NGC04I0325055_2505",
+      "stem": "NGC04I0325055_2505",
+      "total_segs": 18,
+      "unnamed_segs": 17
+    },
+    {
+      "name": "NGC04I2022075_2208",
+      "stem": "NGC04I2022075_2208",
+      "total_segs": 18,
+      "unnamed_segs": 17
+    },
+    {
+      "name": "NGC95I1322115_2211",
+      "stem": "NGC95I1322115_2211",
+      "total_segs": 18,
+      "unnamed_segs": 17
+    },
+    {
+      "name": "GC03A0214111_1501",
+      "stem": "GC03A0214111_1501",
+      "total_segs": 17,
+      "unnamed_segs": 16
+    },
+    {
+      "name": "GC03C1216125_1702",
+      "stem": "GC03C1216125_1702",
+      "total_segs": 17,
+      "unnamed_segs": 16
+    },
+    {
+      "name": "HGC03I1022015_2202",
+      "stem": "HGC03I1022015_2202",
+      "total_segs": 17,
+      "unnamed_segs": 16
+    },
+    {
+      "name": "HGC04I1122025_2203",
+      "stem": "HGC04I1122025_2203",
+      "total_segs": 17,
+      "unnamed_segs": 16
+    },
+    {
+      "name": "HGC14N2422065_2207",
+      "stem": "HGC14N2422065_2207",
+      "total_segs": 17,
+      "unnamed_segs": 16
+    },
+    {
+      "name": "HGC88I1021065_2107",
+      "stem": "HGC88I1021065_2107",
+      "total_segs": 17,
+      "unnamed_segs": 16
+    },
+    {
+      "name": "NGC02I0119035_1904",
+      "stem": "NGC02I0119035_1904",
+      "total_segs": 17,
+      "unnamed_segs": 16
+    },
+    {
+      "name": "NGC03I1223035_2304",
+      "stem": "NGC03I1223035_2304",
+      "total_segs": 17,
+      "unnamed_segs": 16
+    },
+    {
+      "name": "NGC04I1423035_2304",
+      "stem": "NGC04I1423035_2304",
+      "total_segs": 17,
+      "unnamed_segs": 16
+    },
+    {
+      "name": "NGC05I0121075_2108",
+      "stem": "NGC05I0121075_2108",
+      "total_segs": 17,
+      "unnamed_segs": 16
+    },
+    {
+      "name": "NGC09I2722085_2209",
+      "stem": "NGC09I2722085_2209",
+      "total_segs": 17,
+      "unnamed_segs": 16
+    },
+    {
+      "name": "NGC13N3622085_2209",
+      "stem": "NGC13N3622085_2209",
+      "total_segs": 17,
+      "unnamed_segs": 16
+    },
+    {
+      "name": "GC02M0616015_1602",
+      "stem": "GC02M0616015_1602",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "GC03A0118065_1808",
+      "stem": "GC03A0118065_1808",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "GC03C0117025_1706",
+      "stem": "GC03C0117025_1706",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "GC03C0816125_1702",
+      "stem": "GC03C0816125_1702",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "GC03C1016095_1701",
+      "stem": "GC03C1016095_1701",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "GC03I1018115_1811",
+      "stem": "GC03I1018115_1811",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "GC03N0519015_1902",
+      "stem": "GC03N0519015_1902",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "GC03N0620015_2002",
+      "stem": "GC03N0620015_2002",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "GC04N1117035_1703",
+      "stem": "GC04N1117035_1703",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "GC04N2519035_1904",
+      "stem": "GC04N2519035_1904",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "HGC04I1222025_2203",
+      "stem": "HGC04I1222025_2203",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "HGC10N1622065_2207",
+      "stem": "HGC10N1622065_2207",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "HGC13I1421125_2201",
+      "stem": "HGC13I1421125_2201",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "NGC02I0224055_2405",
+      "stem": "NGC02I0224055_2405",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "NGC03I0822085_2209",
+      "stem": "NGC03I0822085_2209",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "NGC03I0923105_2311",
+      "stem": "NGC03I0923105_2311",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "NGC04I0725045_2504",
+      "stem": "NGC04I0725045_2504",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "NGC04I1923065_2306",
+      "stem": "NGC04I1923065_2306",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "NGC04N1323095_2310",
+      "stem": "NGC04N1323095_2310",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "NGC06I0221065_2107",
+      "stem": "NGC06I0221065_2107",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "NGC09I1722045_2205",
+      "stem": "NGC09I1722045_2205",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "NGC16I4022085_2209",
+      "stem": "NGC16I4022085_2209",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "NGC95N4522105_2210",
+      "stem": "NGC95N4522105_2210",
+      "total_segs": 16,
+      "unnamed_segs": 15
+    },
+    {
+      "name": "GC03N0218085_1810",
+      "stem": "GC03N0218085_1810",
+      "total_segs": 15,
+      "unnamed_segs": 14
+    },
+    {
+      "name": "HGC03N0120105_2011",
+      "stem": "HGC03N0120105_2011",
+      "total_segs": 15,
+      "unnamed_segs": 14
+    },
+    {
+      "name": "HGC04I1722045_2204",
+      "stem": "HGC04I1722045_2204",
+      "total_segs": 15,
+      "unnamed_segs": 14
+    },
+    {
+      "name": "HGC09I2322045_2204",
+      "stem": "HGC09I2322045_2204",
+      "total_segs": 15,
+      "unnamed_segs": 14
+    },
+    {
+      "name": "HGC16I0921075_2108",
+      "stem": "HGC16I0921075_2108",
+      "total_segs": 15,
+      "unnamed_segs": 14
+    },
+    {
+      "name": "HGC49I3922015_2201",
+      "stem": "HGC49I3922015_2201",
+      "total_segs": 15,
+      "unnamed_segs": 14
+    },
+    {
+      "name": "NGC03I1122075_2207",
+      "stem": "NGC03I1122075_2207",
+      "total_segs": 15,
+      "unnamed_segs": 14
+    },
+    {
+      "name": "NGC03I1222035_2204",
+      "stem": "NGC03I1222035_2204",
+      "total_segs": 15,
+      "unnamed_segs": 14
+    },
+    {
+      "name": "NGC06I0522095_2210",
+      "stem": "NGC06I0522095_2210",
+      "total_segs": 15,
+      "unnamed_segs": 14
+    },
+    {
+      "name": "NGC11N2122065_2207",
+      "stem": "NGC11N2122065_2207",
+      "total_segs": 15,
+      "unnamed_segs": 14
+    },
+    {
+      "name": "NGC13N2622065_2206",
+      "stem": "NGC13N2622065_2206",
+      "total_segs": 15,
+      "unnamed_segs": 14
+    },
+    {
+      "name": "NGC95N3122115_2211",
+      "stem": "NGC95N3122115_2211",
+      "total_segs": 15,
+      "unnamed_segs": 14
+    },
+    {
+      "name": "GC03A0719045_1905",
+      "stem": "GC03A0719045_1905",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "GC03N0416125_1701",
+      "stem": "GC03N0416125_1701",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "GC03N0517025_1703",
+      "stem": "GC03N0517025_1703",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "GC03N1118085_1808",
+      "stem": "GC03N1118085_1808",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "GC03N1218085_1808",
+      "stem": "GC03N1218085_1808",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "GC04I1518025_1803",
+      "stem": "GC04I1518025_1803",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "GC04N2017095_1709",
+      "stem": "GC04N2017095_1709",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "GC05I1718075_1808",
+      "stem": "GC05I1718075_1808",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "HGC07I1222045_2205",
+      "stem": "HGC07I1222045_2205",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "HGC13N2822035_2204",
+      "stem": "HGC13N2822035_2204",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "HGC16I1021075_2108",
+      "stem": "HGC16I1021075_2108",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "HGC48I2321125_2201",
+      "stem": "HGC48I2321125_2201",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "HGC49I4022015_2201",
+      "stem": "HGC49I4022015_2201",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "NGC00I0223075_2307",
+      "stem": "NGC00I0223075_2307",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "NGC00I0224105_2410",
+      "stem": "NGC00I0224105_2410",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "NGC03I0424035_2403",
+      "stem": "NGC03I0424035_2403",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "NGC03I0723095_2310",
+      "stem": "NGC03I0723095_2310",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "NGC03I0924015_2401",
+      "stem": "NGC03I0924015_2401",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "NGC03I1223065_2306",
+      "stem": "NGC03I1223065_2306",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "NGC04I0425045_2504",
+      "stem": "NGC04I0425045_2504",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "NGC04I0425105_2510",
+      "stem": "NGC04I0425105_2510",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "NGC06I0121065_2107",
+      "stem": "NGC06I0121065_2107",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "NGC13I1822035_2203",
+      "stem": "NGC13I1822035_2203",
+      "total_segs": 14,
+      "unnamed_segs": 13
+    },
+    {
+      "name": "GC03A0519095_1909",
+      "stem": "GC03A0519095_1909",
+      "total_segs": 13,
+      "unnamed_segs": 12
+    },
+    {
+      "name": "GC03I0518125_1901",
+      "stem": "GC03I0518125_1901",
+      "total_segs": 13,
+      "unnamed_segs": 12
+    },
+    {
+      "name": "GC04I1318075_1808",
+      "stem": "GC04I1318075_1808",
+      "total_segs": 13,
+      "unnamed_segs": 12
+    },
+    {
+      "name": "GC04I2319035_1904",
+      "stem": "GC04I2319035_1904",
+      "total_segs": 13,
+      "unnamed_segs": 12
+    },
+    {
+      "name": "GC04N1817035_1704",
+      "stem": "GC04N1817035_1704",
+      "total_segs": 13,
+      "unnamed_segs": 12
+    },
+    {
+      "name": "HGC03N0220055_2006",
+      "stem": "HGC03N0220055_2006",
+      "total_segs": 13,
+      "unnamed_segs": 12
+    },
+    {
+      "name": "HGC03N0520045_2005",
+      "stem": "HGC03N0520045_2005",
+      "total_segs": 13,
+      "unnamed_segs": 12
+    },
+    {
+      "name": "HGC16I1721085_2109",
+      "stem": "HGC16I1721085_2109",
+      "total_segs": 13,
+      "unnamed_segs": 12
+    },
+    {
+      "name": "HGC48I2421125_2201",
+      "stem": "HGC48I2421125_2201",
+      "total_segs": 13,
+      "unnamed_segs": 12
+    },
+    {
+      "name": "HGC91N3321075_2107",
+      "stem": "HGC91N3321075_2107",
+      "total_segs": 13,
+      "unnamed_segs": 12
+    },
+    {
+      "name": "NGC02I0319045_1905",
+      "stem": "NGC02I0319045_1905",
+      "total_segs": 13,
+      "unnamed_segs": 12
+    },
+    {
+      "name": "NGC03I0124015_2403",
+      "stem": "NGC03I0124015_2403",
+      "total_segs": 13,
+      "unnamed_segs": 12
+    },
+    {
+      "name": "NGC05I1819045_1905",
+      "stem": "NGC05I1819045_1905",
+      "total_segs": 13,
+      "unnamed_segs": 12
+    },
+    {
+      "name": "NGC13N3922085_2209",
+      "stem": "NGC13N3922085_2209",
+      "total_segs": 13,
+      "unnamed_segs": 12
+    },
+    {
+      "name": "NGC49I4522075_2207",
+      "stem": "NGC49I4522075_2207",
+      "total_segs": 13,
+      "unnamed_segs": 12
+    },
+    {
+      "name": "NGC78I4422075_2208",
+      "stem": "NGC78I4422075_2208",
+      "total_segs": 13,
+      "unnamed_segs": 12
+    },
+    {
+      "name": "NGC89T4521055_2106",
+      "stem": "NGC89T4521055_2106",
+      "total_segs": 13,
+      "unnamed_segs": 12
+    },
+    {
+      "name": "GC02M0416015_1602",
+      "stem": "GC02M0416015_1602",
+      "total_segs": 12,
+      "unnamed_segs": 11
+    },
+    {
+      "name": "GC03A0618085_1808",
+      "stem": "GC03A0618085_1808",
+      "total_segs": 12,
+      "unnamed_segs": 11
+    },
+    {
+      "name": "GC03A1215105_1511",
+      "stem": "GC03A1215105_1511",
+      "total_segs": 12,
+      "unnamed_segs": 11
+    },
+    {
+      "name": "GC03N0417025_1703",
+      "stem": "GC03N0417025_1703",
+      "total_segs": 12,
+      "unnamed_segs": 11
+    },
+    {
+      "name": "GC03N1018085_1809",
+      "stem": "GC03N1018085_1809",
+      "total_segs": 12,
+      "unnamed_segs": 11
+    },
+    {
+      "name": "GC04I1618115_1812",
+      "stem": "GC04I1618115_1812",
+      "total_segs": 12,
+      "unnamed_segs": 11
+    },
+    {
+      "name": "GC05I1119035_1903",
+      "stem": "GC05I1119035_1903",
+      "total_segs": 12,
+      "unnamed_segs": 11
+    },
+    {
+      "name": "HGC93I2622025_2203",
+      "stem": "HGC93I2622025_2203",
+      "total_segs": 12,
+      "unnamed_segs": 11
+    },
+    {
+      "name": "HGC94I3122035_2203",
+      "stem": "HGC94I3122035_2203",
+      "total_segs": 12,
+      "unnamed_segs": 11
+    },
+    {
+      "name": "NGC03I0324035_2404",
+      "stem": "NGC03I0324035_2404",
+      "total_segs": 12,
+      "unnamed_segs": 11
+    },
+    {
+      "name": "NGC03I0922075_2207",
+      "stem": "NGC03I0922075_2207",
+      "total_segs": 12,
+      "unnamed_segs": 11
+    },
+    {
+      "name": "NGC03I0923065_2307",
+      "stem": "NGC03I0923065_2307",
+      "total_segs": 12,
+      "unnamed_segs": 11
+    },
+    {
+      "name": "NGC04I0824125_2412",
+      "stem": "NGC04I0824125_2412",
+      "total_segs": 12,
+      "unnamed_segs": 11
+    },
+    {
+      "name": "NGC04I1123095_2310",
+      "stem": "NGC04I1123095_2310",
+      "total_segs": 12,
+      "unnamed_segs": 11
+    },
+    {
+      "name": "NGC05I2719035_1904",
+      "stem": "NGC05I2719035_1904",
+      "total_segs": 12,
+      "unnamed_segs": 11
+    },
+    {
+      "name": "NGC78I3922065_2206",
+      "stem": "NGC78I3922065_2206",
+      "total_segs": 12,
+      "unnamed_segs": 11
+    },
+    {
+      "name": "NGC94I4022035_2203",
+      "stem": "NGC94I4022035_2203",
+      "total_segs": 12,
+      "unnamed_segs": 11
+    },
+    {
+      "name": "NGC95I3222105_2210",
+      "stem": "NGC95I3222105_2210",
+      "total_segs": 12,
+      "unnamed_segs": 11
+    },
+    {
+      "name": "GC00I0119045_1905",
+      "stem": "GC00I0119045_1905",
+      "total_segs": 11,
+      "unnamed_segs": 10
+    },
+    {
+      "name": "GC03A1017065_1707",
+      "stem": "GC03A1017065_1707",
+      "total_segs": 11,
+      "unnamed_segs": 10
+    },
+    {
+      "name": "GC03A1114121_1503",
+      "stem": "GC03A1114121_1503",
+      "total_segs": 11,
+      "unnamed_segs": 10
+    },
+    {
+      "name": "GC03A1218035_1804",
+      "stem": "GC03A1218035_1804",
+      "total_segs": 11,
+      "unnamed_segs": 10
+    },
+    {
+      "name": "GC03I0719015_1902",
+      "stem": "GC03I0719015_1902",
+      "total_segs": 11,
+      "unnamed_segs": 10
+    },
+    {
+      "name": "GC03N1218085_1809",
+      "stem": "GC03N1218085_1809",
+      "total_segs": 11,
+      "unnamed_segs": 10
+    },
+    {
+      "name": "GC04A1618065_1808",
+      "stem": "GC04A1618065_1808",
+      "total_segs": 11,
+      "unnamed_segs": 10
+    },
+    {
+      "name": "GC04I1518115_1812",
+      "stem": "GC04I1518115_1812",
+      "total_segs": 11,
+      "unnamed_segs": 10
+    },
+    {
+      "name": "GC04N2217095_1709",
+      "stem": "GC04N2217095_1709",
+      "total_segs": 11,
+      "unnamed_segs": 10
+    },
+    {
+      "name": "HGC16I1821085_2109",
+      "stem": "HGC16I1821085_2109",
+      "total_segs": 11,
+      "unnamed_segs": 10
+    },
+    {
+      "name": "HGC93I3222015_2202",
+      "stem": "HGC93I3222015_2202",
+      "total_segs": 11,
+      "unnamed_segs": 10
+    },
+    {
+      "name": "HGC93I3322015_2202",
+      "stem": "HGC93I3322015_2202",
+      "total_segs": 11,
+      "unnamed_segs": 10
+    },
+    {
+      "name": "HGC94I2822035_2203",
+      "stem": "HGC94I2822035_2203",
+      "total_segs": 11,
+      "unnamed_segs": 10
+    },
+    {
+      "name": "NGC03I0423015_2301",
+      "stem": "NGC03I0423015_2301",
+      "total_segs": 11,
+      "unnamed_segs": 10
+    },
+    {
+      "name": "NGC14I2922065_2207",
+      "stem": "NGC14I2922065_2207",
+      "total_segs": 11,
+      "unnamed_segs": 10
+    },
+    {
+      "name": "NGC49I4222075_2207",
+      "stem": "NGC49I4222075_2207",
+      "total_segs": 11,
+      "unnamed_segs": 10
+    },
+    {
+      "name": "NGC78I4022065_2206",
+      "stem": "NGC78I4022065_2206",
+      "total_segs": 11,
+      "unnamed_segs": 10
+    },
+    {
+      "name": "GC00N0116055_1606",
+      "stem": "GC00N0116055_1606",
+      "total_segs": 10,
+      "unnamed_segs": 9
+    },
+    {
+      "name": "GC03A1118035_1804",
+      "stem": "GC03A1118035_1804",
+      "total_segs": 10,
+      "unnamed_segs": 9
+    },
+    {
+      "name": "GC03N0518085_1810",
+      "stem": "GC03N0518085_1810",
+      "total_segs": 10,
+      "unnamed_segs": 9
+    },
+    {
+      "name": "HGC94I3022035_2203",
+      "stem": "HGC94I3022035_2203",
+      "total_segs": 10,
+      "unnamed_segs": 9
+    },
+    {
+      "name": "NGC03I0424015_2401",
+      "stem": "NGC03I0424015_2401",
+      "total_segs": 10,
+      "unnamed_segs": 9
+    },
+    {
+      "name": "NGC03I1023115_2312",
+      "stem": "NGC03I1023115_2312",
+      "total_segs": 10,
+      "unnamed_segs": 9
+    },
+    {
+      "name": "NGC06I1222055_2206",
+      "stem": "NGC06I1222055_2206",
+      "total_segs": 10,
+      "unnamed_segs": 9
+    },
+    {
+      "name": "NGC09I2025065_2506",
+      "stem": "NGC09I2025065_2506",
+      "total_segs": 10,
+      "unnamed_segs": 9
+    },
+    {
+      "name": "NGC89T3021065_2107",
+      "stem": "NGC89T3021065_2107",
+      "total_segs": 10,
+      "unnamed_segs": 9
+    },
+    {
+      "name": "HGC03I0220045_2005",
+      "stem": "HGC03I0220045_2005",
+      "total_segs": 9,
+      "unnamed_segs": 8
+    },
+    {
+      "name": "NGC03I0225025_2502",
+      "stem": "NGC03I0225025_2502",
+      "total_segs": 9,
+      "unnamed_segs": 8
+    },
+    {
+      "name": "NGC03I0324035_2403",
+      "stem": "NGC03I0324035_2403",
+      "total_segs": 9,
+      "unnamed_segs": 8
+    },
+    {
+      "name": "GC04N1818035_1805",
+      "stem": "GC04N1818035_1805",
+      "total_segs": 8,
+      "unnamed_segs": 7
+    },
+    {
+      "name": "NGC03I0923115_2312",
+      "stem": "NGC03I0923115_2312",
+      "total_segs": 8,
+      "unnamed_segs": 7
+    },
+    {
+      "name": "NGC89T3021075_2108",
+      "stem": "NGC89T3021075_2108",
+      "total_segs": 8,
+      "unnamed_segs": 7
+    },
+    {
+      "name": "GC03I0815015_1503",
+      "stem": "GC03I0815015_1503",
+      "total_segs": 55,
+      "unnamed_segs": 4
+    },
+    {
+      "name": "HGC03N0321085_2109",
+      "stem": "HGC03N0321085_2109",
+      "total_segs": 18,
+      "unnamed_segs": 3
+    },
+    {
+      "name": "GC03N0318045_1805",
+      "stem": "GC03N0318045_1805",
+      "total_segs": 39,
+      "unnamed_segs": 2
+    },
+    {
+      "name": "GC00A0318065_1807",
+      "stem": "GC00A0318065_1807",
+      "total_segs": 22,
+      "unnamed_segs": 1
+    },
+    {
+      "name": "GC03K0614110_1501",
+      "stem": "GC03K0614110_1501",
+      "total_segs": 62,
+      "unnamed_segs": 1
+    },
+    {
+      "name": "GC05A1619045_1905",
+      "stem": "GC05A1619045_1905",
+      "total_segs": 22,
+      "unnamed_segs": 1
+    },
+    {
+      "name": "GC05I0315055_1506",
+      "stem": "GC05I0315055_1506",
+      "total_segs": 42,
+      "unnamed_segs": 1
+    },
+    {
+      "name": "NGC04I0622115_2212",
+      "stem": "NGC04I0622115_2212",
+      "total_segs": 11,
+      "unnamed_segs": 1
+    },
+    {
+      "name": "NGC13T1625075_2507",
+      "stem": "NGC13T1625075_2507",
+      "total_segs": 47,
+      "unnamed_segs": 1
+    },
+    {
+      "name": "NGC78I3822065_2206",
+      "stem": "NGC78I3822065_2206",
+      "total_segs": 13,
+      "unnamed_segs": 1
+    }
+  ]
+}
