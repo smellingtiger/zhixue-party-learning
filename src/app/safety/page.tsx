@@ -16,6 +16,14 @@ import {
   Users,
   MessageSquare,
   ArrowRight,
+  AlertTriangle,
+  Mountain as MountainIcon,
+  Ship,
+  Tornado,
+  CloudFog,
+  Snowflake,
+  Sun,
+  TriangleAlert,
 } from 'lucide-react';
 
 const disasterTypes = [
@@ -23,6 +31,13 @@ const disasterTypes = [
   { id: 'earthquake', name: '地震', icon: Mountain, color: 'orange', description: '地震应急避险知识' },
   { id: 'typhoon', name: '台风', icon: Wind, color: 'cyan', description: '台风防御与应对' },
   { id: 'fire', name: '火灾', icon: Flame, color: 'red', description: '火灾预防与逃生' },
+  { id: 'landslide', name: '泥石流', icon: TriangleAlert, color: 'amber', description: '泥石流预警与避险' },
+  { id: 'tsunami', name: '海啸', icon: Ship, color: 'teal', description: '海啸成因与防护' },
+  { id: 'tornado', name: '龙卷风', icon: Tornado, color: 'indigo', description: '龙卷风监测与应对' },
+  { id: 'volcano', name: '火山爆发', icon: MountainIcon, color: 'rose', description: '火山活动与防灾' },
+  { id: 'sandstorm', name: '沙尘暴', icon: CloudFog, color: 'yellow', description: '沙尘暴防护知识' },
+  { id: 'avalanche', name: '雪崩', icon: Snowflake, color: 'sky', description: '雪崩预警与逃生' },
+  { id: 'drought', name: '干旱', icon: Sun, color: 'lime', description: '干旱应对与节水' },
 ];
 
 const courseCards = [
@@ -82,14 +97,20 @@ export default function SafetyPage() {
 
   const selectedDisasterData = disasterTypes.find(d => d.id === selectedDisaster);
 
+  const handleNavigateWithDisaster = (href: string) => {
+    if (href === '/safety/disaster-graph') {
+      const disasterName = disasterTypes.find(d => d.id === selectedDisaster)?.name || '地震';
+      localStorage.setItem('selectedDisaster', disasterName);
+      router.push(`${href}?disaster=${encodeURIComponent(disasterName)}`);
+    } else {
+      router.push(href);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100">
       <main className="w-full px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-8"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
           {/* 顶部标题区 */}
           <div 
             className="relative overflow-hidden rounded-3xl"
@@ -125,8 +146,8 @@ export default function SafetyPage() {
                 </p>
               </motion.div>
 
-              {/* 灾害类型选择 */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              {/* 灾害类型选择 - 扩展为11种 */}
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 mb-8">
                 {disasterTypes.map((disaster, index) => {
                   const Icon = disaster.icon;
                   const isSelected = selectedDisaster === disaster.id;
@@ -135,26 +156,25 @@ export default function SafetyPage() {
                       key={disaster.id}
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.6 + index * 0.1, type: 'spring', stiffness: 200 }}
+                      transition={{ delay: 0.6 + index * 0.05, type: 'spring', stiffness: 200 }}
                       whileHover={{ y: -4, scale: 1.02 }}
                       onClick={() => setSelectedDisaster(disaster.id)}
-                      className={`group cursor-pointer relative overflow-hidden rounded-2xl backdrop-blur-sm border p-5 text-center transition-all duration-500 ${
+                      className={`group cursor-pointer relative overflow-hidden rounded-xl backdrop-blur-sm border p-4 text-center transition-all duration-500 ${
                         isSelected
-                          ? 'bg-white/30 border-white/60 shadow-[0_0_30px_rgba(255,255,255,0.3)]'
+                          ? 'bg-white/30 border-white/60 shadow-[0_0_20px_rgba(255,255,255,0.3)]'
                           : 'bg-white/10 border-white/30 hover:border-white/50 hover:bg-white/20'
                       }`}
                     >
-                      <div className="absolute -top-6 -right-6 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all duration-500" />
+                      <div className="absolute -top-4 -right-4 w-16 h-16 bg-white/10 rounded-full blur-xl group-hover:bg-white/20 transition-all duration-500" />
                       <div className="relative z-10">
-                        <div className={`w-16 h-16 mx-auto rounded-xl flex items-center justify-center mb-3 transition-transform duration-300 ${
+                        <div className={`w-12 h-12 mx-auto rounded-lg flex items-center justify-center mb-2 transition-transform duration-300 ${
                           isSelected ? 'bg-white/40 scale-110' : 'bg-white/20 group-hover:scale-110'
                         }`}>
-                          <Icon className={`w-8 h-8 transition-colors duration-300 ${
+                          <Icon className={`w-6 h-6 transition-colors duration-300 ${
                             isSelected ? 'text-white' : 'text-white/70 group-hover:text-white'
                           }`} />
                         </div>
-                        <h4 className="text-xl font-bold text-white mb-1">{disaster.name}</h4>
-                        <p className="text-xs text-white/60">{disaster.description}</p>
+                        <h4 className="text-sm font-bold text-white">{disaster.name}</h4>
                       </div>
                     </motion.div>
                   );
@@ -202,7 +222,7 @@ export default function SafetyPage() {
                     </div>
                     <Button
                       variant="ghost"
-                      onClick={() => course.href && router.push(course.href)}
+                      onClick={() => handleNavigateWithDisaster(course.href || '/')}
                       className="w-full mt-4 bg-white/20 hover:bg-white/30 text-white border border-white/30 gap-2"
                     >
                       进入学习
