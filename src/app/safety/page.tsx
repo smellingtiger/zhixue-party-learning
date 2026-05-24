@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ const courseCards = [
     hoverBorder: 'hover:border-blue-300/60',
     iconBg: 'bg-blue-500/30',
     iconColor: 'text-blue-300',
+    href: null,
   },
   {
     id: 'knowledge-intro',
@@ -46,6 +48,7 @@ const courseCards = [
     hoverBorder: 'hover:border-emerald-300/60',
     iconBg: 'bg-emerald-500/30',
     iconColor: 'text-emerald-300',
+    href: '/safety/knowledge-intro',
   },
   {
     id: 'command-course',
@@ -57,6 +60,7 @@ const courseCards = [
     hoverBorder: 'hover:border-purple-300/60',
     iconBg: 'bg-purple-500/30',
     iconColor: 'text-purple-300',
+    href: '/safety/command-course',
   },
   {
     id: 'quiz-interactive',
@@ -68,10 +72,12 @@ const courseCards = [
     hoverBorder: 'hover:border-orange-300/60',
     iconBg: 'bg-orange-500/30',
     iconColor: 'text-orange-300',
+    href: null,
   },
 ];
 
 export default function SafetyPage() {
+  const router = useRouter();
   const [selectedDisaster, setSelectedDisaster] = useState('flood');
 
   const selectedDisasterData = disasterTypes.find(d => d.id === selectedDisaster);
@@ -196,6 +202,7 @@ export default function SafetyPage() {
                     </div>
                     <Button
                       variant="ghost"
+                      onClick={() => course.href && router.push(course.href)}
                       className="w-full mt-4 bg-white/20 hover:bg-white/30 text-white border border-white/30 gap-2"
                     >
                       进入学习
