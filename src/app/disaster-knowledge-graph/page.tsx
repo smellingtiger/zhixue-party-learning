@@ -155,6 +155,9 @@ export default function DisasterKnowledgeGraphPage() {
     setIsGenerating(true);
     setSelectedNode(null);
     
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
+    
     try {
       const response = await fetch('/api/disaster-knowledge-graph', {
         method: 'POST',
@@ -162,7 +165,10 @@ export default function DisasterKnowledgeGraphPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ disasterType }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       const result = await response.json();
       
@@ -170,11 +176,21 @@ export default function DisasterKnowledgeGraphPage() {
         throw new Error(result.error || '生成失败');
       }
 
+      if (!result.data || !result.data.id) {
+        throw new Error('返回的图谱数据不完整，请重试');
+      }
+
       setGraphData(result.data);
       toast.success(`成功生成${disasterType}知识图谱`);
     } catch (error) {
+      clearTimeout(timeoutId);
       console.error('生成知识图谱失败:', error);
-      toast.error(error instanceof Error ? error.message : '生成失败，请重试');
+      
+      if (error instanceof Error && error.name === 'AbortError') {
+        toast.error('生成超时（60秒），请重试或稍后再试');
+      } else {
+        toast.error(error instanceof Error ? error.message : '生成失败，请重试');
+      }
     } finally {
       setIsLoading(false);
       setIsGenerating(false);

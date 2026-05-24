@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://192.168.1.212:11434';
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'deepseek-r1:14b';
+const SILICONFLOW_API_KEY = process.env.SILICONFLOW_API_KEY || 'sk-benvwygtccjxvhrnbjqbztiopkroriorvfllywtkzidbwlwb';
+const SILICONFLOW_BASE_URL = 'https://api.siliconflow.cn/v1';
+const SILICONFLOW_MODEL = process.env.SILICONFLOW_MODEL || 'deepseek-ai/DeepSeek-V4-Flash';
 
 interface DisasterGraphNode {
   id: string;
@@ -23,7 +24,9 @@ const DISASTER_TEMPLATES: Record<string, string> = {
 4. 每个子类别下要有2-4个具体知识点
 5. 每个节点需要有id、label、type、description字段
 6. type字段值为：root/category/subcategory/detail
-7. 返回格式必须是有效的JSON，不要有任何其他文字说明`,
+7. 返回格式必须是有效的标准JSON，使用双引号包裹所有字符串
+8. 不要包含任何代码块标记（如\`\`\`json），直接返回纯JSON
+9. 确保JSON格式完全正确，所有括号和引号都必须配对`,
 
   '洪水': `请为"洪水（洪涝）"灾害生成一个完整的知识图谱JSON结构。要求：
 1. 根节点为"洪涝灾害知识体系"
@@ -138,64 +141,101 @@ export async function POST(request: NextRequest) {
 6. type字段值为：root/category/subcategory/detail
 7. 返回格式必须是有效的JSON，不要有任何其他文字说明`;
 
-    console.log(`[灾害图谱] 正在调用 Ollama 生成 ${disasterType} 知识图谱...`);
-    console.log(`[灾害图谱] Ollama 地址: ${OLLAMA_BASE_URL}, 模型: ${OLLAMA_MODEL}`);
+    console.log(`[灾害图谱] 正在调用硅基流动生成 ${disasterType} 知识图谱...`);
+    console.log(`[灾害图谱] 模型: ${SILICONFLOW_MODEL}`);
 
-    const response = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
+    const startTime = Date.now();
+
+    const response = await fetch(`${SILICONFLOW_BASE_URL}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SILICONFLOW_API_KEY}`,
       },
       body: JSON.stringify({
-        model: OLLAMA_MODEL,
-        prompt: prompt,
-        stream: false,
-        options: {
-          temperature: 0.8,
-          top_p: 0.9,
-          num_predict: 4096,
-        },
+        model: SILICONFLOW_MODEL,
+        messages: [
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.8,
+        top_p: 0.9,
+        max_tokens: 4096,
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`[灾害图谱] Ollama API 错误: ${response.status} - ${errorText}`);
+      console.error(`[灾害图谱] 硅基流动 API 错误: ${response.status} - ${errorText}`);
       return NextResponse.json(
-        { error: `Ollama API 调用失败: ${response.status}` },
+        { error: `硅基流动 API 调用失败: ${response.status}` },
         { status: 500 }
       );
     }
 
     const data = await response.json();
-    let content = data.response?.trim() || '';
+    let content = data.choices?.[0]?.message?.content?.trim() || '';
 
-    console.log(`[灾害图谱] Ollama 原始响应长度: ${content.length}`);
+    const duration = Date.now() - startTime;
+    console.log(`[灾害图谱] API 调用耗时: ${duration}ms`);
+    console.log(`[灾害图谱] 硅基流动响应长度: ${content.length}`);
 
     let graphData: DisasterGraphNode;
 
     try {
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      const jsonMatch = content.match(/```json\n?([\s\S]*?)```/);
       if (jsonMatch) {
-        graphData = JSON.parse(jsonMatch[0]);
+        console.log('[灾害图谱] 检测到 markdown 代码块格式');
+        graphData = JSON.parse(jsonMatch[1]);
       } else {
-        throw new Error('无法从响应中提取JSON');
+        const directJsonMatch = content.match(/\{[\s\S]*\}/);
+        if (directJsonMatch) {
+          graphData = JSON.parse(directJsonMatch[0]);
+        } else {
+          throw new Error('无法从响应中提取JSON');
+        }
       }
     } catch (parseError) {
-      console.error('[灾害图谱] JSON 解析失败，尝试清理后重试...');
+      console.error('[灾害图谱] JSON 解析失败:', parseError);
+      console.log('[灾害图谱] 尝试修复 JSON...');
       
-      const cleanedContent = content
+      let cleanedContent = content;
+      
+      const jsonMatch = content.match(/```json\n?([\s\S]*?)```/);
+      if (jsonMatch) {
+        cleanedContent = jsonMatch[1];
+      } else {
+        const bracketMatch = content.match(/\{[\s\S]*\}/);
+        if (bracketMatch) {
+          cleanedContent = bracketMatch[0];
+        }
+      }
+      
+      cleanedContent = cleanedContent
         .replace(/```json\n?/g, '')
         .replace(/```\n?/g, '')
-        .replace(/^[^{]*/, '')
-        .replace(/[^}]*$/, '')
+        .replace(/\n/g, ' ')
+        .replace(/，/g, ',')
+        .replace(/：/g, ':')
+        .replace(/，/g, ',')
+        .replace(/\"\\'/g, '"')
+        .replace(/\\'/g, "'")
+        .replace(/,(\s*[}\]])/g, '$1')
         .trim();
       
-      const jsonMatch = cleanedContent.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        graphData = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error('JSON解析失败');
+      console.log(`[灾害图谱] 清理后的 JSON 长度: ${cleanedContent.length}`);
+      
+      try {
+        graphData = JSON.parse(cleanedContent);
+      } catch (secondError) {
+        console.error('[灾害图谱] JSON 解析仍然失败，尝试使用修复函数...');
+        try {
+          const fixedJson = tryFixJson(cleanedContent);
+          graphData = JSON.parse(fixedJson);
+        } catch (finalError) {
+          console.error('[灾害图谱] 所有解析尝试均失败');
+          console.log('[灾害图谱] 原始内容前500字符:', content.substring(0, 500));
+          throw new Error(`JSON解析失败: ${finalError instanceof Error ? finalError.message : '未知错误'}`);
+        }
       }
     }
 
@@ -216,12 +256,49 @@ export async function POST(request: NextRequest) {
   }
 }
 
+function tryFixJson(jsonStr: string): string {
+  console.log('[灾害图谱] 开始修复 JSON...');
+  
+  let fixed = jsonStr;
+  
+  const depth = (str: string, open: string, close: string) => {
+    let count = 0;
+    for (const char of str) {
+      if (char === open) count++;
+      if (char === close) count--;
+    }
+    return count;
+  };
+  
+  const braceDiff = depth(fixed, '{', '}');
+  const bracketDiff = depth(fixed, '[', ']');
+  
+  if (braceDiff > 0) {
+    console.log(`[灾害图谱] 补充 ${braceDiff} 个 }`);
+    fixed += '}'.repeat(braceDiff);
+  }
+  if (bracketDiff > 0) {
+    console.log(`[灾害图谱] 补充 ${bracketDiff} 个 ]`);
+    fixed += ']'.repeat(bracketDiff);
+  }
+  
+  fixed = fixed
+    .replace(/,\s*([}\]])/g, '$1')
+    .replace(/([{,])\s*([}\]])/g, '$1 "$2"')
+    .replace(/\\u0000/g, '')
+    .replace(/\t/g, ' ');
+  
+  console.log(`[灾害图谱] 修复后的 JSON 长度: ${fixed.length}`);
+  return fixed;
+}
+
 export async function GET() {
   return NextResponse.json({
     availableDisasters: Object.keys(DISASTER_TEMPLATES),
-    ollamaConfig: {
-      baseUrl: OLLAMA_BASE_URL,
-      model: OLLAMA_MODEL,
+    llmConfig: {
+      provider: '硅基流动 (SiliconFlow)',
+      baseUrl: SILICONFLOW_BASE_URL,
+      model: SILICONFLOW_MODEL,
     },
   });
 }
