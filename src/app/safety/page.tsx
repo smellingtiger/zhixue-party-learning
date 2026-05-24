@@ -29,14 +29,14 @@ const courseCards = [
   {
     id: 'knowledge-graph',
     title: '知识图谱',
-    description: '系统化的安全知识体系图谱，全面了解内涝灾害的成因、影响与应对措施',
+    description: '系统化的安全知识体系图谱，全面了解各类灾害的成因、影响与应对措施',
     icon: Map,
     color: 'from-blue-600/80 via-blue-500/70 to-cyan-500/70',
     hoverShadow: 'hover:shadow-[0_0_30px_rgba(59,130,246,0.3)]',
     hoverBorder: 'hover:border-blue-300/60',
     iconBg: 'bg-blue-500/30',
     iconColor: 'text-blue-300',
-    href: null,
+    href: '/safety/disaster-graph',
   },
   {
     id: 'knowledge-intro',
@@ -65,14 +65,14 @@ const courseCards = [
   {
     id: 'quiz-interactive',
     title: '岗位答题互动',
-    description: '通过互动答题检验学习成果，巩固内涝应急知识，提升实战应对水平',
+    description: '通过互动答题检验学习成果，巩固应急知识，提升实战应对水平',
     icon: MessageSquare,
     color: 'from-orange-600/80 via-orange-500/70 to-yellow-500/70',
     hoverShadow: 'hover:shadow-[0_0_30px_rgba(249,115,22,0.3)]',
     hoverBorder: 'hover:border-orange-300/60',
     iconBg: 'bg-orange-500/30',
     iconColor: 'text-orange-300',
-    href: null,
+    href: '/safety/quiz-interactive',
   },
 ];
 
