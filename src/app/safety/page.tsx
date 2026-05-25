@@ -16,28 +16,15 @@ import {
   Users,
   MessageSquare,
   ArrowRight,
-  AlertTriangle,
-  Mountain as MountainIcon,
-  Ship,
-  Tornado,
-  CloudFog,
   Snowflake,
-  Sun,
-  TriangleAlert,
 } from 'lucide-react';
 
 const disasterTypes = [
-  { id: 'flood', name: '内涝', icon: Waves, color: 'blue', description: '城市内涝防灾减灾' },
-  { id: 'earthquake', name: '地震', icon: Mountain, color: 'orange', description: '地震应急避险知识' },
+  { id: 'waterlogging', name: '内涝', icon: Waves, color: 'blue', description: '城市内涝防灾减灾' },
   { id: 'typhoon', name: '台风', icon: Wind, color: 'cyan', description: '台风防御与应对' },
-  { id: 'fire', name: '火灾', icon: Flame, color: 'red', description: '火灾预防与逃生' },
-  { id: 'landslide', name: '泥石流', icon: TriangleAlert, color: 'amber', description: '泥石流预警与避险' },
-  { id: 'tsunami', name: '海啸', icon: Ship, color: 'teal', description: '海啸成因与防护' },
-  { id: 'tornado', name: '龙卷风', icon: Tornado, color: 'indigo', description: '龙卷风监测与应对' },
-  { id: 'volcano', name: '火山爆发', icon: MountainIcon, color: 'rose', description: '火山活动与防灾' },
-  { id: 'sandstorm', name: '沙尘暴', icon: CloudFog, color: 'yellow', description: '沙尘暴防护知识' },
-  { id: 'avalanche', name: '雪崩', icon: Snowflake, color: 'sky', description: '雪崩预警与逃生' },
-  { id: 'drought', name: '干旱', icon: Sun, color: 'lime', description: '干旱应对与节水' },
+  { id: 'earthquake', name: '地震', icon: Mountain, color: 'orange', description: '地震应急避险知识' },
+  { id: 'forest-fire', name: '森林火灾', icon: Flame, color: 'red', description: '森林火灾预防与扑救' },
+  { id: 'cold-wave', name: '寒潮', icon: Snowflake, color: 'sky', description: '寒潮防护与应对' },
 ];
 
 const courseCards = [

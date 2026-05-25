@@ -4,21 +4,18 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import * as d3 from 'd3';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  AlertTriangle,
-  RefreshCw,
   ZoomIn,
   ZoomOut,
   Maximize2,
   Info,
-  Loader2,
   Sparkles,
   ArrowLeft
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { DISASTER_GRAPH_DATA } from '@/lib/disaster-graph-data';
 
 interface DisasterGraphNode {
   id: string;
@@ -48,86 +45,41 @@ export default function DisasterGraphPage() {
 
   const [selectedDisaster, setSelectedDisaster] = useState<string>('');
   const [graphData, setGraphData] = useState<DisasterGraphNode | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [selectedNode, setSelectedNode] = useState<DisasterGraphNode | null>(null);
 
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const simulationRef = useRef<d3.Simulation<DisasterGraphNode, undefined> | null>(null);
   const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
 
-  const generateGraph = useCallback(async (disasterType: string) => {
+  const loadGraph = useCallback((disasterType: string) => {
     if (!disasterType) return;
-    setIsLoading(true);
-    setIsGenerating(true);
     setSelectedNode(null);
-    setGraphData(null);
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 90000);
-
-    try {
-      const response = await fetch('/api/disaster-knowledge-graph', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ disasterType }),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`API 错误 (${response.status}): ${errorText}`);
-      }
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.error || '生成失败');
-      }
-
-      if (!result.data || !result.data.id || !Array.isArray(result.data.children)) {
-        console.error('无效的数据结构:', result.data);
-        throw new Error('返回的图谱数据格式不正确，请重试');
-      }
-
-      console.log(`[${disasterType}] 图谱节点: ${countNodes(result.data)}个`);
-      setGraphData(result.data);
-      toast.success(`成功生成${disasterType}知识图谱`);
-    } catch (error) {
-      clearTimeout(timeoutId);
-      console.error('生成知识图谱失败:', error);
-
-      if (error instanceof Error && error.name === 'AbortError') {
-        toast.error('生成超时（90秒），请重试');
-      } else {
-        toast.error(error instanceof Error ? error.message : '生成失败，请重试');
-      }
-    } finally {
-      setIsLoading(false);
-      setIsGenerating(false);
+    const staticData = DISASTER_GRAPH_DATA[disasterType];
+    if (staticData) {
+      console.log(`[${disasterType}] 图谱节点: ${countNodes(staticData)}个`);
+      setGraphData(staticData);
+    } else {
+      console.error('未找到灾害类型数据:', disasterType);
+      setGraphData(null);
     }
   }, []);
 
-  // Auto-start generation on mount
   useEffect(() => {
     const disasterFromUrl = searchParams.get('disaster');
     const disasterFromStorage = localStorage.getItem('selectedDisaster');
     const disasterType = disasterFromUrl || disasterFromStorage || '内涝';
 
     setSelectedDisaster(disasterType);
-    generateGraph(disasterType);
-  }, [searchParams, generateGraph]);
+    loadGraph(disasterType);
+  }, [searchParams, loadGraph]);
 
   const handleRegenerate = () => {
     if (selectedDisaster) {
-      generateGraph(selectedDisaster);
+      loadGraph(selectedDisaster);
     }
   };
 
-  // D3 rendering
   useEffect(() => {
     if (!graphData || !svgRef.current || !containerRef.current) return;
 
@@ -191,8 +143,6 @@ export default function DisasterGraphPage() {
       .force('collision', d3.forceCollide().radius((d: any) => TYPE_SIZES[d.type] + 15))
       .alpha(1)
       .restart();
-
-    simulationRef.current = simulation;
 
     const link = g.append('g').selectAll('line')
       .data(links).join('line')
@@ -275,33 +225,6 @@ export default function DisasterGraphPage() {
     }
   };
 
-  if (isGenerating) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100">
-        <div className="container mx-auto px-4 py-8">
-          <Button variant="outline" onClick={() => router.push('/safety')} className="gap-2 border-white/40 bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm mb-6">
-            <ArrowLeft className="w-4 h-4" />返回安全培训
-          </Button>
-          <Card className="bg-white/80 backdrop-blur-sm border-gray-200">
-            <CardContent className="p-12">
-              <div className="flex flex-col items-center gap-6">
-                <div className="relative">
-                  <Loader2 className="w-16 h-16 text-blue-600 animate-spin" />
-                  <div className="absolute inset-0 w-16 h-16 rounded-full border-4 border-blue-400/30 animate-ping" />
-                </div>
-                <div className="text-center space-y-2">
-                  <h3 className="text-xl font-semibold text-gray-900">正在生成「{selectedDisaster}」知识图谱</h3>
-                  <p className="text-gray-600">AI 正在分析 {selectedDisaster} 灾害的完整知识体系...</p>
-                  <p className="text-sm text-gray-500">这可能需要 10-30 秒，请耐心等待</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
   if (!graphData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100">
@@ -310,8 +233,7 @@ export default function DisasterGraphPage() {
             <ArrowLeft className="w-4 h-4" />返回安全培训
           </Button>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20">
-            <AlertTriangle className="w-24 h-24 text-yellow-500/50 mx-auto mb-6" />
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">无法生成图谱</h3>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">未找到知识图谱数据</h3>
             <p className="text-gray-600 mb-6">请先在安全培训页面选择灾害类型</p>
             <Button onClick={() => router.push('/safety')} className="bg-blue-600 hover:bg-blue-700 text-white">
               返回选择
@@ -339,18 +261,18 @@ export default function DisasterGraphPage() {
           <h1 className="text-4xl font-bold text-white mb-2" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
             {selectedDisaster}知识图谱
           </h1>
-          <p className="text-gray-600 text-sm">AI 驱动 · 内容随机生成 · 点击节点查看详情</p>
+          <p className="text-gray-600 text-sm">静态数据 · 秒级加载 · 点击节点查看详情</p>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">✓ 图谱已生成</Badge>
+              <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">✓ 图谱已加载</Badge>
               <span className="text-gray-600 text-sm">点击节点查看详情 | 拖拽移动节点 | 滚轮缩放</span>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleRegenerate} disabled={isLoading} className="border-gray-300 text-gray-700 hover:bg-gray-100">
-                <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />重新生成
+              <Button variant="outline" size="sm" onClick={handleRegenerate} className="border-gray-300 text-gray-700 hover:bg-gray-100">
+                重新加载
               </Button>
               <Button variant="outline" size="sm" onClick={handleZoomIn} className="border-gray-300 text-gray-700 hover:bg-gray-100"><ZoomIn className="w-4 h-4" /></Button>
               <Button variant="outline" size="sm" onClick={handleZoomOut} className="border-gray-300 text-gray-700 hover:bg-gray-100"><ZoomOut className="w-4 h-4" /></Button>

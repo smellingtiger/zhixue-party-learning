@@ -18,6 +18,7 @@ interface GenerateGraphRequest {
 
 const DISASTER_CONFIG: Record<string, { root: string; categories: string[] }> = {
   '地震': { root: '地震灾害', categories: ['成因机制', '预警监测', '应急避险', '次生灾害', '防灾减灾'] },
+  '内涝': { root: '城市内涝', categories: ['形成原因', '预警等级', '应急响应', '排涝措施', '交通管制'] },
   '洪水': { root: '洪水灾害', categories: ['洪水类型', '形成原因', '预警等级', '应急措施', '灾后重建'] },
   '台风': { root: '台风灾害', categories: ['台风分级', '形成机制', '路径预测', '防御措施', '历史案例'] },
   '火山爆发': { root: '火山灾害', categories: ['火山类型', '喷发类型', '监测预警', '避险方法', '防灾准备'] },
