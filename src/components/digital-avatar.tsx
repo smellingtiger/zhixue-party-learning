@@ -30,6 +30,12 @@ interface DigitalAvatarProps {
   onSpeechEnd?: () => void;
   onSectionChange?: (sectionIndex: number) => void;
   courseName?: string;
+  /** Course ID for page-based audio files (e.g., '10') */
+  courseId?: string;
+  /** Current page index within chapter for granular audio */
+  currentPageIndex?: number;
+  /** Total number of pages in current chapter */
+  totalPages?: number;
 }
 
 function formatTime(seconds: number): string {
@@ -38,7 +44,7 @@ function formatTime(seconds: number): string {
   return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
-export default function DigitalAvatar({ chapterContents, currentChapterIndex, audioPrefix = '/audio/', onSpeechEnd, onSectionChange, courseName }: DigitalAvatarProps) {
+export default function DigitalAvatar({ chapterContents, currentChapterIndex, audioPrefix = '/audio/', onSpeechEnd, onSectionChange, courseName, courseId, currentPageIndex = 0, totalPages = 1 }: DigitalAvatarProps) {
   const [status, setStatus] = useState<PlayStatus>('idle');
   const [speed, setSpeed] = useState(1.0);
   const [audioDurations, setAudioDurations] = useState<Record<string, number>>({});
@@ -56,8 +62,15 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
   const currentContent = chapterContents[currentChapterIndex];
   const chapterId = CHAPTER_IDS[currentChapterIndex] || `chapter${currentChapterIndex}`;
   const audioFilePrefix = courseName && (courseName.includes('乡村振兴') || courseName.includes('rural')) ? 'rural-' : '';
-  const audioKey = `${audioFilePrefix}${chapterId}`;
-  const audioUrl = `/audio/${audioKey}.mp3`;
+
+  // Determine audio URL strategy: page-based (e.g., 10-0-0.mp3) or chapter-based (e.g., preface.mp3)
+  const usePageBasedAudio = !!courseId;
+  const audioKey = usePageBasedAudio
+    ? `${courseId}-${currentChapterIndex}-${currentPageIndex}`
+    : `${audioFilePrefix}${chapterId}`;
+  const audioUrl = usePageBasedAudio
+    ? `/audio/typhoon/${audioKey}.mp3`
+    : `/audio/${audioKey}.mp3`;
   const hasAudio = audioAvailable[audioKey] === true;
 
   useEffect(() => {
@@ -69,18 +82,29 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
 
   useEffect(() => {
     const check = async () => {
-      for (let i = 0; i < chapterContents.length && i < CHAPTER_IDS.length; i++) {
-        const id = `${audioFilePrefix}${CHAPTER_IDS[i]}`;
+      if (usePageBasedAudio) {
+        // Check page-based audio files for all chapters and pages
+        const key = `${courseId}-${currentChapterIndex}-${currentPageIndex}`;
         try {
-          const res = await fetch(`/audio/${id}.mp3`, { method: 'HEAD' });
-          setAudioAvailable(prev => ({ ...prev, [id]: res.ok }));
+          const res = await fetch(`/audio/typhoon/${key}.mp3`, { method: 'HEAD' });
+          setAudioAvailable(prev => ({ ...prev, [key]: res.ok }));
         } catch {
-          setAudioAvailable(prev => ({ ...prev, [id]: false }));
+          setAudioAvailable(prev => ({ ...prev, [key]: false }));
+        }
+      } else {
+        for (let i = 0; i < chapterContents.length && i < CHAPTER_IDS.length; i++) {
+          const id = `${audioFilePrefix}${CHAPTER_IDS[i]}`;
+          try {
+            const res = await fetch(`/audio/${id}.mp3`, { method: 'HEAD' });
+            setAudioAvailable(prev => ({ ...prev, [id]: res.ok }));
+          } catch {
+            setAudioAvailable(prev => ({ ...prev, [id]: false }));
+          }
         }
       }
     };
     check();
-  }, [chapterContents.length, audioFilePrefix]);
+  }, [usePageBasedAudio, courseId, currentChapterIndex, currentPageIndex, chapterContents.length, audioFilePrefix]);
 
   const splitIntoSentences = (text: string): string[] => {
     return text

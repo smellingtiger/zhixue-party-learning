@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Shield,
@@ -16,31 +15,18 @@ import {
   Users,
   MessageSquare,
   ArrowRight,
-  AlertTriangle,
-  Mountain as MountainIcon,
-  Ship,
-  Tornado,
-  CloudFog,
   Snowflake,
-  Sun,
-  TriangleAlert,
 } from 'lucide-react';
 
 const disasterTypes = [
-  { id: 'flood', name: '内涝', icon: Waves, color: 'blue', description: '城市内涝防灾减灾' },
-  { id: 'earthquake', name: '地震', icon: Mountain, color: 'orange', description: '地震应急避险知识' },
-  { id: 'typhoon', name: '台风', icon: Wind, color: 'cyan', description: '台风防御与应对' },
-  { id: 'fire', name: '火灾', icon: Flame, color: 'red', description: '火灾预防与逃生' },
-  { id: 'landslide', name: '泥石流', icon: TriangleAlert, color: 'amber', description: '泥石流预警与避险' },
-  { id: 'tsunami', name: '海啸', icon: Ship, color: 'teal', description: '海啸成因与防护' },
-  { id: 'tornado', name: '龙卷风', icon: Tornado, color: 'indigo', description: '龙卷风监测与应对' },
-  { id: 'volcano', name: '火山爆发', icon: MountainIcon, color: 'rose', description: '火山活动与防灾' },
-  { id: 'sandstorm', name: '沙尘暴', icon: CloudFog, color: 'yellow', description: '沙尘暴防护知识' },
-  { id: 'avalanche', name: '雪崩', icon: Snowflake, color: 'sky', description: '雪崩预警与逃生' },
-  { id: 'drought', name: '干旱', icon: Sun, color: 'lime', description: '干旱应对与节水' },
+  { id: 'flood', name: '内涝', icon: Waves, color: 'blue', description: '按降雨量与积水深度分级', knowledgePath: '/safety/knowledge-intro' },
+  { id: 'typhoon', name: '台风', icon: Wind, color: 'cyan', description: '热带低压到超强台风分级', knowledgePath: '/safety/typhoon-knowledge' },
+  { id: 'earthquake', name: '地震', icon: Mountain, color: 'orange', description: '按震级和烈度分级', knowledgePath: '/safety/earthquake-knowledge' },
+  { id: 'forest-fire', name: '森林/草原火灾', icon: Flame, color: 'red', description: '按受害面积分级', knowledgePath: '/safety/forest-fire-knowledge' },
+  { id: 'cold-wave', name: '寒潮', icon: Snowflake, color: 'sky', description: '按降温幅度和最低气温分级', knowledgePath: '/safety/cold-wave-knowledge' },
 ];
 
-const courseCards = [
+const courseCards = (selectedDisasterId: string) => [
   {
     id: 'knowledge-graph',
     title: '知识图谱',
@@ -56,14 +42,77 @@ const courseCards = [
   {
     id: 'knowledge-intro',
     title: '知识科普介绍课程',
-    description: '深入浅出的内涝科普知识，帮助您掌握基本的防灾减灾理论与实操技能',
+    description: (() => {
+      const descriptions: Record<string, string> = {
+        flood: '深入浅出的内涝科普知识，帮助您掌握基本的防灾减灾理论与实操技能',
+        typhoon: '系统讲解台风从热带低压到超强台风的全过程，掌握蓝黄橙红预警与五类避险技能',
+        earthquake: '地震成因、震级烈度分级、震前准备与震后自救互救全指南',
+        'forest-fire': '森林/草原火灾成因与分级标准，掌握避险逃生与火场自救技能',
+        'cold-wave': '寒潮分级标准、预警信号识别与防寒保暖应对指南',
+      };
+      return descriptions[selectedDisasterId] || '防灾减灾科普知识，帮助您掌握基本的防灾理论与实操技能';
+    })(),
     icon: BookOpen,
-    color: 'from-emerald-600/80 via-emerald-500/70 to-green-500/70',
-    hoverShadow: 'hover:shadow-[0_0_30px_rgba(16,185,129,0.3)]',
-    hoverBorder: 'hover:border-emerald-300/60',
-    iconBg: 'bg-emerald-500/30',
-    iconColor: 'text-emerald-300',
-    href: '/safety/knowledge-intro',
+    color: (() => {
+      const colors: Record<string, string> = {
+        flood: 'from-emerald-600/80 via-emerald-500/70 to-green-500/70',
+        typhoon: 'from-cyan-600/80 via-cyan-500/70 to-blue-500/70',
+        earthquake: 'from-orange-600/80 via-orange-500/70 to-red-500/70',
+        'forest-fire': 'from-red-600/80 via-red-500/70 to-yellow-500/70',
+        'cold-wave': 'from-sky-600/80 via-sky-500/70 to-indigo-500/70',
+      };
+      return colors[selectedDisasterId] || 'from-emerald-600/80 via-emerald-500/70 to-green-500/70';
+    })(),
+    hoverShadow: (() => {
+      const shadows: Record<string, string> = {
+        flood: 'hover:shadow-[0_0_30px_rgba(16,185,129,0.3)]',
+        typhoon: 'hover:shadow-[0_0_30px_rgba(6,182,212,0.3)]',
+        earthquake: 'hover:shadow-[0_0_30px_rgba(249,115,22,0.3)]',
+        'forest-fire': 'hover:shadow-[0_0_30px_rgba(239,68,68,0.3)]',
+        'cold-wave': 'hover:shadow-[0_0_30px_rgba(56,189,248,0.3)]',
+      };
+      return shadows[selectedDisasterId] || 'hover:shadow-[0_0_30px_rgba(16,185,129,0.3)]';
+    })(),
+    hoverBorder: (() => {
+      const borders: Record<string, string> = {
+        flood: 'hover:border-emerald-300/60',
+        typhoon: 'hover:border-cyan-300/60',
+        earthquake: 'hover:border-orange-300/60',
+        'forest-fire': 'hover:border-red-300/60',
+        'cold-wave': 'hover:border-sky-300/60',
+      };
+      return borders[selectedDisasterId] || 'hover:border-emerald-300/60';
+    })(),
+    iconBg: (() => {
+      const bgs: Record<string, string> = {
+        flood: 'bg-emerald-500/30',
+        typhoon: 'bg-cyan-500/30',
+        earthquake: 'bg-orange-500/30',
+        'forest-fire': 'bg-red-500/30',
+        'cold-wave': 'bg-sky-500/30',
+      };
+      return bgs[selectedDisasterId] || 'bg-emerald-500/30';
+    })(),
+    iconColor: (() => {
+      const colors: Record<string, string> = {
+        flood: 'text-emerald-300',
+        typhoon: 'text-cyan-300',
+        earthquake: 'text-orange-300',
+        'forest-fire': 'text-red-300',
+        'cold-wave': 'text-sky-300',
+      };
+      return colors[selectedDisasterId] || 'text-emerald-300';
+    })(),
+    href: (() => {
+      const paths: Record<string, string> = {
+        flood: '/safety/knowledge-intro',
+        typhoon: '/safety/typhoon-knowledge',
+        earthquake: '/safety/earthquake-knowledge',
+        'forest-fire': '/safety/forest-fire-knowledge',
+        'cold-wave': '/safety/cold-wave-knowledge',
+      };
+      return paths[selectedDisasterId] || '/safety/knowledge-intro';
+    })(),
   },
   {
     id: 'command-course',
@@ -146,8 +195,8 @@ export default function SafetyPage() {
                 </p>
               </motion.div>
 
-              {/* 灾害类型选择 - 扩展为11种 */}
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 mb-8">
+              {/* 灾害类型选择 - 5种 */}
+              <div className="grid grid-cols-5 gap-3 mb-8">
                 {disasterTypes.map((disaster, index) => {
                   const Icon = disaster.icon;
                   const isSelected = selectedDisaster === disaster.id;
@@ -198,7 +247,7 @@ export default function SafetyPage() {
 
           {/* 课程卡片区域 */}
           <div className="grid md:grid-cols-2 gap-5">
-            {courseCards.map((course, index) => {
+            {courseCards(selectedDisaster).map((course, index) => {
               const Icon = course.icon;
               return (
                 <motion.div
