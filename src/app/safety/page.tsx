@@ -19,11 +19,11 @@ import {
 } from 'lucide-react';
 
 const disasterTypes = [
-  { id: 'flood', name: '内涝', icon: Waves, color: 'blue', description: '按降雨量与积水深度分级', knowledgePath: '/safety/knowledge-intro' },
-  { id: 'typhoon', name: '台风', icon: Wind, color: 'cyan', description: '热带低压到超强台风分级', knowledgePath: '/safety/typhoon-knowledge' },
-  { id: 'earthquake', name: '地震', icon: Mountain, color: 'orange', description: '按震级和烈度分级', knowledgePath: '/safety/earthquake-knowledge' },
-  { id: 'forest-fire', name: '森林/草原火灾', icon: Flame, color: 'red', description: '按受害面积分级', knowledgePath: '/safety/forest-fire-knowledge' },
-  { id: 'cold-wave', name: '寒潮', icon: Snowflake, color: 'sky', description: '按降温幅度和最低气温分级', knowledgePath: '/safety/cold-wave-knowledge' },
+  { id: 'waterlogging', name: '内涝', icon: Waves, color: 'blue', description: '城市内涝防灾减灾' },
+  { id: 'typhoon', name: '台风', icon: Wind, color: 'cyan', description: '台风防御与应对' },
+  { id: 'earthquake', name: '地震', icon: Mountain, color: 'orange', description: '地震应急避险知识' },
+  { id: 'forest-fire', name: '森林火灾', icon: Flame, color: 'red', description: '森林火灾预防与扑救' },
+  { id: 'cold-wave', name: '寒潮', icon: Snowflake, color: 'sky', description: '寒潮防护与应对' },
 ];
 
 const courseCards = (selectedDisasterId: string) => [

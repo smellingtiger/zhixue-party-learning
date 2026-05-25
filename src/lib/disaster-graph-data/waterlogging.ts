@@ -1,0 +1,282 @@
+export const waterloggingGraphData = {
+  id: 'waterlogging',
+  label: '城市内涝',
+  type: 'root',
+  description: '城市内涝防灾减灾知识体系',
+  children: [
+    {
+      id: 'formation-cause',
+      label: '形成原因',
+      type: 'category',
+      description: '内涝形成的自然与人为因素',
+      children: [
+        {
+          id: 'rainfall-factor',
+          label: '降雨因素',
+          type: 'subcategory',
+          description: '极端降水事件导致内涝',
+          children: [
+            { id: 'heavy-rain', label: '短时强降雨', type: 'detail', description: '1小时降雨量超过50mm，排水系统来不及排走' },
+            { id: 'continuous-rain', label: '持续性强降雨', type: 'detail', description: '连续多日累计降雨量大，土壤饱和后地表径流剧增' },
+            { id: 'extreme-rainfall', label: '极端暴雨天气', type: 'detail', description: '百年一遇或五十年一遇的特大暴雨' },
+          ],
+        },
+        {
+          id: 'drainage-system',
+          label: '排水系统缺陷',
+          type: 'subcategory',
+          description: '城市排水管网能力不足或老化',
+          children: [
+            { id: 'pipe-ageing', label: '管网老化淤积', type: 'detail', description: '管道使用年限长，管壁结垢淤积导致过流能力下降30%-50%' },
+            { id: 'design-standard-low', label: '设计标准偏低', type: 'detail', description: '老城区按0.5-1年一遇设计，远低于现行标准' },
+            { id: 'pump-station-insufficient', label: '泵站抽排能力不足', type: 'detail', description: '泵站装机容量不够，强降雨期间无法及时抽排积水' },
+          ],
+        },
+        {
+          id: 'urbanization-factor',
+          label: '城市化影响',
+          type: 'subcategory',
+          description: '城市扩张改变水文环境',
+          children: [
+            { id: 'impermeable-surface', label: '不透水面积增加', type: 'detail', description: '道路建筑等硬质地面占比超70%，雨水无法下渗形成径流' },
+            { id: 'river-channel-narrowed', label: '河道被侵占缩窄', type: 'detail', description: '填河造地、河道覆盖导致行洪断面减小' },
+            { id: 'low-lying-area', label: '低洼区域开发', type: 'detail', description: '在低洼地带建设住宅商业区，天然汇水点变成内涝重灾区' },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'warning-level',
+      label: '预警等级',
+      type: 'category',
+      description: '气象部门发布的内涝预警分级标准',
+      children: [
+        {
+          id: 'blue-warning',
+          label: '蓝色预警',
+          type: 'subcategory',
+          description: '最低级别预警信号',
+          children: [
+            { id: 'blue-condition', label: '发布条件', type: 'detail', description: '预计未来12小时内部分区域将出现内涝风险' },
+            { id: 'blue-measure', label: '防御措施', type: 'detail', description: '关注天气预报，做好防范准备，检查排水设施' },
+          ],
+        },
+        {
+          id: 'yellow-warning',
+          label: '黄色预警',
+          type: 'subcategory',
+          description: '较高级别预警信号',
+          children: [
+            { id: 'yellow-condition', label: '发布条件', type: 'detail', description: '24小时降雨量达50mm以上，可能引发局部内涝' },
+            { id: 'yellow-measure', label: '防御措施', type: 'detail', description: '加强易涝点巡查监测，地下空间准备沙袋挡水板' },
+            { id: 'yellow-public', label: '公众应对', type: 'detail', description: '减少外出，远离低洼地带和地下通道' },
+          ],
+        },
+        {
+          id: 'orange-warning',
+          label: '橙色预警',
+          type: 'subcategory',
+          description: '严重级别预警信号',
+          children: [
+            { id: 'orange-condition', label: '发布条件', type: 'detail', description: '24小时降雨量达100mm以上，大范围内涝风险高' },
+            { id: 'orange-measure', label: '防御措施', type: 'detail', description: '启动应急响应，部署抢险队伍和物资到重点区域' },
+            { id: 'orange-evacuation', label: '人员转移', type: 'detail', description: '危险区域人员提前转移至安全地带' },
+          ],
+        },
+        {
+          id: 'red-warning',
+          label: '红色预警',
+          type: 'subcategory',
+          description: '最高级别预警信号',
+          children: [
+            { id: 'red-condition', label: '发布条件', type: 'detail', description: '24小时降雨量达250mm以上或3小时超过100mm' },
+            { id: 'red-measure', label: '防御措施', type: 'detail', description: '全面启动应急救援，所有力量投入抢险救灾' },
+            { id: 'red-emergency', label: '紧急措施', type: 'detail', description: '停课停业、交通管制、封闭危险路段' },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'emergency-response',
+      label: '应急响应',
+      type: 'category',
+      description: '城市内涝四级应急响应体系',
+      children: [
+        {
+          id: 'level-iv-response',
+          label: 'IV级应急响应',
+          type: 'subcategory',
+          description: '一般内涝事件的响应级别',
+          children: [
+            { id: 'iv-trigger', label: '启动条件', type: 'detail', description: '蓝色或黄色预警生效，局部区域出现轻度积水' },
+            { id: 'iv-duty', label: '值班值守', type: 'detail', description: '相关部门实行24小时值班，领导带班制度落实到位' },
+            { id: 'iv-patrol', label: '巡查监测', type: 'detail', description: '对易涝点、下穿隧道、地下车库等重点部位每2小时巡查一次' },
+            { id: 'iv-equipment', label: '设备预置', type: 'detail', description: '移动泵车、沙袋、挡水板等物资预置到关键点位待命' },
+          ],
+        },
+        {
+          id: 'level-iii-response',
+          label: 'III级应急响应',
+          type: 'subcategory',
+          description: '较大内涝事件的响应级别',
+          children: [
+            { id: 'iii-trigger', label: '启动条件', type: 'detail', description: '橙色预警生效，多个区域出现中度积水，部分道路交通受阻' },
+            { id: 'iii-command', label: '指挥调度', type: 'detail', description: '成立现场指挥部，统一协调各部门开展应急处置工作' },
+            { id: 'iii-drainage', label: '强排作业', type: 'detail', description: '调动移动泵车对积水路段进行机械强排作业' },
+            { id: 'iii-traffic', label: '交通疏导', type: 'detail', description: '交警部门对积水路段实施临时管制引导车辆绕行' },
+            { id: 'iii-info-release', label: '信息发布', type: 'detail', description: '通过短信广播新媒体实时发布积水路况信息' },
+          ],
+        },
+        {
+          id: 'level-ii-response',
+          label: 'II级应急响应',
+          type: 'subcategory',
+          description: '重大内涝事件的响应级别',
+          children: [
+            { id: 'ii-trigger', label: '启动条件', type: 'detail', description: '红色预警生效，大面积严重积水，基础设施受损' },
+            { id: 'ii-force-deploy', label: '力量部署', type: 'detail', description: '消防武警民兵等多支救援力量集结待命随时出动' },
+            { id: 'ii-rescue-action', label: '救援行动', type: 'detail', description: '组织被困人员转移营救，优先救助老人儿童病患' },
+            { id: 'ii-infrastructure', label: '设施抢修', type: 'detail', description: '电力通信供水等部门紧急抢修受损设施恢复基本功能' },
+            { id: 'ii-shelter', label: '安置保障', type: 'detail', description: '开放避难场所安置受灾群众提供食宿医疗等服务' },
+          ],
+        },
+        {
+          id: 'level-i-response',
+          label: 'I级应急响应',
+          type: 'subcategory',
+          description: '特别重大内涝事件的最高响应级别',
+          children: [
+            { id: 'i-trigger', label: '启动条件', type: 'detail', description: '特大暴雨引发灾难性内涝，造成重大人员伤亡或财产损失' },
+            { id: 'i-command-center', label: '最高指挥', type: 'detail', description: '市主要领导坐镇指挥，全市进入紧急状态全面动员' },
+            { id: 'i-all-hands', label: '全员参战', type: 'detail', description: '所有党政机关企事业单位停止正常工作全力投入抗洪抢险' },
+            { id: 'i-external-support', label: '外部支援', type: 'detail', description: '请求省级支援调派专业救援队伍和大型装备增援' },
+            { id: 'i-post-disaster', label: '灾后处置', type: 'detail', description: '灾情统计评估消毒防疫灾后重建规划等工作同步推进' },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'drainage-measure',
+      label: '排涝措施',
+      type: 'category',
+      description: '城市积水的多种排涝技术手段',
+      children: [
+        {
+          id: 'mechanical-drainage',
+          label: '机械强排',
+          type: 'subcategory',
+          description: '使用机械设备快速抽排积水',
+          children: [
+            { id: 'mobile-pump-truck', label: '移动泵车', type: 'detail', description: '车载式大流量水泵每小时可抽排500-2000立方米' },
+            { id: 'submersible-pump', label: '潜水泵强排', type: 'detail', description: '便携式潜水泵适用于狭窄空间和小面积积水排除' },
+            { id: 'diesel-pump', label: '柴油自吸泵', type: 'detail', description: '无电力供应时可独立运行适合野外和断电区域使用' },
+          ],
+        },
+        {
+          id: 'channel-diversion',
+          label: '导流分流',
+          type: 'subcategory',
+          description: '开挖导流设施引导水流',
+          children: [
+            { id: 'temp-drain-ditch', label: '临时排水沟', type: 'detail', description: '挖掘机快速开挖临时沟渠将积水引向附近河流' },
+            { id: 'sandbag-wall', label: '沙袋挡水墙', type: 'detail', description: '用沙袋筑坝阻挡洪水保护重要设施和居民区' },
+            { id: 'floodgate-control', label: '闸门调度', type: 'detail', description: '科学调控河道闸门水位加速城区积水外排' },
+          ],
+        },
+        {
+          id: 'sponge-city',
+          label: '海绵城市措施',
+          type: 'subcategory',
+          description: '利用海绵设施滞蓄渗透雨水',
+          children: [
+            { id: 'rain-garden', label: '雨水花园', type: 'detail', description: '下沉式绿地种植耐淹植物自然吸收净化雨水' },
+            { id: 'permeable-pavement', label: '透水铺装', type: 'detail', description: '透水砖透水混凝土让雨水直接渗入地下补充地下水' },
+            { id: 'green-roof', label: '绿色屋顶', type: 'detail', description: '屋顶绿化层可截留30%-50%的屋面雨水减少径流' },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'traffic-control',
+      label: '交通管制',
+      type: 'category',
+      description: '内涝期间的交通管控措施',
+      children: [
+        {
+          id: 'road-closure',
+          label: '道路封闭管理',
+          type: 'subcategory',
+          description: '根据积水深度采取分级封闭措施',
+          children: [
+            { id: 'closure-level-1', label: '一级封闭（警示）', type: 'detail', description: '积水15-25cm设置警示标志车辆减速慢行通过' },
+            { id: 'closure-level-2', label: '二级封闭（限制）', type: 'detail', description: '积水25-40cm禁止小型客车通行货车和大巴可通行' },
+            { id: 'closure-level-3', label: '三级封闭（禁行）', type: 'detail', description: '积水超过40cm所有车辆禁止通行物理隔离封路' },
+          ],
+        },
+        {
+          id: 'detour-guidance',
+          label: '绕行引导',
+          type: 'subcategory',
+          description: '为受影响车辆提供替代路线',
+          children: [
+            { id: 'nav-push', label: '导航推送', type: 'detail', description: '与高德百度地图合作实时推送积水路段和绕行方案' },
+            { id: 'vms-board', label: '可变情报板', type: 'detail', description: '高速公路和主干道电子屏显示前方路况和分流提示' },
+            { id: 'traffic-police-guide', label: '交警现场指挥', type: 'detail', description: '交警在路口人工指挥疏导交通避免拥堵加剧' },
+          ],
+        },
+        {
+          id: 'public-transit',
+          label: '公共交通调整',
+          type: 'subcategory',
+          description: '公交地铁等公共交通运营调整',
+          children: [
+            { id: 'bus-detour', label: '公交线路改道', type: 'detail', description: '避开积水路段临时调整公交线路站点告知乘客' },
+            { id: 'metro-safety', label: '地铁站防护', type: 'detail', description: '出入口加装防洪挡板放置沙袋防止倒灌进站' },
+            { id: 'service-suspend', label: '停运措施', type: 'detail', description: '严重积水时暂停部分线路运营确保乘客安全' },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'self-protection',
+      label: '自救互救',
+      type: 'category',
+      description: '公众在内涝中的自我保护和互助方法',
+      children: [
+        {
+          id: 'indoor-safety',
+          label: '室内避险',
+          type: 'subcategory',
+          description: '室内人员的安全注意事项',
+          children: [
+            { id: 'cut-power', label: '切断电源', type: 'detail', description: '发现进水立即切断家中电源防止触电事故发生' },
+            { id: 'move-to-higher', label: '转移到高处', type: 'detail', description: '迅速转移到二楼及以上位置等待救援不要贪恋财物' },
+            { id: 'reserve-supplies', label: '储备物资', type: 'detail', description: '提前储备饮用水食物手电筒急救包等应急物品' },
+          ],
+        },
+        {
+          id: 'outdoor-safety',
+          label: '室外避险',
+          type: 'subcategory',
+          description: '室外人员的逃生安全要点',
+          children: [
+            { id: 'avoid-underpass', label: '远离地下通道', type: 'detail', description: '立交桥下穿隧道是内涝最危险的区域切勿停留' },
+            { id: 'avoid-electricity', label: '远离电线杆变压器', type: 'detail', description: '积水可能导致漏电触电保持至少8米安全距离' },
+            { id: 'find-high-ground', label: '寻找高地', type: 'detail', description: '向地势高处移动远离河边低洼地带和围墙' },
+          ],
+        },
+        {
+          id: 'vehicle-rescue',
+          label: '车辆涉水自救',
+          type: 'subcategory',
+          description: '车辆被困积水中的逃生方法',
+          children: [
+            { id: 'unlock-immediately', label: '立即解锁开门', type: 'detail', description: '车辆入水第一时间解锁打开车门车窗' },
+            { id: 'break-window', label: '破窗逃生', type: 'detail', description: '车门无法打开时用安全锤敲击车窗四角破窗逃生' },
+            { id: 'wait-for-pressure-balance', label: '等压差平衡', type: 'detail', description: '完全淹没后等待车内灌满水平衡内外压力再开门' },
+          ],
+        },
+      ],
+    },
+  ],
+};

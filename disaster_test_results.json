@@ -1,0 +1,122 @@
+{
+  "test_time": "2026-05-25T15:06:52.056826",
+  "total_tests": 5,
+  "successful_tests": 5,
+  "results": [
+    {
+      "disaster_name": "内涝",
+      "url": "http://localhost:3000/safety/disaster-graph?disaster=内涝",
+      "success": true,
+      "loading_state_detected": false,
+      "graph_loaded": true,
+      "load_time_seconds": 2.42,
+      "console_errors": [],
+      "text_content_preview": "返回安全培训\n当前灾害：内涝\n内涝知识图谱\n\n动态生成 · 知识库关联 · 点击节点查看详情\n\n✓ 图谱已生成\n来源: 静态配置 | 课程数: 0 | 分类数: 0\n点击节点查看详情 | 拖拽移动节点 | 滚轮缩放\n重新生成\n城市内涝\n预防预警\n应急响应\n应急处置\n灾后恢复\n综合保障\n图例\n根节点\n响应阶段\n知识分类\n关联课程",
+      "statistics": [
+        "来源: 静态配置 ",
+        "课程数: 0 ",
+        "分类数: 0"
+      ],
+      "graph_info": {
+        "hasVisualization": true,
+        "svgCount": 18,
+        "canvasCount": 0,
+        "nodeElementsCount": 0
+      },
+      "screenshot": "内涝_dynamic_graph.png",
+      "error_message": null
+    },
+    {
+      "disaster_name": "台风",
+      "url": "http://localhost:3000/safety/disaster-graph?disaster=台风",
+      "success": true,
+      "loading_state_detected": false,
+      "graph_loaded": true,
+      "load_time_seconds": 2.41,
+      "console_errors": [],
+      "text_content_preview": "返回安全培训\n当前灾害：台风\n台风知识图谱\n\n动态生成 · 知识库关联 · 点击节点查看详情\n\n✓ 图谱已生成\n来源: 静态配置 | 课程数: 0 | 分类数: 0\n点击节点查看详情 | 拖拽移动节点 | 滚轮缩放\n重新生成\n台风灾害\n预防预警\n应急响应\n应急处置\n灾后恢复\n综合保障\n图例\n根节点\n响应阶段\n知识分类\n关联课程",
+      "statistics": [
+        "来源: 静态配置 ",
+        "课程数: 0 ",
+        "分类数: 0"
+      ],
+      "graph_info": {
+        "hasVisualization": true,
+        "svgCount": 18,
+        "canvasCount": 0,
+        "nodeElementsCount": 0
+      },
+      "screenshot": "台风_dynamic_graph.png",
+      "error_message": null
+    },
+    {
+      "disaster_name": "地震",
+      "url": "http://localhost:3000/safety/disaster-graph?disaster=地震",
+      "success": true,
+      "loading_state_detected": false,
+      "graph_loaded": true,
+      "load_time_seconds": 2.42,
+      "console_errors": [],
+      "text_content_preview": "返回安全培训\n当前灾害：地震\n地震知识图谱\n\n动态生成 · 知识库关联 · 点击节点查看详情\n\n✓ 图谱已生成\n来源: 静态配置 | 课程数: 0 | 分类数: 0\n点击节点查看详情 | 拖拽移动节点 | 滚轮缩放\n重新生成\n地震灾害\n预防预警\n应急响应\n应急处置\n灾后恢复\n综合保障\n图例\n根节点\n响应阶段\n知识分类\n关联课程",
+      "statistics": [
+        "来源: 静态配置 ",
+        "课程数: 0 ",
+        "分类数: 0"
+      ],
+      "graph_info": {
+        "hasVisualization": true,
+        "svgCount": 18,
+        "canvasCount": 0,
+        "nodeElementsCount": 0
+      },
+      "screenshot": "地震_dynamic_graph.png",
+      "error_message": null
+    },
+    {
+      "disaster_name": "森林火灾",
+      "url": "http://localhost:3000/safety/disaster-graph?disaster=森林火灾",
+      "success": true,
+      "loading_state_detected": false,
+      "graph_loaded": true,
+      "load_time_seconds": 2.42,
+      "console_errors": [],
+      "text_content_preview": "返回安全培训\n当前灾害：森林火灾\n森林火灾知识图谱\n\n动态生成 · 知识库关联 · 点击节点查看详情\n\n✓ 图谱已生成\n来源: 静态配置 | 课程数: 0 | 分类数: 0\n点击节点查看详情 | 拖拽移动节点 | 滚轮缩放\n重新生成\n森林火灾\n预防预警\n应急响应\n应急处置\n灾后恢复\n综合保障\n图例\n根节点\n响应阶段\n知识分类\n关联课程",
+      "statistics": [
+        "来源: 静态配置 ",
+        "课程数: 0 ",
+        "分类数: 0"
+      ],
+      "graph_info": {
+        "hasVisualization": true,
+        "svgCount": 18,
+        "canvasCount": 0,
+        "nodeElementsCount": 0
+      },
+      "screenshot": "森林火灾_dynamic_graph.png",
+      "error_message": null
+    },
+    {
+      "disaster_name": "寒潮",
+      "url": "http://localhost:3000/safety/disaster-graph?disaster=寒潮",
+      "success": true,
+      "loading_state_detected": false,
+      "graph_loaded": true,
+      "load_time_seconds": 2.42,
+      "console_errors": [],
+      "text_content_preview": "返回安全培训\n当前灾害：寒潮\n寒潮知识图谱\n\n动态生成 · 知识库关联 · 点击节点查看详情\n\n✓ 图谱已生成\n来源: 静态配置 | 课程数: 0 | 分类数: 0\n点击节点查看详情 | 拖拽移动节点 | 滚轮缩放\n重新生成\n寒潮灾害\n预防预警\n应急响应\n应急处置\n灾后恢复\n综合保障\n图例\n根节点\n响应阶段\n知识分类\n关联课程",
+      "statistics": [
+        "来源: 静态配置 ",
+        "课程数: 0 ",
+        "分类数: 0"
+      ],
+      "graph_info": {
+        "hasVisualization": true,
+        "svgCount": 18,
+        "canvasCount": 0,
+        "nodeElementsCount": 0
+      },
+      "screenshot": "寒潮_dynamic_graph.png",
+      "error_message": null
+    }
+  ]
+}
