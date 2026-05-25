@@ -229,7 +229,7 @@ export default function DisasterGraphPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100">
         <div className="container mx-auto px-4 py-8">
-          <Button variant="outline" onClick={() => router.push('/safety')} className="gap-2 border-white/40 bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm mb-6">
+          <Button variant="outline" onClick={() => router.push('/safety')} className="gap-2 border-red-400 bg-white hover:bg-red-50 text-red-700 font-medium shadow-sm mb-6">
             <ArrowLeft className="w-4 h-4" />返回安全培训
           </Button>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20">
@@ -248,7 +248,7 @@ export default function DisasterGraphPage() {
     <div className="min-h-screen bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100">
       <div className="container mx-auto px-4 py-8">
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-6">
-          <Button variant="outline" onClick={() => router.push('/safety')} className="gap-2 border-white/40 bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm">
+          <Button variant="outline" onClick={() => router.push('/safety')} className="gap-2 border-red-400 bg-white hover:bg-red-50 text-red-700 font-medium shadow-sm">
             <ArrowLeft className="w-4 h-4" />返回安全培训
           </Button>
           <motion.div key={selectedDisaster} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/40 border border-white/50">
@@ -258,7 +258,7 @@ export default function DisasterGraphPage() {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+          <h1 className="text-4xl font-bold text-red-800 mb-2" style={{ textShadow: '0 1px 3px rgba(185,28,28,0.15)' }}>
             {selectedDisaster}知识图谱
           </h1>
           <p className="text-gray-600 text-sm">静态数据 · 秒级加载 · 点击节点查看详情</p>

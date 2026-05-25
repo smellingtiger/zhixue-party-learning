@@ -1,53 +1,122 @@
 {
-  "test_time": "2026-05-25 14:30:46",
-  "total": 5,
-  "success": 5,
-  "failed": 0,
+  "test_time": "2026-05-25T15:06:52.056826",
+  "total_tests": 5,
+  "successful_tests": 5,
   "results": [
     {
-      "disaster": "内涝",
+      "disaster_name": "内涝",
       "url": "http://localhost:3000/safety/disaster-graph?disaster=内涝",
-      "load_success": true,
-      "visible_content": "精英在线学习智能体\nAI个性化推荐\nAI生成课程\nAI智能组班\n知识库\nAI画像\n安全应急培训\n游\n返回安全培训\n当前灾害：内涝\n内涝知识图谱\n\n静态数据 · 秒级加载 · 点击节点查看详情\n\n✓ 图谱已加载\n点击节点查看详情 | 拖拽移动节点 | 滚轮缩放\n重新加载\n城市内涝\n形成原因\n降雨因素\n短时强降雨\n排水系统\n管网老化\n预警等级\n黄色预警\n应急响应\n红色预警\n最高响应\n应急响应\nIV级响应\n值班值守\nI级响应\n全面动员\n排涝措施\n机械强排\n移动泵车\n导流排水\n临时排水沟\n交通管制\n道路封闭\n封闭标准\n绕行引导\n导航推送\n图例\n根节点\n主分类\n子分类\n知识点",
+      "success": true,
+      "loading_state_detected": false,
+      "graph_loaded": true,
+      "load_time_seconds": 2.42,
       "console_errors": [],
-      "screenshot_path": "test_screenshots\\内涝_graph.png",
-      "errors": []
+      "text_content_preview": "返回安全培训\n当前灾害：内涝\n内涝知识图谱\n\n动态生成 · 知识库关联 · 点击节点查看详情\n\n✓ 图谱已生成\n来源: 静态配置 | 课程数: 0 | 分类数: 0\n点击节点查看详情 | 拖拽移动节点 | 滚轮缩放\n重新生成\n城市内涝\n预防预警\n应急响应\n应急处置\n灾后恢复\n综合保障\n图例\n根节点\n响应阶段\n知识分类\n关联课程",
+      "statistics": [
+        "来源: 静态配置 ",
+        "课程数: 0 ",
+        "分类数: 0"
+      ],
+      "graph_info": {
+        "hasVisualization": true,
+        "svgCount": 18,
+        "canvasCount": 0,
+        "nodeElementsCount": 0
+      },
+      "screenshot": "内涝_dynamic_graph.png",
+      "error_message": null
     },
     {
-      "disaster": "台风",
+      "disaster_name": "台风",
       "url": "http://localhost:3000/safety/disaster-graph?disaster=台风",
-      "load_success": true,
-      "visible_content": "精英在线学习智能体\nAI个性化推荐\nAI生成课程\nAI智能组班\n知识库\nAI画像\n安全应急培训\n游\n返回安全培训\n当前灾害：台风\n台风知识图谱\n\n静态数据 · 秒级加载 · 点击节点查看详情\n\n✓ 图谱已加载\n点击节点查看详情 | 拖拽移动节点 | 滚轮缩放\n重新加载\n台风\n台风分级\n热带低压\n风力标准\n超强台风\n风力标准\n预警信号\n蓝色预警\n防御指南\n红色预警\n紧急防御\n防御措施\n台风来临前\n物资储备\n台风期间\n室内避险\n次生灾害\n风暴潮\n预警监测\n山体滑坡\n边坡监测\n应急救援\n人员转移\n转移路线\n灾后恢复\n灾情评估\n图例\n根节点\n主分类\n子分类\n知识点",
+      "success": true,
+      "loading_state_detected": false,
+      "graph_loaded": true,
+      "load_time_seconds": 2.41,
       "console_errors": [],
-      "screenshot_path": "test_screenshots\\台风_graph.png",
-      "errors": []
+      "text_content_preview": "返回安全培训\n当前灾害：台风\n台风知识图谱\n\n动态生成 · 知识库关联 · 点击节点查看详情\n\n✓ 图谱已生成\n来源: 静态配置 | 课程数: 0 | 分类数: 0\n点击节点查看详情 | 拖拽移动节点 | 滚轮缩放\n重新生成\n台风灾害\n预防预警\n应急响应\n应急处置\n灾后恢复\n综合保障\n图例\n根节点\n响应阶段\n知识分类\n关联课程",
+      "statistics": [
+        "来源: 静态配置 ",
+        "课程数: 0 ",
+        "分类数: 0"
+      ],
+      "graph_info": {
+        "hasVisualization": true,
+        "svgCount": 18,
+        "canvasCount": 0,
+        "nodeElementsCount": 0
+      },
+      "screenshot": "台风_dynamic_graph.png",
+      "error_message": null
     },
     {
-      "disaster": "地震",
+      "disaster_name": "地震",
       "url": "http://localhost:3000/safety/disaster-graph?disaster=地震",
-      "load_success": true,
-      "visible_content": "精英在线学习智能体\nAI个性化推荐\nAI生成课程\nAI智能组班\n知识库\nAI画像\n安全应急培训\n游\n返回安全培训\n当前灾害：地震\n地震知识图谱\n\n静态数据 · 秒级加载 · 点击节点查看详情\n\n✓ 图谱已加载\n点击节点查看详情 | 拖拽移动节点 | 滚轮缩放\n重新加载\n地震\n震级分级\n微震/小震\n震级范围\n强震/巨大地震\n震级范围\n烈度分级\n低烈度\nIII度\n高烈度\nXI度\n预警监测\n地震台网\n台站布设\n预警发布\nP波检测\n应急避险\n室内避险\n伏地遮挡\n室外避险\n开阔地带\n防灾减灾\n建筑抗震\n抗震规范\n公众教育\n应急演练\n图例\n根节点\n主分类\n子分类\n知识点",
+      "success": true,
+      "loading_state_detected": false,
+      "graph_loaded": true,
+      "load_time_seconds": 2.42,
       "console_errors": [],
-      "screenshot_path": "test_screenshots\\地震_graph.png",
-      "errors": []
+      "text_content_preview": "返回安全培训\n当前灾害：地震\n地震知识图谱\n\n动态生成 · 知识库关联 · 点击节点查看详情\n\n✓ 图谱已生成\n来源: 静态配置 | 课程数: 0 | 分类数: 0\n点击节点查看详情 | 拖拽移动节点 | 滚轮缩放\n重新生成\n地震灾害\n预防预警\n应急响应\n应急处置\n灾后恢复\n综合保障\n图例\n根节点\n响应阶段\n知识分类\n关联课程",
+      "statistics": [
+        "来源: 静态配置 ",
+        "课程数: 0 ",
+        "分类数: 0"
+      ],
+      "graph_info": {
+        "hasVisualization": true,
+        "svgCount": 18,
+        "canvasCount": 0,
+        "nodeElementsCount": 0
+      },
+      "screenshot": "地震_dynamic_graph.png",
+      "error_message": null
     },
     {
-      "disaster": "森林火灾",
+      "disaster_name": "森林火灾",
       "url": "http://localhost:3000/safety/disaster-graph?disaster=森林火灾",
-      "load_success": true,
-      "visible_content": "精英在线学习智能体\nAI个性化推荐\nAI生成课程\nAI智能组班\n知识库\nAI画像\n安全应急培训\n游\n返回安全培训\n当前灾害：森林火灾\n森林火灾知识图谱\n\n静态数据 · 秒级加载 · 点击节点查看详情\n\n✓ 图谱已加载\n点击节点查看详情 | 拖拽移动节点 | 滚轮缩放\n重新加载\n森林火灾\n火灾分级\n一般火灾\n面积标准\n重大/特别重大火灾\n面积标准\n火险预警\n低度危险\n一二等级\n极度危险\n五级预警\n防火措施\n火源管控\n禁火令\n防火隔离带\n隔离带建设\n扑救方法\n直接扑打\n扑火工具\n以水灭火\n消防水车\n逃生自救\n安全转移\n逆风撤离\n紧急避险\n避险区域\n图例\n根节点\n主分类\n子分类\n知识点",
+      "success": true,
+      "loading_state_detected": false,
+      "graph_loaded": true,
+      "load_time_seconds": 2.42,
       "console_errors": [],
-      "screenshot_path": "test_screenshots\\森林火灾_graph.png",
-      "errors": []
+      "text_content_preview": "返回安全培训\n当前灾害：森林火灾\n森林火灾知识图谱\n\n动态生成 · 知识库关联 · 点击节点查看详情\n\n✓ 图谱已生成\n来源: 静态配置 | 课程数: 0 | 分类数: 0\n点击节点查看详情 | 拖拽移动节点 | 滚轮缩放\n重新生成\n森林火灾\n预防预警\n应急响应\n应急处置\n灾后恢复\n综合保障\n图例\n根节点\n响应阶段\n知识分类\n关联课程",
+      "statistics": [
+        "来源: 静态配置 ",
+        "课程数: 0 ",
+        "分类数: 0"
+      ],
+      "graph_info": {
+        "hasVisualization": true,
+        "svgCount": 18,
+        "canvasCount": 0,
+        "nodeElementsCount": 0
+      },
+      "screenshot": "森林火灾_dynamic_graph.png",
+      "error_message": null
     },
     {
-      "disaster": "寒潮",
+      "disaster_name": "寒潮",
       "url": "http://localhost:3000/safety/disaster-graph?disaster=寒潮",
-      "load_success": true,
-      "visible_content": "精英在线学习智能体\nAI个性化推荐\nAI生成课程\nAI智能组班\n知识库\nAI画像\n安全应急培训\n游\n返回安全培训\n当前灾害：寒潮\n寒潮知识图谱\n\n静态数据 · 秒级加载 · 点击节点查看详情\n\n✓ 图谱已加载\n点击节点查看详情 | 拖拽移动节点 | 滚轮缩放\n重新加载\n寒潮\n寒潮分级\n一般寒潮\n分级标准\n强/特强寒潮\n分级标准\n预警信号\n蓝色预警\n防御指南\n红色预警\n紧急防御\n防护措施\n个人防护\n保暖衣物\n农业防护\n大棚保温\n次生灾害\n冰冻灾害\n道路结冰\n冻害灾害\n农作物冻害\n应急救援\n保暖物资\n物资储备\n弱势群体保护\n关爱老人\n图例\n根节点\n主分类\n子分类\n知识点",
+      "success": true,
+      "loading_state_detected": false,
+      "graph_loaded": true,
+      "load_time_seconds": 2.42,
       "console_errors": [],
-      "screenshot_path": "test_screenshots\\寒潮_graph.png",
-      "errors": []
+      "text_content_preview": "返回安全培训\n当前灾害：寒潮\n寒潮知识图谱\n\n动态生成 · 知识库关联 · 点击节点查看详情\n\n✓ 图谱已生成\n来源: 静态配置 | 课程数: 0 | 分类数: 0\n点击节点查看详情 | 拖拽移动节点 | 滚轮缩放\n重新生成\n寒潮灾害\n预防预警\n应急响应\n应急处置\n灾后恢复\n综合保障\n图例\n根节点\n响应阶段\n知识分类\n关联课程",
+      "statistics": [
+        "来源: 静态配置 ",
+        "课程数: 0 ",
+        "分类数: 0"
+      ],
+      "graph_info": {
+        "hasVisualization": true,
+        "svgCount": 18,
+        "canvasCount": 0,
+        "nodeElementsCount": 0
+      },
+      "screenshot": "寒潮_dynamic_graph.png",
+      "error_message": null
     }
   ]
 }
