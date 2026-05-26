@@ -49,7 +49,7 @@ const NPC_EMOTIONS = {
 type NPCEmotion = keyof typeof NPC_EMOTIONS;
 
 const OPTION_LABELS = ['A', 'B', 'C', 'D'];
-const TOTAL_QUESTIONS = 5;
+const TOTAL_QUESTIONS = 6;
 
 interface DisasterTheme {
   name: string;
@@ -60,7 +60,7 @@ interface DisasterTheme {
   alarmGradient: string;
   alarmTextShadow: string;
   icon: string;
-  particleType: 'rain' | 'heavy-rain' | 'shake' | 'fire' | 'wind' | 'rock' | 'none';
+  particleType: 'rain' | 'heavy-rain' | 'shake' | 'fire' | 'wind' | 'rock' | 'cold' | 'none';
   particleCount: number;
   cardBorder: string;
   progressGradient: string;
@@ -134,6 +134,24 @@ function getDisasterTheme(type: string): DisasterTheme {
       cardBorder: 'border-amber-900/40', progressGradient: 'from-amber-600 via-yellow-600 to-orange-500',
       buttonColor: 'bg-amber-600 hover:bg-amber-700', buttonHover: 'shadow-amber-900/40 hover:shadow-amber-800/60',
       correctColor: 'bg-yellow-950/40 border-yellow-700/50', wrongColor: 'bg-red-950/40 border-red-700/50'
+    },
+    寒潮: {
+      name: '寒潮', bgGradient: 'from-slate-900 via-cyan-950 to-blue-950', bgAccent: 'rgba(100,180,220,0.12)',
+      alarmColor: '#60a5fa', alarmGlow: 'rgba(96,165,250,0.7)', alarmGradient: 'radial-gradient(ellipse at center, rgba(96,165,250,0.5) 0%, rgba(59,130,246,0.75) 40%, rgba(37,99,235,0.92) 70%, rgba(15,23,42,0.98) 100%)',
+      alarmTextShadow: '0 0 40px rgba(96,165,250,0.8), 0 0 80px rgba(59,130,246,0.6)',
+      icon: '❄️', particleType: 'cold', particleCount: 20,
+      cardBorder: 'border-cyan-800/40', progressGradient: 'from-cyan-400 to-blue-500',
+      buttonColor: 'bg-cyan-600 hover:bg-cyan-700', buttonHover: 'shadow-cyan-900/40 hover:shadow-cyan-800/60',
+      correctColor: 'bg-blue-950/40 border-cyan-600/50', wrongColor: 'bg-red-950/40 border-red-700/50'
+    },
+    森林火灾: {
+      name: '森林火灾', bgGradient: 'from-red-950 via-orange-950 to-yellow-950', bgAccent: 'rgba(234,88,12,0.13)',
+      alarmColor: '#f97316', alarmGlow: 'rgba(249,115,22,0.8)', alarmGradient: 'radial-gradient(ellipse at center, rgba(249,115,22,0.6) 0%, rgba(234,88,12,0.84) 40%, rgba(194,65,12,0.95) 70%, rgba(69,10,10,0.97) 100%)',
+      alarmTextShadow: '0 0 40px rgba(249,115,22,0.9), 0 0 80px rgba(234,88,12,0.7), 0 0 120px rgba(194,65,12,0.4)',
+      icon: '🔥', particleType: 'fire', particleCount: 18,
+      cardBorder: 'border-orange-900/40', progressGradient: 'from-orange-500 via-red-500 to-yellow-500',
+      buttonColor: 'bg-orange-600 hover:bg-orange-700', buttonHover: 'shadow-orange-900/50 hover:shadow-orange-800/70',
+      correctColor: 'bg-lime-950/40 border-lime-700/50', wrongColor: 'bg-red-950/50 border-red-800/50'
     }
   };
   return themes[type] || themes['地震'];
@@ -321,35 +339,38 @@ function EmergencyTrainingContent() {
   };
 
   const triggerAlarmSequence = () => {
-    setAlarmIntensity('full');
-    alarmTimerRef.current = setTimeout(() => {
-      setAlarmIntensity('flash');
-      alarmTimerRef.current = setTimeout(() => {
-        setAlarmIntensity('idle');
-        startNPCDialogue();
-      }, 2000);
-    }, 1500);
-  };
-
-  const startNPCDialogue = () => {
     const s = gameStateRef.current.scenario;
-    if (!s) {
-      console.error('[BUG] startNPCDialogue: scenario is null in ref!');
-      setPhase('error');
-      setErrorMessage('场景数据丢失，请刷新页面重试');
-      return;
-    }
+    if (!s) return;
+    
+    setAlarmIntensity('full');
     setNpcEmotion('panic');
+    
     const lines = [
-      `不好了！不好了！${s.type}紧急情况！`,
-      `我刚收到最新消息：${s.situation}`,
-      `指挥中心已经启动${s.levelName}响应，急需各岗位负责人到位！`,
-      `请问您是...？哪位领导来了？`
+      `⚠️ 紧急情况！${s.type}！`,
+      `${s.situation.substring(0, 60)}...`,
+      `指挥中心已启动${s.levelName}响应，请立即选择您的岗位身份！`
     ];
     setDialogueLines(lines);
     setDialogueIdx(0);
-    setShowDialogueNext(true);
-    setPhase('npc_talk');
+    setShowDialogueNext(false);
+    setPhase('alarm');
+    
+    let currentLine = 0;
+    const autoPlayDialogue = () => {
+      if (currentLine < lines.length) {
+        setDialogueIdx(currentLine);
+        currentLine++;
+        alarmTimerRef.current = setTimeout(autoPlayDialogue, 1800);
+      } else {
+        setAlarmIntensity('idle');
+        setPhase('role_select');
+      }
+    };
+    
+    alarmTimerRef.current = setTimeout(() => {
+      setAlarmIntensity('flash');
+      autoPlayDialogue();
+    }, 1200);
   };
 
   const handleSelectRole = async (roleId: string) => {
@@ -381,7 +402,8 @@ function EmergencyTrainingContent() {
       setCurrentQuestion(data.currentQuestion);
       setScore(data.score);
 
-      startRoleIntro(role!);
+      setNpcEmotion('serious');
+      setPhase('question');
     } catch (error) {
       console.error('Failed to select role:', error);
       setClickedRoleId(null);
@@ -478,15 +500,15 @@ function EmergencyTrainingContent() {
     setNpcEmotion('serious');
     const su = gameStateRef.current.situationUpdate;
     setDialogueLines([
-      '报告！有新情况！',
-      su || '情况发生了变化...',
-      '请您根据最新情况做出判断！'
+      `📢 情况更新：${su ? su.substring(0, 40) + '...' : '情况发生变化'}`
     ]);
     setDialogueIdx(0);
-    setShowDialogueNext(true);
+    setShowDialogueNext(false);
     setPhase('alert_update');
+    
     alarmTimerRef.current = setTimeout(() => {
       setAlarmIntensity('idle');
+      handleNextQuestion();
     }, 2000);
   };
 
@@ -539,7 +561,7 @@ function EmergencyTrainingContent() {
   };
 
   const isAlarming = alarmIntensity !== 'idle';
-  const isNPCPhase = ['npc_talk', 'role_intro', 'alert_update'].includes(phase);
+  const isNPCPhase = ['alarm', 'npc_talk', 'role_intro', 'alert_update'].includes(phase);
   const theme = scenario ? getDisasterTheme(scenario.type) : getDisasterTheme('地震');
   const alarmConfig = scenario ? getAlarmLevelConfig(scenario.level) : getAlarmLevelConfig('I');
   const showParticles = (phase !== 'idle' && phase !== 'error') || isAlarming;
@@ -637,6 +659,13 @@ function EmergencyTrainingContent() {
           85% { opacity: 0.9; }
           100% { transform: translateY(100vh) rotate(180deg); opacity: 0; }
         }
+        @keyframes snow-fall {
+          0% { transform: translateY(-20px) translateX(0) rotate(0deg); opacity: 0; }
+          10% { opacity: 0.8; }
+          50% { transform: translateY(50vh) translateX(30px) rotate(180deg); opacity: 0.6; }
+          90% { opacity: 0.4; }
+          100% { transform: translateY(105vh) translateX(-20px) rotate(360deg); opacity: 0; }
+        }
         @keyframes crack-spread {
           0% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); filter: none; }
           10% { clip-path: polygon(0 0, 48% 2%, 52% 5%, 49% 8%, 51% 12%, 47% 15%, 53% 18%, 50% 22%, 100% 20%, 100% 35%, 45% 38%, 55% 42%, 48% 46%, 52% 50%, 46% 54%, 54% 58%, 49% 62%, 51% 66%, 100% 65%, 100% 80%, 44% 82%, 56% 86%, 49% 90%, 51% 95%, 100% 93%, 100% 100%, 0 100%); }
@@ -689,6 +718,29 @@ function EmergencyTrainingContent() {
           0%, 100% { background: transparent; }
           5%, 15%, 25% { background: rgba(255,255,255,0.08); }
           10%, 20%, 30% { background: rgba(255,255,255,0.02); }
+        }
+        @keyframes fire-flicker {
+          0%, 100% { transform: scale(1); opacity: 0.7; }
+          25% { transform: scale(1.2); opacity: 0.9; }
+          50% { transform: scale(0.9); opacity: 0.6; }
+          75% { transform: scale(1.15); opacity: 0.85; }
+        }
+        @keyframes fire-glow-pulse {
+          0%, 100% { opacity: 0.7; }
+          50% { opacity: 1; }
+        }
+        @keyframes fire-ground-flicker {
+          0%, 100% { opacity: 0.4; height: 10px; }
+          50% { opacity: 0.8; height: 14px; }
+        }
+        @keyframes ice-shimmer {
+          0%, 100% { opacity: 0.75; filter: brightness(1); }
+          33% { opacity: 0.9; filter: brightness(1.15); }
+          66% { opacity: 0.8; filter: brightness(1.05); }
+        }
+        @keyframes ice-crystal-spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
       `}</style>
 
@@ -768,6 +820,192 @@ function EmergencyTrainingContent() {
                 }}
               >🪨</span>
             ))}
+            {theme.particleType === 'cold' && Array.from({ length: Math.ceil(theme.particleCount * alarmConfig.particleMultiplier) }).map((_, i) => (
+              <span
+                key={`snow-${i}`}
+                className="absolute text-white/60 text-lg"
+                style={{
+                  left: `${(i * 53 + 17) % 100}%`,
+                  top: '-20px',
+                  animation: `snow-fall ${3 + (i % 5) * 1.2}s linear infinite`,
+                  animationDelay: `${(i * 0.25) % 4}s`
+                }}
+              >❄</span>
+            ))}
+          </div>
+        )}
+
+        {/* ========== 森林火灾专属视觉：燃烧的树林 ========== */}
+        {showParticles && theme.particleType === 'fire' && (
+          <div className="fixed bottom-0 left-0 right-0 h-[35vh] pointer-events-none z-[9] overflow-hidden">
+            <svg viewBox="0 0 1440 350" preserveAspectRatio="none" className="w-full h-full">
+              <defs>
+                <linearGradient id="fireSkyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#1a0800" stopOpacity="0" />
+                  <stop offset="60%" stopColor="#2d1000" stopOpacity="0.6" />
+                  <stop offset="100%" stopColor="#4a1800" stopOpacity="0.95" />
+                </linearGradient>
+                <linearGradient id="treeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#1a4a1a" />
+                  <stop offset="100%" stopColor="#0d280d" />
+                </linearGradient>
+                <linearGradient id="fireGlow" x1="50%" y1="100%" x2="50%" y2="0%">
+                  <stop offset="0%" stopColor="#ff4400" stopOpacity="0.8" />
+                  <stop offset="40%" stopColor="#ff8800" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="#ffcc00" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <rect x="0" y="0" width="1440" height="350" fill="url(#fireSkyGrad)" />
+              {/* 火光映照 */}
+              <rect x="0" y="200" width="1440" height="150" fill="url(#fireGlow)" style={{ animation: 'fire-glow-pulse 1.5s ease-in-out infinite' }} />
+              {/* 三角形抽象树木 - 多排 */}
+              {[...Array(8)].map((_, row) => (
+                <g key={`tree-row-${row}`} transform={`translate(0, ${row * 25})`}>
+                  {[...Array(20)].map((_, col) => {
+                    const x = col * 75 + (row % 2) * 37;
+                    const height = 60 + Math.sin(col * 0.8 + row) * 20;
+                    const baseY = 320 - row * 15;
+                    const isBurning = (col + row * 3) % 5 === 0;
+                    return (
+                      <g key={`tree-${row}-${col}`}>
+                        {/* 树干 */}
+                        <rect
+                          x={x + 12}
+                          y={baseY - 10}
+                          width="6"
+                          height="15"
+                          fill="#3d2817"
+                        />
+                        {/* 树冠（三角形堆叠） */}
+                        <polygon
+                          points={`${x},${baseY} ${x + 30},${baseY - height * 0.5} ${x + 60},${baseY}`}
+                          fill="url(#treeGrad)"
+                          opacity={0.85 + row * 0.02}
+                        />
+                        <polygon
+                          points={`${x + 5},${baseY - height * 0.2} ${x + 30},${baseY - height * 0.75} ${x + 55},${baseY - height * 0.2}`}
+                          fill="url(#treeGrad)"
+                          opacity={0.9}
+                        />
+                        <polygon
+                          points={`${x + 10},${baseY - height * 0.4} ${x + 30},${baseY - height} ${x + 50},${baseY - height * 0.4}`}
+                          fill="#228b22"
+                          opacity={0.92}
+                        />
+                        {/* 燃烧的树 */}
+                        {isBurning && (
+                          <>
+                            <circle
+                              cx={x + 30}
+                              cy={baseY - height * 0.5}
+                              r={8 + Math.random() * 6}
+                              fill="#ff4400"
+                              opacity={0.7}
+                              style={{ animation: `fire-flicker ${0.8 + Math.random() * 0.6}s ease-in-out infinite` }}
+                            />
+                            <circle
+                              cx={x + 28}
+                              cy={baseY - height * 0.55}
+                              r={5 + Math.random() * 4}
+                              fill="#ff8800"
+                              opacity={0.8}
+                              style={{ animation: `fire-flicker ${0.6 + Math.random() * 0.4}s ease-in-out infinite reverse` }}
+                            />
+                            <circle
+                              cx={x + 33}
+                              cy={baseY - height * 0.45}
+                              r={4 + Math.random() * 3}
+                              fill="#ffcc00"
+                              opacity={0.9}
+                              style={{ animation: `fire-flicker ${0.5 + Math.random() * 0.3}s ease-in-out infinite` }}
+                            />
+                          </>
+                        )}
+                      </g>
+                    );
+                  })}
+                </g>
+              ))}
+              {/* 地面火焰线 */}
+              <rect x="0" y="340" width="1440" height="10" fill="#ff4400" opacity="0.6" style={{ animation: 'fire-ground-flicker 0.3s ease-in-out infinite' }} />
+            </svg>
+          </div>
+        )}
+
+        {/* ========== 寒潮专属视觉：冰封大地 ========== */}
+        {showParticles && (theme.particleType === 'cold') && (
+          <div className="fixed inset-0 pointer-events-none z-[9] overflow-hidden">
+            {/* 冰晶覆盖效果 */}
+            <div className="absolute inset-0" style={{
+              background: 'radial-gradient(ellipse at center, transparent 40%, rgba(200,230,255,0.08) 70%, rgba(180,220,255,0.15) 100%)',
+            }} />
+            {/* 大冰块装饰 */}
+            <svg viewBox="0 0 1440 900" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
+              <defs>
+                <linearGradient id="iceBlockGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#e8f4fc" stopOpacity="0.9" />
+                  <stop offset="30%" stopColor="#b8dff0" stopOpacity="0.7" />
+                  <stop offset="70%" stopColor="#88c8e8" stopOpacity="0.6" />
+                  <stop offset="100%" stopColor="#58b8e0" stopOpacity="0.5" />
+                </linearGradient>
+                <linearGradient id="iceShine" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#ffffff" stopOpacity="0.8" />
+                  <stop offset="50%" stopColor="#ffffff" stopOpacity="0.2" />
+                  <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+                </linearGradient>
+                <filter id="iceGlow">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              
+              {/* 左下角大冰块 */}
+              <g transform="translate(50, 650)" filter="url(#iceGlow)">
+                <polygon points="0,120 80,0 160,120 140,130 80,45 20,130" fill="url(#iceBlockGrad)" stroke="#a0d8f0" strokeWidth="2" opacity="0.85" style={{ animation: 'ice-shimmer 3s ease-in-out infinite' }} />
+                <polygon points="20,110 80,30 140,110 125,118 80,52 35,118" fill="url(#iceShine)" opacity="0.4" />
+                <line x1="80" y1="0" x2="80" y2="120" stroke="#c0e8ff" strokeWidth="1" opacity="0.5" />
+                <line x1="40" y1="60" x2="120" y2="60" stroke="#c0e8ff" strokeWidth="1" opacity="0.3" />
+              </g>
+
+              {/* 右下角大冰块 */}
+              <g transform="translate(1150, 600) scale(1.3)" filter="url(#iceGlow)">
+                <polygon points="0,100 70,0 140,100 122,108 70,38 18,108" fill="url(#iceBlockGrad)" stroke="#a0d8f0" strokeWidth="2" opacity="0.8" style={{ animation: 'ice-shimmer 2.5s ease-in-out infinite 0.5s' }} />
+                <polygon points="18,92 70,32 122,92 108,98 70,48 32,98" fill="url(#iceShine)" opacity="0.35" />
+                <line x1="70" y1="0" x2="70" y2="100" stroke="#c0e8ff" strokeWidth="1" opacity="0.5" />
+              </g>
+
+              {/* 中间偏右冰块 */}
+              <g transform="translate(900, 720) scale(0.8)" filter="url(#iceGlow)">
+                <polygon points="0,80 55,0 110,80 96,86 55,30 14,86" fill="url(#iceBlockGrad)" stroke="#a0d8f0" strokeWidth="1.5" opacity="0.75" style={{ animation: 'ice-shimmer 3.5s ease-in-out infinite 1s' }} />
+              </g>
+
+              {/* 左侧小冰块 */}
+              <g transform="translate(200, 750) scale(0.6)" filter="url(#iceGlow)">
+                <polygon points="0,70 48,0 96,70 84,76 48,26 12,76" fill="url(#iceBlockGrad)" stroke="#a0d8f0" strokeWidth="1" opacity="0.7" style={{ animation: 'ice-shimmer 2.8s ease-in-out infinite 0.3s' }} />
+              </g>
+
+              {/* 地面结冰线 */}
+              <rect x="0" y="888" width="1440" height="12" fill="rgba(180,220,255,0.3)" />
+              <line x1="0" y1="892" x2="1440" y2="892" stroke="rgba(200,235,255,0.5)" strokeWidth="2" strokeDasharray="20,10" />
+
+              {/* 冰晶雪花点缀 */}
+              {[
+                { x: 300, y: 200, size: 15 }, { x: 700, y: 150, size: 20 },
+                { x: 1100, y: 250, size: 12 }, { x: 500, y: 400, size: 18 },
+                { x: 900, y: 500, size: 14 }, { x: 200, y: 550, size: 16 },
+                { x: 1300, y: 450, size: 22 }, { x: 600, y: 300, size: 13 }
+              ].map((flake, i) => (
+                <g key={`flake-${i}`} transform={`translate(${flake.x}, ${flake.y})`} style={{ animation: `ice-crystal-spin ${8 + i}s linear infinite` }}>
+                  <polygon points="0,-{flake.size/2} {flake.size/4},-{flake.size/4} {flake.size/2},-{flake.size/2} {flake.size/4},{flake.size/4} 0,{flake.size/2} -{flake.size/4},{flake.size/4} -{flake.size/2},-{flake.size/2} -{flake.size/4},-{flake.size/4}" 
+                    fill="none" stroke="rgba(200,235,255,0.4)" strokeWidth="1.5" />
+                  <line x1="0" y1="-{flake.size/2}" x2="0" y2="{flake.size/2}" stroke="rgba(200,235,255,0.3)" strokeWidth="1" />
+                  <line x1="-{flake.size/2}" y1="0" x2="{flake.size/2}" y2="0" stroke="rgba(200,235,255,0.3)" strokeWidth="1" />
+                </g>
+              ))}
+            </svg>
           </div>
         )}
 
@@ -899,7 +1137,7 @@ function EmergencyTrainingContent() {
         {/* ========== 分级警报全屏覆盖（使用主题色+等级配置）========== */}
         {isAlarming && (
           <div
-            className="fixed inset-0 z-50 pointer-events-none"
+            className="fixed inset-0 z-[45] pointer-events-none"
             style={{
               animation: (() => {
                 if (alarmIntensity === 'none') return 'none';
@@ -1096,7 +1334,7 @@ function EmergencyTrainingContent() {
 
           {/* ========== NPC对话阶段 ========== */}
           {(isNPCPhase) && (
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center relative z-[60]">
               {/* NPC角色卡片 */}
               <div
                 className="relative mb-6"
@@ -1408,7 +1646,7 @@ function EmergencyTrainingContent() {
                     <span className="text-slate-600 text-xl">/{TOTAL_QUESTIONS}</span>
                   </div>
                   <p className="text-slate-400 text-sm mb-4">
-                    {score >= 5 ? '🎉 满分！应急预案掌握出色！' :
+                    {score >= 6 ? '🎉 满分！应急预案掌握出色！' :
                      score >= 4 ? '👍 表现优秀，继续加油！' :
                      score >= 3 ? '📖 基本合格，还需磨练。' :
                      '📚 需要加强学习应急手册。'}

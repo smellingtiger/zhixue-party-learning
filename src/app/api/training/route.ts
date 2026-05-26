@@ -13,7 +13,7 @@ interface TrainingRequest {
   disasterType?: string;
 }
 
-const TOTAL_QUESTIONS = 5;
+const TOTAL_QUESTIONS = 6;
 
 const EXAMINER_PERSONA = `你是应急指挥中心的AI考官，负责组织应急演练培训。你的任务是根据应急手册内容生成选择题、评价用户选择、推进场景。
 
@@ -72,7 +72,7 @@ D. 选项D
 正确答案字母
 </correct>
 
-### 最后一题（第5题）评价后，用以下格式：
+### 最后一题（第6题）评价后，用以下格式：
 <feedback>
 对/错
 </feedback>
