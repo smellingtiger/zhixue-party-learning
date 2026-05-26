@@ -105,8 +105,12 @@ export default function SafetyPage() {
   const selectedDisasterData = disasterTypes.find(d => d.id === selectedDisaster);
 
   const handleNavigateWithDisaster = (href: string) => {
+    const disasterName = disasterTypes.find(d => d.id === selectedDisaster)?.name || '地震';
+    
     if (href === '/safety/disaster-graph') {
-      const disasterName = disasterTypes.find(d => d.id === selectedDisaster)?.name || '地震';
+      localStorage.setItem('selectedDisaster', disasterName);
+      router.push(`${href}?disaster=${encodeURIComponent(disasterName)}`);
+    } else if (href === '/safety/quiz-interactive') {
       localStorage.setItem('selectedDisaster', disasterName);
       router.push(`${href}?disaster=${encodeURIComponent(disasterName)}`);
     } else {
