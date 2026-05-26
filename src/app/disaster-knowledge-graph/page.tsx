@@ -35,6 +35,12 @@ interface DisasterGraphNode {
   type: 'root' | 'category' | 'subcategory' | 'detail';
   description?: string;
   children?: DisasterGraphNode[];
+  x?: number;
+  y?: number;
+  vx?: number;
+  vy?: number;
+  fx?: number;
+  fy?: number;
 }
 
 interface DisasterType {
@@ -148,7 +154,8 @@ export default function DisasterKnowledgeGraphPage() {
   
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const simulationRef = useRef<d3.Simulation<DisasterGraphNode, undefined> | null>(null);
+  const simulationRef = useRef<d3.Simulation<any, undefined> | null>(null);
+  const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
 
   const generateGraph = useCallback(async (disasterType: string) => {
     setIsLoading(true);
@@ -233,6 +240,7 @@ export default function DisasterKnowledgeGraphPage() {
         g.attr('transform', transform.toString());
       });
 
+    zoomRef.current = zoom;
     svg.call(zoom);
 
     function flattenData(node: DisasterGraphNode, depth: number = 0): DisasterGraphNode[] {
@@ -261,23 +269,20 @@ export default function DisasterKnowledgeGraphPage() {
 
     const nodeMap = new Map(nodes.map(n => [n.id, n]));
 
-    const simulation = d3.forceSimulation(nodes)
-      .force('link', d3.forceLink(links)
-        .id(d => (d as DisasterGraphNode).id)
-        .distance(d => {
-          const node = d as DisasterGraphNode;
-          if (node.type === 'root') return 200;
-          if (node.type === 'category') return 150;
-          if (node.type === 'subcategory') return 100;
+    const simulation = d3.forceSimulation(nodes as any)
+      .force('link', d3.forceLink(links as any)
+        .id((d: any) => d.id)
+        .distance((d: any) => {
+          const sourceNode = typeof d.source === 'string' ? nodeMap.get(d.source) : d.source;
+          if (sourceNode?.type === 'root') return 200;
+          if (sourceNode?.type === 'category') return 150;
+          if (sourceNode?.type === 'subcategory') return 100;
           return 80;
         })
         .strength(0.5))
       .force('charge', d3.forceManyBody().strength(-400))
       .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius(d => {
-        const node = d as DisasterGraphNode;
-        return TYPE_SIZES[node.type] + 10;
-      }));
+      .force('collision', d3.forceCollide().radius((d: any) => TYPE_SIZES[d.type] + 10));
 
     simulationRef.current = simulation;
 
@@ -294,21 +299,23 @@ export default function DisasterKnowledgeGraphPage() {
       .data(nodes)
       .join('g')
       .style('cursor', 'pointer')
-      .call(d3.drag<SVGGElement, DisasterGraphNode>()
-        .on('start', (event, d) => {
-          if (!event.active) simulation.alphaTarget(0.3).restart();
-          d.fx = d.x;
-          d.fy = d.y;
-        })
-        .on('drag', (event, d) => {
-          d.fx = event.x;
-          d.fy = event.y;
-        })
-        .on('end', (event, d) => {
-          if (!event.active) simulation.alphaTarget(0);
-          d.fx = null;
-          d.fy = null;
-        }));
+      .call((selection: any) => {
+        selection.call(d3.drag()
+          .on('start', (event: any, d: any) => {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+          })
+          .on('drag', (event: any, d: any) => {
+            d.fx = event.x;
+            d.fy = event.y;
+          })
+          .on('end', (event: any, d: any) => {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+          }));
+      });
 
     node.append('circle')
       .attr('r', d => TYPE_SIZES[d.type])
@@ -352,12 +359,24 @@ export default function DisasterKnowledgeGraphPage() {
 
     simulation.on('tick', () => {
       link
-        .attr('x1', d => (d.source as DisasterGraphNode).x || 0)
-        .attr('y1', d => (d.source as DisasterGraphNode).y || 0)
-        .attr('x2', d => (d.target as DisasterGraphNode).x || 0)
-        .attr('y2', d => (d.target as DisasterGraphNode).y || 0);
+        .attr('x1', (d: any) => {
+          const source = typeof d.source === 'string' ? nodeMap.get(d.source) : d.source;
+          return source?.x || 0;
+        })
+        .attr('y1', (d: any) => {
+          const source = typeof d.source === 'string' ? nodeMap.get(d.source) : d.source;
+          return source?.y || 0;
+        })
+        .attr('x2', (d: any) => {
+          const target = typeof d.target === 'string' ? nodeMap.get(d.target) : d.target;
+          return target?.x || 0;
+        })
+        .attr('y2', (d: any) => {
+          const target = typeof d.target === 'string' ? nodeMap.get(d.target) : d.target;
+          return target?.y || 0;
+        });
 
-      node.attr('transform', d => `translate(${d.x || 0},${d.y || 0})`);
+      node.attr('transform', (d: any) => `translate(${d.x || 0},${d.y || 0})`);
     });
 
     const initialTransform = d3.zoomIdentity
@@ -372,33 +391,33 @@ export default function DisasterKnowledgeGraphPage() {
   }, [graphData]);
 
   const handleZoomIn = () => {
-    if (svgRef.current) {
+    if (svgRef.current && zoomRef.current) {
       const svg = d3.select(svgRef.current);
       svg.transition().call(
-        (zoom as any).scaleBy,
+        (zoomRef.current as any).scaleBy,
         1.3
       );
     }
   };
 
   const handleZoomOut = () => {
-    if (svgRef.current) {
+    if (svgRef.current && zoomRef.current) {
       const svg = d3.select(svgRef.current);
       svg.transition().call(
-        (zoom as any).scaleBy,
+        (zoomRef.current as any).scaleBy,
         0.7
       );
     }
   };
 
   const handleResetZoom = () => {
-    if (svgRef.current && containerRef.current) {
+    if (svgRef.current && containerRef.current && zoomRef.current) {
       const svg = d3.select(svgRef.current);
       const width = containerRef.current.clientWidth;
       const height = containerRef.current.clientHeight;
       
       svg.transition().call(
-        (zoom as any).transform,
+        (zoomRef.current as any).transform,
         d3.zoomIdentity.translate(width / 2, height / 2).scale(0.8)
       );
     }

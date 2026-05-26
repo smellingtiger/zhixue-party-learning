@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { disasterScenarios, getRoleById, getRequiredRoles } from '@/lib/emergency-training';
-import { getCardsByLevel } from '@/lib/emergency-sops';
+import { disasterScenarios, getRoleById, getRequiredRoles, getScenariosByType, getAvailableDisasterTypes } from '@/lib/emergency-training-new';
 import { ollamaChat } from '@/lib/emergency-ollama';
 
 interface TrainingRequest {
@@ -11,6 +10,7 @@ interface TrainingRequest {
   correctAnswer?: string;
   questionIndex?: number;
   score?: number;
+  disasterType?: string;
 }
 
 const TOTAL_QUESTIONS = 5;
@@ -96,28 +96,6 @@ ${requiredRoles.map(r => `  · ${r.department} - ${r.name}：${r.description}`).
 请在右侧选择您要扮演的角色，开始实战演练！`;
 }
 
-function getRoleInstructions(scenario: typeof disasterScenarios[0], role: NonNullable<ReturnType<typeof getRoleById>>): string[] {
-  const level = scenario.level as 'IV' | 'III' | 'II' | 'I';
-  const cards = getCardsByLevel(level);
-
-  const deptName = role.department.replace(/[（(].*[）)]/g, '').trim();
-
-  for (const card of cards) {
-    if (card.name === deptName || card.role === deptName) {
-      return card.instructions;
-    }
-    const cardClean = card.name.replace(/[（(].*[）)]/g, '').trim();
-    if (cardClean === deptName || deptName.includes(cardClean) || cardClean.includes(deptName)) {
-      return card.instructions;
-    }
-    if (card.role === role.department || role.department.includes(card.name)) {
-      return card.instructions;
-    }
-  }
-
-  return [];
-}
-
 function parseTag(content: string, tag: string): string {
   const regex = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`, 'i');
   const match = content.match(regex);
@@ -152,7 +130,6 @@ function parseQuestion(content: string) {
 function buildQuestionPrompt(
   scenario: typeof disasterScenarios[0],
   role: NonNullable<ReturnType<typeof getRoleById>>,
-  roleInstructions: string[],
   questionIndex: number,
   situationContext?: string
 ): string {
@@ -168,12 +145,12 @@ function buildQuestionPrompt(
 用户扮演的角色：【${role.department} ${role.name}】
 角色描述：${role.description}
 
-该角色在应急手册${scenario.level}级响应中的具体指令：
-${roleInstructions.length > 0 ? roleInstructions.map((inst, i) => `${i + 1}. ${inst}`).join('\n') : '根据常识判断'}
+该角色在${scenario.level}级响应中的职责：
+${role.description}
 
 请根据以上信息，生成一道贴合场景的选择题：
 - 题目要体现当前情境下的决策压力
-- 正确选项应严格对照手册指令
+- 正确选项应符合该角色的职责要求
 - 3个错误选项要有迷惑性（如：跳过步骤、越权决策、时机不对等）
 - 每个选项都要是具体的可操作行动
 
@@ -183,7 +160,6 @@ ${roleInstructions.length > 0 ? roleInstructions.map((inst, i) => `${i + 1}. ${i
 function buildEvaluationPrompt(
   scenario: typeof disasterScenarios[0],
   role: NonNullable<ReturnType<typeof getRoleById>>,
-  roleInstructions: string[],
   questionIndex: number,
   questionText: string,
   options: Array<{ id: string; text: string }>,
@@ -219,8 +195,8 @@ ${optionsText}
 
 用户当前得分：${score}/${questionIndex - 1}
 
-该角色的手册指令：
-${roleInstructions.length > 0 ? roleInstructions.slice(0, 5).map((inst, i) => `${i + 1}. ${inst}`).join('\n') : '无'}
+该角色的职责：
+${role.description}
 
 请评价用户的选择是否正确，给出详细解释，然后${nextPrompt}。`;
 }
@@ -228,10 +204,10 @@ ${roleInstructions.length > 0 ? roleInstructions.slice(0, 5).map((inst, i) => `$
 export async function POST(request: NextRequest) {
   try {
     const body: TrainingRequest = await request.json();
-    const { action, scenarioId, selectedRoleId, selectedOption, correctAnswer, questionIndex, score } = body;
+    const { action, scenarioId, selectedRoleId, selectedOption, correctAnswer, questionIndex, score, disasterType } = body;
 
     if (action === 'start') {
-      return await handleStart();
+      return await handleStart(disasterType);
     }
 
     if (action === 'select_role' && scenarioId && selectedRoleId) {
@@ -249,8 +225,16 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handleStart() {
-  const scenario = disasterScenarios[Math.floor(Math.random() * disasterScenarios.length)];
+async function handleStart(disasterType?: string) {
+  let scenario;
+  
+  if (disasterType) {
+    const scenarios = getScenariosByType(disasterType);
+    scenario = scenarios.length > 0 ? scenarios[Math.floor(Math.random() * scenarios.length)] : disasterScenarios[0];
+  } else {
+    scenario = disasterScenarios[Math.floor(Math.random() * disasterScenarios.length)];
+  }
+  
   const requiredRoles = getRequiredRoles(scenario.id);
 
   let message: string;
@@ -291,10 +275,8 @@ async function handleSelectRole(scenarioId: string, roleId: string) {
     return NextResponse.json({ error: '场景或角色不存在' }, { status: 400 });
   }
 
-  const roleInstructions = getRoleInstructions(scenario, role);
-
   try {
-    const prompt = buildQuestionPrompt(scenario, role, roleInstructions, 1);
+    const prompt = buildQuestionPrompt(scenario, role, 1);
 
     const rawOutput = await ollamaChat([
       { role: 'system', content: MCQ_SYSTEM_PROMPT },
@@ -320,7 +302,7 @@ async function handleSelectRole(scenarioId: string, roleId: string) {
   } catch (llmError) {
     console.warn('LLM question generation failed:', (llmError as Error).message);
 
-    const fallbackQuestion = generateFallbackQuestion(scenario, role, roleInstructions, 1);
+    const fallbackQuestion = generateFallbackQuestion(scenario, role, 1);
     return NextResponse.json({
       type: 'question',
       role,
@@ -347,14 +329,12 @@ async function handleAnswer(
     return NextResponse.json({ error: '场景或角色不存在' }, { status: 400 });
   }
 
-  const roleInstructions = getRoleInstructions(scenario, role);
-
   try {
     const isCorrect = selectedOption.toUpperCase() === correctAnswer.toUpperCase();
     const newScore = isCorrect ? score + 1 : score;
 
     const prompt = buildEvaluationPrompt(
-      scenario, role, roleInstructions,
+      scenario, role,
       questionIndex, '', [],
       correctAnswer, selectedOption, newScore,
       scenario.situation
@@ -422,7 +402,7 @@ async function handleAnswer(
       });
     }
 
-    const fallbackQuestion = generateFallbackQuestion(scenario, role, roleInstructions, questionIndex + 1);
+    const fallbackQuestion = generateFallbackQuestion(scenario, role, questionIndex + 1);
     return NextResponse.json({
       type: 'feedback',
       isCorrect,
@@ -439,20 +419,33 @@ async function handleAnswer(
 function generateFallbackQuestion(
   scenario: typeof disasterScenarios[0],
   role: NonNullable<ReturnType<typeof getRoleById>>,
-  roleInstructions: string[],
   questionIndex: number
 ) {
-  const inst = roleInstructions.length > 0 ? roleInstructions : ['保持通信畅通，等待上级指示', '组织人员撤离危险区域', '检查物资储备情况', '向上级报告当前情况'];
-  const correctInst = inst[0] || '启动应急响应预案';
+  const actions = [
+    `按照${scenario.level}级响应预案启动相关工作`,
+    '立即向上级领导汇报当前情况',
+    '组织本部门人员到位待命',
+    '与相关部门建立实时沟通渠道',
+    '启动应急物资储备检查',
+    '发布针对性预警通知',
+    '协调专业救援力量',
+    '评估当前风险等级'
+  ];
+
+  const correctIdx = Math.min(questionIndex - 1, actions.length - 1);
+  const shuffled = [...actions].sort(() => Math.random() - 0.5);
+  const correctPos = shuffled.indexOf(actions[correctIdx]);
+  
+  const options = shuffled.slice(0, 4).map((action, idx) => ({
+    id: OPTION_LABELS[idx],
+    text: action
+  }));
 
   return {
-    questionText: `【第${questionIndex}题】作为${role.department}，在当前${scenario.type}${scenario.levelName}情况下，您首先应该采取什么行动？`,
-    options: [
-      { id: 'A', text: correctInst },
-      { id: 'B', text: inst[1] || '立即发布全市通告' },
-      { id: 'C', text: inst[2] || '等待上级进一步指示' },
-      { id: 'D', text: inst[3] || '直接奔赴现场指挥' }
-    ],
-    correctAnswer: 'A'
+    questionText: `【第${questionIndex}题】作为${role.department}${role.name}，在当前${scenario.type}${scenario.levelName}情况下，您首先应该采取什么行动？`,
+    options,
+    correctAnswer: OPTION_LABELS[correctPos >= 0 && correctPos < 4 ? correctPos : 0]
   };
 }
+
+const OPTION_LABELS = ['A', 'B', 'C', 'D'];

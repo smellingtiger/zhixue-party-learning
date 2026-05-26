@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import * as d3 from 'd3';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -14,7 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { DISASTER_GRAPH_DATA } from '@/lib/disaster-graph-data';
 
 interface DisasterGraphNode {
@@ -23,6 +23,12 @@ interface DisasterGraphNode {
   type: 'root' | 'category' | 'subcategory' | 'detail';
   description?: string;
   children?: DisasterGraphNode[];
+  x?: number;
+  y?: number;
+  vx?: number;
+  vy?: number;
+  fx?: number;
+  fy?: number;
 }
 
 const TYPE_COLORS: Record<string, string> = {
@@ -39,9 +45,9 @@ const TYPE_SIZES: Record<string, number> = {
   detail: 12
 };
 
-export default function DisasterGraphPage() {
+function DisasterGraphContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = require('next/navigation').useSearchParams();
 
   const [selectedDisaster, setSelectedDisaster] = useState<string>('');
   const [graphData, setGraphData] = useState<DisasterGraphNode | null>(null);
@@ -127,11 +133,11 @@ export default function DisasterGraphPage() {
     const links = getLinks(graphData);
     const nodeMap = new Map(nodes.map(n => [n.id, n]));
 
-    const simulation = d3.forceSimulation(nodes)
-      .force('link', d3.forceLink(links)
+    const simulation = d3.forceSimulation(nodes as any)
+      .force('link', d3.forceLink(links as any)
         .id((d: any) => d.id)
         .distance((d: any) => {
-          const src = d.source as DisasterGraphNode | undefined;
+          const src = typeof d.source === 'string' ? nodeMap.get(d.source) : d.source;
           if (src?.type === 'root') return 200;
           if (src?.type === 'category') return 150;
           if (src?.type === 'subcategory') return 100;
@@ -151,16 +157,18 @@ export default function DisasterGraphPage() {
     const node = g.append('g').selectAll('g')
       .data(nodes).join('g')
       .style('cursor', 'pointer')
-      .call(d3.drag<SVGGElement, DisasterGraphNode>()
-        .on('start', (event, d) => {
-          if (!event.active) simulation.alphaTarget(0.3).restart();
-          d.fx = d.x; d.fy = d.y;
-        })
-        .on('drag', (event, d) => { d.fx = event.x; d.fy = event.y; })
-        .on('end', (event, d) => {
-          if (!event.active) simulation.alphaTarget(0);
-          d.fx = null; d.fy = null;
-        }));
+      .call((selection: any) => {
+        selection.call(d3.drag()
+          .on('start', (event: any, d: any) => {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x; d.fy = d.y;
+          })
+          .on('drag', (event: any, d: any) => { d.fx = event.x; d.fy = event.y; })
+          .on('end', (event: any, d: any) => {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null; d.fy = null;
+          }));
+      });
 
     node.append('circle')
       .attr('r', (d: any) => TYPE_SIZES[d.type])
@@ -358,6 +366,21 @@ export default function DisasterGraphPage() {
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
       `}</style>
     </div>
+  );
+}
+
+export default function DisasterGraphPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">加载中...</p>
+        </div>
+      </div>
+    }>
+      <DisasterGraphContent />
+    </Suspense>
   );
 }
 

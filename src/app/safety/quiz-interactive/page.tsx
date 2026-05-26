@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -207,8 +207,10 @@ function getAlarmLevelConfig(level: string): AlarmLevelConfig {
   return configs[level] || configs['I'];
 }
 
-export default function EmergencyTrainingPage() {
+function EmergencyTrainingContent() {
   const router = useRouter();
+  const searchParams = require('next/navigation').useSearchParams();
+  const selectedDisasterType = searchParams.get('disaster') || null;
   const [phase, setPhase] = useState<'idle' | 'alarm' | 'npc_talk' | 'role_select' | 'role_intro' | 'question' | 'feedback' | 'alert_update' | 'complete' | 'error' | 'loading'>('idle');
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [requiredRoles, setRequiredRoles] = useState<Role[]>([]);
@@ -273,7 +275,10 @@ export default function EmergencyTrainingPage() {
     fetch('/api/training', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'start' })
+      body: JSON.stringify({ 
+        action: 'start', 
+        disasterType: selectedDisasterType 
+      })
     })
       .then(res => res.json())
       .then(data => {
@@ -283,7 +288,7 @@ export default function EmergencyTrainingPage() {
         setIsPreloading(false);
       })
       .catch(() => setIsPreloading(false));
-  }, []);
+  }, [selectedDisasterType]);
 
   const advanceDialogue = () => {
     if (dialogueIdx < dialogueLines.length - 1) {
@@ -1439,5 +1444,20 @@ export default function EmergencyTrainingPage() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function EmergencyTrainingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-blue-400">加载中...</p>
+        </div>
+      </div>
+    }>
+      <EmergencyTrainingContent />
+    </Suspense>
   );
 }
