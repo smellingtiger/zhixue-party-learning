@@ -742,6 +742,10 @@ function EmergencyTrainingContent() {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
         }
+        @keyframes ice-drip {
+          0%, 100% { opacity: 0.6; transform: scaleY(1); }
+          50% { opacity: 0.9; transform: scaleY(1.05); }
+        }
       `}</style>
 
       <div className={`min-h-screen bg-gradient-to-br ${theme.bgGradient} text-white relative overflow-hidden`}>
@@ -935,74 +939,146 @@ function EmergencyTrainingContent() {
         {/* ========== 寒潮专属视觉：冰封大地 ========== */}
         {showParticles && (theme.particleType === 'cold') && (
           <div className="fixed inset-0 pointer-events-none z-[9] overflow-hidden">
-            {/* 冰晶覆盖效果 */}
+            {/* 冰霜覆盖效果 */}
             <div className="absolute inset-0" style={{
-              background: 'radial-gradient(ellipse at center, transparent 40%, rgba(200,230,255,0.08) 70%, rgba(180,220,255,0.15) 100%)',
+              background: 'radial-gradient(ellipse at center, transparent 30%, rgba(180,220,255,0.06) 60%, rgba(160,200,240,0.12) 100%)',
             }} />
-            {/* 大冰块装饰 */}
+            
+            {/* 霜花纹理叠加 */}
+            <div className="absolute inset-0 opacity-[0.15]" style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5 L35 25 L55 30 L35 35 L30 55 L25 35 L5 30 L25 25 Z' fill='none' stroke='%23a0d8f0' stroke-width='0.5'/%3E%3Ccircle cx='30' cy='30' r='8' fill='none' stroke='%23c0e8ff' stroke-width='0.3'/%3E%3C/svg%3E")`,
+              backgroundSize: '80px 80px',
+            }} />
+
+            {/* 大冰块装饰 - 更逼真的冰块形状 */}
             <svg viewBox="0 0 1440 900" preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
               <defs>
-                <linearGradient id="iceBlockGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#e8f4fc" stopOpacity="0.9" />
-                  <stop offset="30%" stopColor="#b8dff0" stopOpacity="0.7" />
-                  <stop offset="70%" stopColor="#88c8e8" stopOpacity="0.6" />
-                  <stop offset="100%" stopColor="#58b8e0" stopOpacity="0.5" />
+                <linearGradient id="iceMain" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
+                  <stop offset="20%" stopColor="#d4eeff" stopOpacity="0.85" />
+                  <stop offset="50%" stopColor="#a8d8f0" stopOpacity="0.7" />
+                  <stop offset="80%" stopColor="#7cc4e8" stopOpacity="0.55" />
+                  <stop offset="100%" stopColor="#50a8e0" stopOpacity="0.4" />
                 </linearGradient>
-                <linearGradient id="iceShine" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#ffffff" stopOpacity="0.8" />
-                  <stop offset="50%" stopColor="#ffffff" stopOpacity="0.2" />
-                  <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+                <linearGradient id="iceFace1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="#b8e0f8" stopOpacity="0.5" />
+                </linearGradient>
+                <linearGradient id="iceFace2" x1="100%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#e0f0ff" stopOpacity="0.75" />
+                  <stop offset="100%" stopColor="#90c8e8" stopOpacity="0.4" />
+                </linearGradient>
+                <linearGradient id="iceFace3" x1="50%" y1="0%" x2="50%" y2="100%">
+                  <stop offset="0%" stopColor="#c8e8ff" stopOpacity="0.65" />
+                  <stop offset="100%" stopColor="#68b0d8" stopOpacity="0.35" />
                 </linearGradient>
                 <filter id="iceGlow">
-                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feGaussianBlur stdDeviation="4" result="blur" />
                   <feMerge>
                     <feMergeNode in="blur" />
                     <feMergeNode in="SourceGraphic" />
                   </feMerge>
                 </filter>
+                <filter id="iceEdge">
+                  <feMorphology operator="dilate" radius="1" result="dilated" />
+                  <feFlood floodColor="#e0f4ff" floodOpacity="0.6" result="glow" />
+                  <feComposite in="glow" in2="dilated" operator="in" />
+                </filter>
               </defs>
-              
-              {/* 左下角大冰块 */}
-              <g transform="translate(50, 650)" filter="url(#iceGlow)">
-                <polygon points="0,120 80,0 160,120 140,130 80,45 20,130" fill="url(#iceBlockGrad)" stroke="#a0d8f0" strokeWidth="2" opacity="0.85" style={{ animation: 'ice-shimmer 3s ease-in-out infinite' }} />
-                <polygon points="20,110 80,30 140,110 125,118 80,52 35,118" fill="url(#iceShine)" opacity="0.4" />
-                <line x1="80" y1="0" x2="80" y2="120" stroke="#c0e8ff" strokeWidth="1" opacity="0.5" />
-                <line x1="40" y1="60" x2="120" y2="60" stroke="#c0e8ff" strokeWidth="1" opacity="0.3" />
+
+              {/* 左下角大冰块 - 立方体造型 */}
+              <g transform="translate(40, 620)" filter="url(#iceGlow)" style={{ animation: 'ice-shimmer 4s ease-in-out infinite' }}>
+                {/* 冰块主体 - 类似立方体透视 */}
+                <polygon points="45,10 120,35 120,110 45,140" fill="url(#iceMain)" stroke="#c0e8ff" strokeWidth="1.5" strokeLinejoin="round" />
+                <polygon points="120,35 165,55 165,130 120,110" fill="url(#iceFace1)" stroke="#a0d8f0" strokeWidth="1" strokeLinejoin="round" />
+                <polygon points="45,140 120,110 165,130 90,155" fill="url(#iceFace2)" stroke="#88c8e8" strokeWidth="1" strokeLinejoin="round" />
+                {/* 顶面 */}
+                <polygon points="45,10 120,35 165,55 90,30" fill="url(#iceFace3)" stroke="#b0d8f0" strokeWidth="1.2" strokeLinejoin="round" />
+                {/* 高光 */}
+                <line x1="55" y1="25" x2="70" y2="18" stroke="#ffffff" strokeWidth="2" opacity="0.7" strokeLinecap="round" />
+                <line x1="52" y1="32" x2="62" y2="28" stroke="#ffffff" strokeWidth="1.5" opacity="0.5" strokeLinecap="round" />
+                {/* 冰裂纹 */}
+                <path d="M60,70 L85,85 M75,95 L100,105 M55,115 L80,125" stroke="#e0f4ff" strokeWidth="0.8" opacity="0.4" strokeLinecap="round" />
+                {/* 底部阴影 */}
+                <ellipse cx="105" cy="158" rx="70" ry="12" fill="#000000" opacity="0.25" />
               </g>
 
-              {/* 右下角大冰块 */}
-              <g transform="translate(1150, 600) scale(1.3)" filter="url(#iceGlow)">
-                <polygon points="0,100 70,0 140,100 122,108 70,38 18,108" fill="url(#iceBlockGrad)" stroke="#a0d8f0" strokeWidth="2" opacity="0.8" style={{ animation: 'ice-shimmer 2.5s ease-in-out infinite 0.5s' }} />
-                <polygon points="18,92 70,32 122,92 108,98 70,48 32,98" fill="url(#iceShine)" opacity="0.35" />
-                <line x1="70" y1="0" x2="70" y2="100" stroke="#c0e8ff" strokeWidth="1" opacity="0.5" />
+              {/* 右下角大冰块 - 不规则多面体 */}
+              <g transform="translate(1120, 580) scale(1.2)" filter="url(#iceGlow)" style={{ animation: 'ice-shimmer 3s ease-in-out infinite 0.5s' }}>
+                <polygon points="30,20 100,5 130,40 115,120 40,135 10,90" fill="url(#iceMain)" stroke="#c0e8ff" strokeWidth="1.5" strokeLinejoin="round" />
+                <polygon points="100,5 145,25 130,40" fill="url(#iceFace1)" stroke="#a0d8f0" strokeWidth="1" />
+                <polygon points="130,40 145,25 150,100 115,120" fill="url(#iceFace2)" stroke="#88c8e8" strokeWidth="1" />
+                <polygon points="40,135 115,120 90,155 20,148" fill="url(#iceFace3)" stroke="#98d0ec" strokeWidth="1" />
+                {/* 内部反光面 */}
+                <polygon points="45,50 85,35 100,60 70,75" fill="url(#iceFace1)" opacity="0.3" />
+                <line x1="48" y1="38" x2="58" y2="33" stroke="#ffffff" strokeWidth="2" opacity="0.7" strokeLinecap="round" />
+                {/* 裂纹 */}
+                <path d="M55,80 Q75,90 65,110" stroke="#e0f4ff" strokeWidth="0.8" opacity="0.35" fill="none" />
+                <ellipse cx="82" cy="148" rx="55" ry="10" fill="#000000" opacity="0.22" />
               </g>
 
-              {/* 中间偏右冰块 */}
-              <g transform="translate(900, 720) scale(0.8)" filter="url(#iceGlow)">
-                <polygon points="0,80 55,0 110,80 96,86 55,30 14,86" fill="url(#iceBlockGrad)" stroke="#a0d8f0" strokeWidth="1.5" opacity="0.75" style={{ animation: 'ice-shimmer 3.5s ease-in-out infinite 1s' }} />
+              {/* 中间偏右中等冰块 */}
+              <g transform="translate(880, 700) scale(0.75)" filter="url(#iceGlow)" style={{ animation: 'ice-shimmer 3.5s ease-in-out infinite 1s' }}>
+                <polygon points="35,15 90,0 120,30 105,100 35,110 5,70" fill="url(#iceMain)" stroke="#c0e8ff" strokeWidth="1.2" strokeLinejoin="round" />
+                <polygon points="90,0 130,18 120,30" fill="url(#iceFace1)" stroke="#a0d8f0" strokeWidth="0.8" />
+                <polygon points="120,30 130,18 128,85 105,100" fill="url(#iceFace2)" stroke="#88c8e8" strokeWidth="0.8" />
+                <line x1="42" y1="28" x2="52" y2="22" stroke="#ffffff" strokeWidth="1.5" opacity="0.65" strokeLinecap="round" />
+                <ellipse cx="68" cy="118" rx="48" ry="8" fill="#000000" opacity="0.2" />
               </g>
 
               {/* 左侧小冰块 */}
-              <g transform="translate(200, 750) scale(0.6)" filter="url(#iceGlow)">
-                <polygon points="0,70 48,0 96,70 84,76 48,26 12,76" fill="url(#iceBlockGrad)" stroke="#a0d8f0" strokeWidth="1" opacity="0.7" style={{ animation: 'ice-shimmer 2.8s ease-in-out infinite 0.3s' }} />
+              <g transform="translate(180, 740) scale(0.55)" filter="url(#iceGlow)" style={{ animation: 'ice-shimmer 2.8s ease-in-out infinite 0.3s' }}>
+                <polygon points="30,12 75,0 100,25 88,80 28,92 5,58" fill="url(#iceMain)" stroke="#c0e8ff" strokeWidth="1" strokeLinejoin="round" />
+                <polygon points="75,0 108,14 100,25" fill="url(#iceFace1)" stroke="#a0d8f0" strokeWidth="0.7" />
+                <line x1="36" y1="22" x2="44" y2="17" stroke="#ffffff" strokeWidth="1.2" opacity="0.6" strokeLinecap="round" />
+                <ellipse cx="56" cy="99" rx="38" ry="6" fill="#000000" opacity="0.18" />
               </g>
 
-              {/* 地面结冰线 */}
-              <rect x="0" y="888" width="1440" height="12" fill="rgba(180,220,255,0.3)" />
-              <line x1="0" y1="892" x2="1440" y2="892" stroke="rgba(200,235,255,0.5)" strokeWidth="2" strokeDasharray="20,10" />
+              {/* 右侧小碎冰块 */}
+              <g transform="translate(1020, 780) scale(0.4)" filter="url(#iceGlow)" style={{ animation: 'ice-shimmer 2.2s ease-in-out infinite 1.5s' }}>
+                <polygon points="25,10 60,0 80,22 70,65 25,72 8,45" fill="url(#iceMain)" stroke="#c0e8f0" strokeWidth="0.8" />
+                <ellipse cx="44" cy="78" rx="28" ry="5" fill="#000000" opacity="0.15" />
+              </g>
+
+              {/* 地面结冰层 */}
+              <rect x="0" y="885" width="1440" height="15" fill="rgba(160,200,230,0.25)" />
+              <rect x="0" y="888" width="1440" height="8" fill="rgba(180,220,245,0.35)" />
+              <line x1="0" y1="892" x2="1440" y2="892" stroke="rgba(220,240,255,0.5)" strokeWidth="1.5" />
+              
+              {/* 冰凌（底部边缘） */}
+              {Array.from({ length: 25 }).map((_, i) => {
+                const x = i * 58 + (i % 2) * 20;
+                const height = 15 + Math.sin(i * 1.2) * 12;
+                const width = 6 + (i % 3) * 3;
+                return (
+                  <polygon key={`icicle-${i}`}
+                    points={`${x},892 ${x + width/2},${892 + height} ${x + width},892`}
+                    fill={`rgba(${180 + i % 40},${220 + i % 30},255,${0.4 + Math.random() * 0.3})`}
+                    stroke="rgba(200,235,255,0.4)"
+                    strokeWidth="0.5"
+                    style={{ animation: `ice-drip ${3 + (i % 4)}s ease-in-out infinite ${i * 0.15}s` }}
+                  />
+                );
+              })}
 
               {/* 冰晶雪花点缀 */}
               {[
-                { x: 300, y: 200, size: 15 }, { x: 700, y: 150, size: 20 },
-                { x: 1100, y: 250, size: 12 }, { x: 500, y: 400, size: 18 },
-                { x: 900, y: 500, size: 14 }, { x: 200, y: 550, size: 16 },
-                { x: 1300, y: 450, size: 22 }, { x: 600, y: 300, size: 13 }
+                { x: 250, y: 180, size: 18 }, { x: 650, y: 120, size: 24 },
+                { x: 1050, y: 200, size: 16 }, { x: 450, y: 350, size: 20 },
+                { x: 850, y: 450, size: 15 }, { x: 150, y: 500, size: 17 },
+                { x: 1250, y: 380, size: 26 }, { x: 550, y: 280, size: 14 }
               ].map((flake, i) => (
-                <g key={`flake-${i}`} transform={`translate(${flake.x}, ${flake.y})`} style={{ animation: `ice-crystal-spin ${8 + i}s linear infinite` }}>
-                  <polygon points="0,-{flake.size/2} {flake.size/4},-{flake.size/4} {flake.size/2},-{flake.size/2} {flake.size/4},{flake.size/4} 0,{flake.size/2} -{flake.size/4},{flake.size/4} -{flake.size/2},-{flake.size/2} -{flake.size/4},-{flake.size/4}" 
-                    fill="none" stroke="rgba(200,235,255,0.4)" strokeWidth="1.5" />
-                  <line x1="0" y1="-{flake.size/2}" x2="0" y2="{flake.size/2}" stroke="rgba(200,235,255,0.3)" strokeWidth="1" />
-                  <line x1="-{flake.size/2}" y1="0" x2="{flake.size/2}" y2="0" stroke="rgba(200,235,255,0.3)" strokeWidth="1" />
+                <g key={`flake-${i}`} transform={`translate(${flake.x}, ${flake.y})`} style={{ animation: `ice-crystal-spin ${10 + i}s linear infinite` }}>
+                  {/* 六角雪花 */}
+                  {[0, 60, 120, 180, 240, 300].map((angle) => (
+                    <g key={angle} transform={`rotate(${angle})`}>
+                      <line x1="0" y1="0" x2="0" y2={-flake.size} stroke="rgba(200,235,255,0.5)" strokeWidth="1.5" strokeLinecap="round" />
+                      <line x1="0" y1={-flake.size * 0.4} x2={-flake.size * 0.15} y2={-flake.size * 0.55} stroke="rgba(200,235,255,0.35)" strokeWidth="0.8" />
+                      <line x1="0" y1={-flake.size * 0.4} x2={flake.size * 0.15} y2={-flake.size * 0.55} stroke="rgba(200,235,255,0.35)" strokeWidth="0.8" />
+                      <circle cx="0" cy={-flake.size * 0.7} r="2" fill="rgba(220,240,255,0.4)" />
+                    </g>
+                  ))}
+                  <circle cx="0" cy="0" r="3" fill="rgba(230,245,255,0.5)" />
                 </g>
               ))}
             </svg>
