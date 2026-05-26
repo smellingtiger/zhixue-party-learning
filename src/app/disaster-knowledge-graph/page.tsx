@@ -29,7 +29,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
-interface DisasterGraphNode {
+interface DisasterGraphNode extends d3.SimulationNodeDatum {
   id: string;
   label: string;
   type: 'root' | 'category' | 'subcategory' | 'detail';

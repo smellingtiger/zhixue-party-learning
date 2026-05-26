@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import {
   Shield,
@@ -16,6 +16,8 @@ import {
   MessageSquare,
   ArrowRight,
   Snowflake,
+  AlertTriangle,
+  X,
 } from 'lucide-react';
 
 const disasterTypes = [
@@ -42,67 +44,13 @@ const courseCards = (selectedDisasterId: string) => [
   {
     id: 'knowledge-intro',
     title: '知识科普介绍课程',
-    description: (() => {
-      const descriptions: Record<string, string> = {
-        flood: '深入浅出的内涝科普知识，帮助您掌握基本的防灾减灾理论与实操技能',
-        typhoon: '系统讲解台风从热带低压到超强台风的全过程，掌握蓝黄橙红预警与五类避险技能',
-        earthquake: '地震成因、震级烈度分级、震前准备与震后自救互救全指南',
-        'forest-fire': '森林/草原火灾成因与分级标准，掌握避险逃生与火场自救技能',
-        'cold-wave': '寒潮分级标准、预警信号识别与防寒保暖应对指南',
-      };
-      return descriptions[selectedDisasterId] || '防灾减灾科普知识，帮助您掌握基本的防灾理论与实操技能';
-    })(),
+    description: '防灾减灾科普知识，帮助您掌握基本的防灾理论与实操技能',
     icon: BookOpen,
-    color: (() => {
-      const colors: Record<string, string> = {
-        flood: 'from-emerald-600/80 via-emerald-500/70 to-green-500/70',
-        typhoon: 'from-cyan-600/80 via-cyan-500/70 to-blue-500/70',
-        earthquake: 'from-orange-600/80 via-orange-500/70 to-red-500/70',
-        'forest-fire': 'from-red-600/80 via-red-500/70 to-yellow-500/70',
-        'cold-wave': 'from-sky-600/80 via-sky-500/70 to-indigo-500/70',
-      };
-      return colors[selectedDisasterId] || 'from-emerald-600/80 via-emerald-500/70 to-green-500/70';
-    })(),
-    hoverShadow: (() => {
-      const shadows: Record<string, string> = {
-        flood: 'hover:shadow-[0_0_30px_rgba(16,185,129,0.3)]',
-        typhoon: 'hover:shadow-[0_0_30px_rgba(6,182,212,0.3)]',
-        earthquake: 'hover:shadow-[0_0_30px_rgba(249,115,22,0.3)]',
-        'forest-fire': 'hover:shadow-[0_0_30px_rgba(239,68,68,0.3)]',
-        'cold-wave': 'hover:shadow-[0_0_30px_rgba(56,189,248,0.3)]',
-      };
-      return shadows[selectedDisasterId] || 'hover:shadow-[0_0_30px_rgba(16,185,129,0.3)]';
-    })(),
-    hoverBorder: (() => {
-      const borders: Record<string, string> = {
-        flood: 'hover:border-emerald-300/60',
-        typhoon: 'hover:border-cyan-300/60',
-        earthquake: 'hover:border-orange-300/60',
-        'forest-fire': 'hover:border-red-300/60',
-        'cold-wave': 'hover:border-sky-300/60',
-      };
-      return borders[selectedDisasterId] || 'hover:border-emerald-300/60';
-    })(),
-    iconBg: (() => {
-      const bgs: Record<string, string> = {
-        flood: 'bg-emerald-500/30',
-        typhoon: 'bg-cyan-500/30',
-        earthquake: 'bg-orange-500/30',
-        'forest-fire': 'bg-red-500/30',
-        'cold-wave': 'bg-sky-500/30',
-      };
-      return bgs[selectedDisasterId] || 'bg-emerald-500/30';
-    })(),
-    iconColor: (() => {
-      const colors: Record<string, string> = {
-        flood: 'text-emerald-300',
-        typhoon: 'text-cyan-300',
-        earthquake: 'text-orange-300',
-        'forest-fire': 'text-red-300',
-        'cold-wave': 'text-sky-300',
-      };
-      return colors[selectedDisasterId] || 'text-emerald-300';
-    })(),
+    color: 'from-emerald-600/80 via-emerald-500/70 to-green-500/70',
+    hoverShadow: 'hover:shadow-[0_0_30px_rgba(16,185,129,0.3)]',
+    hoverBorder: 'hover:border-emerald-300/60',
+    iconBg: 'bg-emerald-500/30',
+    iconColor: 'text-emerald-300',
     href: (() => {
       const paths: Record<string, string> = {
         flood: '/safety/knowledge-intro',
@@ -124,7 +72,16 @@ const courseCards = (selectedDisasterId: string) => [
     hoverBorder: 'hover:border-purple-300/60',
     iconBg: 'bg-purple-500/30',
     iconColor: 'text-purple-300',
-    href: '/safety/command-course',
+    href: (() => {
+      const paths: Record<string, string> = {
+        flood: '/safety/command-course?disaster=flood',
+        typhoon: '/safety/command-course?disaster=typhoon',
+        earthquake: '/safety/command-course?disaster=earthquake',
+        'forest-fire': '/safety/command-course?disaster=forest-fire',
+        'cold-wave': '/safety/command-course?disaster=cold-wave',
+      };
+      return paths[selectedDisasterId] || '/safety/command-course?disaster=flood';
+    })(),
   },
   {
     id: 'quiz-interactive',
@@ -142,7 +99,8 @@ const courseCards = (selectedDisasterId: string) => [
 
 export default function SafetyPage() {
   const router = useRouter();
-  const [selectedDisaster, setSelectedDisaster] = useState('flood');
+  const [selectedDisaster, setSelectedDisaster] = useState('');
+  const [showDisasterPrompt, setShowDisasterPrompt] = useState(false);
 
   const selectedDisasterData = disasterTypes.find(d => d.id === selectedDisaster);
 
@@ -154,6 +112,14 @@ export default function SafetyPage() {
     } else {
       router.push(href);
     }
+  };
+
+  const handleCardClick = (href: string) => {
+    if (!selectedDisaster) {
+      setShowDisasterPrompt(true);
+      return;
+    }
+    handleNavigateWithDisaster(href);
   };
 
   return (
@@ -232,15 +198,24 @@ export default function SafetyPage() {
 
               {/* 当前选中的灾害提示 */}
               <motion.div
-                key={selectedDisaster}
+                key={selectedDisaster || 'empty'}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 border border-white/30"
               >
-                <Shield className="w-4 h-4 text-yellow-300" />
-                <span className="text-sm text-white/90">
-                  当前选择：<span className="font-bold text-white">{selectedDisasterData?.name}</span> - {selectedDisasterData?.description}
-                </span>
+                {selectedDisaster ? (
+                  <>
+                    <Shield className="w-4 h-4 text-yellow-300" />
+                    <span className="text-sm text-white/90">
+                      当前选择：<span className="font-bold text-white">{selectedDisasterData?.name}</span> - {selectedDisasterData?.description}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <AlertTriangle className="w-4 h-4 text-yellow-300 animate-pulse" />
+                    <span className="text-sm text-yellow-200 font-medium">请在上方选择一个灾害类型开始学习</span>
+                  </>
+                )}
               </motion.div>
             </div>
           </div>
@@ -249,34 +224,52 @@ export default function SafetyPage() {
           <div className="grid md:grid-cols-2 gap-5">
             {courseCards(selectedDisaster).map((course, index) => {
               const Icon = course.icon;
+              const isDisabled = !selectedDisaster;
               return (
                 <motion.div
                   key={course.id}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8 + index * 0.15, type: 'spring', stiffness: 200 }}
-                  whileHover={{ y: -6, scale: 1.02 }}
-                  className={`group cursor-pointer relative overflow-hidden rounded-2xl bg-gradient-to-br ${course.color} backdrop-blur-sm border border-white/30 p-6 text-left ${course.hoverBorder} ${course.hoverShadow} transition-all duration-500`}
+                  {...(isDisabled ? {} : { whileHover: { y: -6, scale: 1.02 } })}
+                  onClick={() => handleCardClick(course.href || '/')}
+                  className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br ${course.color} backdrop-blur-sm border border-white/30 p-6 text-left transition-all duration-500 ${
+                    isDisabled
+                      ? 'cursor-not-allowed opacity-40 grayscale hover:border-white/30'
+                      : `cursor-pointer ${course.hoverBorder} ${course.hoverShadow}`
+                  }`}
                 >
                   <div className="absolute -top-6 -right-6 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all duration-500" />
                   <div className="relative z-10">
                     <div className="flex items-start gap-4 mb-4">
-                      <div className={`w-14 h-14 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ${course.iconBg}`}>
-                        <Icon className={`w-7 h-7 group-hover:text-white transition-colors duration-300 ${course.iconColor}`} />
+                      <div className={`w-14 h-14 rounded-xl flex items-center justify-center transition-transform duration-300 ${course.iconBg} ${isDisabled ? '' : 'group-hover:scale-110'}`}>
+                        <Icon className={`w-7 h-7 transition-colors duration-300 ${course.iconColor} ${isDisabled ? '' : 'group-hover:text-white'}`} />
                       </div>
                       <div className="flex-1">
                         <h4 className="text-2xl font-bold text-white mb-2">{course.title}</h4>
                         <p className="text-base text-white/75 leading-relaxed">{course.description}</p>
                       </div>
                     </div>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleNavigateWithDisaster(course.href || '/')}
-                      className="w-full mt-4 bg-white/20 hover:bg-white/30 text-white border border-white/30 gap-2"
-                    >
-                      进入学习
-                      <ArrowRight className="w-4 h-4" />
-                    </Button>
+                    {isDisabled ? (
+                      <div className="w-full mt-4 bg-white/10 text-white/50 border border-white/20 rounded-lg py-2.5 px-4 text-center text-sm font-medium cursor-not-allowed">
+                        <span className="flex items-center justify-center gap-2">
+                          <AlertTriangle className="w-4 h-4" />
+                          请先选择灾难主题
+                        </span>
+                      </div>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCardClick(course.href || '/');
+                        }}
+                        className="w-full mt-4 bg-white/20 hover:bg-white/30 text-white border border-white/30 gap-2"
+                      >
+                        进入学习
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 </motion.div>
               );
@@ -284,6 +277,48 @@ export default function SafetyPage() {
           </div>
         </motion.div>
       </main>
+
+      {/* 未选择灾难主题提示弹窗 */}
+      <AnimatePresence>
+        {showDisasterPrompt && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+            onClick={() => setShowDisasterPrompt(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', damping: 20, stiffness: 200 }}
+              className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl border border-red-100 text-center relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setShowDisasterPrompt(false)}
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+              >
+                <X className="w-4 h-4 text-gray-500" />
+              </button>
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
+                <AlertTriangle className="w-8 h-8 text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">请先选择灾难主题</h3>
+              <p className="text-gray-500 mb-6 leading-relaxed">
+                请在上方选择一个自然灾害类型后，再进入对应的课程模块学习
+              </p>
+              <Button
+                onClick={() => setShowDisasterPrompt(false)}
+                className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white px-8 py-2.5 shadow-lg shadow-red-200"
+              >
+                我知道了
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -81,6 +81,8 @@ export async function loadCourseScript(courseName?: string, courseId?: string): 
       scriptFile = '/course-scripts/rural-revitalization-script.json';
     } else if (courseName?.includes('内涝') || courseName?.includes('洪涝') || courseName?.includes('防汛') || courseName?.includes('应急处置')) {
       scriptFile = '/course-scripts/flood-script.json';
+    } else if (courseName?.includes('台风应急标准化处置') || courseName?.includes('岗位指挥课程')) {
+      scriptFile = '/course-scripts/typhoon-command-script.json';
     } else if (courseName?.includes('台风') || courseName?.includes('防灾减灾知识科普')) {
       scriptFile = '/course-scripts/typhoon-script.json';
     } else if (courseName?.includes('具身智能')) {
