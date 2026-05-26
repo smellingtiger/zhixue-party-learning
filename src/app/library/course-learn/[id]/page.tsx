@@ -2788,26 +2788,8 @@ export default function CourseLearnPage() {
                   console.log('[数字人] 语音播放完成');
                 }}
                 onSectionChange={(sectionIdx) => {
-                  console.log('[导航] 点击 section 索引:', sectionIdx);
-                  console.log('[导航] 当前章节:', currentChapter, '当前幻灯片:', currentSlide);
-                  console.log('[导航] slides 数量:', slides.length);
-                  
-                  const sections = speechChapterContents[currentChapter]?.sections;
-                  if (!sections || sectionIdx >= sections.length) {
-                    console.log('[导航] sections 数据无效');
-                    return;
-                  }
-                  
-                  const section = sections[sectionIdx];
-                  console.log('[导航] 目标 section 标题:', section.title);
-                  
-                  // 直接索引映射（已验证 sections 和 slides 数量一致）
                   if (sectionIdx >= 0 && sectionIdx < slides.length && sectionIdx !== currentSlide) {
-                    console.log('[导航] 跳转到 slide:', sectionIdx);
                     setCurrentSlide(sectionIdx);
-                  } else {
-                    console.log('[导航] 索引无效或已是当前幻灯片');
-                    console.log('[导航] sectionIdx:', sectionIdx, 'slides.length:', slides.length, 'currentSlide:', currentSlide);
                   }
                 }}
               />

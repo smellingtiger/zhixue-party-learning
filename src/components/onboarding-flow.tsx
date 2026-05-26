@@ -673,6 +673,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
               )}
 
               <div className="relative overflow-hidden rounded-3xl" style={{ backgroundImage: 'url(/welcome-bg.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" />
                 <div className="relative z-10 max-w-5xl mx-auto text-center py-12 px-6">
                   <motion.h2
                     className="text-3xl md:text-4xl font-bold text-white mb-8"
@@ -706,7 +707,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                       transition={{ delay: 0.6, type: 'spring', stiffness: 200 }}
                       whileHover={{ y: -6, scale: 1.02 }}
                       onClick={() => setActiveAgent(activeAgent === 1 ? null : 1)}
-                      className="group cursor-pointer relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-600/80 via-red-500/70 to-orange-500/70 backdrop-blur-sm border border-white/30 p-6 text-left hover:border-red-300/60 hover:shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all duration-500"
+                      className="group cursor-pointer relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-600 via-red-500 to-orange-500 backdrop-blur-sm border border-white/40 p-6 text-left hover:border-red-300/80 hover:shadow-[0_0_30px_rgba(239,68,68,0.5)] transition-all duration-500"
                     >
                       <div className="absolute -top-6 -right-6 w-24 h-24 bg-red-500/10 rounded-full blur-2xl group-hover:bg-red-500/20 transition-all duration-500" />
                       <div className="relative z-10">
@@ -716,10 +717,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                           </div>
                           <div>
                             <span className="text-sm font-bold text-red-300/80 tracking-wider">智能体 01</span>
-                            <h4 className="text-2xl font-bold text-white">AI个性化推荐</h4>
+                            <h4 className="text-2xl font-bold text-white" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>AI个性化推荐</h4>
                           </div>
                         </div>
-                        <p className="text-base text-white/75 leading-relaxed">
+                        <p className="text-base text-white/90 leading-relaxed" style={{ textShadow: '0 1px 2px rgba(0,0,0,0.25)' }}>
                           实时追踪学习进度，深度捕捉交互反馈与行为习惯。AI 精准解读每位学员的偏好与短板，毫秒级推送专属学习内容——<span className="text-red-300 font-medium">比您更懂您的学习需求</span>
                         </p>
                       </div>
@@ -731,7 +732,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                       transition={{ delay: 0.75, type: 'spring', stiffness: 200 }}
                       whileHover={{ y: -6, scale: 1.02 }}
                       onClick={() => setActiveAgent(activeAgent === 2 ? null : 2)}
-                      className="group cursor-pointer relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600/80 via-blue-500/70 to-cyan-500/70 backdrop-blur-sm border border-white/30 p-6 text-left hover:border-blue-300/60 hover:shadow-[0_0_30px_rgba(59,130,246,0.3)] transition-all duration-500"
+                      className="group cursor-pointer relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 backdrop-blur-sm border border-white/40 p-6 text-left hover:border-blue-300/80 hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] transition-all duration-500"
                     >
                       <div className="absolute -top-6 -right-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all duration-500" />
                       <div className="relative z-10">
@@ -741,7 +742,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                           </div>
                           <div>
                             <span className="text-sm font-bold text-blue-300/80 tracking-wider">智能体 02</span>
-                            <h4 className="text-2xl font-bold text-white">AI生成课程</h4>
+                            <h4 className="text-2xl font-bold text-white" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>AI生成课程</h4>
                           </div>
                         </div>
                         <p className="text-base text-white/75 leading-relaxed">
@@ -756,7 +757,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                       transition={{ delay: 0.9, type: 'spring', stiffness: 200 }}
                       whileHover={{ y: -6, scale: 1.02 }}
                       onClick={() => setActiveAgent(activeAgent === 3 ? null : 3)}
-                      className="group cursor-pointer relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600/80 via-emerald-500/70 to-green-500/70 backdrop-blur-sm border border-white/30 p-6 text-left hover:border-emerald-300/60 hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all duration-500"
+                      className="group cursor-pointer relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 via-emerald-500 to-green-500 backdrop-blur-sm border border-white/40 p-6 text-left hover:border-emerald-300/80 hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] transition-all duration-500"
                     >
                       <div className="absolute -top-6 -right-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-500" />
                       <div className="relative z-10">
@@ -766,7 +767,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                           </div>
                           <div>
                             <span className="text-sm font-bold text-emerald-300/80 tracking-wider">智能体 03</span>
-                            <h4 className="text-2xl font-bold text-white">AI智能组班</h4>
+                            <h4 className="text-2xl font-bold text-white" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>AI智能组班</h4>
                           </div>
                         </div>
                         <p className="text-base text-white/75 leading-relaxed">
@@ -830,7 +831,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                               { step: 3, icon: Network, title: '知识图谱', desc: '了解党建知识体系' },
                               { step: 4, icon: GraduationCap, title: '开始学习', desc: '进入系统学习之旅' },
                             ].map((item) => (
-                              <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/25 border border-white/30 hover:bg-white/35 transition-colors">
+                              <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/45 border border-white/50 hover:bg-white/55 transition-colors">
                                 <div className="w-10 h-10 rounded-full bg-white/30 flex items-center justify-center">
                                   <item.icon className="w-4 h-4 text-white" />
                                 </div>
@@ -846,8 +847,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                               { step: 3, icon: Network, title: '知识库整合', desc: '知识检索、内容筛选、审核复查，确保内容质量' },
                               { step: 4, icon: Sparkles, title: '视频图片生成', desc: '自动AI生成配图和教学视频' },
                             ].map((item) => (
-                              <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/25 border border-white/30 hover:bg-white/35 transition-colors">
-                                <div className="w-10 h-10 rounded-full bg-white/30 flex items-center justify-center">
+                              <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/45 border border-white/50 hover:bg-white/55 transition-colors">
+                                <div className="w-10 h-10 rounded-full bg-white/35 flex items-center justify-center">
                                   <item.icon className="w-4 h-4 text-white" />
                                 </div>
                                 <span className="text-[20px] font-bold text-white" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>STEP {item.step}</span>
@@ -862,8 +863,8 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                               { step: 3, icon: Sparkles, title: '智能匹配推荐', desc: '多维数据模型生成最优推荐名单与课程方案' },
                               { step: 4, icon: CheckCircle2, title: '一键生成班级', desc: '确认方案，自动发送通知，全程数字化管理' },
                             ].map((item) => (
-                              <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/25 border border-white/30 hover:bg-white/35 transition-colors">
-                                <div className="w-10 h-10 rounded-full bg-white/30 flex items-center justify-center">
+                              <div key={item.step} className="flex flex-col items-center gap-2 p-4 rounded-xl bg-white/45 border border-white/50 hover:bg-white/55 transition-colors">
+                                <div className="w-10 h-10 rounded-full bg-white/35 flex items-center justify-center">
                                   <item.icon className="w-4 h-4 text-white" />
                                 </div>
                                 <span className="text-[20px] font-bold text-white" style={{ textShadow: '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000' }}>STEP {item.step}</span>

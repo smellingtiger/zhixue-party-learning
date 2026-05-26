@@ -58,6 +58,7 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
 
   const [currentTime, setCurrentTime] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
+  const [hoveredMarker, setHoveredMarker] = useState<number | null>(null);
 
   const currentContent = chapterContents[currentChapterIndex];
   const chapterId = CHAPTER_IDS[currentChapterIndex] || `chapter${currentChapterIndex}`;
@@ -570,115 +571,13 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
 
             {/* 进度条区域 */}
             <div className="mb-1 mt-1">
-              {/* 小节标题 - 智能防重叠布局 */}
-              {sectionMarkers.length > 0 && (() => {
-                // 预计算所有节点的位置和间距
-                const markerPositions = sectionMarkers.map((marker, idx) => {
-                  const pct = displayTotal > 0 ? (marker.timeOffset / displayTotal) * 100 : 0;
-                  return { marker, idx, pct };
-                });
-                
-                // 判断某个位置是否应该显示文字标题
-                const shouldShowTitle = (idx: number): boolean => {
-                  const pos = markerPositions[idx];
-                  if (!pos) return false;
-                  
-                  // 当前节点：始终显示
-                  if (pos.idx === currentPageIndex) return true;
-                  
-                  // 首节点和尾节点：始终显示（用于锚定）
-                  if (pos.idx === 0 || pos.idx === sectionMarkers.length - 1) return true;
-                  
-                  // 检查与前一个节点的间距
-                  const prevPos = markerPositions[idx - 1];
-                  const prevGap = prevPos ? pos.pct - prevPos.pct : 100;
-                  
-                  // 检查与后一个节点的间距
-                  const nextPos = markerPositions[idx + 1];
-                  const nextGap = nextPos ? nextPos.pct - pos.pct : 100;
-                  
-                  // 如果两侧间距都小于阈值，隐藏（显示为圆点）
-                  const minGap = 6; // 最小间距百分比阈值
-                  return prevGap >= minGap || nextGap >= minGap;
-                };
-                
-                return (
-                  <div className="relative h-5 mb-1">
-                    {markerPositions.map(({ marker, idx, pct }) => {
-                      const isCurrent = idx === currentPageIndex;
-                      const showTitle = shouldShowTitle(idx);
-                      
-                      // 计算与前一个标记的间距（用于确定文字偏移方向）
-                      const prevPct = idx > 0 ? markerPositions[idx - 1].pct : 0;
-                      const nextPct = idx < markerPositions.length - 1 ? markerPositions[idx + 1].pct : 100;
-                      const hasSpaceLeft = pct - prevPct > 5;
-                      const hasSpaceRight = nextPct - pct > 5;
-                      
-                      // 确定文字对齐方式：优先向右，空间不足时向左
-                      let textAlign: 'left' | 'right' | 'center' = 'center';
-                      if (!hasSpaceRight && hasSpaceLeft) {
-                        textAlign = 'right';
-                      } else if (!hasSpaceLeft && hasSpaceRight) {
-                        textAlign = 'left';
-                      }
-                      
-                      return (
-                        <div
-                          key={idx}
-                          className="absolute bottom-0"
-                          style={{ 
-                            left: `${pct}%`, 
-                            transform: 'translateX(-50%)'
-                          }}
-                        >
-                          {showTitle ? (
-                            <span
-                              className={`text-[10px] font-medium block cursor-pointer transition-colors ${
-                                isCurrent
-                                  ? 'text-red-700 font-bold'
-                                  : 'text-red-500 hover:text-red-700'
-                              }`}
-                              style={{ 
-                                textAlign,
-                                maxWidth: '80px',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap'
-                              }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (onSectionChange && idx !== currentPageIndex) {
-                                  if (status === 'playing') {
-                                    if (audioRef.current) {
-                                      audioRef.current.pause();
-                                      audioRef.current.currentTime = 0;
-                                    }
-                                    cancelAnimationFrame(rafRef.current);
-                                    setStatus('idle');
-                                  }
-                                  onSectionChange(idx);
-                                }
-                              }}
-                              title={`点击跳转到: ${marker.title}`}
-                            >
-                              {marker.title}
-                            </span>
-                          ) : (
-                            <div className="w-1.5 h-1.5 rounded-full bg-red-300 mx-auto" style={{ marginTop: '6px' }} />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })()}
-
               {/* 进度条 */}
               <div
                 ref={progressTrackRef}
                 className="relative h-3 bg-gray-200 rounded-full cursor-pointer group select-none"
                 onClick={handleProgressClick}
                 onMouseDown={handleProgressDragStart}
+                onMouseLeave={() => setHoveredMarker(null)}
               >
                 {/* 已播放进度 */}
                 <div
@@ -686,25 +585,43 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
                   style={{ width: `${displayProgressPercent}%` }}
                 />
 
-                {/* 节点竖线 */}
-                {sectionMarkers.map((marker, idx) => {
-                  const pct = displayTotal > 0
-                    ? (marker.timeOffset / displayTotal) * 100
-                    : 0;
-                  const isStartNode = idx === 0;
-                  return (
-                    <div
-                      key={idx}
-                      className="absolute top-0 h-full flex items-center"
-                      style={{ left: `${pct}%`, transform: 'translateX(-50%)' }}
-                    >
-                      {isStartNode && (
-                        <div className="w-2 h-2 bg-red-500 rounded-full mr-0.5" />
-                      )}
-                      <div className="w-0.5 h-full bg-red-500/60" />
-                    </div>
-                  );
-                })}
+                {/* 小节节点圆点 + 悬浮提示 */}
+                {sectionMarkers.length > 0 && displayTotal > 0 &&
+                  sectionMarkers.map((marker, idx) => {
+                    const pct = (marker.timeOffset / displayTotal) * 100;
+                    const isCurrent = idx === currentPageIndex;
+                    return (
+                      <div
+                        key={idx}
+                        className="absolute top-1/2 -translate-y-1/2 z-20"
+                        style={{ left: `${pct}%` }}
+                        onMouseEnter={() => setHoveredMarker(idx)}
+                      >
+                        <div
+                          className={`rounded-full border-2 border-white shadow-md cursor-pointer transition-all hover:scale-150 hover:shadow-lg ${
+                            isCurrent
+                              ? 'w-3 h-3 bg-red-500 hover:bg-red-400'
+                              : 'w-2 h-2 bg-red-400/60 hover:bg-red-400'
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onSectionChange && idx !== currentPageIndex) {
+                              if (status === 'playing') {
+                                if (audioRef.current) {
+                                  audioRef.current.pause();
+                                  audioRef.current.currentTime = 0;
+                                }
+                                cancelAnimationFrame(rafRef.current);
+                                setStatus('idle');
+                              }
+                              onSectionChange(idx);
+                            }
+                          }}
+                          title={`${marker.title}`}
+                        />
+                      </div>
+                    );
+                  })}
 
                 {/* 拖动滑块 */}
                 {displayTotal > 0 && (
@@ -717,6 +634,24 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
                   />
                 )}
               </div>
+
+              {/* 悬浮提示 */}
+              {hoveredMarker !== null && sectionMarkers[hoveredMarker] && (
+                <div
+                  className="relative"
+                  style={{
+                    left: `${displayTotal > 0 ? (sectionMarkers[hoveredMarker].timeOffset / displayTotal) * 100 : 0}%`,
+                    transform: 'translateX(-50%)',
+                  }}
+                >
+                  <div className="absolute -top-1 z-30 bg-gray-900/95 text-white text-xs px-2.5 py-1.5 rounded-lg shadow-xl whitespace-nowrap pointer-events-none backdrop-blur-sm border border-gray-700">
+                    <span className="font-medium">{hoveredMarker + 1}/{sectionMarkers.length}</span>
+                    <span className="text-gray-400 mx-1">-</span>
+                    <span>{sectionMarkers[hoveredMarker].title}</span>
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900/95 rotate-45 border-r border-b border-gray-700" />
+                  </div>
+                </div>
+              )}
               </div>
 
             {/* 时间戳 */}
