@@ -232,13 +232,39 @@ class CourseDoc:
             # 清洗标题：删除数字前缀，确保第一个字是中文
             self._parsed["title"] = clean_course_title(self._parsed.get("title", ""))
             
+            # 党政知识库：未分类归到国家治理
+            if self.knowledge_base == "party" and self._parsed.get("category") in ("未分类", "未知"):
+                self._parsed["category"] = "国家治理"
+            
+            # 安全应急知识库：未分类归到安全管理与法规 + 党政分类映射
+            if self.knowledge_base == "emergency":
+                cat = self._parsed.get("category", "")
+                if cat in ("未分类", "未知"):
+                    self._parsed["category"] = "安全管理与法规"
+                # 将党政相关分类映射到应急分类 + 合并小类别
+                PARTY_TO_EMERGENCY_MAP = {
+                    "政治理论": "安全管理与法规",
+                    "业务能力": "安全管理与法规",
+                    "廉政建设": "安全管理与法规",
+                    "国际视野": "综合安全",
+                    "国家治理": "安全管理与法规",
+                    "党建实务": "安全管理与法规",
+                    # 合并个位数小类别到大类
+                    "焊接与热切割": "综合安全",
+                    "起重伤害": "建筑施工安全",
+                    "物体打击": "建筑施工安全",
+                }
+                if cat in PARTY_TO_EMERGENCY_MAP:
+                    self._parsed["category"] = PARTY_TO_EMERGENCY_MAP[cat]
+            
             return self._parsed
 
         # 从原始txt解析
         try:
             text = self.filepath.read_text(encoding="utf-8")
         except Exception:
-            self._parsed = {"title": self.filename, "category": "未知", "paragraph_count": 0, "segments": []}
+            fallback_cat = "国家治理" if self.knowledge_base == "party" else "未分类"
+            self._parsed = {"title": self.filename, "category": fallback_cat, "paragraph_count": 0, "segments": []}
             return self._parsed
 
         lines = text.split("\n")
@@ -353,6 +379,32 @@ class CourseDoc:
         # 清洗标题：删除数字前缀，确保第一个字是中文
         self._parsed["title"] = clean_course_title(self._parsed.get("title", ""))
         
+        # 党政知识库：未分类归到国家治理
+        if self.knowledge_base == "party" and self._parsed.get("category") in ("未分类", "未知"):
+            self._parsed["category"] = "国家治理"
+        
+        # 安全应急知识库：未分类归到安全管理与法规
+        if self.knowledge_base == "emergency" and self._parsed.get("category") in ("未分类", "未知"):
+            self._parsed["category"] = "安全管理与法规"
+        
+        # 安全应急知识库：将党政相关分类映射到应急分类 + 合并小类别
+        PARTY_TO_EMERGENCY_MAP = {
+            "政治理论": "安全管理与法规",
+            "业务能力": "安全管理与法规",
+            "廉政建设": "安全管理与法规",
+            "国际视野": "综合安全",
+            "国家治理": "安全管理与法规",
+            "党建实务": "安全管理与法规",
+            # 合并个位数小类别到大类
+            "焊接与热切割": "综合安全",
+            "起重伤害": "建筑施工安全",
+            "物体打击": "建筑施工安全",
+        }
+        if self.knowledge_base == "emergency":
+            cat = self._parsed.get("category", "")
+            if cat in PARTY_TO_EMERGENCY_MAP:
+                self._parsed["category"] = PARTY_TO_EMERGENCY_MAP[cat]
+        
         return self._parsed
 
     @property
@@ -376,6 +428,11 @@ class CourseDoc:
         return datetime.fromtimestamp(self.filepath.stat().st_mtime)
 
     def to_dict(self):
+        course_code = self.get_course_code()
+        nas_mapping = load_nas_mapping()
+        emergency_map = load_emergency_video_mapping()
+        has_video = course_code in nas_mapping or course_code in emergency_map
+        
         return {
             "id": self.id,
             "filename": self.filename,
@@ -386,6 +443,7 @@ class CourseDoc:
             "size_display": self._format_size(self.size),
             "modified_time": self.modified_time.strftime("%Y-%m-%d %H:%M"),
             "knowledge_base": self.knowledge_base,
+            "has_video": has_video,
         }
 
     def to_detail(self):
@@ -408,6 +466,55 @@ class CourseDoc:
             return f"{size / 1024 / 1024:.1f} MB"
 
 
+def is_code_name(title: str) -> bool:
+    """判断是否为编码名称（非自然中文标题）"""
+    if not title:
+        return True
+    # 纯数字+字母+下划线等组合，不含连续中文（>=2个连续汉字）
+    if re.search(r'[\u4e00-\u9fff]{2,}', title):
+        return False
+    # 以字母+数字开头，不含中文
+    if re.match(r'^[A-Z]+\d+', title):
+        return True
+    # 类似 GC02A0416065, A01, GC04160005 等
+    return False
+
+
+def get_raw_course_code(filepath: Path) -> str:
+    """从TXT文件快速获取课程编码（不触发完整解析）"""
+    try:
+        text = filepath.read_text(encoding="utf-8")
+        for line in text.split("\n")[:6]:
+            m = re.search(r"【课程名称】(.+)", line)
+            if m:
+                return m.group(1).strip()
+    except Exception:
+        pass
+    return filepath.stem
+
+
+def should_filter_emergency_doc(filepath: Path) -> bool:
+    """判断是否应该过滤掉应急课程（无中文名映射且无视频链接）"""
+    course_code = get_raw_course_code(filepath)
+    
+    # 如果课程名包含至少2个连续汉字，说明是中文名称，不过滤
+    if re.search(r'[\u4e00-\u9fff]{2,}', course_code):
+        return False
+    
+    # 检查是否有中文名映射
+    name_mapping = load_course_name_mapping()
+    if course_code in name_mapping:
+        return False
+    
+    # 检查是否有视频链接
+    emergency_map = load_emergency_video_mapping()
+    if course_code in emergency_map:
+        return False
+    
+    # 无中文名映射且无视频链接，应该过滤
+    return True
+
+
 def scan_all_docs(knowledge_base: str = None) -> list[CourseDoc]:
     docs = []
     bases_to_scan = KNOWLEDGE_BASES if knowledge_base is None else {knowledge_base: KNOWLEDGE_BASES.get(knowledge_base, {"dir": None})}
@@ -418,6 +525,9 @@ def scan_all_docs(knowledge_base: str = None) -> list[CourseDoc]:
             continue
         files = sorted(kb_dir.glob("*.txt"))
         for f in files:
+            # 安全应急知识库：过滤无中文名无视频的课程
+            if kb_key == "emergency" and should_filter_emergency_doc(f):
+                continue
             docs.append(CourseDoc(f, knowledge_base=kb_key))
 
     return docs
@@ -930,19 +1040,22 @@ async function loadInfo(){
     const r=await fetch('/api/info?knowledge_base='+curKB);
     const info=await r.json();
     updateDisplayCounts(info.total_files||0);
+    return info;
   }catch(e){
     console.error('加载info失败');
+    return null;
   }
 }
 
-function switchKB(kb,btn){
+async function switchKB(kb,btn){
   curKB=kb;
+  totalAll=0;
   var btns=document.querySelectorAll('.kb-tab');
   btns.forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
   curCat=''; curId=null;
-  loadFiles();
-  loadInfo();
+  showWelcome();
+  await Promise.all([loadFiles(), loadInfo()]);
   showWelcome();
 }
 
@@ -971,6 +1084,8 @@ function renderCourseGrid(files){
   }
   let html='';
   files.forEach(function(f){
+    const hasVideo = f.has_video || f.video_url || (curKB === 'party' && f.title.includes('.mp4'));
+    const videoTag = hasVideo ? '<span class="course-grid-card-badge video-badge">&#x1F3AC; 有视频</span>' : '';
     html+='<div class="course-grid-card'+(f.id===curId?' active':'')+'" onclick="openFile(\''+f.id+'\')">'+
       '<div class="course-grid-card-icon">&#x1F4C4;</div>'+
       '<div class="course-grid-card-title">'+esc(f.title)+'</div>'+
@@ -978,6 +1093,7 @@ function renderCourseGrid(files){
         '<span class="course-grid-card-badge">'+esc(f.category)+'</span>'+
         '<span class="course-grid-card-badge">'+f.size_display+'</span>'+
         '<span class="course-grid-card-badge">'+f.paragraph_count+'段</span>'+
+        videoTag+
       '</div>'+
     '</div>';
   });

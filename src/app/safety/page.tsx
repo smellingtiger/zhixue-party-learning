@@ -27,8 +27,8 @@ const disasterTypes = [
 const courseCards = (selectedDisasterId: string) => [
   {
     id: 'knowledge-graph',
-    title: '知识图谱',
-    description: '系统化的安全知识体系图谱，全面了解各类灾害的成因、影响与应对措施',
+    title: '知识中枢',
+    description: '灾种全维度结构化知识库，图谱可视化+成因/风险/避险/案例等核心知识',
     icon: Map,
     color: 'from-blue-600 via-blue-500 to-cyan-500',
     hoverShadow: 'hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]',
