@@ -52,41 +52,39 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q') || '';
-    const category = searchParams.get('category') || '';
+    const categoryFilter = searchParams.get('category') || '';
     const page = parseInt(searchParams.get('page') || '1');
     const pageSize = parseInt(searchParams.get('pageSize') || '50');
+    const knowledgeBase = searchParams.get('knowledge_base') || '';
 
     const params = new URLSearchParams();
-    if (query) params.set('q', query);
-    if (category && category !== 'all') params.set('category', category);
+    if (knowledgeBase) params.set('knowledge_base', knowledgeBase);
     params.set('sort', 'title');
 
     const [filesRes, infoRes] = await Promise.all([
       fetch(`${KNOWLEDGE_SERVICE_URL}/api/files?${params}`),
-      fetch(`${KNOWLEDGE_SERVICE_URL}/api/info`),
+      fetch(`${KNOWLEDGE_SERVICE_URL}/api/info?knowledge_base=${knowledgeBase}`),
     ]);
 
     const data = await filesRes.json();
     const info = await infoRes.json().catch(() => ({}));
 
-    const files = data.files || [];
+    let files = data.files || [];
     
-    const seenTitles = new Set<string>();
-    const dedupedFiles = files.filter((f: any) => {
-      const normalizedTitle = (f.title || '').replace(/\.txt$/, '').replace(/[（(][一二三四五六七八九十上中下\d]+[）)]/g, '').trim();
-      if (seenTitles.has(normalizedTitle)) {
-        return false;
-      }
-      seenTitles.add(normalizedTitle);
-      return true;
-    });
+    // 应用筛选条件
+    if (categoryFilter && categoryFilter !== 'all') {
+      files = files.filter((f: any) => f.category === categoryFilter);
+    }
+    if (query) {
+      const qLower = query.toLowerCase();
+      files = files.filter((f: any) => f.title.toLowerCase().includes(qLower));
+    }
 
-    const filteredCount = dedupedFiles.length;
-    const start = (page - 1) * pageSize;
-    const paged = dedupedFiles.slice(start, start + pageSize);
-
-    const docs = paged.map((f: any) => {
+    const docs = files.map((f: any) => {
       const nasCourseCode = checkNasVideo(f.filename, f.title);
+      const isPartyKnowledgeBase = knowledgeBase === 'party';
+      const hasVideo = isPartyKnowledgeBase ? true : !!nasCourseCode;
+      const videoId = isPartyKnowledgeBase ? (f.filename?.replace(/\.txt$/, '') || f.id) : (nasCourseCode || null);
       return {
         id: f.id,
         title: f.title,
@@ -94,8 +92,8 @@ export async function GET(request: NextRequest) {
         category: f.category,
         paragraphCount: f.paragraph_count,
         fileName: f.filename,
-        videoId: nasCourseCode,
-        hasVideo: !!nasCourseCode,
+        videoId,
+        hasVideo,
       };
     });
 
@@ -105,8 +103,12 @@ export async function GET(request: NextRequest) {
     const globalCategoryCounts = info.category_counts || data.category_counts || {};
     const globalCategoryParagraphs = info.category_paragraph_counts || {};
 
+    const filteredCount = files.length;
+    const start = (page - 1) * pageSize;
+    const paged = docs.slice(start, start + pageSize);
+
     return NextResponse.json({
-      docs,
+      docs: paged,
       total: filteredCount,
       globalTotal,
       globalParagraphs,
