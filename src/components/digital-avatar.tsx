@@ -65,28 +65,30 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
 
   // Determine audio URL strategy: page-based (e.g., 10-0-0.mp3) or chapter-based (e.g., preface.mp3)
   const usePageBasedAudio = !!courseId;
+  const audioDir = usePageBasedAudio
+    ? (courseId === '11' ? '/audio/typhoon-command' : '/audio/typhoon')
+    : '/audio';
   const audioKey = usePageBasedAudio
     ? `${courseId}-${currentChapterIndex}-${currentPageIndex}`
     : `${audioFilePrefix}${chapterId}`;
   const audioUrl = usePageBasedAudio
-    ? `/audio/typhoon/${audioKey}.mp3`
+    ? `${audioDir}/${audioKey}.mp3`
     : `/audio/${audioKey}.mp3`;
   const hasAudio = audioAvailable[audioKey] === true;
 
   useEffect(() => {
-    fetch('/audio/durations.json')
+    fetch(`${audioDir}/durations.json`)
       .then(res => res.json())
       .then((data: Record<string, number>) => setAudioDurations(data))
       .catch(() => {});
-  }, []);
+  }, [audioDir]);
 
   useEffect(() => {
     const check = async () => {
       if (usePageBasedAudio) {
-        // Check page-based audio files for all chapters and pages
         const key = `${courseId}-${currentChapterIndex}-${currentPageIndex}`;
         try {
-          const res = await fetch(`/audio/typhoon/${key}.mp3`, { method: 'HEAD' });
+          const res = await fetch(`${audioDir}/${key}.mp3`, { method: 'HEAD' });
           setAudioAvailable(prev => ({ ...prev, [key]: res.ok }));
         } catch {
           setAudioAvailable(prev => ({ ...prev, [key]: false }));
@@ -104,7 +106,7 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
       }
     };
     check();
-  }, [usePageBasedAudio, courseId, currentChapterIndex, currentPageIndex, chapterContents.length, audioFilePrefix]);
+  }, [usePageBasedAudio, courseId, currentChapterIndex, currentPageIndex, chapterContents.length, audioFilePrefix, audioDir]);
 
   const splitIntoSentences = (text: string): string[] => {
     return text
@@ -127,12 +129,34 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
 
   const progressPercent = effectiveTotalDuration > 0 ? (currentTime / effectiveTotalDuration) * 100 : 0;
 
-  // Scale section markers proportionally to match actual audio duration
+  // 页面级音频：按各小节实际 MP3 时长显示全部小节标题，支持点击跳转
+  // 章节级音频（一整章一个 MP3）：按文本长度比例在进度条上标记各小节标题
   const sectionMarkers: SectionMarker[] = useMemo(() => {
     const rawSections = currentContent?.sections || [];
-    if (rawSections.length === 0 || effectiveTotalDuration <= 0) return [];
+    if (rawSections.length === 0) return [];
 
-    // Compute each section's duration proportion from text content length
+    if (usePageBasedAudio && courseId && Object.keys(audioDurations).length > 0) {
+      let cumulative = 0;
+      const allSectionDurations: number[] = [];
+      for (let i = 0; i < rawSections.length; i++) {
+        const key = `${courseId}-${currentChapterIndex}-${i}`;
+        const dur = audioDurations[key];
+        allSectionDurations.push((dur && dur > 0) ? dur : 0);
+        cumulative += allSectionDurations[i];
+      }
+      const totalChapDur = cumulative;
+      if (totalChapDur <= 0) return [];
+
+      cumulative = 0;
+      return rawSections.map((section, i) => {
+        const timeOffset = cumulative;
+        cumulative += allSectionDurations[i];
+        return { title: section.title, content: section.content || '', timeOffset };
+      });
+    }
+
+    if (effectiveTotalDuration <= 0) return [];
+
     const charsPerSec = 4.25;
     const sectionDurations = rawSections.map(section => {
       const fullText = section.title + (section.content || '');
@@ -142,15 +166,39 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
     const totalDur = sectionDurations.reduce((sum, d) => sum + d, 0);
     if (totalDur <= 0) return [];
 
-    // Scale each section's proportion to the actual audio duration
-    // Last marker = start time of last section (last section's content plays after it)
     let cumulative = 0;
     return rawSections.map((section, i) => {
       const timeOffset = cumulative;
       cumulative += (sectionDurations[i] / totalDur) * effectiveTotalDuration;
       return { title: section.title, content: section.content || '', timeOffset };
     });
-  }, [currentContent?.sections, effectiveTotalDuration]);
+  }, [currentContent?.sections, effectiveTotalDuration, usePageBasedAudio, audioDurations, courseId, currentChapterIndex]);
+
+  // 页面级音频进度显示：全章总时长 + 累计进度
+  const chapterTotalDuration = useMemo(() => {
+    if (!usePageBasedAudio || !courseId) return effectiveTotalDuration;
+    let total = 0;
+    const rawSections = currentContent?.sections || [];
+    for (let i = 0; i < rawSections.length; i++) {
+      const dur = audioDurations[`${courseId}-${currentChapterIndex}-${i}`];
+      total += (dur && dur > 0) ? dur : 0;
+    }
+    return total > 0 ? total : effectiveTotalDuration;
+  }, [usePageBasedAudio, effectiveTotalDuration, currentContent?.sections, audioDurations, courseId, currentChapterIndex]);
+
+  const prevSectionsDuration = useMemo(() => {
+    if (!usePageBasedAudio || !courseId) return 0;
+    let cumulative = 0;
+    for (let i = 0; i < currentPageIndex; i++) {
+      const dur = audioDurations[`${courseId}-${currentChapterIndex}-${i}`];
+      cumulative += (dur && dur > 0) ? dur : 0;
+    }
+    return cumulative;
+  }, [usePageBasedAudio, currentPageIndex, courseId, currentChapterIndex, audioDurations]);
+
+  const displayTotal = usePageBasedAudio ? chapterTotalDuration : effectiveTotalDuration;
+  const displayCurrent = usePageBasedAudio ? (prevSectionsDuration + currentTime) : currentTime;
+  const displayProgressPercent = displayTotal > 0 ? (displayCurrent / displayTotal) * 100 : 0;
 
   const updateTimeDisplay = useCallback(() => {
     if (audioRef.current && !isDraggingRef.current) {
@@ -258,6 +306,19 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
     setAudioDuration(0);
   }, []);
 
+  // 章节或页面切换时重置音频状态
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.removeAttribute('src');
+      audioRef.current.load();
+    }
+    window.speechSynthesis.cancel();
+    setStatus('idle');
+    setCurrentTime(0);
+    setAudioDuration(0);
+  }, [currentChapterIndex, currentPageIndex]);
+
   const handleToggle = useCallback(() => {
     if (status === 'playing') handlePause();
     else if (status === 'paused') handleResume();
@@ -279,8 +340,7 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
     } else {
       setCurrentTime(clampedTime);
     }
-    // 计算当前时间对应的 section 索引并通知父组件
-    if (sectionMarkers.length > 0 && onSectionChange) {
+    if (!usePageBasedAudio && sectionMarkers.length > 0 && onSectionChange) {
       let sectionIdx = 0;
       for (let i = 0; i < sectionMarkers.length; i++) {
         if (clampedTime >= sectionMarkers[i].timeOffset) {
@@ -291,7 +351,7 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
       }
       onSectionChange(sectionIdx);
     }
-  }, [hasAudio, effectiveTotalDuration, sectionMarkers, onSectionChange]);
+  }, [hasAudio, effectiveTotalDuration, sectionMarkers, onSectionChange, usePageBasedAudio]);
 
   const handleSkipForward = useCallback(() => {
     handleSeek(currentTime + 15);
@@ -301,36 +361,44 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
     handleSeek(currentTime - 15);
   }, [currentTime, handleSeek]);
 
+  // 组件卸载时清理音频资源
   useEffect(() => {
     return () => {
-      handleStop();
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        cancelAnimationFrame(rafRef.current);
         audioRef.current.src = '';
         audioRef.current = null;
       }
+      window.speechSynthesis.cancel();
     };
-  }, [handleStop]);
+  }, []);
 
-  useEffect(() => {
-    handleStop();
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.removeAttribute('src');
-      audioRef.current.load();
+  const chapterTimeToSection = useCallback((chapterTime: number): { sectionIdx: number; localTime: number } => {
+    if (!usePageBasedAudio || sectionMarkers.length === 0) {
+      return { sectionIdx: currentPageIndex, localTime: chapterTime };
     }
-    setCurrentTime(0);
-    setAudioDuration(0);
-  }, [currentChapterIndex, handleStop]);
+    let targetIdx = sectionMarkers.length - 1;
+    for (let i = sectionMarkers.length - 1; i >= 0; i--) {
+      if (chapterTime >= sectionMarkers[i].timeOffset) {
+        targetIdx = i;
+        break;
+      }
+    }
+    const localTime = Math.max(0, chapterTime - sectionMarkers[targetIdx].timeOffset);
+    return { sectionIdx: targetIdx, localTime };
+  }, [usePageBasedAudio, sectionMarkers, currentPageIndex]);
 
   const applySnap = useCallback((rawTime: number): number => {
     if (sectionMarkers.length === 0) return rawTime;
     const snapThreshold = 0.06;
-    const rawPct = effectiveTotalDuration > 0 ? rawTime / effectiveTotalDuration : 0;
+    const totalForSnap = usePageBasedAudio ? displayTotal : effectiveTotalDuration;
+    const rawPct = totalForSnap > 0 ? rawTime / totalForSnap : 0;
     let bestTime = rawTime;
     let bestDist = snapThreshold;
     for (const marker of sectionMarkers) {
-      const pct = effectiveTotalDuration > 0 ? marker.timeOffset / effectiveTotalDuration : 0;
+      const pct = totalForSnap > 0 ? marker.timeOffset / totalForSnap : 0;
       const dist = Math.abs(rawPct - pct);
       if (dist < bestDist) {
         bestDist = dist;
@@ -338,18 +406,38 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
       }
     }
     return bestTime;
-  }, [sectionMarkers, effectiveTotalDuration]);
+  }, [sectionMarkers, effectiveTotalDuration, usePageBasedAudio, displayTotal]);
 
   const handleProgressClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!progressTrackRef.current || effectiveTotalDuration === 0) return;
+    if (!progressTrackRef.current || displayTotal === 0) return;
     const rect = progressTrackRef.current.getBoundingClientRect();
     const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    handleSeek(applySnap(ratio * effectiveTotalDuration));
-  }, [handleSeek, applySnap, effectiveTotalDuration]);
+    const rawTime = ratio * displayTotal;
+    const snapped = applySnap(rawTime);
+
+    if (usePageBasedAudio && sectionMarkers.length > 0) {
+      const { sectionIdx, localTime } = chapterTimeToSection(snapped);
+      if (sectionIdx !== currentPageIndex && onSectionChange) {
+        if (status === 'playing') {
+          if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+          }
+          cancelAnimationFrame(rafRef.current);
+          setStatus('idle');
+        }
+        onSectionChange(sectionIdx);
+      } else {
+        handleSeek(localTime);
+      }
+    } else {
+      handleSeek(snapped);
+    }
+  }, [displayTotal, applySnap, usePageBasedAudio, sectionMarkers, chapterTimeToSection, currentPageIndex, onSectionChange, handleSeek, status]);
 
   const handleProgressDragStart = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
-    if (!progressTrackRef.current || effectiveTotalDuration === 0) return;
+    if (!progressTrackRef.current || displayTotal === 0) return;
     const wasPlaying = status === 'playing';
     isDraggingRef.current = true;
 
@@ -365,9 +453,13 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
       if (!progressTrackRef.current) return;
       const rect = progressTrackRef.current.getBoundingClientRect();
       const ratio = Math.max(0, Math.min(1, (moveEvent.clientX - rect.left) / rect.width));
-      const rawTime = ratio * effectiveTotalDuration;
+      const rawTime = ratio * displayTotal;
       const snapped = applySnap(rawTime);
-      setCurrentTime(snapped);
+      if (usePageBasedAudio) {
+        setCurrentTime(snapped - prevSectionsDuration);
+      } else {
+        setCurrentTime(snapped);
+      }
     };
 
     const handleUp = (moveEvent: MouseEvent) => {
@@ -378,26 +470,47 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
       if (!progressTrackRef.current) return;
       const rect = progressTrackRef.current.getBoundingClientRect();
       const ratio = Math.max(0, Math.min(1, (moveEvent.clientX - rect.left) / rect.width));
-      const rawTime = ratio * effectiveTotalDuration;
-      const seekTime = applySnap(rawTime);
-      setCurrentTime(seekTime);
+      const rawTime = ratio * displayTotal;
+      const snapped = applySnap(rawTime);
 
-      if (hasAudio && audioRef.current) {
-        audioRef.current.currentTime = seekTime;
-        if (wasPlaying) {
-          audioRef.current.play().then(() => {
-            setStatus('playing');
-            rafRef.current = requestAnimationFrame(updateTimeDisplay);
-          });
+      if (usePageBasedAudio && sectionMarkers.length > 0) {
+        const { sectionIdx, localTime } = chapterTimeToSection(snapped);
+        if (sectionIdx !== currentPageIndex && onSectionChange) {
+          setCurrentTime(0);
+          onSectionChange(sectionIdx);
+          return;
         }
-      } else if (wasPlaying) {
-        setStatus('playing');
+        setCurrentTime(localTime);
+        if (hasAudio && audioRef.current) {
+          audioRef.current.currentTime = localTime;
+          if (wasPlaying) {
+            audioRef.current.play().then(() => {
+              setStatus('playing');
+              rafRef.current = requestAnimationFrame(updateTimeDisplay);
+            });
+          }
+        } else if (wasPlaying) {
+          setStatus('playing');
+        }
+      } else {
+        setCurrentTime(snapped);
+        if (hasAudio && audioRef.current) {
+          audioRef.current.currentTime = snapped;
+          if (wasPlaying) {
+            audioRef.current.play().then(() => {
+              setStatus('playing');
+              rafRef.current = requestAnimationFrame(updateTimeDisplay);
+            });
+          }
+        } else if (wasPlaying) {
+          setStatus('playing');
+        }
       }
     };
 
     document.addEventListener('mousemove', handleMove);
     document.addEventListener('mouseup', handleUp);
-  }, [status, hasAudio, effectiveTotalDuration, applySnap, updateTimeDisplay]);
+  }, [status, hasAudio, displayTotal, applySnap, updateTimeDisplay, usePageBasedAudio, sectionMarkers, chapterTimeToSection, currentPageIndex, onSectionChange, prevSectionsDuration]);
 
   return (
     <Card className="relative overflow-hidden border-2 border-red-200 bg-gradient-to-br from-white via-red-50/30 to-orange-50/30 shadow-lg">
@@ -456,78 +569,116 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
             </div>
 
             {/* 进度条区域 */}
-            <div className="mb-1 mt-1">
-              {/* 小节标题 - 绝对定位对齐节点 */}
-              {sectionMarkers.length > 0 && (
-                <div className="relative h-5 mb-1">
-                  {sectionMarkers.map((marker, idx) => {
-                    const pct = effectiveTotalDuration > 0
-                      ? (marker.timeOffset / effectiveTotalDuration) * 100
-                      : 0;
-                    return (
-                      <div
-                        key={idx}
-                        className="absolute bottom-0"
-                        style={{ left: `${pct}%`, transform: 'translateX(-50%)' }}
-                      >
-                        <span className="text-[10px] text-red-600 font-medium text-center whitespace-nowrap block">
-                          {marker.title}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
+            <div className="mb-1 mt-1 relative" style={{ minHeight: '90px' }}>
               {/* 进度条 */}
               <div
                 ref={progressTrackRef}
                 className="relative h-3 bg-gray-200 rounded-full cursor-pointer group select-none"
+                style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', width: '100%' }}
                 onClick={handleProgressClick}
                 onMouseDown={handleProgressDragStart}
               >
                 {/* 已播放进度 */}
                 <div
                   className="absolute top-0 left-0 h-full bg-gradient-to-r from-red-500 to-orange-500 rounded-full transition-none"
-                  style={{ width: `${progressPercent}%` }}
+                  style={{ width: `${displayProgressPercent}%` }}
                 />
 
-                {/* 节点竖线 */}
-                {sectionMarkers.map((marker, idx) => {
-                  const pct = effectiveTotalDuration > 0
-                    ? (marker.timeOffset / effectiveTotalDuration) * 100
-                    : 0;
-                  const isStartNode = idx === 0;
-                  return (
-                    <div
-                      key={idx}
-                      className="absolute top-0 h-full flex items-center"
-                      style={{ left: `${pct}%`, transform: 'translateX(-50%)' }}
-                    >
-                      {isStartNode && (
-                        <div className="w-2 h-2 bg-red-500 rounded-full mr-0.5" />
-                      )}
-                      <div className="w-0.5 h-full bg-red-500/60" />
-                    </div>
-                  );
-                })}
+                {/* 小节节点圆点 */}
+                {sectionMarkers.length > 0 && displayTotal > 0 &&
+                  sectionMarkers.map((marker, idx) => {
+                    const pct = (marker.timeOffset / displayTotal) * 100;
+                    const isCurrent = idx === currentPageIndex;
+                    return (
+                      <div
+                        key={idx}
+                        className="absolute top-1/2 -translate-y-1/2 z-20"
+                        style={{ left: `${pct}%` }}
+                      >
+                        <div
+                          className={`rounded-full border-2 border-white shadow-md cursor-pointer transition-all hover:scale-150 hover:shadow-lg ${
+                            isCurrent
+                              ? 'w-3 h-3 bg-red-500 hover:bg-red-400'
+                              : 'w-2 h-2 bg-red-400/60 hover:bg-red-400'
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onSectionChange && idx !== currentPageIndex) {
+                              if (status === 'playing') {
+                                if (audioRef.current) {
+                                  audioRef.current.pause();
+                                  audioRef.current.currentTime = 0;
+                                }
+                                cancelAnimationFrame(rafRef.current);
+                                setStatus('idle');
+                              }
+                              onSectionChange(idx);
+                            }
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
 
                 {/* 拖动滑块 */}
-                {effectiveTotalDuration > 0 && (
+                {displayTotal > 0 && (
                   <div
                     className="absolute top-1/2 w-4 h-4 bg-white border-2 border-red-500 rounded-full shadow-lg cursor-grab active:cursor-grabbing z-10"
                     style={{
-                      left: `${progressPercent}%`,
+                      left: `${displayProgressPercent}%`,
                       transform: 'translate(-50%, -50%)',
                     }}
                   />
                 )}
               </div>
+
+              {/* 小节标题 - 上下交替圆角按钮 */}
+              {sectionMarkers.length > 0 && displayTotal > 0 &&
+                sectionMarkers.map((marker, idx) => {
+                  const pct = (marker.timeOffset / displayTotal) * 100;
+                  const isCurrent = idx === currentPageIndex;
+                  const isEven = idx % 2 === 0;
+                  return (
+                    <button
+                      key={idx}
+                      className={`absolute text-[10px] font-medium whitespace-nowrap cursor-pointer transition-all px-2 py-0.5 rounded-full border flex-shrink-0 ${
+                        isCurrent
+                          ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white border-red-400 font-bold shadow-sm'
+                          : 'bg-white text-gray-600 border-gray-200 hover:border-red-300 hover:text-red-600'
+                      }`}
+                      style={{
+                        left: `${pct}%`,
+                        transform: 'translateX(-50%)',
+                        ...(isEven ? { top: '0px' } : { bottom: '0px' }),
+                        maxWidth: '80px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        zIndex: 30,
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onSectionChange && idx !== currentPageIndex) {
+                          if (status === 'playing') {
+                            if (audioRef.current) {
+                              audioRef.current.pause();
+                              audioRef.current.currentTime = 0;
+                            }
+                            cancelAnimationFrame(rafRef.current);
+                            setStatus('idle');
+                          }
+                          onSectionChange(idx);
+                        }
+                      }}
+                    >
+                      {marker.title}
+                    </button>
+                  );
+                })}
               </div>
 
             {/* 时间戳 */}
             <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
-              <span>{formatTime(currentTime)} / {formatTime(effectiveTotalDuration)}</span>
+              <span>{formatTime(displayCurrent)} / {formatTime(displayTotal)}</span>
             </div>
           </div>
         </div>

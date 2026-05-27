@@ -7,6 +7,11 @@ export interface SopCard {
   instructions: string[];
 }
 
+export interface RoleCard {
+  roleName: string;
+  instructions: string[];
+}
+
 const sopCards: SopCard[] = [
   { name: '市防汛指挥部', role: '副指挥长', level: 'IV', instructions: ['指令水文部门监测河道水位、流量，预测洪水对城市排水系统的影响', '指令城市管理部门利用地下管网监控平台，实时监测易涝点水位、排水设施运行状态', '指令交通部门通过视频监控和巡查，识别低洼路段、隧道、涵洞等高风险区域'] },
   { name: '市应急局', role: '核心执行层', level: 'IV', instructions: ['指令安排专职人员值班，实时接收气象、水文部门发布的降雨预报和积水点监测数据，确保信息上传下达通畅', '指令通过智慧应急平台动态跟踪高风险区域，每小时汇总各区县上报的灾情及处置进展', '协调城管部门调拨移动泵车、排水管、沙袋等基础物资至预设点位；督促属地街道清理雨水箅子，确保排水设施畅通'] },

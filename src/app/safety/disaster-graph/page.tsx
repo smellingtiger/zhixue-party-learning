@@ -462,7 +462,7 @@ function DisasterGraphContent() {
       .join('g')
       .style('cursor', 'pointer')
       .call((selection: any) => {
-        selection.call(d3.drag()
+        selection.call((d3.drag<SVGGElement, DisasterGraphNode>() as any)
           .on('start', (event: any, d: any) => {
             d.fx = d.x;
             d.fy = d.y;

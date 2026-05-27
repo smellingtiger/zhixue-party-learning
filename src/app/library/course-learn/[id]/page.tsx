@@ -123,6 +123,15 @@ function getCourseImageUrl(courseCode: string, chapterIndex: number, pageIndex: 
     '8-5-2': '/6-5-2.png',
     '8-6-1': '/6-6-1.png',
     '8-6-2': '/6-6-2.png',
+    // 台风岗位指挥课程 (courseId=11) 配图
+    '11-0-1': '/knowledge-images/11-0-0.png',
+    '11-1-1': '/knowledge-images/11-1-1.png',
+    '11-1-3': '/knowledge-images/11-1-2.png',
+    '11-2-1': '/knowledge-images/11-2-1.png',
+    '11-3-1': '/knowledge-images/11-3-1.png',
+    '11-3-3': '/knowledge-images/11-3-2.png',
+    '11-4-1': '/knowledge-images/11-4-1.png',
+    '11-4-3': '/knowledge-images/11-4-2.png',
   };
   if (knownImageMap[imageKey]) {
     return knownImageMap[imageKey];
@@ -297,6 +306,7 @@ function getStaticFallbackCourseData(courseId?: string): any {
       name: `课程 ${courseId}`,
       description: 'AI推荐课程',
       totalHours: 0.2,
+      courseCode: courseId,
       chapters: [
         {
           id: courseId,
@@ -338,6 +348,7 @@ function getCourseData(courseId?: string): any {
       else if (courseName.includes('基层') || courseName.includes('党务')) courseCode = '6';
       else if (courseName.includes('乡村振兴')) courseCode = '7';
       else if (courseName.includes('内涝') || courseName.includes('洪涝') || courseName.includes('防汛') || courseName.includes('应急处置')) courseCode = '8';
+      else if (courseName.includes('台风应急标准化处置') || courseName.includes('岗位指挥课程')) courseCode = '11';
       
       return {
         id: parsed.chapters?.[0]?.id || 1,
@@ -357,8 +368,10 @@ function getCourseData(courseId?: string): any {
           }
           
           if (chapterContent) {
-            if (chapterContent.includes('---PAGE---')) {
-              const pageSections = chapterContent.split('---PAGE---').filter((p: string) => p.trim());
+            const processedContent = chapterContent.replace(/\[IMG:([^:]+):([^\]]*)\]/g, '![$2]($1)');
+            
+            if (processedContent.includes('---PAGE---')) {
+              const pageSections = processedContent.split('---PAGE---').filter((p: string) => p.trim());
               let pIndex = 0;
               const chapterNumMatch = ch.title.match(/第(\d+)章/);
               const chapterImageNum = chapterNumMatch ? parseInt(chapterNumMatch[1]) : 0;
@@ -542,14 +555,14 @@ function getCourseData(courseId?: string): any {
                 const prefaceImageUrl = getCourseImageUrl(courseCode, 0, 1);
                 slides.push({
                   type: 'mixed',
-                  content: chapterContent,
+                  content: processedContent,
                   chapterTitle: ch.title,
                   imageUrl: prefaceImageUrl || undefined,
                   imageCaption: prefaceImageUrl ? '前言：乡村振兴战略概述' : undefined,
-                  thinkingSteps: generateGenericThinkingSteps(chapterContent, ch.title, chIdx * 100),
+                  thinkingSteps: generateGenericThinkingSteps(processedContent, ch.title, chIdx * 100),
                 });
               } else {
-              const paragraphs = chapterContent.split('\n\n').filter((p: string) => p.trim());
+              const paragraphs = processedContent.split('\n\n').filter((p: string) => p.trim());
               const paragraphsPerPage = 3;
               let imgPageIndex = 0;
               const forceImageSlide = courseCode === '2' || courseCode === '3';
@@ -702,10 +715,17 @@ function getCourseData(courseId?: string): any {
             '第7章：分角色SOP卡速查——你的岗位在各级响应中做什么': '应急局、城管局、交通局岗位的四级速查卡。通用原则：升级即新增、时限压缩、上报升级、联动扩展。速记口诀：蓝黄橙红四级跳。',
             '第8章：课程测试与工具包': '10道测试题覆盖四级响应核心知识点。应急工具包包含关键联系表、汛前检查清单、岗位SOP卡空白模板。每年汛前桌面推演、每季度更新。',
           };
-          const summaries = courseCode === '7' ? ruralSummaries : courseCode === '8' ? floodSummaries : embodiedSummaries;
+          const typhoonSummaries: Record<string, string> = {
+            '前言：课程定位与台风分级总览': '本课程面向防台应急处置岗位人员，覆盖市、区、街道三级。场景限定为台风从生成到登陆全过程，IV→III→II→I四级响应。学员需明确岗位定位、处置动作、阈值时限和上报路径。',
+            '第1章：台风灾害导致城市运行中断——市情与Ⅳ级响应': '了解该市地理概况及台风灾害成因，掌握Ⅳ级响应启动条件。7个核心岗位（副市长、应急局、气象局、水利局、交通局、城管局、属地街道）各有明确SOP卡。',
+            '第2章：响应升级——Ⅳ级升级到Ⅲ级响应': '升级触发条件：台风增强为强热带风暴，风力10-13级。新增公安、海事局、农业农村局、卫健委4个岗位，形成9岗位协同网络。副市长每3小时听取气象预报。',
+            '第3章：响应升级——Ⅲ级升级到Ⅱ级响应': '台风或强台风24小时内正面影响。从9岗位扩展到18岗位全域联动，市长任指挥长。新增自然资源局、通信办、供电公司、网信办、教育局、文旅局、武警部队等。',
+            '第4章：响应升级——Ⅱ级升级到Ⅰ级响应': '强台风或超强台风即将登陆，风力14级以上。市长接管全部指挥权，实行扁平化直接指挥。申请国家级力量支援（解放军、龙吸水、跨省救援队）。',
+          };
+          const summaries = courseCode === '7' ? ruralSummaries : courseCode === '8' ? floodSummaries : courseCode === '11' ? typhoonSummaries : embodiedSummaries;
           
-          // 为每章末尾添加试题页面
-          const chapterQuiz = courseCode === '8' ? null : getChapterQuiz(parsed.courseName || '', ch.id, ch.title);
+          // 为每章末尾添加试题页面（内涝和台风课程使用独立测试系统）
+          const chapterQuiz = (courseCode === '8' || courseCode === '11') ? null : getChapterQuiz(parsed.courseName || '', ch.id, ch.title);
           if (chapterQuiz) {
             slides.push({
               type: 'quiz',
@@ -718,6 +738,7 @@ function getCourseData(courseId?: string): any {
           return { id: ch.id, title: ch.title, totalSlides: slides.length, aiSummary: summaries[ch.title] || `${ch.title}。深入讲解核心要义，帮助您全面掌握相关知识点和实践方法。`, keyPoints: [ch.title.replace(/第.*章[：:]/, '').substring(0, 10)], videoUrl, slides, sections: ch.sections || [] };
         }),
         testQuestions: parsed.testQuestions || [],
+        courseCode: courseCode,
       };
     }
   } catch (e) {
@@ -732,6 +753,7 @@ function getCourseData(courseId?: string): any {
       name: `课程 ${courseId}`,
       description: 'AI推荐课程',
       totalHours: 0.2,
+      courseCode: courseId,
       chapters: [
         {
           id: courseId,
@@ -865,7 +887,7 @@ export default function CourseLearnPage() {
   const [speechContents, setSpeechContents] = useState<ChapterScript[]>([]);
   const [course, setCourse] = useState<any>(() => getStaticFallbackCourseData(courseId));
   const courseTestQuestions = course?.testQuestions || [];
-  const isCourseTestChapter = courseTestQuestions.length > 0 && currentChapter === course.chapters.length - 1;
+  const isCourseTestChapter = courseTestQuestions.length > 0 && currentChapter === course.chapters.length - 1 && course?.courseCode !== '8' && course?.courseCode !== '11';
   const [testState, setTestState] = useState({
     answers: {} as Record<number, string>,
     results: null as Record<number, { score: number; comment: string }> | null,
@@ -1185,12 +1207,16 @@ export default function CourseLearnPage() {
       setShowThinkingLogic(false);
     } else {
       setCompletedSlides(prev => new Set(prev).add(`${currentChapter}-${currentSlide}`));
-      // 课程学完后：有诊断数据返回首页，无诊断数据返回资源库
-      const hasDiagnostic = localStorage.getItem('user_diagnostic');
-      if (hasDiagnostic) {
-        router.push('/home');
+      // 课程学完后：内涝和台风课程返回安全应急页面，其他课程根据诊断数据判断
+      if (course?.courseCode === '8' || course?.courseCode === '11') {
+        router.push('/safety');
       } else {
-        router.push('/library');
+        const hasDiagnostic = localStorage.getItem('user_diagnostic');
+        if (hasDiagnostic) {
+          router.push('/home');
+        } else {
+          router.push('/library');
+        }
       }
     }
   }, [currentSlide, currentChapter, slides.length, course.chapters.length, router]);
@@ -1948,9 +1974,9 @@ export default function CourseLearnPage() {
 
                     {/* 图文混合 - 杂志风排版 */}
                     {block.type === 'mixed' && (
-                      <div className="space-y-10">
-                        {/* 内容区域：左文右图或上图下文 */}
-                        <div className={block.imageUrl ? 'grid grid-cols-1 lg:grid-cols-5 gap-8 items-start' : ''}>
+                      <div className="space-y-8">
+                        {/* 内容区域：左文右图 */}
+                        <div className={block.imageUrl ? 'grid grid-cols-1 lg:grid-cols-5 gap-10 items-start' : ''}>
                           {/* Markdown文本 */}
                           <div className={`prose prose-gray max-w-none ${block.imageUrl ? 'lg:col-span-3' : ''}`}>
                         <ReactMarkdown
@@ -2129,31 +2155,56 @@ export default function CourseLearnPage() {
                         </ReactMarkdown>
                       </div>
 
-                          {/* 图片侧边栏 */}
+                          {/* 图片侧边栏 - 杂志风卡片 */}
                           {block.imageUrl && (
                             <div className="lg:col-span-2">
-                              <figure className="sticky top-4">
-                                <div className="relative group overflow-hidden rounded-lg border border-red-200 shadow-sm">
-                                  <img
-                                    src={block.imageUrl}
-                                    alt={block.imageCaption || '课程配图'}
-                                    className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                                    onError={(e) => {
-                                      const target = e.currentTarget;
-                                      target.style.display = 'none';
-                                      const placeholder = target.parentElement;
-                                      if (placeholder) {
-                                        placeholder.innerHTML = `<div class="aspect-square bg-gradient-to-br from-red-100 to-orange-50 flex items-center justify-center"><div class="text-center p-4"><div class="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-red-400 to-orange-500 flex items-center justify-center"><span class="text-2xl">📊</span></div><p class="text-sm text-gray-600 font-medium">${block.imageCaption || '课程配图'}</p><p class="text-xs text-gray-400 mt-1">图片加载中</p></div></div>`;
-                                      }
-                                    }}
-                                  />
+                              <figure className="sticky top-4 group">
+                                {/* 图片容器：玻璃拟态边框 */}
+                                <div className="relative overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-white/10 to-white/5 shadow-2xl shadow-blue-900/10 backdrop-blur-sm transition-all duration-500 hover:shadow-blue-500/20 hover:shadow-2xl">
+                                  {/* 顶部装饰光晕 */}
+                                  <div className="absolute -top-20 -right-20 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl" />
+                                  <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl" />
+                                  
+                                  {/* 图片本身 */}
+                                  <div className="relative overflow-hidden">
+                                    <img
+                                      src={block.imageUrl}
+                                      alt={block.imageCaption || '课程配图'}
+                                      className="w-full h-auto object-cover aspect-[16/9] transition-all duration-700 group-hover:scale-[1.03] group-hover:saturate-[1.1]"
+                                      onError={(e) => {
+                                        const target = e.currentTarget;
+                                        target.style.display = 'none';
+                                        const placeholder = target.parentElement;
+                                        if (placeholder) {
+                                          placeholder.innerHTML = `<div class="aspect-[16/9] bg-gradient-to-br from-gray-900 to-blue-900 flex items-center justify-center"><div class="text-center p-6"><div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/30"><span class="text-2xl filter grayscale">🖼</span></div><p class="text-sm text-blue-200/80 font-medium">${block.imageCaption || '课程配图'}</p><p class="text-xs text-blue-300/50 mt-2">图片加载中</p></div></div>`;
+                                        }
+                                      }}
+                                    />
+                                    {/* 底部渐变遮罩 */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                  </div>
+                                  
                                   {/* 图片角标装饰 */}
-                                  <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-red-400" />
-                                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-red-400" />
+                                  <div className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-white/30 rounded-tl-lg pointer-events-none" />
+                                  <div className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-white/30 rounded-br-lg pointer-events-none" />
                                 </div>
+                                
+                                {/* 图注 - 精致同色系 */}
                                 {block.imageCaption && (
-                                  <figcaption className="mt-3 text-xs text-gray-500 leading-relaxed pl-2 border-l-2 border-red-300">
-                                    {block.imageCaption}
+                                  <figcaption className="mt-4 flex items-start gap-3">
+                                    <div className="flex-shrink-0 mt-0.5">
+                                      <div className="w-5 h-5 rounded-md bg-gradient-to-br from-blue-500/20 to-cyan-400/20 flex items-center justify-center">
+                                        <span className="text-[10px] text-blue-400">📷</span>
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-medium text-blue-300 leading-relaxed">
+                                        {block.imageCaption}
+                                      </p>
+                                      <p className="text-[11px] text-blue-400/50 mt-1">
+                                        图示说明 · 实际图片替代
+                                      </p>
+                                    </div>
                                   </figcaption>
                                 )}
                               </figure>
@@ -2730,20 +2781,15 @@ export default function CourseLearnPage() {
               <DigitalAvatar 
                 chapterContents={speechChapterContents}
                 currentChapterIndex={currentChapter}
+                courseId={courseId}
+                courseName={course?.name}
+                currentPageIndex={currentSlide}
                 onSpeechEnd={() => {
                   console.log('[数字人] 语音播放完成');
                 }}
                 onSectionChange={(sectionIdx) => {
-                  // 语音小节索引映射到 PPT 幻灯片索引
-                  // 策略：section 索引直接映射到 slide 索引（跳过视频页）
-                  const chapterSlides = chapter?.slides || [];
-                  let targetSlide = sectionIdx;
-                  // 如果第一页是视频，小节索引需要 +1 偏移
-                  if (chapterSlides.length > 0 && chapterSlides[0].type === 'video') {
-                    targetSlide = Math.min(sectionIdx + 1, chapterSlides.length - 1);
-                  }
-                  if (targetSlide !== currentSlide && targetSlide >= 0 && targetSlide < chapterSlides.length) {
-                    setCurrentSlide(targetSlide);
+                  if (sectionIdx >= 0 && sectionIdx < slides.length && sectionIdx !== currentSlide) {
+                    setCurrentSlide(sectionIdx);
                   }
                 }}
               />

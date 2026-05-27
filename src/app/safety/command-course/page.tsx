@@ -1,8 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { floodCourseData } from '@/app/ai-course/flood-course-data';
+import { typhoonCommandCourseData } from '@/app/ai-course/typhoon-command-course-data';
+import { earthquakeCommandCourseData } from '@/app/ai-course/earthquake-command-course-data';
+import { forestFireCommandCourseData } from '@/app/ai-course/forest-fire-command-course-data';
+import { coldWaveCommandCourseData } from '@/app/ai-course/cold-wave-command-course-data';
 import { Button } from '@/components/ui/button';
 import {
   ArrowLeft,
@@ -17,17 +21,28 @@ import {
 
 export default function CommandCoursePage() {
   const router = useRouter();
-  const course = floodCourseData;
+  const searchParams = useSearchParams();
+  const disaster = searchParams.get('disaster') || 'flood';
+  const course = disaster === 'typhoon' ? typhoonCommandCourseData 
+    : disaster === 'earthquake' ? earthquakeCommandCourseData 
+    : disaster === 'forest-fire' ? forestFireCommandCourseData
+    : disaster === 'cold-wave' ? coldWaveCommandCourseData
+    : floodCourseData;
+  const courseId = disaster === 'typhoon' ? 11 
+    : disaster === 'earthquake' ? 12 
+    : disaster === 'forest-fire' ? 14
+    : disaster === 'cold-wave' ? 16
+    : 8;
   const [isFavorited, setIsFavorited] = useState(false);
 
   const handleStartLearn = (chapterIdx: number) => {
     localStorage.setItem('current_ai_course', JSON.stringify(course));
-    router.push(`/library/course-learn/8?chapter=${chapterIdx}`);
+    router.push(`/library/course-learn/${courseId}?chapter=${chapterIdx}`);
   };
 
   const handleStartFullCourse = () => {
     localStorage.setItem('current_ai_course', JSON.stringify(course));
-    router.push('/library/course-learn/8');
+    router.push(`/library/course-learn/${courseId}`);
   };
 
   return (

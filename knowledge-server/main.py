@@ -20,6 +20,7 @@ import uvicorn
 import video_cache
 
 KNOWLEDGE_BASE_DIR = Path(r"E:\社院课程stt\knowledge_base_txt")
+EMERGENCY_KNOWLEDGE_BASE_DIR = Path(r"E:\社院课程stt\knowledge_base_txt_emergency")
 PROCESSED_DIR = Path(r"E:\社院课程stt\knowledge_base_processed")
 TITLES_DIR = Path(r"E:\社院课程stt\knowledge_base_titles")
 CLASSIFICATION_FILE = Path(r"E:\社院课程stt\classification_result.json")
@@ -28,6 +29,12 @@ NAS_MAPPING_FILE = Path(r"d:\TraeProject\zhixue-party-learning\knowledge-server\
 SERVER_HOST = "0.0.0.0"
 SERVER_PORT = 8080
 SERVER_TITLE = "智学知识库"
+
+# 知识库配置
+KNOWLEDGE_BASES = {
+    "party": {"name": "党政", "dir": KNOWLEDGE_BASE_DIR, "icon": "🏛️", "color": "#dc2626"},
+    "emergency": {"name": "安全应急", "dir": EMERGENCY_KNOWLEDGE_BASE_DIR, "icon": "🚨", "color": "#2563eb"},
+}
 
 # 加载新的分类数据
 _new_categories_cache = None
@@ -89,13 +96,14 @@ app.add_middleware(
 
 
 class CourseDoc:
-    def __init__(self, filepath: Path):
+    def __init__(self, filepath: Path, knowledge_base: str = "party"):
         self.filepath = filepath
         self.filename = filepath.name
         self.id = str(uuid.uuid5(uuid.NAMESPACE_DNS, str(filepath)))
         self._parsed = None
         self._processed = None
         self._raw_code = None
+        self.knowledge_base = knowledge_base
 
     def get_course_code(self) -> str:
         if self._raw_code is not None:
@@ -184,6 +192,7 @@ class CourseDoc:
         lines = text.split("\n")
         title = ""
         category = ""
+        sub_category = ""
         para_count = 0
 
         for line in lines[:6]:
@@ -193,6 +202,9 @@ class CourseDoc:
             m = re.search(r"【课程分类】(.+)", line)
             if m:
                 category = m.group(1).strip()
+            m = re.search(r"【课程子类】(.+)", line)
+            if m:
+                sub_category = m.group(1).strip()
             m = re.search(r"【段落数量】(.+)", line)
             if m:
                 try:
@@ -271,7 +283,7 @@ class CourseDoc:
 
         self._parsed = {
             "title": title or self.filename.replace(".txt", ""),
-            "category": category or "未分类",
+            "category": sub_category or category or "未分类",
             "paragraph_count": para_count or len(segments),
             "segments": segments,
         }
@@ -318,6 +330,7 @@ class CourseDoc:
             "size": self.size,
             "size_display": self._format_size(self.size),
             "modified_time": self.modified_time.strftime("%Y-%m-%d %H:%M"),
+            "knowledge_base": self.knowledge_base,
         }
 
     def to_detail(self):
@@ -340,11 +353,19 @@ class CourseDoc:
             return f"{size / 1024 / 1024:.1f} MB"
 
 
-def scan_all_docs() -> list[CourseDoc]:
-    if not KNOWLEDGE_BASE_DIR.exists():
-        return []
-    files = sorted(KNOWLEDGE_BASE_DIR.glob("*.txt"))
-    return [CourseDoc(f) for f in files]
+def scan_all_docs(knowledge_base: str = None) -> list[CourseDoc]:
+    docs = []
+    bases_to_scan = KNOWLEDGE_BASES if knowledge_base is None else {knowledge_base: KNOWLEDGE_BASES.get(knowledge_base, {"dir": None})}
+
+    for kb_key, kb_info in bases_to_scan.items():
+        kb_dir = kb_info.get("dir")
+        if kb_dir is None or not kb_dir.exists():
+            continue
+        files = sorted(kb_dir.glob("*.txt"))
+        for f in files:
+            docs.append(CourseDoc(f, knowledge_base=kb_key))
+
+    return docs
 
 
 def get_doc_by_id(doc_id: str) -> Optional[CourseDoc]:
@@ -367,8 +388,9 @@ async def list_files(
     category: Optional[str] = Query(None),
     q: Optional[str] = Query(None),
     sort: str = Query("title"),
+    knowledge_base: Optional[str] = Query(None),
 ):
-    docs = scan_all_docs()
+    docs = scan_all_docs(knowledge_base)
 
     if category:
         docs = [d for d in docs if d.category == category]
@@ -384,7 +406,8 @@ async def list_files(
     else:
         docs.sort(key=lambda d: d.title)
 
-    categories, category_counts = get_categories(scan_all_docs())
+    all_docs = scan_all_docs(knowledge_base)
+    categories, category_counts = get_categories(all_docs)
 
     return {
         "files": [d.to_dict() for d in docs],
@@ -395,8 +418,8 @@ async def list_files(
 
 
 @app.get("/api/search")
-async def search_content(q: str = Query(..., min_length=1)):
-    docs = scan_all_docs()
+async def search_content(q: str = Query(..., min_length=1), knowledge_base: Optional[str] = Query(None)):
+    docs = scan_all_docs(knowledge_base)
     q_lower = q.lower()
     search_results = []
 
@@ -535,8 +558,8 @@ async def get_video_info(course_code: str):
 
 
 @app.get("/api/info")
-async def server_info():
-    docs = scan_all_docs()
+async def server_info(knowledge_base: Optional[str] = Query(None)):
+    docs = scan_all_docs(knowledge_base)
     categories, category_counts = get_categories(docs)
     total_size = sum(d.size for d in docs)
     total_paragraphs = sum(d.paragraph_count for d in docs)
@@ -549,6 +572,12 @@ async def server_info():
     processed_count = len(list(PROCESSED_DIR.glob("*.json"))) if PROCESSED_DIR.exists() else 0
 
     cache_stats = video_cache.get_cache_stats()
+
+    # 统计各知识库的文件数
+    kb_stats = {}
+    for kb_key in KNOWLEDGE_BASES:
+        kb_docs = scan_all_docs(kb_key)
+        kb_stats[kb_key] = {"name": KNOWLEDGE_BASES[kb_key]["name"], "count": len(kb_docs)}
 
     return {
         "name": SERVER_TITLE,
@@ -564,6 +593,7 @@ async def server_info():
         "processed_count": processed_count,
         "video_cache": cache_stats,
         "server_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "knowledge_bases": kb_stats,
     }
 
 
@@ -593,6 +623,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Serif SC',san
 .search-box:focus-within{background:rgba(255,255,255,0.25)}
 .search-box input{background:none;border:none;outline:none;color:#fff;padding:8px 10px;font-size:14px;width:200px}
 .search-box input::placeholder{color:rgba(255,255,255,0.6)}
+.kb-tabs{display:flex;gap:6px;margin-right:12px}
+.kb-tab{padding:6px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.3);background:none;color:rgba(255,255,255,0.8);font-size:13px;cursor:pointer;transition:.15s;white-space:nowrap}
+.kb-tab:hover{background:rgba(255,255,255,0.15)}
+.kb-tab.active{background:rgba(255,255,255,0.2) !important;color:#fff !important;font-weight:600}
 .server-info{color:rgba(255,255,255,0.7);font-size:12px;display:flex;align-items:center;gap:6px;padding:6px 12px;background:rgba(0,0,0,0.1);border-radius:6px;flex-shrink:0}
 .server-info .dot{width:6px;height:6px;background:#22c55e;border-radius:50%;display:inline-block}
 .main-container{display:flex;height:calc(100vh - var(--header-height))}
@@ -666,6 +700,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Serif SC',san
     <span class="header-subtitle" id="headerSubtitle">加载中...</span>
   </div>
   <div class="header-right">
+    <div class="kb-tabs" id="kbTabs">
+      <button class="kb-tab active" onclick="switchKB('party',this)" style="background:rgba(255,255,255,0.2);color:#fff">🏛️ 党政</button>
+      <button class="kb-tab" onclick="switchKB('emergency',this)">🚨 安全应急</button>
+    </div>
     <div class="search-box">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input type="text" id="searchInput" placeholder="搜索文件名..." onkeyup="handleSearch(event)">
@@ -711,7 +749,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Serif SC',san
 <div class="toast" id="toast"></div>
 
 <script>
-let curCat='', curSort='title', curSearch='', curId=null, allFiles=[], totalAll=565, curVideoMode='video';
+let curCat='', curSort='title', curSearch='', curId=null, allFiles=[], totalAll=565, curVideoMode='video', curKB='party';
 
 function init(){
   document.getElementById('serverAddr').textContent=window.location.host;
@@ -734,6 +772,7 @@ async function loadFiles(){
     if(curCat) p.set('category',curCat);
     if(curSearch) p.set('q',curSearch);
     p.set('sort',curSort);
+    p.set('knowledge_base',curKB);
     const r=await fetch('/api/files?'+p.toString());
     const d=await r.json();
     allFiles=d.files;
@@ -749,12 +788,24 @@ async function loadFiles(){
 
 async function loadInfo(){
   try{
-    const r=await fetch('/api/info');
+    const r=await fetch('/api/info?knowledge_base='+curKB);
     const info=await r.json();
     updateDisplayCounts(info.total_files||0);
   }catch(e){
     console.error('加载info失败');
   }
+}
+
+function switchKB(kb,btn){
+  curKB=kb;
+  var btns=document.querySelectorAll('.kb-tab');
+  btns.forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  curCat=''; curId=null;
+  loadFiles();
+  document.getElementById('contentTitle').textContent='欢迎使用知识库';
+  document.getElementById('contentMeta').innerHTML='';
+  document.getElementById('contentBody').innerHTML='<div class="welcome-screen"><div class="welcome-icon">&#x1F4DA;</div><div class="welcome-text" id="welcomeText">知识库加载中...</div><div class="welcome-hint">从左侧选择一个课程开始阅读</div></div>';
 }
 
 function updateDisplayCounts(total){
@@ -953,10 +1004,11 @@ if __name__ == "__main__":
     separator = "=" * 55
     print(f"""
 {separator}
-  {SERVER_TITLE} - 公务员在线学习知识库
+  {SERVER_TITLE} - 双知识库在线学习
 {separator}
 
-  数据源: {KNOWLEDGE_BASE_DIR}
+  党政: {KNOWLEDGE_BASE_DIR}
+  安全应急: {EMERGENCY_KNOWLEDGE_BASE_DIR}
   LLM标题: {TITLES_DIR}
   分类数据: {CLASSIFICATION_FILE}
   服务地址: http://{SERVER_HOST}:{SERVER_PORT}
@@ -977,17 +1029,23 @@ if __name__ == "__main__":
     video_cache.init_video_cache()
     cache_stats = video_cache.get_cache_stats()
 
-    docs = scan_all_docs()
-    cats, cnts = get_categories(docs)
-    total_paras = sum(d.paragraph_count for d in docs)
+    all_docs = scan_all_docs()
+    cats, cnts = get_categories(all_docs)
+    total_paras = sum(d.paragraph_count for d in all_docs)
     processed_count = len(list(PROCESSED_DIR.glob("*.json"))) if PROCESSED_DIR.exists() else 0
 
-    print(f"  已发现 {len(docs)} 个课程文件:\n")
-    for c in cats:
-        print(f"    [{c}] {cnts[c]} 个课程")
+    print(f"  已发现 {len(all_docs)} 个课程文件:\n")
+    for kb_key, kb_info in KNOWLEDGE_BASES.items():
+        kb_docs = scan_all_docs(kb_key)
+        kb_cats, kb_cnts = get_categories(kb_docs)
+        print(f"    [{kb_info['name']}] {len(kb_docs)} 个课程, {len(kb_cats)} 个分类")
+        for c in kb_cats[:5]:
+            print(f"      - {c}: {kb_cnts[c]} 个")
+        if len(kb_cats) > 5:
+            print(f"      ... 共 {len(kb_cats)} 个分类")
+
     print(f"\n  总段落数: {total_paras}")
-    print(f"  已处理课程: {processed_count}/{len(docs)}")
-    print(f"  可用视频: {nas_count}/{len(docs)}")
+    print(f"  已处理课程: {processed_count}/{len(all_docs)}")
     print(f"  视频缓存: {cache_stats['count']} 个文件, {cache_stats['totalSize'] / (1024 * 1024):.0f}MB / {cache_stats['maxSize'] / (1024 * 1024):.0f}MB")
     print(f"\n{separator}\n")
 
