@@ -13,6 +13,7 @@ import {
   ArrowRight,
   AlertTriangle,
   X,
+  Bot,
 } from 'lucide-react';
 
 const disasterTypes = [
@@ -83,12 +84,24 @@ const courseCards = (selectedDisasterId: string) => [
     title: '岗位答题互动',
     description: '通过互动答题检验学习成果，巩固应急知识，提升实战应对水平',
     icon: MessageSquare,
-    color: 'from-orange-600 via-orange-500 to-yellow-500',
-    hoverShadow: 'hover:shadow-[0_0_30px_rgba(249,115,22,0.5)]',
-    hoverBorder: 'hover:border-orange-300/80',
-    iconBg: 'bg-orange-500/40',
-    iconColor: 'text-orange-200',
+    color: 'from-orange-600/80 via-orange-500/70 to-yellow-500/70',
+    hoverShadow: 'hover:shadow-[0_0_30px_rgba(249,115,22,0.3)]',
+    hoverBorder: 'hover:border-orange-300/60',
+    iconBg: 'bg-orange-500/30',
+    iconColor: 'text-orange-300',
     href: '/safety/quiz-interactive',
+  },
+  {
+    id: 'emergency-advisor',
+    title: '应急方案智能体',
+    description: 'AI驱动的专业方案顾问，识别风险盲区，参考真实案例，提供可操作的应急指挥方案指导',
+    icon: Bot,
+    color: 'from-indigo-600/80 via-purple-500/70 to-pink-500/70',
+    hoverShadow: 'hover:shadow-[0_0_30px_rgba(139,92,246,0.3)]',
+    hoverBorder: 'hover:border-purple-300/60',
+    iconBg: 'bg-purple-500/30',
+    iconColor: 'text-purple-300',
+    href: '/safety/emergency-advisor',
   },
 ];
 
