@@ -58,7 +58,6 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
 
   const [currentTime, setCurrentTime] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
-  const [hoveredMarker, setHoveredMarker] = useState<number | null>(null);
 
   const currentContent = chapterContents[currentChapterIndex];
   const chapterId = CHAPTER_IDS[currentChapterIndex] || `chapter${currentChapterIndex}`;
@@ -570,14 +569,14 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
             </div>
 
             {/* 进度条区域 */}
-            <div className="mb-1 mt-1">
+            <div className="mb-1 mt-1 relative" style={{ minHeight: '90px' }}>
               {/* 进度条 */}
               <div
                 ref={progressTrackRef}
                 className="relative h-3 bg-gray-200 rounded-full cursor-pointer group select-none"
+                style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', width: '100%' }}
                 onClick={handleProgressClick}
                 onMouseDown={handleProgressDragStart}
-                onMouseLeave={() => setHoveredMarker(null)}
               >
                 {/* 已播放进度 */}
                 <div
@@ -585,7 +584,7 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
                   style={{ width: `${displayProgressPercent}%` }}
                 />
 
-                {/* 小节节点圆点 + 悬浮提示 */}
+                {/* 小节节点圆点 */}
                 {sectionMarkers.length > 0 && displayTotal > 0 &&
                   sectionMarkers.map((marker, idx) => {
                     const pct = (marker.timeOffset / displayTotal) * 100;
@@ -595,7 +594,6 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
                         key={idx}
                         className="absolute top-1/2 -translate-y-1/2 z-20"
                         style={{ left: `${pct}%` }}
-                        onMouseEnter={() => setHoveredMarker(idx)}
                       >
                         <div
                           className={`rounded-full border-2 border-white shadow-md cursor-pointer transition-all hover:scale-150 hover:shadow-lg ${
@@ -617,7 +615,6 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
                               onSectionChange(idx);
                             }
                           }}
-                          title={`${marker.title}`}
                         />
                       </div>
                     );
@@ -635,23 +632,48 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
                 )}
               </div>
 
-              {/* 悬浮提示 */}
-              {hoveredMarker !== null && sectionMarkers[hoveredMarker] && (
-                <div
-                  className="relative"
-                  style={{
-                    left: `${displayTotal > 0 ? (sectionMarkers[hoveredMarker].timeOffset / displayTotal) * 100 : 0}%`,
-                    transform: 'translateX(-50%)',
-                  }}
-                >
-                  <div className="absolute -top-1 z-30 bg-gray-900/95 text-white text-xs px-2.5 py-1.5 rounded-lg shadow-xl whitespace-nowrap pointer-events-none backdrop-blur-sm border border-gray-700">
-                    <span className="font-medium">{hoveredMarker + 1}/{sectionMarkers.length}</span>
-                    <span className="text-gray-400 mx-1">-</span>
-                    <span>{sectionMarkers[hoveredMarker].title}</span>
-                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900/95 rotate-45 border-r border-b border-gray-700" />
-                  </div>
-                </div>
-              )}
+              {/* 小节标题 - 上下交替圆角按钮 */}
+              {sectionMarkers.length > 0 && displayTotal > 0 &&
+                sectionMarkers.map((marker, idx) => {
+                  const pct = (marker.timeOffset / displayTotal) * 100;
+                  const isCurrent = idx === currentPageIndex;
+                  const isEven = idx % 2 === 0;
+                  return (
+                    <button
+                      key={idx}
+                      className={`absolute text-[10px] font-medium whitespace-nowrap cursor-pointer transition-all px-2 py-0.5 rounded-full border flex-shrink-0 ${
+                        isCurrent
+                          ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white border-red-400 font-bold shadow-sm'
+                          : 'bg-white text-gray-600 border-gray-200 hover:border-red-300 hover:text-red-600'
+                      }`}
+                      style={{
+                        left: `${pct}%`,
+                        transform: 'translateX(-50%)',
+                        ...(isEven ? { top: '0px' } : { bottom: '0px' }),
+                        maxWidth: '80px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        zIndex: 30,
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onSectionChange && idx !== currentPageIndex) {
+                          if (status === 'playing') {
+                            if (audioRef.current) {
+                              audioRef.current.pause();
+                              audioRef.current.currentTime = 0;
+                            }
+                            cancelAnimationFrame(rafRef.current);
+                            setStatus('idle');
+                          }
+                          onSectionChange(idx);
+                        }
+                      }}
+                    >
+                      {marker.title}
+                    </button>
+                  );
+                })}
               </div>
 
             {/* 时间戳 */}
