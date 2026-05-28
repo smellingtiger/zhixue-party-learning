@@ -78,6 +78,7 @@ export default function KnowledgeBasePage() {
   const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null);
   const [videoLoading, setVideoLoading] = useState(false);
   const [videoMode, setVideoMode] = useState<'video' | 'text'>('video');
+  const [selectedDomain, setSelectedDomain] = useState<'party' | 'emergency'>('party');
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const fetchDocs = useCallback(async () => {
@@ -88,6 +89,7 @@ export default function KnowledgeBasePage() {
       if (selectedCategory !== 'all') params.set('category', selectedCategory);
       params.set('page', page.toString());
       params.set('pageSize', '50');
+      params.set('knowledge_base', selectedDomain);
 
       const res = await fetch(`/api/knowledge-base?${params}`);
       const data: ApiResponse = await res.json();
@@ -108,7 +110,7 @@ export default function KnowledgeBasePage() {
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, selectedCategory, page]);
+  }, [searchQuery, selectedCategory, page, selectedDomain]);
 
   useEffect(() => {
     fetchDocs();
@@ -237,6 +239,13 @@ export default function KnowledgeBasePage() {
     setSelectedDoc(null);
   };
 
+  const handleDomainSwitch = (domain: 'party' | 'emergency') => {
+    setSelectedDomain(domain);
+    setSelectedCategory('all');
+    setPage(1);
+    setSelectedDoc(null);
+  };
+
   const displayDocCount =
     selectedCategory === 'all'
       ? globalTotal
@@ -261,6 +270,28 @@ export default function KnowledgeBasePage() {
             <p className="text-sm text-muted-foreground">{displayTitle}</p>
           </div>
           <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 mr-4">
+              <button
+                onClick={() => handleDomainSwitch('party')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  selectedDomain === 'party'
+                    ? 'bg-red-600 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                🏛️ 党政/公职人员学习
+              </button>
+              <button
+                onClick={() => handleDomainSwitch('emergency')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  selectedDomain === 'emergency'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                🚨 安全应急培训
+              </button>
+            </div>
             <form onSubmit={handleSearch} className="relative flex items-center gap-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />

@@ -27,8 +27,8 @@ const disasterTypes = [
 const courseCards = (selectedDisasterId: string) => [
   {
     id: 'knowledge-graph',
-    title: '知识图谱',
-    description: '系统化的安全知识体系图谱，全面了解各类灾害的成因、影响与应对措施',
+    title: '知识中枢',
+    description: '灾种全维度结构化知识库，图谱可视化+成因/风险/避险/案例等核心知识',
     icon: Map,
     color: 'from-blue-600 via-blue-500 to-cyan-500',
     hoverShadow: 'hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]',
@@ -60,8 +60,8 @@ const courseCards = (selectedDisasterId: string) => [
   },
   {
     id: 'command-course',
-    title: '岗位指挥课程',
-    description: '针对各岗位的应急指挥培训，提升灾情应对的组织协调与决策能力',
+    title: '岗位指挥操作手册',
+    description: '分岗位分等级的应急指挥操作手册，按灾难等级和岗位角色快速查询标准化处理流程',
     icon: Users,
     color: 'from-purple-600 via-purple-500 to-pink-500',
     hoverShadow: 'hover:shadow-[0_0_30px_rgba(168,85,247,0.5)]',

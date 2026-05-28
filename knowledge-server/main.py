@@ -8,13 +8,43 @@ import re
 import json
 import uuid
 import mimetypes
+import requests as sync_requests
 from pathlib import Path
 from typing import Optional
 from datetime import datetime
 
-from fastapi import FastAPI, Query, HTTPException
+
+def clean_course_title(title: str) -> str:
+    """清洗课程名称：删除开头所有数字、序号、符号，确保第一个字是中文汉字"""
+    if not title:
+        return title
+    # 步骤1: 删除开头的数字、序号模式 (如 "01 ", "1. ", "第1章 ", "(1) ", "① ")
+    # 匹配开头的: 纯数字+空格/点/横线、第X章/节/讲、括号数字、圆圈数字等
+    patterns = [
+        r'^\d+[\.\、\-\s]+',           # "01 ", "1. ", "1、", "1-"
+        r'^第[一二三四五六七八九十\d]+[章节讲篇]\s*[\.\、\-\s]*',  # "第一章 ", "第1讲"
+            r'^[(（][一二三四五六七八九十\d]+[)）]\s*',  # "(1) ", "（一）"
+        r'^[①②③④⑤⑥⑦⑧⑨⑩]\s*',       # 圆圈数字
+        r'^[\(\)（）【】\[\]、\.\-]\s*',  # 开头孤立括号、顿号、点、横线
+    ]
+    cleaned = title
+    for _ in range(5):  # 循环多次确保嵌套序号也被清除
+        for p in patterns:
+            cleaned = re.sub(p, '', cleaned)
+        cleaned = cleaned.strip()
+    # 步骤2: 如果开头还有非中文字符（英文、数字、符号），继续删除
+    # 找到第一个中文字符的位置
+    match = re.search(r'[\u4e00-\u9fff]', cleaned)
+    if match:
+        first_chinese_pos = match.start()
+        if first_chinese_pos > 0:
+            # 删除第一个汉字之前的所有内容
+            cleaned = cleaned[first_chinese_pos:]
+    return cleaned.strip()
+
+from fastapi import FastAPI, Query, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse
 import uvicorn
 
 import video_cache
@@ -26,6 +56,7 @@ TITLES_DIR = Path(r"E:\社院课程stt\knowledge_base_titles")
 CLASSIFICATION_FILE = Path(r"E:\社院课程stt\classification_result.json")
 COURSE_NAME_MAPPING_FILE = Path(r"d:\TraeProject\zhixue-party-learning\knowledge-server\course_name_mapping.json")
 NAS_MAPPING_FILE = Path(r"d:\TraeProject\zhixue-party-learning\knowledge-server\course_nas_mapping.json")
+EMERGENCY_VIDEO_MAPPING_FILE = Path(r"d:\TraeProject\zhixue-party-learning\knowledge-server\course_emergency_video_mapping.json")
 SERVER_HOST = "0.0.0.0"
 SERVER_PORT = 8080
 SERVER_TITLE = "智学知识库"
@@ -83,6 +114,24 @@ def load_nas_mapping():
         else:
             _nas_mapping_cache = {}
     return _nas_mapping_cache
+
+# 加载应急课程远程视频映射
+_emergency_video_cache = None
+def load_emergency_video_mapping():
+    global _emergency_video_cache
+    if _emergency_video_cache is None:
+        if EMERGENCY_VIDEO_MAPPING_FILE.exists():
+            try:
+                data = json.loads(EMERGENCY_VIDEO_MAPPING_FILE.read_text(encoding="utf-8"))
+                _emergency_video_cache = {}
+                for item in data.get("matched", []):
+                    _emergency_video_cache[item["course_code"]] = item
+                print(f"已加载 {len(_emergency_video_cache)} 个课程的远程视频URL")
+            except:
+                _emergency_video_cache = {}
+        else:
+            _emergency_video_cache = {}
+    return _emergency_video_cache
 
 app = FastAPI(title=SERVER_TITLE, version="1.0.0")
 
@@ -180,13 +229,42 @@ class CourseDoc:
             if current_title and current_title in name_mapping:
                 self._parsed["title"] = name_mapping[current_title]
             
+            # 清洗标题：删除数字前缀，确保第一个字是中文
+            self._parsed["title"] = clean_course_title(self._parsed.get("title", ""))
+            
+            # 党政知识库：未分类归到国家治理
+            if self.knowledge_base == "party" and self._parsed.get("category") in ("未分类", "未知"):
+                self._parsed["category"] = "国家治理"
+            
+            # 安全应急知识库：未分类归到安全管理与法规 + 党政分类映射
+            if self.knowledge_base == "emergency":
+                cat = self._parsed.get("category", "")
+                if cat in ("未分类", "未知"):
+                    self._parsed["category"] = "安全管理与法规"
+                # 将党政相关分类映射到应急分类 + 合并小类别
+                PARTY_TO_EMERGENCY_MAP = {
+                    "政治理论": "安全管理与法规",
+                    "业务能力": "安全管理与法规",
+                    "廉政建设": "安全管理与法规",
+                    "国际视野": "综合安全",
+                    "国家治理": "安全管理与法规",
+                    "党建实务": "安全管理与法规",
+                    # 合并个位数小类别到大类
+                    "焊接与热切割": "综合安全",
+                    "起重伤害": "建筑施工安全",
+                    "物体打击": "建筑施工安全",
+                }
+                if cat in PARTY_TO_EMERGENCY_MAP:
+                    self._parsed["category"] = PARTY_TO_EMERGENCY_MAP[cat]
+            
             return self._parsed
 
         # 从原始txt解析
         try:
             text = self.filepath.read_text(encoding="utf-8")
         except Exception:
-            self._parsed = {"title": self.filename, "category": "未知", "paragraph_count": 0, "segments": []}
+            fallback_cat = "国家治理" if self.knowledge_base == "party" else "未分类"
+            self._parsed = {"title": self.filename, "category": fallback_cat, "paragraph_count": 0, "segments": []}
             return self._parsed
 
         lines = text.split("\n")
@@ -298,6 +376,35 @@ class CourseDoc:
         if title and title in name_mapping:
             self._parsed["title"] = name_mapping[title]
         
+        # 清洗标题：删除数字前缀，确保第一个字是中文
+        self._parsed["title"] = clean_course_title(self._parsed.get("title", ""))
+        
+        # 党政知识库：未分类归到国家治理
+        if self.knowledge_base == "party" and self._parsed.get("category") in ("未分类", "未知"):
+            self._parsed["category"] = "国家治理"
+        
+        # 安全应急知识库：未分类归到安全管理与法规
+        if self.knowledge_base == "emergency" and self._parsed.get("category") in ("未分类", "未知"):
+            self._parsed["category"] = "安全管理与法规"
+        
+        # 安全应急知识库：将党政相关分类映射到应急分类 + 合并小类别
+        PARTY_TO_EMERGENCY_MAP = {
+            "政治理论": "安全管理与法规",
+            "业务能力": "安全管理与法规",
+            "廉政建设": "安全管理与法规",
+            "国际视野": "综合安全",
+            "国家治理": "安全管理与法规",
+            "党建实务": "安全管理与法规",
+            # 合并个位数小类别到大类
+            "焊接与热切割": "综合安全",
+            "起重伤害": "建筑施工安全",
+            "物体打击": "建筑施工安全",
+        }
+        if self.knowledge_base == "emergency":
+            cat = self._parsed.get("category", "")
+            if cat in PARTY_TO_EMERGENCY_MAP:
+                self._parsed["category"] = PARTY_TO_EMERGENCY_MAP[cat]
+        
         return self._parsed
 
     @property
@@ -321,6 +428,11 @@ class CourseDoc:
         return datetime.fromtimestamp(self.filepath.stat().st_mtime)
 
     def to_dict(self):
+        course_code = self.get_course_code()
+        nas_mapping = load_nas_mapping()
+        emergency_map = load_emergency_video_mapping()
+        has_video = course_code in nas_mapping or course_code in emergency_map
+        
         return {
             "id": self.id,
             "filename": self.filename,
@@ -331,6 +443,7 @@ class CourseDoc:
             "size_display": self._format_size(self.size),
             "modified_time": self.modified_time.strftime("%Y-%m-%d %H:%M"),
             "knowledge_base": self.knowledge_base,
+            "has_video": has_video,
         }
 
     def to_detail(self):
@@ -353,6 +466,55 @@ class CourseDoc:
             return f"{size / 1024 / 1024:.1f} MB"
 
 
+def is_code_name(title: str) -> bool:
+    """判断是否为编码名称（非自然中文标题）"""
+    if not title:
+        return True
+    # 纯数字+字母+下划线等组合，不含连续中文（>=2个连续汉字）
+    if re.search(r'[\u4e00-\u9fff]{2,}', title):
+        return False
+    # 以字母+数字开头，不含中文
+    if re.match(r'^[A-Z]+\d+', title):
+        return True
+    # 类似 GC02A0416065, A01, GC04160005 等
+    return False
+
+
+def get_raw_course_code(filepath: Path) -> str:
+    """从TXT文件快速获取课程编码（不触发完整解析）"""
+    try:
+        text = filepath.read_text(encoding="utf-8")
+        for line in text.split("\n")[:6]:
+            m = re.search(r"【课程名称】(.+)", line)
+            if m:
+                return m.group(1).strip()
+    except Exception:
+        pass
+    return filepath.stem
+
+
+def should_filter_emergency_doc(filepath: Path) -> bool:
+    """判断是否应该过滤掉应急课程（无中文名映射且无视频链接）"""
+    course_code = get_raw_course_code(filepath)
+    
+    # 如果课程名包含至少2个连续汉字，说明是中文名称，不过滤
+    if re.search(r'[\u4e00-\u9fff]{2,}', course_code):
+        return False
+    
+    # 检查是否有中文名映射
+    name_mapping = load_course_name_mapping()
+    if course_code in name_mapping:
+        return False
+    
+    # 检查是否有视频链接
+    emergency_map = load_emergency_video_mapping()
+    if course_code in emergency_map:
+        return False
+    
+    # 无中文名映射且无视频链接，应该过滤
+    return True
+
+
 def scan_all_docs(knowledge_base: str = None) -> list[CourseDoc]:
     docs = []
     bases_to_scan = KNOWLEDGE_BASES if knowledge_base is None else {knowledge_base: KNOWLEDGE_BASES.get(knowledge_base, {"dir": None})}
@@ -363,6 +525,9 @@ def scan_all_docs(knowledge_base: str = None) -> list[CourseDoc]:
             continue
         files = sorted(kb_dir.glob("*.txt"))
         for f in files:
+            # 安全应急知识库：过滤无中文名无视频的课程
+            if kb_key == "emergency" and should_filter_emergency_doc(f):
+                continue
             docs.append(CourseDoc(f, knowledge_base=kb_key))
 
     return docs
@@ -406,6 +571,7 @@ async def list_files(
     else:
         docs.sort(key=lambda d: d.title)
 
+    # 分类统计始终基于当前知识库的全部文档
     all_docs = scan_all_docs(knowledge_base)
     categories, category_counts = get_categories(all_docs)
 
@@ -479,9 +645,10 @@ async def get_doc_video(doc_id: str):
     if not doc:
         raise HTTPException(status_code=404, detail="文档不存在")
     
-    # 获取课程编码
     course_code = doc.get_course_code()
+    course_title = doc.title
     
+    # 1. 检查NAS映射
     nas_mapping = load_nas_mapping()
     if course_code in nas_mapping:
         item = nas_mapping[course_code]
@@ -493,6 +660,26 @@ async def get_doc_video(doc_id: str):
             "video_url": f"/api/video/{course_code}",
             "nas_path": item["nas_path"],
         }
+    
+    # 2. 检查应急课程远程视频映射（按编码或中文名查找）
+    emergency_map = load_emergency_video_mapping()
+    emergency_item = emergency_map.get(course_code)
+    if not emergency_item:
+        # 尝试用中文名反向查找
+        for code, item in emergency_map.items():
+            if item.get("chinese_name") == course_title:
+                emergency_item = item
+                break
+    
+    if emergency_item:
+        return {
+            "has_video": True,
+            "course_code": emergency_item.get("course_code", course_code),
+            "chinese_name": emergency_item.get("chinese_name", course_title),
+            "video_url": f"/api/video/emergency/{emergency_item.get('course_code', course_code)}",
+            "from_remote": True,
+        }
+    
     return {"has_video": False, "course_code": course_code}
 
 
@@ -523,6 +710,59 @@ async def stream_video(course_code: str):
         filename=item["video_filename"],
         headers={"Accept-Ranges": "bytes"},
     )
+
+
+@app.get("/api/video/emergency/{course_code}")
+async def stream_emergency_video(course_code: str, request: Request):
+    """代理远程应急课程视频（添加Referer绕过403）"""
+    emergency_map = load_emergency_video_mapping()
+    item = emergency_map.get(course_code)
+    if not item:
+        raise HTTPException(status_code=404, detail="视频不存在")
+
+    remote_url = item.get("video_url", "")
+    if not remote_url:
+        raise HTTPException(status_code=404, detail="视频URL不存在")
+
+    range_header = request.headers.get("range", "")
+
+    headers = {
+        "Referer": "https://aqsc.jystudy.com/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    }
+    if range_header:
+        headers["Range"] = range_header
+
+    try:
+        r = sync_requests.get(remote_url, headers=headers, stream=True, timeout=30)
+
+        if r.status_code in (200, 206):
+            resp_headers = {
+                "Content-Type": r.headers.get("Content-Type", "video/mp4"),
+                "Accept-Ranges": "bytes",
+                "Cache-Control": "public, max-age=3600",
+            }
+            if "Content-Length" in r.headers:
+                resp_headers["Content-Length"] = r.headers["Content-Length"]
+            if "Content-Range" in r.headers:
+                resp_headers["Content-Range"] = r.headers["Content-Range"]
+
+            def generate():
+                for chunk in r.iter_content(chunk_size=8192):
+                    if chunk:
+                        yield chunk
+                r.close()
+
+            return StreamingResponse(
+                generate(),
+                status_code=r.status_code,
+                headers=resp_headers,
+                media_type=r.headers.get("Content-Type", "video/mp4"),
+            )
+        else:
+            raise HTTPException(status_code=502, detail=f"远程服务器返回 {r.status_code}")
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"视频代理失败: {str(e)}")
 
 
 @app.get("/api/video/{course_code}/info")
@@ -630,30 +870,33 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Serif SC',san
 .server-info{color:rgba(255,255,255,0.7);font-size:12px;display:flex;align-items:center;gap:6px;padding:6px 12px;background:rgba(0,0,0,0.1);border-radius:6px;flex-shrink:0}
 .server-info .dot{width:6px;height:6px;background:#22c55e;border-radius:50%;display:inline-block}
 .main-container{display:flex;height:calc(100vh - var(--header-height))}
-.sidebar{width:var(--sidebar-width);background:var(--card-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
-.sidebar-header{padding:16px 20px;border-bottom:1px solid var(--border)}
+.sidebar{width:260px;background:var(--card-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.sidebar-header{padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
 .sidebar-header h3{font-size:13px;font-weight:600;color:var(--text-muted);letter-spacing:.5px}
-.category-list{padding:12px;display:flex;flex-direction:column;gap:4px}
+.category-list{padding:12px;display:flex;flex-direction:column;gap:4px;overflow-y:auto;flex:1;min-height:0}
 .category-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;transition:.15s;font-size:14px;color:var(--text);border:none;background:none;width:100%;text-align:left}
 .category-item:hover{background:var(--primary-light)}
 .category-item.active{background:var(--primary-light);color:var(--primary);font-weight:600}
 .category-item .count{margin-left:auto;font-size:12px;color:var(--text-muted);background:var(--bg);padding:2px 8px;border-radius:10px}
 .category-item.active .count{background:var(--primary);color:#fff}
-.file-list-container{flex:1;overflow-y:auto;padding:16px}
-.file-stats{font-size:13px;color:var(--text-muted);margin-bottom:12px;padding:0 4px}
-.sort-bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
-.sort-btn{padding:4px 12px;border-radius:6px;border:1px solid var(--border);background:none;font-size:12px;color:var(--text-muted);cursor:pointer;transition:.15s}
+.content-area{flex:1;display:flex;flex-direction:column;background:var(--card-bg);overflow:hidden}
+.course-grid-header{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.course-grid-header h2{font-size:18px;font-weight:600;color:var(--text)}
+.course-grid-controls{display:flex;gap:8px;align-items:center}
+.course-grid{flex:1;overflow-y:auto;padding:20px 24px}
+.course-grid-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.course-grid-card{border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:.15s;background:var(--card-bg)}
+.course-grid-card:hover{border-color:var(--primary);background:var(--primary-light);transform:translateY(-2px);box-shadow:0 4px 12px rgba(220,38,38,0.1)}
+.course-grid-card.active{border-color:var(--primary);background:var(--primary-light)}
+.course-grid-card-icon{width:48px;height:48px;border-radius:10px;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px}
+.course-grid-card.active .course-grid-card-icon{background:var(--primary);color:#fff}
+.course-grid-card-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.course-grid-card-meta{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--text-muted)}
+.course-grid-card-badge{padding:2px 8px;border-radius:4px;background:var(--bg);color:var(--text-muted)}
+.course-grid-empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted)}
+.sort-btn{padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:none;font-size:13px;color:var(--text-muted);cursor:pointer;transition:.15s}
 .sort-btn:hover{border-color:var(--primary);color:var(--primary)}
 .sort-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-.file-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:8px;cursor:pointer;transition:.15s;border:1px solid transparent;margin-bottom:4px}
-.file-item:hover{background:var(--primary-light);border-color:var(--border)}
-.file-item.active{background:var(--primary-light);border-color:var(--primary)}
-.file-icon{width:40px;height:40px;border-radius:8px;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.file-info{flex:1;min-width:0}
-.file-name{font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.file-meta{font-size:12px;color:var(--text-muted);display:flex;gap:8px;margin-top:2px}
-.file-badge{font-size:11px;padding:2px 8px;border-radius:4px;background:var(--bg);color:var(--text-muted)}
-.content-area{flex:1;display:flex;flex-direction:column;background:var(--card-bg);overflow:hidden}
 .content-header{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .content-header h2{font-size:18px;font-weight:600;color:var(--text)}
 .content-meta{display:flex;gap:12px;font-size:12px;color:var(--text-muted);flex-wrap:wrap}
@@ -719,28 +962,35 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Serif SC',san
   <aside class="sidebar">
     <div class="sidebar-header"><h3>课程分类</h3></div>
     <div class="category-list" id="categoryList"></div>
-    <div class="file-list-container">
-      <div class="file-stats" id="fileStats"></div>
-      <div class="sort-bar" id="sortBar">
-        <button class="sort-btn active" onclick="changeSort('title')">按名称</button>
-        <button class="sort-btn" onclick="changeSort('date')">按时间</button>
-        <button class="sort-btn" onclick="changeSort('size')">按大小</button>
-      </div>
-      <div id="fileList"></div>
-    </div>
   </aside>
 
   <main class="content-area">
-    <div class="content-header">
-      <h2 id="contentTitle">欢迎使用知识库</h2>
-      <div class="content-meta" id="contentMeta"></div>
-    </div>
-    <div class="content-body" id="contentBody">
-      <div class="welcome-screen">
-        <div class="welcome-icon">&#x1F4DA;</div>
-        <div class="welcome-text" id="welcomeText">知识库加载中...</div>
-        <div class="welcome-hint">从左侧选择一个课程开始阅读</div>
+    <div id="courseGridArea" style="display:none;flex-direction:column;height:100%">
+      <div class="course-grid-header">
+        <h2 id="courseGridTitle">全部课程</h2>
+        <div class="course-grid-controls">
+          <div class="sort-bar" id="sortBar">
+            <button class="sort-btn active" onclick="changeSort('title')">按名称</button>
+            <button class="sort-btn" onclick="changeSort('date')">按时间</button>
+            <button class="sort-btn" onclick="changeSort('size')">按大小</button>
+          </div>
+        </div>
       </div>
+      <div class="course-grid">
+        <div class="course-grid-list" id="courseGridList"></div>
+      </div>
+    </div>
+    <div id="courseDetailArea" style="display:none;flex-direction:column;height:100%">
+      <div class="content-header">
+        <h2 id="contentTitle">欢迎使用知识库</h2>
+        <div class="content-meta" id="contentMeta"></div>
+      </div>
+      <div class="content-body" id="contentBody"></div>
+    </div>
+    <div id="welcomeArea" class="welcome-screen">
+      <div class="welcome-icon">&#x1F4DA;</div>
+      <div class="welcome-text" id="welcomeText">知识库加载中...</div>
+      <div class="welcome-hint">从左侧选择一个分类开始浏览</div>
     </div>
   </main>
 </div>
@@ -749,7 +999,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Serif SC',san
 <div class="toast" id="toast"></div>
 
 <script>
-let curCat='', curSort='title', curSearch='', curId=null, allFiles=[], totalAll=565, curVideoMode='video', curKB='party';
+let curCat='', curSort='title', curSearch='', curId=null, allFiles=[], totalAll=0, curVideoMode='video', curKB='party';
 
 function init(){
   document.getElementById('serverAddr').textContent=window.location.host;
@@ -778,9 +1028,8 @@ async function loadFiles(){
     allFiles=d.files;
     if(!curCat && !curSearch) totalAll=d.total;
     renderCats(d.categories,d.category_counts);
-    renderFiles(d.files);
-    document.getElementById('fileStats').textContent='共 '+d.total+' 个课程';
-    updateDisplayCounts(totalAll);
+    renderCourseGrid(d.files);
+    showCourseGrid();
   }catch(e){
     showToast('加载失败');
   }
@@ -791,21 +1040,23 @@ async function loadInfo(){
     const r=await fetch('/api/info?knowledge_base='+curKB);
     const info=await r.json();
     updateDisplayCounts(info.total_files||0);
+    return info;
   }catch(e){
     console.error('加载info失败');
+    return null;
   }
 }
 
-function switchKB(kb,btn){
+async function switchKB(kb,btn){
   curKB=kb;
+  totalAll=0;
   var btns=document.querySelectorAll('.kb-tab');
   btns.forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
   curCat=''; curId=null;
-  loadFiles();
-  document.getElementById('contentTitle').textContent='欢迎使用知识库';
-  document.getElementById('contentMeta').innerHTML='';
-  document.getElementById('contentBody').innerHTML='<div class="welcome-screen"><div class="welcome-icon">&#x1F4DA;</div><div class="welcome-text" id="welcomeText">知识库加载中...</div><div class="welcome-hint">从左侧选择一个课程开始阅读</div></div>';
+  showWelcome();
+  await Promise.all([loadFiles(), loadInfo()]);
+  showWelcome();
 }
 
 function updateDisplayCounts(total){
@@ -822,32 +1073,55 @@ function renderCats(cats,counts){
   list.innerHTML=html;
 }
 
-function renderFiles(files){
-  const ct=document.getElementById('fileList');
+function renderCourseGrid(files){
+  const ct=document.getElementById('courseGridList');
+  const titleEl=document.getElementById('courseGridTitle');
+  titleEl.textContent=curCat?curCat:'全部课程';
+  
   if(files.length===0){
-    ct.innerHTML='<div class="empty-files"><div class="welcome-icon">&#x1F50D;</div><h3>未找到匹配的课程</h3><p>尝试修改搜索条件</p></div>';
+    ct.innerHTML='<div class="course-grid-empty"><div class="welcome-icon">&#x1F50D;</div><h3>未找到匹配的课程</h3><p>尝试修改搜索条件</p></div>';
     return;
   }
   let html='';
   files.forEach(function(f){
-    html+='<div class="file-item'+(f.id===curId?' active':'')+'" onclick="openFile(\''+f.id+'\')">'+
-      '<div class="file-icon">&#x1F4C4;</div>'+
-      '<div class="file-info">'+
-        '<div class="file-name">'+esc(f.title)+'</div>'+
-        '<div class="file-meta"><span>'+f.category+'</span><span>'+f.size_display+'</span><span>'+f.modified_time+'</span></div>'+
+    const hasVideo = f.has_video || f.video_url || (curKB === 'party' && f.title.includes('.mp4'));
+    const videoTag = hasVideo ? '<span class="course-grid-card-badge video-badge">&#x1F3AC; 有视频</span>' : '';
+    html+='<div class="course-grid-card'+(f.id===curId?' active':'')+'" onclick="openFile(\''+f.id+'\')">'+
+      '<div class="course-grid-card-icon">&#x1F4C4;</div>'+
+      '<div class="course-grid-card-title">'+esc(f.title)+'</div>'+
+      '<div class="course-grid-card-meta">'+
+        '<span class="course-grid-card-badge">'+esc(f.category)+'</span>'+
+        '<span class="course-grid-card-badge">'+f.size_display+'</span>'+
+        '<span class="course-grid-card-badge">'+f.paragraph_count+'段</span>'+
+        videoTag+
       '</div>'+
-      '<span class="file-badge">'+f.paragraph_count+'段</span>'+
     '</div>';
   });
   ct.innerHTML=html;
 }
 
+function showCourseGrid(){
+  document.getElementById('courseGridArea').style.display='flex';
+  document.getElementById('courseDetailArea').style.display='none';
+  document.getElementById('welcomeArea').style.display='none';
+}
+
+function showCourseDetail(){
+  document.getElementById('courseGridArea').style.display='none';
+  document.getElementById('courseDetailArea').style.display='flex';
+  document.getElementById('welcomeArea').style.display='none';
+}
+
+function showWelcome(){
+  document.getElementById('courseGridArea').style.display='none';
+  document.getElementById('courseDetailArea').style.display='none';
+  document.getElementById('welcomeArea').style.display='flex';
+}
+
 function filterCat(cat){
     curCat=cat; curSearch=''; document.getElementById('searchInput').value='';
     curId=null; loadFiles();
-    document.getElementById('contentTitle').textContent='欢迎使用知识库';
-    document.getElementById('contentMeta').innerHTML='';
-    document.getElementById('contentBody').innerHTML='<div class="welcome-screen"><div class="welcome-icon">&#x1F4DA;</div><div class="welcome-text" id="welcomeText">知识库加载中...</div><div class="welcome-hint">从左侧选择一个课程开始阅读</div></div>';
+    showCourseGrid();
   }
 
 function changeSort(s){
@@ -872,6 +1146,7 @@ function handleSearch(e){
 
 async function openFile(id){
   curId=id;
+  showCourseDetail();
   document.getElementById('contentTitle').textContent='加载中...';
   document.getElementById('contentBody').innerHTML='<div class="loading">加载中</div>';
   try{
@@ -1025,6 +1300,10 @@ if __name__ == "__main__":
     nas_map = load_nas_mapping()
     nas_count = len(nas_map)
 
+    # 预加载应急课程远程视频映射
+    emergency_video_map = load_emergency_video_mapping()
+    emergency_video_count = len(emergency_video_map)
+
     # 初始化视频缓存
     video_cache.init_video_cache()
     cache_stats = video_cache.get_cache_stats()
@@ -1046,6 +1325,7 @@ if __name__ == "__main__":
 
     print(f"\n  总段落数: {total_paras}")
     print(f"  已处理课程: {processed_count}/{len(all_docs)}")
+    print(f"  NAS视频: {nas_count} 个, 远程视频: {emergency_video_count} 个")
     print(f"  视频缓存: {cache_stats['count']} 个文件, {cache_stats['totalSize'] / (1024 * 1024):.0f}MB / {cache_stats['maxSize'] / (1024 * 1024):.0f}MB")
     print(f"\n{separator}\n")
 

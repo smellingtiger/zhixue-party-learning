@@ -103,33 +103,36 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [graphLoaded, setGraphLoaded] = useState(false);
   const [savedDiagnostic, setSavedDiagnostic] = useState<any>(null);
   
-  // 初始化时立即检查是否有诊断数据，如果有则立即显示加载页（避免先显示原版界面）
-  const [isAutoLoading, setIsAutoLoading] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return !!localStorage.getItem('user_diagnostic');
+  // 初始化时始终为false，避免SSR/CSR不匹配
+  const [isAutoLoading, setIsAutoLoading] = useState(false);
+
+  // hydration后检查localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined' && localStorage.getItem('user_diagnostic')) {
+      setIsAutoLoading(true);
     }
-    return false;
+  }, []);
+
+  const [currentUser, setCurrentUser] = useState<CurrentUser>({
+    id: 'guest_default',
+    username: '游客用户',
+    display_name: '游客',
+    avatar_url: null,
   });
 
-
-
-  const [currentUser, setCurrentUser] = useState<CurrentUser>(() => {
+  // hydration后读取用户数据
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('user');
       if (stored) {
         try {
-          return JSON.parse(stored);
+          setCurrentUser(JSON.parse(stored));
         } catch {
+          // ignore parse errors
         }
       }
     }
-    return {
-      id: 'guest_default',
-      username: '游客用户',
-      display_name: '游客',
-      avatar_url: null,
-    };
-  });
+  }, []);
 
   const [progress, setProgress] = useState<LearningProgress[]>([]);
 
