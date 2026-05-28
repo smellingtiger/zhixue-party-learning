@@ -634,7 +634,7 @@ function DisasterGraphContent() {
 
   if (!graphData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100">
+      <div className="h-full overflow-auto bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100">
         <div className="container mx-auto px-4 py-8">
           <Button variant="outline" onClick={() => router.push('/safety')} className="gap-2 border-red-400 bg-white hover:bg-red-50 text-red-700 font-medium shadow-sm mb-6">
             <ArrowLeft className="w-4 h-4" />返回安全培训
@@ -652,7 +652,7 @@ function DisasterGraphContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100">
+    <div className="h-full overflow-auto bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100">
       <div className="container mx-auto px-4 py-8">
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-6">
           <Button variant="outline" onClick={() => router.push('/safety')} className="gap-2 border-red-400 bg-white hover:bg-red-50 text-red-700 font-medium shadow-sm">
@@ -771,7 +771,7 @@ function DisasterGraphContent() {
 export default function DisasterGraphPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100 flex items-center justify-center">
+      <div className="h-full overflow-auto bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">加载中...</p>

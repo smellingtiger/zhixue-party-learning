@@ -13,7 +13,7 @@ import {
   ArrowRight,
   AlertTriangle,
   X,
-  Bot,
+  Zap,
 } from 'lucide-react';
 
 const disasterTypes = [
@@ -92,16 +92,16 @@ const courseCards = (selectedDisasterId: string) => [
     href: '/safety/quiz-interactive',
   },
   {
-    id: 'emergency-advisor',
-    title: '应急方案智能体',
-    description: 'AI驱动的专业方案顾问，识别风险盲区，参考真实案例，提供可操作的应急指挥方案指导',
-    icon: Bot,
-    color: 'from-indigo-600/80 via-purple-500/70 to-pink-500/70',
-    hoverShadow: 'hover:shadow-[0_0_30px_rgba(139,92,246,0.3)]',
-    hoverBorder: 'hover:border-purple-300/60',
-    iconBg: 'bg-purple-500/30',
-    iconColor: 'text-purple-300',
-    href: '/safety/emergency-advisor',
+    id: 'sentinel',
+    title: '应急哨兵',
+    description: 'Emergency Sentinel · 数字孪生决策系统：左侧态势沙盘 + 右侧智能参谋，方案/培训/问答三位一体',
+    icon: Zap,
+    color: 'from-red-600/90 via-orange-500/80 to-yellow-500/70',
+    hoverShadow: 'hover:shadow-[0_0_30px_rgba(248,113,113,0.4)]',
+    hoverBorder: 'hover:border-red-300/60',
+    iconBg: 'bg-red-500/30',
+    iconColor: 'text-red-200',
+    href: '/safety/sentinel',
   },
 ];
 
@@ -135,7 +135,7 @@ export default function SafetyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100">
+    <div className="h-full overflow-auto bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100">
       <main className="w-full px-4 py-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
           {/* 顶部标题区 */}
@@ -166,7 +166,7 @@ export default function SafetyPage() {
               >
                 <div className="inline-flex items-center gap-2 mb-2">
                   <Shield className="w-5 h-5 text-yellow-300" />
-                  <h3 className="text-xl font-bold text-white">自然灾害防护 · 四大课程模块</h3>
+                  <h3 className="text-xl font-bold text-white">自然灾害防护 · 五大课程模块</h3>
                   <Shield className="w-5 h-5 text-yellow-300" />
                 </div>
                 <p className="text-white/70 max-w-2xl mx-auto text-sm mb-8">
