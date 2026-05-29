@@ -1,111 +1,477 @@
-export type ResponseLevel = 'IV' | 'III' | 'II' | 'I';
+export interface SOPNode {
+  id: string;
+  type: 'start' | 'condition' | 'action' | 'decision' | 'end';
+  title: string;
+  description: string;
+  priority: 1 | 2 | 3;
+  conditions?: string[];
+  actions?: string[];
+  nextNodes?: string[];
+  decisionOptions?: DecisionOption[];
+  resources?: Resource[];
+  duration?: string;
+  responsible?: string;
+}
 
-export interface SopCard {
+export interface DecisionOption {
+  label: string;
+  nextNode: string;
+  condition?: string;
+}
+
+export interface Resource {
+  type: 'personnel' | 'equipment' | 'material' | 'transport';
   name: string;
-  role: string;
-  level: string;
-  instructions: string[];
+  quantity: number;
+  unit: string;
+  priority: number;
 }
 
-export interface RoleCard {
-  roleName: string;
-  instructions: string[];
+export interface SOPPlan {
+  id: string;
+  name: string;
+  disasterType: string;
+  version: string;
+  nodes: SOPNode[];
+  startNode: string;
+  tags: string[];
 }
 
-const sopCards: SopCard[] = [
-  { name: '市防汛指挥部', role: '副指挥长', level: 'IV', instructions: ['指令水文部门监测河道水位、流量，预测洪水对城市排水系统的影响', '指令城市管理部门利用地下管网监控平台，实时监测易涝点水位、排水设施运行状态', '指令交通部门通过视频监控和巡查，识别低洼路段、隧道、涵洞等高风险区域'] },
-  { name: '市应急局', role: '核心执行层', level: 'IV', instructions: ['指令安排专职人员值班，实时接收气象、水文部门发布的降雨预报和积水点监测数据，确保信息上传下达通畅', '指令通过智慧应急平台动态跟踪高风险区域，每小时汇总各区县上报的灾情及处置进展', '协调城管部门调拨移动泵车、排水管、沙袋等基础物资至预设点位；督促属地街道清理雨水箅子，确保排水设施畅通'] },
-  { name: '市城管局', role: '协作执行层', level: 'IV', instructions: ['指令对历史易涝点开展"拉网式排查"，清理雨水箅子、排水口杂物，确保管网畅通', '启动智慧排水系统，联动泵站根据水位监测数据自动开启强排模式', '调派移动泵车、铺设排水管，连接泵车与河道或者下水道，实现积水定向导流优先处置主干道积水'] },
-  { name: '市交通局', role: '协作执行层', level: 'IV', instructions: ['指令对积水深度≥30cm的低洼路段、下穿隧道等区域实施交通管制，设置警示牌、反光锥等物理隔离设施', '启动全市交通监控系统，重点监测易涝点周边交通流量，每30分钟更新一次路况信息', '根据积水情况动态调整公交线路，暂停或绕行受影响路段，确保乘客安全'] },
-  { name: '属地街道办', role: '协作执行层', level: 'IV', instructions: ['指令发现主干道积水深度≥30cm、持续20分钟以上等情况，需在15分钟内电话直报上级应急管理部门', '通过应急通信系统收集汇总现场信息，包括积水点位、物资需求等', '指令组织社区人员、网格员对辖区内雨水箅子、排水口进行"拉网式排查"'] },
-  
-  { name: '市防汛指挥部', role: '副指挥长', level: 'III', instructions: ['立即到岗坐镇应急指挥中心，统筹应急、城管、交通、公安、卫健等部门成立联合指挥部', '指令检查各成员单位预案执行情况，重点督导城管局"一点一策"方案、交通局公交绕行方案落实', '指令每30分钟听取气象、水文部门短临预报'] },
-  { name: '市应急局', role: '核心执行层', level: 'III', instructions: ['市应急局局长需到岗带班，组织成立由应急、城管、交通、公安、卫健等部门组成的24小时联合指挥部', '指令启动应急指挥平台GIS地图实时叠加功能，动态监控内涝点、救援队伍分布及物资调度路径', '调用市级物资储备库，增配移动泵车、冲锋舟、沙袋等应急物资'] },
-  { name: '市公安局', role: '协作执行层', level: 'III', instructions: ['分管副局长到岗带班，组建由交警、特警、治安、网安等多警种参与的24小时联合指挥部', '指令将日常勤务升级为全警上路勤务，调派50%以上警力驻守重点区域', '指令对积水深度≥50cm的路段上游500米处设警示牌反光锥，实施硬隔离封闭'] },
-  { name: '市交通局', role: '协作执行层', level: 'III', instructions: ['局长进驻应急指挥中心，组建由公路、运管、公交、轨交等多部门参与的24小时联合指挥部', '指令每30分钟整合气象、水文、城管数据，通过GIS地图监控内涝点、断交点及救援进展', '指令检查下属单位应急预案执行情况，重点督导公交绕行、地铁防汛、公路抢通等预案落地'] },
-  { name: '市城管局', role: '协作执行层', level: 'III', instructions: ['分管副局长进驻指挥中心，统筹成立24小时联合指挥部', '启动专项工作组：排水抢险组、设施保障组、次生灾害防控组', '指令每30分钟通过GIS内涝风险地图更新积水点水位、泵站运行状态'] },
-  { name: '市卫健委', role: '协作执行层', level: 'III', instructions: ['卫健委主要领导进驻应急指挥中心，组建由医疗救治、疾控、监督等组成的联合工作组', '指令增设临时医疗点，在断交区域、安置点增设不少于3个临时医疗站', '指令增派不少于5支巡回医疗队，覆盖断交区域及安置点'] },
-  { name: '市气象局', role: '协作执行层', level: 'III', instructions: ['分管副局长进驻应急指挥中心，组建由气象台、减灾科、办公室等部门参与的24小时联合指挥部', '指令启动移动气象监测车、无人机等设备，对重灾区实施分钟级实况监测', '指令每1小时发布一次0-3小时强降水落区预报，重点标注高风险区域'] },
-  
-  { name: '市防汛指挥部', role: '指挥长', level: 'II', instructions: ['立即进驻市级应急指挥中心，组建由副市长、市委领导、驻军代表、重点部门一把手参与的24小时联合指挥部', '签发《Ⅱ级响应启动令》，明确各部门职责分工及响应要求', '指令每30分钟听取气象、水文部门报告，若灾情持续恶化，立即向省级防指申请启动Ⅰ级响应'] },
-  { name: '市防汛指挥部', role: '副指挥长', level: 'II', instructions: ['立即进驻重灾区现场指挥部，统筹成立"抢险救援、医疗救助、交通管制"专项工作组', '签发《Ⅱ级响应执行指令》，细化部门分工', '指令每30分钟听取气象、水文部门报告，若灾情持续恶化，立即向市长建议启动Ⅰ级响应'] },
-  { name: '市应急局', role: '核心执行层', level: 'II', instructions: ['局长24小时驻守指挥中心，统筹应急、消防、武警、公安等20+部门成立跨部门作战组', '指令实时叠加气象卫星云图、积水点热力图、救援力量定位', '督导预案执行情况，核查各部门"一点一策"方案落地情况'] },
-  { name: '市公安局', role: '协作执行层', level: 'II', instructions: ['分管副局长24小时驻守指挥中心，统筹交警、特警、治安、网安等多警种成立跨部门作战组', '指令从重点区域布警升级为全警上路勤务，调派70%以上警力驻守断交重灾区', '协调周边县市警力待命，确保1小时内增援'] },
-  { name: '市交通局', role: '协作执行层', level: 'II', instructions: ['局长24小时驻守指挥中心，联动应急、城管、公安等部门成立交通抢险专项组', '指令实时叠加气象雷达、积水热力图、公交停运数据，自动生成《全网断交风险预警》', '核查公交、地铁、公路等"一站一策"防汛方案'] },
-  { name: '市城管局', role: '协作执行层', level: 'II', instructions: ['分管副局长进驻指挥中心，统筹成立24小时联合抢险指挥部', '启动专项工作组：排水抢险组、设施保障组、次生灾害防控组', '调集大型抽排设备，增配"龙吸水"泵车不少于5台，优先处置主干道、下穿隧道积水'] },
-  { name: '市住建局', role: '协作执行层', level: 'II', instructions: ['局长24小时驻守指挥中心，统筹成立由房管、质安、城建、设计等处室组成的防汛联合指挥部', '指令启用预置应急避难场所（如学校、体育馆），协调公交集团调度车辆保障转运', '协同交通局对塌陷路段采用钢板和速凝材料组合的方式，3小时内恢复单向通行'] },
-  { name: '市气象局', role: '协作执行层', level: 'II', instructions: ['局长24小时驻守指挥中心，统筹成立由气象台、减灾科、装备保障等部门组成的联合指挥部', '指令每30分钟发布0-3小时短临预报，标注高风险区域，叠加GIS地形与排水管网数据预测积水路径', '联合城管局，指导泵车布设点位，暴雨峰值前预降河道水位'] },
-  { name: '市自然资源局', role: '协作执行层', level: 'II', instructions: ['局长24小时驻守指挥中心，统筹成立地质灾害联合指挥部', '指令将隐患点巡查升级为高危区域实时动态监测，对山体滑坡、地面塌陷高风险区实施无人机巡查', '联合网信办全网巡查"山体裂缝""道路塌陷"等谣言，1小时内封禁账号并公开辟谣'] },
-  { name: '市委网信办', role: '协作执行层', level: 'II', instructions: ['分管副主任24小时驻守指挥中心，统筹成立网络安全与舆情联合指挥部', '启动专项工作组：舆情监测组、网络安全组、信息发布组', '指令利用AI工具全网抓取"交通瘫痪"等敏感关键词，每30分钟生成《涉灾舆情热力图》'] },
-  { name: '市通讯办', role: '协作执行层', level: 'II', instructions: ['分管副主任24小时驻守指挥中心，联动应急、交通、电力等部门成立通信保障专项工作组', '调度应急通信资源，卫星电话从Ⅲ级20部增至≥50部；应急通信车从10辆增至≥30辆', '联合网信办1小时内封堵谣言，溯源追责造谣账号'] },
-  { name: '市供电公司', role: '协作执行层', level: 'II', instructions: ['公司主要负责人24小时驻守应急指挥中心，联动政府应急、城管、交通等部门成立电力抢险联合指挥部', '核查各片区变电站、配电房的"一站一策"防汛方案，未达标设施立即整改', '指令从Ⅲ级"重点区域值守"升级为全员应急勤务，调集80%以上抢修力量驻守重灾区'] },
-  { name: '武警部队', role: '协作执行层', level: 'II', instructions: ['支队主官进驻市级应急指挥中心，加入防汛联合指挥部，实行24小时联合值守', '指令从Ⅲ级"部分兵力待命"升级为全员战备，调集80%以上兵力驻守重灾区', '指令制定"一点一案"救援方案，核查抢险装备及物资储备'] },
-  
-  { name: '市防汛指挥部', role: '指挥长', level: 'I', instructions: ['担任市级防指总指挥，立即启动市级应急指挥中心最高权限，接管副市长、各部门指挥权', '签发《Ⅰ级响应启动令》，宣布全市进入应急响应状态，授权采取交通管制、物资征用、人员强制转移等非常措施', '直接对接省防总，申请调用国家级排涝设备，协调省军区调动驻地部队参与高危区抢险'] },
-  { name: '市防汛指挥部', role: '副指挥长', level: 'I', instructions: ['担任抢险总执行人，立即率水利、应急、公安等部门组成联合指挥部，进驻灾害最重区域', '签发《Ⅰ级响应执行令》，授权采取交通管制、物资征用、人员强制转移等紧急措施', '直调省级/国家级救援装备，通过市警备区依法申报舟桥部队协助'] },
-  { name: '市应急局', role: '核心执行层', level: 'I', instructions: ['局长立即入驻市联合指挥部，实行"双线报告"机制：纵向每15分钟直报省防总、应急管理部；横向实时对接市长、副市长决策', '督导危险化学品生产经营单位、非煤矿山、尾矿库落实防汛措施', '指令在重灾区设立前沿指挥所，由副局长担任指挥长'] },
-  { name: '市水利局', role: '协作执行层', level: 'I', instructions: ['局长入驻市联合指挥部，担任治安与交通管控组组长，实行"双线报告"机制', '加密水库、河道、堤防等水利工程及山洪沟道、积滞水点的监测', '根据汛情发展及时调整发布洪水预警、山洪灾害和积水内涝风险预警等级'] },
-  { name: '市公安局', role: '协作执行层', level: 'I', instructions: ['局长入驻市联合指挥部，担任治安与交通管控组组长，实行"双线报告"机制', '启动战时勤务模式，调集80%以上警力（含特警、交警、治安警）驻守重灾区，取消全体休假', '交通枢纽瘫痪时，协调装甲车开道护送救护车，封闭所有非救援通道'] },
-  { name: '市交通局', role: '协作执行层', level: 'I', instructions: ['局长入驻市联合指挥部，直接对接省防总、交通运输部，实行"战时调度"机制', '建立现场攻坚指挥部，在重灾区设立前沿指挥所，由总工程师担任技术总负责', '疏导受灾地区道路交通，必要时实施严格交通管制，保障指挥、抢险、救灾车辆优先通行'] },
-  { name: '市城管局', role: '协作执行层', level: 'I', instructions: ['局长入驻市联合指挥部，与市防指工作组直接联动，实行"15分钟会商"机制', '负责城区受威胁区域的确认及统计（受威胁区域清单、转移人员清单、老弱病残幼特殊人员专项清单等）', '协助市直相关部门负责市区排涝设施及民心河的维护、管理'] },
-  { name: '市住建局', role: '协作执行层', level: 'I', instructions: ['成立战时指挥部，局长入驻市联合指挥部，直接对接国务院工作组，实行"30分钟直报住建部"机制', '督导落实在建工程停工及相应防汛措施，及时做好受威胁人员的转移安置', '指令每15分钟更新《建筑安全热力图》，标注受困点位、次生风险'] },
-  { name: '市卫健委', role: '协作执行层', level: 'I', instructions: ['成立战时指挥部，局长入驻市联合指挥部，直接对接市工作组和专家组', '申请省级医疗队支援，重点保障ICU、手术室、急诊科等高需求科室', '指令启用市应急物资储备库，增配呼吸机、透析机、急救药品等关键设备'] },
-  { name: '市气象局', role: '协作执行层', level: 'I', instructions: ['局长进驻国家级联合指挥部，直接对接国家防总、中国气象局，实行"30分钟直报"机制', '组织国家级首席预报员团队每1小时会商，发布0-3小时短临预报', '联合水利、自然资源等部门开展流域降水联合研判，分析溃坝、滑坡等衍生风险'] },
-  { name: '市自然资源局', role: '协作执行层', level: 'I', instructions: ['局长进驻国家级联合指挥部，直接对接国务院工作组和自然资源部，实行"30分钟直报"机制', '会同市气象局加密监测气象变化，滚动会商研判，随时做好地质灾害气象风险预警调整发布', '指令启用"空天地"一体化监测对断交区域实施厘米级形变监测'] },
-  { name: '市通讯办', role: '协作执行层', level: 'I', instructions: ['市通信办主任进驻国家级联合指挥部，直接对接国家应急通信保障指挥机构，实行"30分钟直报"机制', '申请国家级通信保障专家组支援，对核心枢纽开展技术评估', '指令对中断的骨干传输网、核心机房实施"双路由+热备倒换"恢复'] },
-  { name: '市供电公司', role: '协作执行层', level: 'I', instructions: ['公司主要负责人入驻市联合指挥部，直接对接省防指，实行"30分钟直报"机制', '启动"战时调度"模式，授权强制调用跨区域应急发电车、无人机巡检设备等资源', '申请省级应急资源，申请省电网跨省调配"龙吸水"5000泵车对淹没变电站强排'] },
-  { name: '武警部队', role: '协作执行层', level: 'I', instructions: ['支队主官进驻市联合指挥部，直接对接省防指，实行"1小时直报"机制', '调集工兵、防化、舟桥等专业分队，24小时内抵达重灾区', '指令工兵分队对塌方路段实施爆破清障和钢桥架设，12小时内恢复主干道通行'] },
+export interface Scenario {
+  id: string;
+  disasterType: string;
+  name: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  parameters: Record<string, any>;
+}
+
+export const FLOOD_SOPS: SOPPlan[] = [
+  {
+    id: 'flood-urban-evacuation',
+    name: '城市内涝人员疏散SOP',
+    disasterType: 'flood',
+    version: '2.1',
+    tags: ['疏散', '人员安置', '内涝'],
+    startNode: 'start',
+    nodes: [
+      {
+        id: 'start',
+        type: 'start',
+        title: '内涝应急响应启动',
+        description: '监测到城市内涝风险，立即启动应急预案',
+        priority: 1,
+        nextNodes: ['assess'],
+        resources: [
+          { type: 'personnel', name: '应急指挥人员', quantity: 3, unit: '人', priority: 1 }
+        ]
+      },
+      {
+        id: 'assess',
+        type: 'condition',
+        title: '态势评估',
+        description: '综合评估内涝态势',
+        priority: 1,
+        conditions: [
+          '积水深度 > 30cm',
+          '水位上涨速度',
+          '受影响区域人口',
+          '关键设施状态'
+        ],
+        nextNodes: ['determine-zone'],
+        duration: '15分钟'
+      },
+      {
+        id: 'determine-zone',
+        type: 'decision',
+        title: '划定危险区域',
+        description: '根据积水深度和范围划定疏散区域',
+        priority: 1,
+        decisionOptions: [
+          { label: '积水≤30-50cm', nextNode: 'partial-evacuation' },
+          { label: '50-100cm', nextNode: 'full-evacuation' },
+          { label: '>100cm', nextNode: 'emergency-evacuation' }
+        ]
+      },
+      {
+        id: 'partial-evacuation',
+        type: 'action',
+        title: '局部区域疏散',
+        description: '对危险区域人员疏散，非危险区域就地避险',
+        priority: 2,
+        actions: [
+          '发布预警通知（短信、广播、APP推送',
+          '开放社区避难所',
+          '安排交通接驳车辆',
+          '维持秩序',
+          '医疗保障'
+        ],
+        resources: [
+          { type: 'personnel', name: '社区工作人员', quantity: 20, unit: '人', priority: 1 },
+          { type: 'transport', name: '大巴车', quantity: 5, unit: '辆', priority: 2 },
+          { type: 'material', name: '救生衣', quantity: 500, unit: '件', priority: 1 }
+        ],
+        nextNodes: ['monitor'],
+        responsible: '社区应急办',
+        duration: '30分钟'
+      },
+      {
+        id: 'full-evacuation',
+        type: 'action',
+        title: '全面疏散',
+        description: '受影响区域全员疏散',
+        priority: 1,
+        actions: [
+          '启动全员疏散指令',
+          '划定多条疏散路线',
+          '启动临时安置点',
+          '医疗急救点',
+          '物资保障'
+        ],
+        resources: [
+          { type: 'personnel', name: '应急救援队', quantity: 50, unit: '人', priority: 1 },
+          { type: 'transport', name: '大巴车', quantity: 15, unit: '辆', priority: 1 },
+          { type: 'material', name: '饮用水', quantity: 2000, unit: '箱', priority: 1 },
+          { type: 'equipment', name: '救生艇', quantity: 5, unit: '艘', priority: 1 }
+        ],
+        nextNodes: ['monitor'],
+        responsible: '市应急管理局',
+        duration: '2小时'
+      },
+      {
+        id: 'emergency-evacuation',
+        type: 'action',
+        title: '紧急疏散',
+        description: '危急情况紧急疏散',
+        priority: 1,
+        actions: [
+          '启动紧急响应',
+          '请求支援',
+          '启动直升机救援',
+          '紧急医疗支援'
+        ],
+        resources: [
+          { type: 'personnel', name: '专业救援队伍', quantity: 100, unit: '人', priority: 1 },
+          { type: 'transport', name: '冲锋舟', quantity: 20, unit: '艘', priority: 1 },
+          { type: 'equipment', name: '无人机', quantity: 10, unit: '架', priority: 1 }
+        ],
+        nextNodes: ['monitor'],
+        responsible: '省应急指挥中心',
+        duration: '立即'
+      },
+      {
+        id: 'monitor',
+        type: 'condition',
+        title: '持续监测',
+        description: '持续监测积水、疏散情况',
+        priority: 2,
+        conditions: [
+          '水位变化',
+          '天气',
+          '安置点人数',
+          '疏散进度'
+        ],
+        nextNodes: ['adjust'],
+        duration: '每30分钟'
+      },
+      {
+        id: 'adjust',
+        type: 'decision',
+        title: '方案调整',
+        description: '根据监测结果调整方案',
+        priority: 2,
+        decisionOptions: [
+          { label: '水位下降', nextNode: 'downgrade' },
+          { label: '水位稳定', nextNode: 'maintain' },
+          { label: '水位上升', nextNode: 'escalate' }
+        ]
+      },
+      {
+        id: 'downgrade',
+        type: 'action',
+        title: '降级响应',
+        description: '逐步恢复正常',
+        priority: 3,
+        actions: ['逐步恢复'],
+        nextNodes: ['end'],
+        duration: '4-8小时'
+      },
+      {
+        id: 'maintain',
+        type: 'action',
+        title: '维持当前措施',
+        description: '继续当前措施',
+        priority: 2,
+        nextNodes: ['monitor'],
+        duration: '持续'
+      },
+      {
+        id: 'escalate',
+        type: 'action',
+        title: '升级响应',
+        description: '升级应急响应级别',
+        priority: 1,
+        nextNodes: ['emergency-evacuation'],
+        duration: '立即'
+      },
+      {
+        id: 'end',
+        type: 'end',
+        title: '响应结束',
+        description: '内涝响应结束',
+        priority: 3,
+        actions: ['总结评估', '恢复重建', '预案修订']
+      }
+    ]
+  }
 ];
 
-export function getCardsByLevel(level: string): SopCard[] {
-  return sopCards.filter(card => card.level === level);
-}
+export const TYPHOON_SOPS: SOPPlan[] = [
+  {
+    id: 'typhoon-prepare-evacuate',
+    name: '台风来临前准备与疏散SOP',
+    disasterType: 'typhoon',
+    version: '1.8',
+    tags: ['台风', '预防', '转移'],
+    startNode: 'start',
+    nodes: [
+      {
+        id: 'start',
+        type: 'start',
+        title: '台风预警发布',
+        description: '收到气象部门台风预警',
+        priority: 1,
+        nextNodes: ['alert-level'],
+        resources: [
+          { type: 'personnel', name: '气象联络员', quantity: 2, unit: '人', priority: 1 }
+        ]
+      },
+      {
+        id: 'alert-level',
+        type: 'decision',
+        title: '预警等级判定',
+        description: '根据预警等级',
+        priority: 1,
+        decisionOptions: [
+          { label: '蓝色/黄色预警', nextNode: 'pre-warning' },
+          { label: '橙色预警', nextNode: 'prepare-evacuate' },
+          { label: '红色预警', nextNode: 'force-evacuate' }
+        ]
+      },
+      {
+        id: 'pre-warning',
+        type: 'action',
+        title: '预警准备',
+        description: '预警期准备工作',
+        priority: 2,
+        actions: [
+          '宣传教育',
+          '物资检查',
+          '隐患排查'
+        ],
+        nextNodes: ['monitor'],
+        duration: '72小时'
+      },
+      {
+        id: 'prepare-evacuate',
+        type: 'action',
+        title: '准备转移',
+        description: '危险区域准备转移',
+        priority: 1,
+        actions: [
+          '转移通知',
+          '开放避难所',
+          '加固建筑'
+        ],
+        resources: [
+          { type: 'personnel', name: '转移安置人员', quantity: 30, unit: '人', priority: 1 },
+          { type: 'material', name: '帐篷', quantity: 200, unit: '顶', priority: 1 }
+        ],
+        nextNodes: ['monitor'],
+        duration: '24-48小时'
+      },
+      {
+        id: 'force-evacuate',
+        type: 'action',
+        title: '强制转移',
+        description: '危险区域人员强制转移',
+        priority: 1,
+        actions: [
+          '逐户通知',
+          '护送转移',
+          '安全保障'
+        ],
+        resources: [
+          { type: 'personnel', name: '公安/武警', quantity: 100, unit: '人', priority: 1 },
+          { type: 'transport', name: '车辆', quantity: 30, unit: '辆', priority: 1 }
+        ],
+        nextNodes: ['monitor'],
+        duration: '12-24小时'
+      },
+      {
+        id: 'monitor',
+        type: 'condition',
+        title: '持续监测',
+        description: '持续监测台风动态',
+        priority: 1,
+        conditions: ['台风路径', '风力', '降水', '潮位'],
+        nextNodes: ['end'],
+        duration: '每小时'
+      },
+      {
+        id: 'end',
+        type: 'end',
+        title: '台风过境后',
+        description: '台风过境后评估恢复',
+        priority: 2,
+        actions: ['灾情评估', '恢复重建', '总结']
+      }
+    ]
+  }
+];
 
-export function getCardByName(name: string): SopCard | undefined {
-  return sopCards.find(card => card.name === name);
-}
+export const EARTHQUAKE_SOPS: SOPPlan[] = [
+  {
+    id: 'earthquake-immediate-response',
+    name: '地震震后立即响应SOP',
+    disasterType: 'earthquake',
+    version: '3.0',
+    tags: ['地震', '救援', '医疗'],
+    startNode: 'start',
+    nodes: [
+      {
+        id: 'start',
+        type: 'start',
+        title: '地震发生',
+        description: '地震发生，启动响应',
+        priority: 1,
+        nextNodes: ['quick-assess'],
+        resources: [
+          { type: 'personnel', name: '指挥人员', quantity: 5, unit: '人', priority: 1 }
+        ],
+        duration: '黄金3分钟'
+      },
+      {
+        id: 'quick-assess',
+        type: 'condition',
+        title: '快速评估',
+        description: '快速评估灾情',
+        priority: 1,
+        conditions: ['震级', '震感', '建筑', '伤亡'],
+        nextNodes: ['determine-level'],
+        duration: '15-30分钟'
+      },
+      {
+        id: 'determine-level',
+        type: 'decision',
+        title: '响应级别确定',
+        description: '确定响应级别',
+        priority: 1,
+        decisionOptions: [
+          { label: '一般', nextNode: 'local-response' },
+          { label: '较大', nextNode: 'city-response' },
+          { label: '重大', nextNode: 'provincial-response' },
+          { label: '特别重大', nextNode: 'national-response' }
+        ]
+      },
+      {
+        id: 'local-response',
+        type: 'action',
+        title: '当地响应',
+        description: '当地启动响应',
+        priority: 2,
+        actions: ['搜救', '医疗', '安置'],
+        nextNodes: ['search-rescue'],
+        duration: '1小时'
+      },
+      {
+        id: 'city-response',
+        type: 'action',
+        title: '市级响应',
+        description: '市级启动响应',
+        priority: 1,
+        actions: ['专业救援', '医疗', '物资', '通讯'],
+        resources: [
+          { type: 'personnel', name: '救援队', quantity: 200, unit: '人', priority: 1 },
+          { type: 'equipment', name: '生命探测仪', quantity: 20, unit: '台', priority: 1 }
+        ],
+        nextNodes: ['search-rescue'],
+        duration: '2小时'
+      },
+      {
+        id: 'provincial-response',
+        type: 'action',
+        title: '省级响应',
+        description: '省级启动响应',
+        priority: 1,
+        actions: ['省级救援', '医疗队伍', '物资调配', '支援'],
+        resources: [
+          { type: 'personnel', name: '救援队', quantity: 1000, unit: '人', priority: 1 },
+          { type: 'equipment', name: '挖掘机', quantity: 50, unit: '台', priority: 1 }
+        ],
+        nextNodes: ['search-rescue'],
+        duration: '4小时'
+      },
+      {
+        id: 'national-response',
+        type: 'action',
+        title: '国家响应',
+        description: '国家启动响应',
+        priority: 1,
+        actions: ['国家救援队', '解放军', '国际支援'],
+        nextNodes: ['search-rescue'],
+        duration: '立即'
+      },
+      {
+        id: 'search-rescue',
+        type: 'action',
+        title: '搜救',
+        description: '生命搜救',
+        priority: 1,
+        actions: ['分区搜救', '生命探测', '营救', '医疗急救'],
+        nextNodes: ['medical'],
+        duration: '黄金72小时'
+      },
+      {
+        id: 'medical',
+        type: 'action',
+        title: '医疗救治',
+        description: '医疗救治',
+        priority: 1,
+        actions: ['急救点', '重伤员', '后送'],
+        nextNodes: ['shelter'],
+        duration: '持续'
+      },
+      {
+        id: 'shelter',
+        type: 'action',
+        title: '临时安置',
+        description: '受灾群众安置',
+        priority: 2,
+        nextNodes: ['end'],
+        duration: '持续'
+      },
+      {
+        id: 'end',
+        type: 'end',
+        title: '响应结束',
+        description: '响应结束',
+        priority: 3
+      }
+    ]
+  }
+];
 
-export function getCardByRole(role: string): SopCard | undefined {
-  return sopCards.find(card => card.role === role);
-}
-
-const responseBackgrounds: Record<ResponseLevel, string> = {
-  IV: '本次城区内出现持续强降雨，1小时降雨量≥30mm，主干道积水深度≥30cm且持续20分钟，气象局发布蓝色预警，根据市局防汛抗旱应急预案此时需启动Ⅳ级响应。',
-  III: '降雨量持续上升，本市单小时降雨量≥50mm且持续，气象局发布黄色预警，交警监测到多个主干道积水深度超30cm且持续30分钟以上，城市管理局上报超过5处内涝点，排水系统超负荷运行，根据市局防汛抗旱应急预案此时需启动Ⅲ级响应。',
-  II: '降雨量持续上升，本市12小时内持续降雨量≥100mm，气象局发布橙色预警，交警监测到降雨引发大面积城市积水，主干道积水深度≥80cm，且持续2小时以上，城市管理局上报超过5条主干道同时断交，其中供电设施周边道路全面中断，影响抢险救援，Ⅲ级响应下已投入全部移动泵车、冲锋舟，但积水消退速度＜30%，且灾情持续恶化，根据市局防汛抗旱应急预案此时需启动Ⅱ级响应。',
-  I: '降雨量持续上升，本市连续12小时降雨量≥300mm，气象局发布红色预警，交警监测到降雨引发大面积城市积水，主干道积水深度≥100cm且持续扩大，城市管理局上报超过10条主干道同时断交超过12小时，医院、应急指挥中心周边道路全部中断，救援车辆无法通行，Ⅱ级响应下已投入全部省级救援力量（如"龙吸水"泵车、省级武警），但灾情持续恶化，需申请国家级力量支援，根据市局防汛抗旱应急预案此时需启动Ⅰ级响应。'
+export const getSOPByType = (disasterType: string): SOPPlan[] => {
+  const map: Record<string, SOPPlan[]> = {
+    'flood': FLOOD_SOPS,
+    'typhoon': TYPHOON_SOPS,
+    'earthquake': EARTHQUAKE_SOPS,
+    'forest-fire': [],
+    'cold-wave': []
+  };
+  return map[disasterType] || FLOOD_SOPS;
 };
 
-export interface RoleCard {
-  roleName: string;
-  instructions: string[];
-}
-
-export interface LevelData {
-  levelName: string;
-  background: string;
-  roles: RoleCard[];
-}
-
-export const emergencySOPs: Record<ResponseLevel, LevelData> = {
-  IV: { 
-    levelName: '蓝色预警', 
-    background: responseBackgrounds.IV, 
-    roles: sopCards.filter(c => c.level === 'IV').map(c => ({ roleName: c.role, instructions: c.instructions })) 
-  },
-  III: { 
-    levelName: '黄色预警', 
-    background: responseBackgrounds.III, 
-    roles: sopCards.filter(c => c.level === 'III').map(c => ({ roleName: c.role, instructions: c.instructions })) 
-  },
-  II: { 
-    levelName: '橙色预警', 
-    background: responseBackgrounds.II, 
-    roles: sopCards.filter(c => c.level === 'II').map(c => ({ roleName: c.role, instructions: c.instructions })) 
-  },
-  I: { 
-    levelName: '红色预警', 
-    background: responseBackgrounds.I, 
-    roles: sopCards.filter(c => c.level === 'I').map(c => ({ roleName: c.role, instructions: c.instructions })) 
-  }
+export const getSOPById = (id: string): SOPPlan | undefined => {
+  return [...FLOOD_SOPS, ...TYPHOON_SOPS, ...EARTHQUAKE_SOPS].find(s => s.id === id);
 };

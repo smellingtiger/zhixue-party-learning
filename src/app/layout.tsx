@@ -43,11 +43,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-CN" suppressHydrationWarning className={notoSerifSC.variable}>
-      <body className="antialiased">
+      <body className="antialiased flex flex-col h-screen overflow-hidden">
         <NavProvider>
           <VideoMappingInitializer />
           <MainNav />
-          <main className="flex-1 flex flex-col">{children}</main>
+          <main className="flex-1 flex flex-col overflow-hidden">{children}</main>
         </NavProvider>
         <Toaster />
       </body>

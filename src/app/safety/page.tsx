@@ -13,7 +13,7 @@ import {
   ArrowRight,
   AlertTriangle,
   X,
-  Bot,
+  Zap,
 } from 'lucide-react';
 
 const disasterTypes = [
@@ -27,8 +27,8 @@ const disasterTypes = [
 const courseCards = (selectedDisasterId: string) => [
   {
     id: 'knowledge-graph',
-    title: '知识中枢',
-    description: '灾种全维度结构化知识库，图谱可视化+成因/风险/避险/案例等核心知识',
+    title: '知识图谱',
+    description: '系统化的安全知识体系图谱，全面了解各类灾害的成因、影响与应对措施',
     icon: Map,
     color: 'from-blue-600 via-blue-500 to-cyan-500',
     hoverShadow: 'hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]',
@@ -60,8 +60,8 @@ const courseCards = (selectedDisasterId: string) => [
   },
   {
     id: 'command-course',
-    title: '岗位指挥操作手册',
-    description: '分岗位分等级的应急指挥操作手册，按灾难等级和岗位角色快速查询标准化处理流程',
+    title: '岗位指挥课程',
+    description: '针对各岗位的应急指挥培训，提升灾情应对的组织协调与决策能力',
     icon: Users,
     color: 'from-purple-600 via-purple-500 to-pink-500',
     hoverShadow: 'hover:shadow-[0_0_30px_rgba(168,85,247,0.5)]',
@@ -92,16 +92,16 @@ const courseCards = (selectedDisasterId: string) => [
     href: '/safety/quiz-interactive',
   },
   {
-    id: 'emergency-advisor',
-    title: '应急方案智能体',
-    description: 'AI驱动的专业方案顾问，识别风险盲区，参考真实案例，提供可操作的应急指挥方案指导',
-    icon: Bot,
-    color: 'from-indigo-600/80 via-purple-500/70 to-pink-500/70',
-    hoverShadow: 'hover:shadow-[0_0_30px_rgba(139,92,246,0.3)]',
-    hoverBorder: 'hover:border-purple-300/60',
-    iconBg: 'bg-purple-500/30',
-    iconColor: 'text-purple-300',
-    href: '/safety/emergency-advisor',
+    id: 'sentinel',
+    title: '应急哨兵',
+    description: 'AI智能应急指挥沙盘 · 地图态势感知 + 大模型方案推演 + 人工协同决策，垂直深耕应急方案生成',
+    icon: Zap,
+    color: 'from-red-600/90 via-orange-500/80 to-yellow-500/70',
+    hoverShadow: 'hover:shadow-[0_0_30px_rgba(248,113,113,0.4)]',
+    hoverBorder: 'hover:border-red-300/60',
+    iconBg: 'bg-red-500/30',
+    iconColor: 'text-red-200',
+    href: '/safety/sentinel',
   },
 ];
 
@@ -114,13 +114,17 @@ export default function SafetyPage() {
 
   const handleNavigateWithDisaster = (href: string) => {
     const disasterName = disasterTypes.find(d => d.id === selectedDisaster)?.name || '地震';
-    
+    const disasterId = selectedDisaster || 'flood';
+
     if (href === '/safety/disaster-graph') {
       localStorage.setItem('selectedDisaster', disasterName);
       router.push(`${href}?disaster=${encodeURIComponent(disasterName)}`);
     } else if (href === '/safety/quiz-interactive') {
       localStorage.setItem('selectedDisaster', disasterName);
       router.push(`${href}?disaster=${encodeURIComponent(disasterName)}`);
+    } else if (href === '/safety/sentinel') {
+      localStorage.setItem('selectedDisaster', disasterName);
+      router.push(`${href}?disaster=${encodeURIComponent(disasterId)}`);
     } else {
       router.push(href);
     }
@@ -135,7 +139,7 @@ export default function SafetyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100">
+    <div className="h-full overflow-auto bg-gradient-to-br from-red-100 via-orange-50 to-yellow-100">
       <main className="w-full px-4 py-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
           {/* 顶部标题区 */}
@@ -166,7 +170,7 @@ export default function SafetyPage() {
               >
                 <div className="inline-flex items-center gap-2 mb-2">
                   <Shield className="w-5 h-5 text-yellow-300" />
-                  <h3 className="text-xl font-bold text-white">自然灾害防护 · 四大课程模块</h3>
+                  <h3 className="text-xl font-bold text-white">自然灾害防护 · 五大课程模块</h3>
                   <Shield className="w-5 h-5 text-yellow-300" />
                 </div>
                 <p className="text-white/70 max-w-2xl mx-auto text-sm mb-8">

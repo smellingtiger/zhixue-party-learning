@@ -320,7 +320,7 @@ export default function KnowledgeIntroPage() {
 
   if (viewMode === 'chapter') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-white">
+      <div className="h-full overflow-auto bg-gradient-to-br from-red-50 via-orange-50 to-white">
         <div className="container mx-auto px-4 py-6 max-w-4xl">
           {/* 顶部导航 */}
           <div className="flex items-center justify-between mb-4">

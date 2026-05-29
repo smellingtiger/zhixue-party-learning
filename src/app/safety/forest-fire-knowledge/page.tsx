@@ -382,7 +382,7 @@ export default function ForestFireKnowledgePage() {
 
   if (viewMode === 'chapter') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-white">
+      <div className="h-full overflow-auto bg-gradient-to-br from-green-50 via-emerald-50 to-white">
         <div className="container mx-auto px-4 py-6 max-w-4xl">
           <div className="flex items-center justify-between mb-4">
           <Button
