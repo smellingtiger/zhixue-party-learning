@@ -27,6 +27,14 @@ const apiProxy = createProxyMiddleware({
   },
 });
 
+const videoProxy = createProxyMiddleware({
+  target: 'http://localhost:8080',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/api': '/api',
+  },
+});
+
 app.prepare().then(() => {
   const server = createServer(async (req, res) => {
     try {
@@ -39,6 +47,9 @@ app.prepare().then(() => {
         parsedUrl.pathname?.startsWith('/api/knowledge-base/') ||
         parsedUrl.pathname?.startsWith('/api/knowledge-base');
 
+      // 视频路由代理到8080端口
+      const isVideoRoute = parsedUrl.pathname?.startsWith('/api/video');
+
       const shouldProxy =
         (parsedUrl.pathname?.startsWith('/api/') ||
           parsedUrl.pathname?.startsWith('/sso/') ||
@@ -46,6 +57,11 @@ app.prepare().then(() => {
           parsedUrl.pathname?.startsWith('/live/')) &&
         !isLocalApiRoute &&
         !NEXT_INTERNAL_PATHS.some(p => parsedUrl.pathname?.startsWith(p));
+
+      if (isVideoRoute) {
+        videoProxy(req as any, res as any, () => {});
+        return;
+      }
 
       if (shouldProxy) {
         apiProxy(req as any, res as any, () => {});

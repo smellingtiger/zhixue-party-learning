@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ollamaChatStream } from '@/lib/emergency-ollama';
 
+function log(phase: string, msg: string, data?: unknown) {
+  const ts = new Date().toISOString().substring(11, 23);
+  const prefix = `[AI-SOLUTION ${ts}][${phase}]`;
+  if (data !== undefined) {
+    console.log(prefix, msg, typeof data === 'object' ? JSON.stringify(data).substring(0, 500) : data);
+  } else {
+    console.log(prefix, msg);
+  }
+}
+
 const SYSTEM_PROMPT = `你是一位专业的应急管理方案顾问，具备以下核心能力：
 
 ## 角色定位
@@ -85,30 +95,47 @@ function analyzeUserIntent(message: string): { intent: string; confidence: numbe
     confidence = 0.75;
   }
 
+  log('analyzeIntent', `意图=${intent}, 置信度=${confidence}, 消息="${message.substring(0, 80)}"`);
   return { intent, confidence };
 }
 
 export async function POST(request: NextRequest) {
+  const t0 = Date.now();
   try {
-    const { messages, disasterType = 'flood' } = await request.json();
+    const body = await request.json();
+    const { messages, disasterType = 'flood' } = body;
+
+    log('POST', `收到请求, disasterType=${disasterType}, 消息数=${messages?.length || 0}`);
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      log('POST', '请求校验失败: 消息为空');
       return NextResponse.json({ error: '消息不能为空' }, { status: 400 });
     }
 
     const lastMessage = messages[messages.length - 1]?.content || '';
+    log('POST', `最后一条消息: "${lastMessage.substring(0, 100)}"`);
+
     const userIntent = analyzeUserIntent(lastMessage);
     
     const caseContext = getRelevantCases(disasterType);
+    log('POST', `案例上下文长度=${caseContext.length}, 灾害类型=${disasterType}`);
+
+    const systemContent = `${SYSTEM_PROMPT}${caseContext}\n\n## 当前分析意图\n用户当前意图：${userIntent.intent}（置信度：${(userIntent.confidence * 100).toFixed(0)}%）\n请根据此意图调整回复策略。`;
+    log('POST', `System Prompt总长度=${systemContent.length}`);
 
     const systemMessage = {
       role: 'system',
-      content: `${SYSTEM_PROMPT}${caseContext}\n\n## 当前分析意图\n用户当前意图：${userIntent.intent}（置信度：${(userIntent.confidence * 100).toFixed(0)}%）\n请根据此意图调整回复策略。`
+      content: systemContent
     };
 
     const allMessages = [systemMessage, ...messages];
+    log('POST', `总消息数=${allMessages.length}, 开始调用LLM流式生成`);
 
+    const streamStart = Date.now();
+    log('POST', `请求准备耗时=${streamStart - t0}ms`);
     const stream = await ollamaChatStream(allMessages);
+
+    log('POST', `流创建完成, 创建耗时=${Date.now() - streamStart}ms, 总耗时=${Date.now() - t0}ms`);
 
     return new Response(stream, {
       headers: {
@@ -121,6 +148,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
+    log('POST', `异常: ${(error as Error).message}, 总耗时=${Date.now() - t0}ms`);
     console.error('Emergency solution API error:', error);
     return NextResponse.json(
       { error: '生成方案失败，请稍后重试' },
