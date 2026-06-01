@@ -41,18 +41,35 @@ export async function GET(
   try {
     const { id } = await params;
     
-    // 直接从8080服务获取视频信息
+    // 从8080服务获取课程详情以获取course_code
     const KNOWLEDGE_SERVICE_URL = process.env.KNOWLEDGE_SERVICE_URL || 'http://localhost:8080';
-    const videoRes = await fetch(`${KNOWLEDGE_SERVICE_URL}/api/files/${encodeURIComponent(id)}/video`);
+    const res = await fetch(`${KNOWLEDGE_SERVICE_URL}/api/files/${encodeURIComponent(id)}`);
     
-    if (!videoRes.ok) {
+    if (!res.ok) {
       return NextResponse.json({ error: '课程不存在' }, { status: 404 });
     }
     
-    const videoData = await videoRes.json();
+    const courseData = await res.json();
+    const courseCode = courseData.filename?.replace('.txt', '') || id;
     
-    // 代理8080服务返回的视频数据
-    return NextResponse.json(videoData);
+    const nasMapping = loadNasMapping();
+    
+    if (courseCode in nasMapping) {
+      const item = nasMapping[courseCode];
+      return NextResponse.json({
+        has_video: true,
+        course_code: courseCode,
+        chinese_name: item.chinese_name,
+        video_filename: item.video_filename,
+        video_url: `/api/knowledge-base/video/${courseCode}`,
+        nas_path: item.nas_path,
+      });
+    }
+    
+    return NextResponse.json({
+      has_video: false,
+      course_code: courseCode,
+    });
   } catch (error) {
     console.error('知识库视频信息API错误:', error);
     return NextResponse.json({ error: '获取视频信息失败' }, { status: 500 });

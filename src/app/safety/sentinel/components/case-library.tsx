@@ -68,20 +68,20 @@ export default function CaseLibrary({ onSelectCase }: CaseLibraryProps) {
   };
 
   return (
-    <div className="h-full bg-slate-950 text-slate-100 flex flex-col">
+    <div className="h-full bg-slate-50 text-slate-800 flex flex-col">
       {/* 头部 */}
-      <div className="px-6 py-4 border-b border-slate-800">
+      <div className="px-6 py-4 border-b border-slate-200 bg-white">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center">
               <BookOpen className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-white">领导力案例智库</h1>
-              <p className="text-xs text-slate-400">基于真实事件的决策训练素材库</p>
+              <h1 className="text-lg font-bold text-slate-800">领导力案例智库</h1>
+              <p className="text-xs text-slate-500">基于真实事件的决策训练素材库</p>
             </div>
           </div>
-          <Badge className="bg-indigo-500/20 text-indigo-400 border-indigo-500/30">
+          <Badge className="bg-indigo-50 text-indigo-700 border-indigo-200">
             {realDisasterCases.length} 个案例
           </Badge>
         </div>
@@ -89,12 +89,12 @@ export default function CaseLibrary({ onSelectCase }: CaseLibraryProps) {
         {/* 搜索和筛选 */}
         <div className="flex gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <Input
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="搜索案例名称、地点..."
-              className="pl-9 bg-slate-900 border-slate-700 text-slate-200 placeholder:text-slate-600"
+              className="pl-9 bg-white border-slate-200 text-slate-700 placeholder:text-slate-400"
             />
           </div>
           <div className="flex gap-1.5">
@@ -104,8 +104,8 @@ export default function CaseLibrary({ onSelectCase }: CaseLibraryProps) {
                 onClick={() => setTypeFilter(type)}
                 className={`px-3 py-1.5 text-xs rounded-lg border transition-all ${
                   typeFilter === type
-                    ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300'
-                    : 'border-slate-700 text-slate-400 hover:border-slate-600'
+                    ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                    : 'border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50'
                 }`}
               >
                 {type === 'all' ? '全部' : typeLabels[type]}
@@ -129,23 +129,23 @@ export default function CaseLibrary({ onSelectCase }: CaseLibraryProps) {
                 transition={{ delay: idx * 0.05 }}
               >
                 <Card
-                  className={`bg-slate-900 border-slate-800 hover:border-slate-600 cursor-pointer transition-all ${
-                    selectedCase?.id === caseData.id ? 'border-indigo-500/50 ring-1 ring-indigo-500/20' : ''
+                  className={`bg-white border-slate-200 hover:border-indigo-300 hover:shadow-md cursor-pointer transition-all ${
+                    selectedCase?.id === caseData.id ? 'border-indigo-400 ring-1 ring-indigo-200' : ''
                   }`}
                   onClick={() => setSelectedCase(caseData)}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                      <div className={`w-3 h-3 rounded-full mt-1.5 shrink-0 ${typeColors[caseData.type] || 'bg-slate-500'}`} />
+                      <div className={`w-3 h-3 rounded-full mt-1.5 shrink-0 ${typeColors[caseData.type] || 'bg-slate-400'}`} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-sm font-bold text-white truncate">{caseData.name}</h3>
+                          <h3 className="text-sm font-bold text-slate-800 truncate">{caseData.name}</h3>
                           <Badge variant="outline" className={`text-xs ${difficulty.color}`}>
                             {difficulty.label}
                           </Badge>
                         </div>
-                        <p className="text-xs text-slate-400 line-clamp-2 mb-2">{caseData.description}</p>
-                        <div className="flex items-center gap-3 text-xs text-slate-500">
+                        <p className="text-xs text-slate-500 line-clamp-2 mb-2">{caseData.description}</p>
+                        <div className="flex items-center gap-3 text-xs text-slate-400">
                           <span className="flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             {caseData.date}
@@ -201,6 +201,12 @@ export default function CaseLibrary({ onSelectCase }: CaseLibraryProps) {
   );
 }
 
+const difficultyColorLight: Record<string, string> = {
+  advanced: 'text-red-600 border-red-400',
+  intermediate: 'text-amber-600 border-amber-400',
+  basic: 'text-emerald-600 border-emerald-400',
+};
+
 function CaseDetail({ caseData, onStart }: { caseData: RealDisasterCase; onStart: () => void }) {
   const [activeSection, setActiveSection] = useState<'overview' | 'timeline' | 'decisions' | 'lessons'>('overview');
 
@@ -209,30 +215,30 @@ function CaseDetail({ caseData, onStart }: { caseData: RealDisasterCase; onStart
       {/* 标题 */}
       <div>
         <div className="flex items-center gap-2 mb-2">
-          <Badge className={`${typeColors[caseData.type] || 'bg-slate-500'} text-white`}>
+          <Badge className={`${typeColors[caseData.type] || 'bg-slate-400'} text-white`}>
             {typeLabels[caseData.type]}
           </Badge>
-          <Badge variant="outline" className="border-red-500 text-red-400">
+          <Badge variant="outline" className="border-red-400 text-red-600">
             {caseData.severity === 'critical' ? '特别重大' : caseData.severity === 'high' ? '重大' : '较大'}
           </Badge>
         </div>
-        <h2 className="text-lg font-bold text-white">{caseData.name}</h2>
-        <p className="text-xs text-slate-400 mt-1">{caseData.date} · {caseData.location.name}</p>
+        <h2 className="text-lg font-bold text-slate-800">{caseData.name}</h2>
+        <p className="text-xs text-slate-500 mt-1">{caseData.date} · {caseData.location.name}</p>
       </div>
 
       {/* 统计卡片 */}
       <div className="grid grid-cols-3 gap-2">
-        <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 text-center">
-          <p className="text-xl font-bold text-red-400">{caseData.casualties.deaths}</p>
-          <p className="text-xs text-slate-500">遇难</p>
+        <div className="p-3 rounded-lg bg-white border border-slate-200 text-center">
+          <p className="text-xl font-bold text-red-500">{caseData.casualties.deaths}</p>
+          <p className="text-xs text-slate-400">遇难</p>
         </div>
-        <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 text-center">
-          <p className="text-xl font-bold text-amber-400">{caseData.casualties.injuries}</p>
-          <p className="text-xs text-slate-500">受伤</p>
+        <div className="p-3 rounded-lg bg-white border border-slate-200 text-center">
+          <p className="text-xl font-bold text-amber-500">{caseData.casualties.injuries}</p>
+          <p className="text-xs text-slate-400">受伤</p>
         </div>
-        <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 text-center">
-          <p className="text-xl font-bold text-emerald-400">{caseData.decisionPoints.length}</p>
-          <p className="text-xs text-slate-500">决策点</p>
+        <div className="p-3 rounded-lg bg-white border border-slate-200 text-center">
+          <p className="text-xl font-bold text-emerald-500">{caseData.decisionPoints.length}</p>
+          <p className="text-xs text-slate-400">决策点</p>
         </div>
       </div>
 
@@ -244,8 +250,8 @@ function CaseDetail({ caseData, onStart }: { caseData: RealDisasterCase; onStart
             onClick={() => setActiveSection(section)}
             className={`px-3 py-1.5 text-xs rounded-lg transition-all ${
               activeSection === section
-                ? 'bg-indigo-500/20 text-indigo-300'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-indigo-50 text-indigo-700'
+                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
             }`}
           >
             {section === 'overview' && '概览'}
@@ -260,30 +266,30 @@ function CaseDetail({ caseData, onStart }: { caseData: RealDisasterCase; onStart
       <div className="space-y-3">
         {activeSection === 'overview' && (
           <>
-            <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
-              <h4 className="text-xs font-bold text-slate-300 mb-2">事故描述</h4>
-              <p className="text-xs text-slate-400 leading-relaxed">{caseData.description}</p>
+            <div className="p-3 rounded-lg bg-white border border-slate-200">
+              <h4 className="text-xs font-bold text-slate-700 mb-2">事故描述</h4>
+              <p className="text-xs text-slate-500 leading-relaxed">{caseData.description}</p>
             </div>
-            <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
-              <h4 className="text-xs font-bold text-slate-300 mb-2">周边设施</h4>
+            <div className="p-3 rounded-lg bg-white border border-slate-200">
+              <h4 className="text-xs font-bold text-slate-700 mb-2">周边设施</h4>
               <div className="space-y-1.5">
                 {caseData.facilities.slice(0, 5).map(f => (
                   <div key={f.id} className="flex items-center gap-2 text-xs">
-                    <MapPin className="w-3 h-3 text-slate-500" />
-                    <span className="text-slate-300">{f.name}</span>
-                    <span className="text-slate-500">({f.type === 'hospital' ? '医院' : f.type === 'fire_station' ? '消防站' : f.type === 'shelter' ? '避难所' : '其他'})</span>
+                    <MapPin className="w-3 h-3 text-slate-400" />
+                    <span className="text-slate-700">{f.name}</span>
+                    <span className="text-slate-400">({f.type === 'hospital' ? '医院' : f.type === 'fire_station' ? '消防站' : f.type === 'shelter' ? '避难所' : '其他'})</span>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="p-3 rounded-lg bg-slate-900 border border-slate-800">
-              <h4 className="text-xs font-bold text-slate-300 mb-2">救援力量</h4>
+            <div className="p-3 rounded-lg bg-white border border-slate-200">
+              <h4 className="text-xs font-bold text-slate-700 mb-2">救援力量</h4>
               <div className="space-y-1.5">
                 {caseData.rescueForces.slice(0, 5).map(f => (
                   <div key={f.id} className="flex items-center gap-2 text-xs">
-                    <Shield className="w-3 h-3 text-slate-500" />
-                    <span className="text-slate-300">{f.name}</span>
-                    {f.arrivalTime && <span className="text-slate-500">到达: {f.arrivalTime}</span>}
+                    <Shield className="w-3 h-3 text-slate-400" />
+                    <span className="text-slate-700">{f.name}</span>
+                    {f.arrivalTime && <span className="text-slate-400">到达: {f.arrivalTime}</span>}
                   </div>
                 ))}
               </div>
@@ -297,14 +303,14 @@ function CaseDetail({ caseData, onStart }: { caseData: RealDisasterCase; onStart
               <div key={idx} className="flex gap-3">
                 <div className="flex flex-col items-center">
                   <div className="w-2 h-2 rounded-full bg-indigo-500" />
-                  {idx < caseData.timeline.length - 1 && <div className="w-px h-full bg-slate-700 mt-1" />}
+                  {idx < caseData.timeline.length - 1 && <div className="w-px h-full bg-slate-300 mt-1" />}
                 </div>
                 <div className="pb-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-indigo-400">{tl.time}</span>
-                    {tl.source && <span className="text-xs text-slate-600">({tl.source})</span>}
+                    <span className="text-xs font-mono text-indigo-600">{tl.time}</span>
+                    {tl.source && <span className="text-xs text-slate-400">({tl.source})</span>}
                   </div>
-                  <p className="text-xs text-slate-300 mt-0.5">{tl.event}</p>
+                  <p className="text-xs text-slate-700 mt-0.5">{tl.event}</p>
                 </div>
               </div>
             ))}
@@ -314,19 +320,19 @@ function CaseDetail({ caseData, onStart }: { caseData: RealDisasterCase; onStart
         {activeSection === 'decisions' && (
           <div className="space-y-3">
             {caseData.decisionPoints.map((dp, idx) => (
-              <div key={idx} className="p-3 rounded-lg bg-slate-900 border border-slate-800">
+              <div key={idx} className="p-3 rounded-lg bg-white border border-slate-200">
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge className="bg-amber-500/20 text-amber-400 text-xs">决策点 {idx + 1}</Badge>
-                  <span className="text-xs text-slate-500">{dp.time}</span>
+                  <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-xs">决策点 {idx + 1}</Badge>
+                  <span className="text-xs text-slate-400">{dp.time}</span>
                 </div>
-                <p className="text-xs text-slate-300 mb-2">{dp.description}</p>
+                <p className="text-xs text-slate-700 mb-2">{dp.description}</p>
                 <div className="space-y-1">
                   {dp.options.map((opt, oi) => (
                     <div key={oi} className="flex items-start gap-2 text-xs">
-                      <ChevronRight className="w-3 h-3 text-slate-500 mt-0.5 shrink-0" />
+                      <ChevronRight className="w-3 h-3 text-slate-400 mt-0.5 shrink-0" />
                       <div>
-                        <span className="text-slate-300">{opt}</span>
-                        <span className="text-slate-500 ml-2">→ {dp.consequences[oi]}</span>
+                        <span className="text-slate-700">{opt}</span>
+                        <span className="text-slate-400 ml-2">→ {dp.consequences[oi]}</span>
                       </div>
                     </div>
                   ))}
@@ -339,9 +345,9 @@ function CaseDetail({ caseData, onStart }: { caseData: RealDisasterCase; onStart
         {activeSection === 'lessons' && (
           <div className="space-y-2">
             {caseData.lessons.map((lesson, idx) => (
-              <div key={idx} className="flex items-start gap-2 p-2.5 rounded-lg bg-slate-900 border border-slate-800">
-                <span className="text-xs font-bold text-indigo-400 shrink-0">{idx + 1}.</span>
-                <p className="text-xs text-slate-300">{lesson}</p>
+              <div key={idx} className="flex items-start gap-2 p-2.5 rounded-lg bg-white border border-slate-200">
+                <span className="text-xs font-bold text-indigo-600 shrink-0">{idx + 1}.</span>
+                <p className="text-xs text-slate-700">{lesson}</p>
               </div>
             ))}
           </div>

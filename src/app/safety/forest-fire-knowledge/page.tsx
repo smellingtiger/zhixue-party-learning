@@ -71,12 +71,12 @@ function RealImage({ src, alt }: { src: string; alt: string }) {
     );
   }
   return (
-    <div className="my-6 rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-gray-100">
-      <div className="relative w-full">
+    <div className="my-6 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+      <div className="aspect-video relative bg-gray-100">
         <img
           src={src}
           alt={alt}
-          className="w-full h-auto object-contain"
+          className="w-full h-full object-cover"
           onError={() => setError(true)}
           loading="lazy"
         />

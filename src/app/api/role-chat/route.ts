@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ollamaChatStream } from '@/lib/emergency-ollama';
 import { getCharacter } from '@/lib/emergency-characters';
-import { emergencySOPs, type ResponseLevel } from '@/lib/emergency-sops';
+import { FLOOD_SOPS, type SOPPlan } from '@/lib/emergency-sops';
+
+type ResponseLevel = 'IV' | 'III' | 'II' | 'I';
 
 function buildRoleSystemPrompt(
   characterId: string,
@@ -13,14 +15,16 @@ function buildRoleSystemPrompt(
     return '';
   }
 
-  const levelKey: ResponseLevel = level as ResponseLevel;
-  const levelData = emergencySOPs[levelKey];
   const roleKeyword = character?.title?.replace(/[（(].*[）)]/g, '').trim();
-  const roleCard = levelData?.roles?.find(r =>
-    r.roleName?.includes(roleKeyword || '') || r.roleName === character?.title
+  
+  // 从FLOOD_SOPS中获取对应角色的指令
+  const floodSOP = FLOOD_SOPS[0];
+  const roleNode = floodSOP?.nodes?.find(n => 
+    n.responsible?.includes(roleKeyword || '') || 
+    n.title?.includes(roleKeyword || '')
   );
 
-  const manualInstructions = roleCard?.instructions?.join('\n') || '暂无对应指令';
+  const manualInstructions = roleNode?.actions?.join('\n') || '暂无对应指令';
 
   return `# 角色扮演设定
 

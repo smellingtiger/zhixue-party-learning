@@ -756,7 +756,7 @@ export const Sandbox3D = memo(function Sandbox3D({ entities = [], showDangerZone
     ro.observe(container);
 
     // render loop
-    let animId: number;
+    let animId: number = 0;
     const animate = () => {
       animId = requestAnimationFrame(animate);
       controls.update();
@@ -769,7 +769,8 @@ export const Sandbox3D = memo(function Sandbox3D({ entities = [], showDangerZone
           tl.timer = (tl.timer + 1) % 180;
           for (let i = 0; i < 3; i++) {
             const active = (tl.timer < 60 && i === 2) || (tl.timer >= 60 && tl.timer < 120 && i === 1) || (tl.timer >= 120 && i === 0);
-            tl.lights[i].material.opacity = active ? 0.9 : 0.12;
+            const mat = tl.lights[i].material as THREE.MeshBasicMaterial;
+            mat.opacity = active ? 0.9 : 0.12;
           }
         }
 

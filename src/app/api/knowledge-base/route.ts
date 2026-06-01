@@ -82,9 +82,9 @@ export async function GET(request: NextRequest) {
 
     const docs = files.map((f: any) => {
       const nasCourseCode = checkNasVideo(f.filename, f.title);
-      // 直接使用8080后端返回的has_video字段
-      const hasVideo = f.has_video === true;
-      const videoId = nasCourseCode || f.id;
+      const isPartyKnowledgeBase = knowledgeBase === 'party';
+      const hasVideo = isPartyKnowledgeBase ? true : !!nasCourseCode;
+      const videoId = isPartyKnowledgeBase ? (f.filename?.replace(/\.txt$/, '') || f.id) : (nasCourseCode || null);
       return {
         id: f.id,
         title: f.title,

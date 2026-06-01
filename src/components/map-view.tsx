@@ -56,6 +56,22 @@ interface MapViewProps {
   movingResources?: MovingResource[];
   showDangerZone?: boolean;
   onEntityClick?: (id: string) => void;
+  // 战役模式控制
+  campaignCenter?: { lat: number; lng: number } | null;
+  campaignZoom?: number | null;
+  highlightEntityIds?: string[];
+  // 自定义定位点标记
+  locationMarkers?: Array<{
+    id: string;
+    lat: number;
+    lng: number;
+    label: string;
+    offsetLat?: number;
+    offsetLng?: number;
+    zIndex?: number;
+    highlightRadius?: number;
+    highlightColor?: string;
+  }>;
 }
 
 function createIcon(type: EntityType, status?: string): L.DivIcon {
@@ -160,15 +176,24 @@ function getMovingIcon(color: string): L.DivIcon {
   return movingIconCache.get(color)!;
 }
 
-function MapController({ entities }: { entities: MapEntity2D[] }) {
+function MapController({ entities, campaignCenter, campaignZoom }: {
+  entities: MapEntity2D[];
+  campaignCenter?: { lat: number; lng: number } | null;
+  campaignZoom?: number | null;
+}) {
   const map = useMap();
 
   useEffect(() => {
-    if (entities.length > 0) {
+    if (campaignCenter && campaignZoom) {
+      map.flyTo([campaignCenter.lat, campaignCenter.lng], campaignZoom, {
+        duration: 1.5,
+        easeLinearity: 0.25,
+      });
+    } else if (entities.length > 0) {
       const bounds = L.latLngBounds(entities.map(e => [e.lat, e.lng]));
       map.fitBounds(bounds, { padding: [60, 60], maxZoom: 15 });
     }
-  }, [entities]);
+  }, [entities, campaignCenter, campaignZoom]);
 
   return null;
 }
@@ -180,6 +205,10 @@ export const MapView = memo(function MapView({
   movingResources = [],
   showDangerZone = false,
   onEntityClick,
+  campaignCenter,
+  campaignZoom,
+  highlightEntityIds = [],
+  locationMarkers = [],
 }: MapViewProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const onEntityClickRef = useRef(onEntityClick);
@@ -216,13 +245,13 @@ export const MapView = memo(function MapView({
         className="tactical-map"
       >
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          subdomains="abcd"
-          maxZoom={19}
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}"
+          subdomains="1234"
+          maxZoom={18}
+          attribution='&copy; <a href="https://www.amap.com">高德地图</a>'
         />
 
-        <MapController entities={entities} />
+        <MapController entities={entities} campaignCenter={campaignCenter} campaignZoom={campaignZoom} />
 
         {/* 真实危险区域 */}
         {showDangerZone && dangerZones.map((zone, idx) => {
@@ -257,7 +286,7 @@ export const MapView = memo(function MapView({
                 weight: 2,
                 opacity: 0.35,
                 dashArray: '8,6',
-                dashOffset: Math.floor(Date.now() / 200) % 14,
+                dashOffset: String(Math.floor(Date.now() / 200) % 14),
               }}
             />
             <Circle
@@ -284,7 +313,7 @@ export const MapView = memo(function MapView({
                 weight: 1.5 + flow.size * 0.4,
                 opacity: 0.85 * (1 - progress * 0.4),
                 dashArray: '8,5',
-                dashOffset: -elapsed * 0.05,
+                dashOffset: String(-elapsed * 0.05),
               }}
             />
           );
@@ -315,7 +344,7 @@ export const MapView = memo(function MapView({
                     weight: 3,
                     opacity: 0.6,
                     dashArray: '4,4',
-                    dashOffset: -Date.now() * 0.08,
+                    dashOffset: String(-Date.now() * 0.08),
                   }}
                 />
               )}
@@ -342,16 +371,17 @@ export const MapView = memo(function MapView({
 
         {entities.map(entity => {
           const isActive = activeId === entity.id;
+          const isHighlighted = highlightEntityIds.includes(entity.id);
           const isEvent = entity.type === 'sensor' && (entity.status === 'danger' || entity.status === 'warning');
           return (
             <Marker
               key={entity.id}
               position={[entity.lat, entity.lng]}
-              icon={getIcon(entity.type, entity.status)}
+              icon={getIcon(entity.type, isHighlighted ? 'danger' : entity.status)}
               eventHandlers={{
                 click: () => handleMarkerClick(entity.id),
               }}
-              zIndexOffset={isEvent ? 500 : 100}
+              zIndexOffset={isHighlighted ? 1000 : isEvent ? 500 : 100}
             >
               <Tooltip permanent direction={isEvent ? 'top' : 'bottom'} offset={[0, isEvent ? -14 : 6]}>
                 <span style={{
@@ -393,13 +423,16 @@ export const MapView = memo(function MapView({
                       )}
                       {entity.data.type && (
                         <p style={{ margin: '2px 0' }}>
-                          类型: {{
-                            hospital: '医院', fire_station: '消防站', police_station: '警察局',
-                            shelter: '避难所', command_center: '指挥中心', school: '学校',
-                            army_base: '军事基地', airport: '机场',
-                            fire_brigade: '消防队', armed_police: '武警', army: '解放军',
-                            militia: '民兵', medical_team: '医疗队', engineering: '工程队', volunteer: '志愿者'
-                          }[entity.data.type] || entity.data.type}
+                          类型: {(() => {
+                            const typeMap: Record<string, string> = {
+                              hospital: '医院', fire_station: '消防站', police_station: '警察局',
+                              shelter: '避难所', command_center: '指挥中心', school: '学校',
+                              army_base: '军事基地', airport: '机场',
+                              fire_brigade: '消防队', armed_police: '武警', army: '解放军',
+                              militia: '民兵', medical_team: '医疗队', engineering: '工程队', volunteer: '志愿者'
+                            };
+                            return typeMap[entity.data.type as string] || entity.data.type;
+                          })()}
                         </p>
                       )}
                     </div>
@@ -410,6 +443,80 @@ export const MapView = memo(function MapView({
                 </div>
               </Popup>
             </Marker>
+          );
+        })}
+
+        {/* 自定义定位点标记 */}
+        {locationMarkers.map(marker => {
+          const displayLat = marker.offsetLat ?? marker.lat;
+          const displayLng = marker.offsetLng ?? marker.lng;
+          return (
+            <div key={marker.id}>
+              {/* 高亮锚定圆圈（第四步） */}
+              {marker.highlightRadius && (
+                <Circle
+                  center={[displayLat, displayLng]}
+                  radius={marker.highlightRadius}
+                  pathOptions={{
+                    color: marker.highlightColor || '#38bdf8',
+                    fillColor: marker.highlightColor || '#38bdf8',
+                    fillOpacity: 0.1,
+                    weight: 2,
+                    opacity: 0.4,
+                    dashArray: '6,4',
+                  }}
+                />
+              )}
+              {/* 标记点（第三步） */}
+              <Marker
+                position={[displayLat, displayLng]}
+                zIndexOffset={marker.zIndex || 1000}
+                icon={new L.DivIcon({
+                  html: `<div style="
+                    display:flex;align-items:center;justify-content:center;
+                    width:32px;height:32px;
+                    background:linear-gradient(135deg, #38bdf8, #818cf8);
+                    border-radius:50%;
+                    box-shadow:0 0 12px rgba(56,189,248,0.6);
+                    border:2px solid white;
+                    animation:marker-pulse 2s infinite;
+                  ">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                  </div>
+                  <div style="
+                    position:absolute;top:100%;left:50%;transform:translateX(-50%);
+                    margin-top:4px;padding:2px 8px;
+                    background:rgba(15,23,42,0.9);
+                    border:1px solid #38bdf8;
+                    border-radius:4px;
+                    color:#e2e8f0;
+                    font-size:11px;
+                    font-weight:600;
+                    white-space:nowrap;
+                    text-shadow:0 1px 3px rgba(0,0,0,0.8);
+                  ">${marker.label}</div>
+                  <style>@keyframes marker-pulse{0%,100%{box-shadow:0 0 12px rgba(56,189,248,0.6)}50%{box-shadow:0 0 24px rgba(56,189,248,0.9)}}</style>`,
+                  className: '',
+                  iconSize: [32, 48],
+                  iconAnchor: [16, 16],
+                })}
+              >
+                <Tooltip permanent direction="top" offset={[0, -16]}>
+                  <span style={{
+                    fontWeight: 700,
+                    fontSize: 11,
+                    color: '#38bdf8',
+                    whiteSpace: 'nowrap',
+                    textShadow: '0 1px 4px rgba(0,0,0,0.9)',
+                  }}>
+                    📍 {marker.label}
+                  </span>
+                </Tooltip>
+              </Marker>
+            </div>
           );
         })}
       </MapContainer>
