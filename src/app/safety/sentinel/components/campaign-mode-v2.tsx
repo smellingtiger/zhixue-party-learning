@@ -13,7 +13,7 @@ import {
   FileText, Clock, Target, AlertCircle,
   Maximize2, X, MessageSquare, Sparkles, Lightbulb
 } from 'lucide-react';
-import type { FlowLine, MovingResource } from '@/components/map-view';
+import type { FlowLine, MovingResource, StoryBubbleData, MarkerEffectType } from '@/components/map-view';
 import {
   createAgent,
   getDecisionAgents,
@@ -50,10 +50,17 @@ interface CampaignModeV2Props {
     lat: number;
     lng: number;
     label: string;
+    zoom: number;
     offsetLat?: number;
     offsetLng?: number;
     zIndex?: number;
+    highlightRadius?: number;
+    highlightColor?: string;
+    highlightMessage?: string;
+    effectType?: MarkerEffectType;
+    emotion?: string;
   }>) => void;
+  onStoryBubblesChange?: (bubbles: StoryBubbleData[]) => void;
 }
 
 interface DraggablePanelProps {
@@ -264,203 +271,51 @@ function RTSIntroOverlay({ disasterCase, onComplete }: { disasterCase: RealDisas
   );
 }
 
-// ==================== 打字机效果组件 ====================
-function TypewriterText({ text, speed = 20, onComplete }: { 
-  text: string; 
-  speed?: number; 
-  onComplete?: () => void;
-}) {
-  const [displayedText, setDisplayedText] = useState('');
-  const [isComplete, setIsComplete] = useState(false);
-
-  useEffect(() => {
-    setDisplayedText('');
-    setIsComplete(false);
-    let index = 0;
-    const timer = setInterval(() => {
-      if (index < text.length) {
-        setDisplayedText(text.slice(0, index + 1));
-        index++;
-      } else {
-        setIsComplete(true);
-        clearInterval(timer);
-        onComplete?.();
-      }
-    }, speed);
-    return () => clearInterval(timer);
-  }, [text, speed, onComplete]);
-
-  return (
-    <p className="text-sm whitespace-pre-wrap leading-relaxed">
-      {displayedText}
-      {!isComplete && <span className="inline-block w-0.5 h-4 bg-slate-400 animate-pulse ml-0.5" />}
-    </p>
-  );
-}
-
-// ==================== 角色发言气泡 ====================
-function AgentMessageBubble({ message, isUser = false, onJumpToLocation }: { 
-  message: AgentMessage; 
+// ==================== 极简历史日志条目 ====================
+function HistoryLogEntry({ message, isUser, onClick }: {
+  message: AgentMessage;
   isUser?: boolean;
-  onJumpToLocation?: (lat: number, lng: number, zoom: number, label: string) => void;
+  onClick?: () => void;
 }) {
-  const getEmotionColor = (emotion: string) => {
-    const colors: Record<string, string> = {
-      calm: 'bg-sky-100 border-sky-300 text-sky-700',
-      urgent: 'bg-rose-100 border-rose-300 text-rose-700',
-      worried: 'bg-amber-100 border-amber-300 text-amber-700',
-      confident: 'bg-emerald-100 border-emerald-300 text-emerald-700',
-      concerned: 'bg-orange-100 border-orange-300 text-orange-700',
-    };
-    return colors[emotion] || colors.calm;
-  };
-
-  const [showAll, setShowAll] = useState(false);
-  const [isTyping, setIsTyping] = useState(!isUser);
-
-  // 检测是否为长方案内容（超过500字符或包含方案特征标记）
-  const isLongPlan = message.agentId === 'ai-advisor' && message.message.length > 500;
-  
-  // 提取方案摘要（前3行或前200字符）
-  const getPlanSummary = () => {
-    const lines = message.message.split('\n').filter(l => l.trim());
-    return lines.slice(0, 3).join('\n').slice(0, 200);
-  };
-
-  // 解析消息中的坐标信息（从 location 字段提取）
   const location = (message as any).location;
-
-  const handleLocationClick = () => {
-    if (location && onJumpToLocation) {
-      onJumpToLocation(location.lat, location.lng, location.zoom || 16, location.label || '查看位置');
-    }
-  };
-
-  // 跳过打字机效果，直接显示全部文本
-  const handleSkipTypewriter = () => {
-    setShowAll(true);
-    setIsTyping(false);
+  const emotionColors: Record<string, string> = {
+    urgent: 'text-red-400', worried: 'text-orange-400',
+    concerned: 'text-yellow-400', confident: 'text-green-400',
+    calm: 'text-blue-400',
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      className={`flex items-start gap-3 mb-3 ${isUser ? 'flex-row-reverse' : ''}`}
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      className={`flex items-center gap-2.5 py-2 px-3 rounded-lg cursor-pointer transition-colors hover:bg-slate-700/50 ${
+        isUser ? 'bg-amber-500/5' : ''
+      }`}
+      onClick={onClick}
     >
-      {/* 头像 */}
-      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-md ${
-        isUser ? 'bg-amber-100' :
-        message.agentId === 'ai-advisor' ? 'bg-violet-100' :
-        'bg-slate-100'
+      <span className="text-sm text-slate-500 shrink-0 w-14 text-right font-mono">
+        {new Date(message.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+      </span>
+      <span className={`text-sm font-bold shrink-0 min-w-[64px] ${
+        isUser ? 'text-amber-400' :
+        message.agentId === 'ai-advisor' ? 'text-violet-400' :
+        'text-sky-400'
       }`}>
-        {isUser ? <Shield className="w-5 h-5 text-amber-600" /> :
-         message.agentId === 'ai-advisor' ? <Brain className="w-5 h-5 text-violet-600" /> :
-         <Users className="w-5 h-5 text-sky-600" />}
-      </div>
-
-      {/* 消息卡片 */}
-      <div className={`flex-1 max-w-md rounded-xl border-2 shadow-lg overflow-hidden ${
-        isUser ? 'bg-amber-50 border-amber-200' :
-        message.agentId === 'ai-advisor' ? 'bg-violet-50 border-violet-200' :
-        'bg-white border-slate-200'
-      }`}>
-        {/* 消息头部 */}
-        {!isUser && (
-          <div className={`px-3 py-2 border-b ${
-            message.agentId === 'ai-advisor' ? 'border-violet-200' : 'border-slate-200'
-          }`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className={`text-sm font-bold ${
-                  message.agentId === 'ai-advisor' ? 'text-violet-700' : 'text-sky-700'
-                }`}>{message.agentName}</span>
-                {message.emotion && (
-                  <Badge className={`text-[10px] font-semibold ${getEmotionColor(message.emotion)}`}>
-                    {message.emotion === 'calm' ? '冷静' :
-                     message.emotion === 'urgent' ? '紧急' :
-                     message.emotion === 'worried' ? '担忧' :
-                     message.emotion === 'confident' ? '自信' : '关切'}
-                  </Badge>
-                )}
-              </div>
-              <div className="flex items-center gap-1">
-                {/* 坐标跳转按钮 */}
-                {location && onJumpToLocation && (
-                  <button
-                    onClick={() => onJumpToLocation(location.lat, location.lng, location.zoom || 16, location.label)}
-                    className="flex items-center gap-1 px-2 py-1 rounded-lg bg-sky-100 hover:bg-sky-200 transition-all text-xs text-sky-700 font-medium shadow-sm"
-                    title="点击跳转到对应位置"
-                  >
-                    <MapPin className="w-3 h-3" />
-                    <span className="truncate max-w-[70px]">{location.label || '查看位置'}</span>
-                  </button>
-                )}
-                {/* 跳过打字机按钮 */}
-                {isTyping && !showAll && (
-                  <button
-                    onClick={handleSkipTypewriter}
-                    className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 transition-all text-xs text-slate-600 font-medium"
-                    title="显示全部内容"
-                  >
-                    跳过
-                  </button>
-                )}
-              </div>
-            </div>
-            {message.agentDepartment && (
-              <p className="text-xs text-slate-500 mt-1">{message.agentDepartment}</p>
-            )}
-          </div>
-        )}
-
-        {/* 消息内容 */}
-        <div className="px-3 py-2">
-          {isLongPlan && !showAll ? (
-            <div>
-              <div className="text-xs leading-relaxed text-violet-800">
-                <p className="whitespace-pre-wrap">{getPlanSummary()}</p>
-              </div>
-              <button
-                onClick={() => setShowAll(true)}
-                className="mt-2 flex items-center gap-1 text-xs text-violet-600 hover:text-violet-800 font-medium"
-              >
-                <Maximize2 className="w-3 h-3" />
-                查看完整方案 ({message.message.length} 字)
-              </button>
-            </div>
-          ) : isUser || showAll || !isTyping ? (
-            <p className={`text-sm whitespace-pre-wrap leading-relaxed ${
-              isUser ? 'text-amber-900' :
-              message.agentId === 'ai-advisor' ? 'text-violet-900' :
-              'text-slate-700'
-            }`}>{message.message}</p>
-          ) : (
-            <TypewriterText 
-              text={message.message} 
-              speed={15}
-              onComplete={() => setIsTyping(false)}
-            />
-          )}
-          
-          {/* 行动指示 */}
-          {message.action && !isUser && message.agentId !== 'ai-advisor' && (
-            <div className="mt-2 flex items-center gap-1 text-xs text-emerald-700 font-medium">
-              <Zap className="w-3 h-3" />
-              行动: {message.action}
-            </div>
-          )}
-        </div>
-
-        {/* 消息底部 - 时间戳 */}
-        <div className={`px-3 py-1 border-t text-xs font-medium ${
-          message.agentId === 'ai-advisor' ? 'border-violet-200 text-violet-600' :
-          isUser ? 'border-amber-200 text-amber-600' :
-          'border-slate-200 text-slate-500'
-        }`}>
-          {new Date(message.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-        </div>
-      </div>
+        {isUser ? '我' : message.agentName}
+      </span>
+      {message.emotion && (
+        <span className={`text-base ${emotionColors[message.emotion] || 'text-slate-400'}`}>
+          {message.emotion === 'urgent' ? '🔴' :
+           message.emotion === 'worried' ? '🟠' :
+           message.emotion === 'concerned' ? '🟡' : ''}
+        </span>
+      )}
+      <span className="text-sm text-slate-300 truncate flex-1">
+        {message.message.length > 40 ? message.message.slice(0, 40) + '...' : message.message}
+      </span>
+      {location && (
+        <MapPin className="w-4 h-4 text-slate-500 shrink-0" />
+      )}
     </motion.div>
   );
 }
@@ -716,7 +571,7 @@ function RoleSelectionPanel({
 }
 
 // ==================== 主组件 ====================
-export default function CampaignModeV2({ disasterCase, onComplete, onStateChange, onAdvisorMessage, onOpenAdvisor, externalMessages, onLocationMarkersChange }: CampaignModeV2Props) {
+export default function CampaignModeV2({ disasterCase, onComplete, onStateChange, onAdvisorMessage, onOpenAdvisor, externalMessages, onLocationMarkersChange, onStoryBubblesChange }: CampaignModeV2Props) {
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
   const [phase, setPhase] = useState<CampaignPhase>('intro');
   const [messages, setMessages] = useState<AgentMessage[]>([]);
@@ -746,31 +601,105 @@ export default function CampaignModeV2({ disasterCase, onComplete, onStateChange
     zIndex?: number;
     highlightRadius?: number;
     highlightColor?: string;
+    highlightMessage?: string;
+    effectType?: MarkerEffectType;
+    emotion?: string;
   }>>([]);
+
+  // 地图对话气泡
+  const [storyBubbles, setStoryBubbles] = useState<StoryBubbleData[]>([]);
 
   // 通知父组件定位点变化
   useEffect(() => {
     onLocationMarkersChange?.(locationMarkers);
   }, [locationMarkers, onLocationMarkersChange]);
 
+  // 通知父组件对话气泡变化
+  useEffect(() => {
+    onStoryBubblesChange?.(storyBubbles);
+  }, [storyBubbles, onStoryBubblesChange]);
+
   /**
    * 绝对视觉协议：原子化 focusOnTarget 函数
    * 唯一入口，严禁在业务代码中直接调用 setMapCenter/setMapZoom
    */
-  const focusOnTarget = useCallback((lat: number, lng: number, label: string, zoom?: number) => {
+  const focusOnTarget = useCallback((lat: number, lng: number, label: string, zoom?: number, effectType?: MarkerEffectType, emotion?: string, highlightMessage?: string) => {
     const target = locationToTargetData(lat, lng, label, zoom);
+    if (effectType) (target as any).effectType = effectType;
+    if (emotion) (target as any).emotion = emotion;
+    if (highlightMessage) (target as any).highlightMessage = highlightMessage;
     const result = markerManagerRef.current.focusOnTarget(target);
-    
+
     setLocationMarkers(result.markers);
     setMapCenter(result.center);
     setMapZoom(result.zoom);
-    
+
     logger.info('MapController', 'focusOnTarget', {
       label: target.labelName,
       coordinates: target.coordinates,
       zoom: target.zoomLevel,
     });
   }, []);
+
+  // 将消息转换为地图对话气泡
+  const messageToBubble = useCallback((msg: AgentMessage, isActive: boolean): StoryBubbleData | null => {
+    const loc = (msg as any).location;
+    if (!loc) return null;
+
+    return {
+      id: `bubble-${msg.timestamp}-${Math.random().toString(36).slice(2, 6)}`,
+      lat: loc.lat,
+      lng: loc.lng,
+      agentName: msg.agentName,
+      agentDepartment: msg.agentDepartment,
+      agentEmotion: msg.emotion || 'calm',
+      message: msg.message,
+      action: msg.action,
+      timestamp: msg.timestamp,
+      isActive,
+    };
+  }, []);
+
+  // 根据消息情绪确定标记特效类型
+  const getEffectType = (emotion?: string): MarkerEffectType => {
+    switch (emotion) {
+      case 'urgent': return 'danger_pulse';
+      case 'worried':
+      case 'concerned': return 'breathing_glow';
+      default: return 'breathing_glow';
+    }
+  };
+
+  // 聚焦到消息所在位置并创建气泡
+  const focusOnMessage = useCallback((msg: AgentMessage) => {
+    const loc = (msg as any).location;
+    if (!loc) return;
+
+    const effectType = getEffectType(msg.emotion);
+    const summary = msg.message.slice(0, 100);
+
+    focusOnTarget(
+      loc.lat,
+      loc.lng,
+      loc.label || msg.agentDepartment,
+      loc.zoom || 16,
+      effectType,
+      msg.emotion,
+      summary,
+    );
+
+    const newBubble = messageToBubble(msg, true);
+
+    setStoryBubbles(prev => {
+      const updated = prev.map(b => ({ ...b, isActive: false }));
+      const maxBubbles = 5;
+      const trimmed = updated.length >= maxBubbles ? updated.slice(updated.length - maxBubbles + 1) : updated;
+      if (newBubble) {
+        return [...trimmed, newBubble];
+      }
+      return trimmed;
+    });
+  }, [focusOnTarget, messageToBubble]);
 
 
   // 剧本演绎状态
@@ -811,7 +740,21 @@ export default function CampaignModeV2({ disasterCase, onComplete, onStateChange
       newMessages.forEach(msg => {
         setMessages(prev => [...prev, msg]);
         roundEngineRef.current?.addMessage(msg);
-        
+
+        // 如果有位置信息，创建地图气泡
+        const loc = (msg as any).location;
+        if (loc) {
+          const bubble = messageToBubble(msg, true);
+          if (bubble) {
+            setStoryBubbles(prev => {
+              const updated = prev.map(b => ({ ...b, isActive: false }));
+              const maxBubbles = 5;
+              const trimmed = updated.length >= maxBubbles ? updated.slice(updated.length - maxBubbles + 1) : updated;
+              return [...trimmed, bubble];
+            });
+          }
+        }
+
         // 如果是AI参谋的方案，同时设置为用户方案以激活提交按钮
         if (msg.agentId === 'ai-advisor' && phase === 'plan_selection') {
           setUserPlan(msg.message);
@@ -859,6 +802,7 @@ export default function CampaignModeV2({ disasterCase, onComplete, onStateChange
     setPhase('role_selection');
     setUserPlan('');
     setMessages([]);
+    setStoryBubbles([]);
     setCurrentScriptEventIndex(-1);
   };
 
@@ -888,22 +832,30 @@ export default function CampaignModeV2({ disasterCase, onComplete, onStateChange
     };
   };
 
-  // 执行单个剧本事件（统一使用 focusOnTarget 原子函数）
+  // 执行单个剧本事件（镜头+标记+气泡，统一操作）
   const playScriptEvent = useCallback((event: ScenarioEvent) => {
+    const effectType = getEffectType(event.emotion);
+
     // 镜头移动 + 标记（原子化操作）
     if (event.cameraConfig) {
       focusOnTarget(
         event.cameraConfig.center.lat,
         event.cameraConfig.center.lng,
         event.location?.label || '目标位置',
-        event.cameraConfig.zoom
+        event.cameraConfig.zoom,
+        effectType,
+        event.emotion,
+        event.content?.slice(0, 100),
       );
     } else if (event.location) {
       focusOnTarget(
         event.location.lat,
         event.location.lng,
         event.location.label || '目标位置',
-        event.location.zoom
+        event.location.zoom,
+        effectType,
+        event.emotion,
+        event.content?.slice(0, 100),
       );
     }
 
@@ -912,10 +864,21 @@ export default function CampaignModeV2({ disasterCase, onComplete, onStateChange
     if (msg) {
       setMessages(prev => [...prev, msg]);
       roundEngineRef.current?.addMessage(msg);
+
+      // 创建地图对话气泡
+      const bubble = messageToBubble(msg, true);
+      if (bubble) {
+        setStoryBubbles(prev => {
+          const updated = prev.map(b => ({ ...b, isActive: false }));
+          const maxBubbles = 5;
+          const trimmed = updated.length >= maxBubbles ? updated.slice(updated.length - maxBubbles + 1) : updated;
+          return [...trimmed, bubble];
+        });
+      }
     }
 
     setCurrentScriptEventIndex(prev => prev + 1);
-  }, [focusOnTarget]);
+  }, [focusOnTarget, getEffectType, messageToBubble]);
 
   // 播放整个剧本阶段
   const playScriptPhase = useCallback((phaseIndex: number, onComplete?: () => void) => {
@@ -937,6 +900,7 @@ export default function CampaignModeV2({ disasterCase, onComplete, onStateChange
 
     setIsScriptPlaying(true);
     setMessages([]);
+    setStoryBubbles([]);
     setCurrentScriptEventIndex(-1);
     setCurrentPhaseIndex(phaseIndex);
 
@@ -1016,11 +980,6 @@ export default function CampaignModeV2({ disasterCase, onComplete, onStateChange
       });
     }, 1500);
   };
-
-  // 处理跳转到指定坐标（用户点击定位按钮时调用，统一使用 focusOnTarget）
-  const handleJumpToLocation = useCallback((lat: number, lng: number, zoom: number = 16, label?: string) => {
-    focusOnTarget(lat, lng, label || '定位点', zoom);
-  }, [focusOnTarget]);
 
   // 调用 API 获取单个角色的评估发言
   const fetchAgentEvaluation = useCallback(async (
@@ -1187,6 +1146,7 @@ export default function CampaignModeV2({ disasterCase, onComplete, onStateChange
     // 进入下一阶段
     setPhase('script_playing');
     setMessages([]);
+    setStoryBubbles([]);
     setRoundResult(null);
     setUserPlan('');
     setRoundNumber(1);
@@ -1250,54 +1210,58 @@ export default function CampaignModeV2({ disasterCase, onComplete, onStateChange
         />
       )}
 
-      {/* 可拖拽的应急指挥会议面板（只显示消息） */}
+      {/* 极简通讯日志面板 */}
       {phase !== 'intro' && phase !== 'role_selection' && (
         <DraggablePanel
-          title="应急指挥会议"
-          icon={<Users className="w-5 h-5 text-blue-400" />}
+          title="📋 通讯日志"
+          icon={<MessageSquare className="w-4 h-4 text-blue-400" />}
           defaultPosition={{ x: 0, y: 0 }}
-          defaultSize={{ width: 384, height: '100%' }}
+          defaultSize={{ width: 320, height: '100%' }}
           headerRight={
-            <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+            <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-[10px]">
               {currentPhaseIndex + 1}/{wuhanScenario.length}
             </Badge>
           }
         >
           <div className="flex flex-col h-full">
             {playerRoleLevel && (
-              <div className="px-4 py-2 border-b border-slate-700/50 flex items-center gap-2">
-                <Badge className={
+              <div className="px-3 py-1.5 border-b border-slate-700/50 flex items-center gap-1.5">
+                <Badge className={`text-xs ${
                   playerRoleLevel === 'decision' ? 'bg-amber-500/20 text-amber-400' :
                   playerRoleLevel === 'core' ? 'bg-red-500/20 text-red-400' :
                   'bg-blue-500/20 text-blue-400'
-                }>
-                  {playerRoleLevel === 'decision' ? '决策指挥层' :
-                   playerRoleLevel === 'core' ? '核心执行层' : '协同配合层'}
+                }`}>
+                  {playerRoleLevel === 'decision' ? '指挥层' :
+                   playerRoleLevel === 'core' ? '执行层' : '协同层'}
                 </Badge>
-                <span className="text-xs text-slate-400">{createAgent(playerRoleId || '')?.role.department}</span>
+                <span className="text-xs text-slate-500 truncate">{createAgent(playerRoleId || '')?.role.department}</span>
+                <span className="text-xs text-slate-500 ml-auto">
+                  {storyBubbles.filter(b => b.isActive).length > 0 ? '🔵 活跃中' : ''}
+                </span>
               </div>
             )}
 
             <div
               ref={chatScrollRef}
-              className="flex-1 overflow-y-auto p-4"
+              className="flex-1 overflow-y-auto p-2"
               onWheel={e => e.stopPropagation()}
               style={{ overscrollBehavior: 'contain' }}
             >
+              {messages.length === 0 && (
+                <div className="text-sm text-slate-500 text-center py-4">等待通讯...</div>
+              )}
               {messages.map((msg, idx) => (
-                <AgentMessageBubble
+                <HistoryLogEntry
                   key={idx}
                   message={msg}
                   isUser={msg.agentId === 'user'}
-                  onJumpToLocation={handleJumpToLocation}
+                  onClick={() => focusOnMessage(msg)}
                 />
               ))}
               {isTyping && (
-                <div className="flex items-center gap-2 text-slate-500 text-sm">
-                  <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" />
-                  <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                  <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
-                  AI智能体思考中...
+                <div className="flex items-center gap-2 text-slate-500 text-xs p-2">
+                  <span className="animate-pulse">●</span>
+                  AI思考中...
                 </div>
               )}
               <div ref={messagesEndRef} />

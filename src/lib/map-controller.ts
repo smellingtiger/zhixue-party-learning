@@ -5,6 +5,8 @@
  * 所有地图视角切换必须通过 focusOnTarget 函数，严禁在业务代码中直接调用 setZoom/panTo/addMarker。
  */
 
+export type MarkerEffectType = 'danger_pulse' | 'breathing_glow' | 'floating_bounce' | 'none';
+
 export interface TargetData {
   coordinates: [number, number];     // [lat, lng] 绝对经纬度
   zoomLevel: number;                 // 强制缩放层级
@@ -12,6 +14,9 @@ export interface TargetData {
   markerColor?: string;              // 标记颜色（默认蓝色渐变）
   highlightRadius?: number;          // 高亮锚定半径（米），0表示不绘制
   highlightColor?: string;           // 高亮颜色（默认蓝色）
+  effectType?: MarkerEffectType;     // 标记特效类型
+  emotion?: string;                  // 情绪标签
+  highlightMessage?: string;         // 高亮消息内容
 }
 
 // ==================== 缩放层级绝对标准 ====================
@@ -77,6 +82,9 @@ export interface LocationMarkerData {
   zIndex?: number;
   highlightRadius?: number;
   highlightColor?: string;
+  highlightMessage?: string;
+  effectType?: MarkerEffectType;
+  emotion?: string;
 }
 
 /**
@@ -130,6 +138,9 @@ export class LocationMarkerManager {
       zIndex: 1000 + this.counter,
       highlightRadius: target.highlightRadius,
       highlightColor: target.highlightColor,
+      highlightMessage: target.highlightMessage,
+      effectType: target.effectType,
+      emotion: target.emotion,
     };
 
     this.markers = [newMarker];
@@ -176,6 +187,9 @@ export class LocationMarkerManager {
         zIndex: 1000 + this.counter + index,
         highlightRadius: target.highlightRadius,
         highlightColor: target.highlightColor,
+        highlightMessage: target.highlightMessage,
+        effectType: target.effectType,
+        emotion: target.emotion,
       });
     });
 

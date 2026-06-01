@@ -19,7 +19,7 @@ import {
   type RealDisasterCase,
 } from '@/lib/real-disaster-cases';
 import { wuhanWaterloggingCase } from '@/lib/wuhan-waterlogging-case';
-import type { DangerZone, MapEntity2D, FlowLine, MovingResource } from '@/components/map-view';
+import type { DangerZone, MapEntity2D, FlowLine, MovingResource, StoryBubbleData, MarkerEffectType } from '@/components/map-view';
 import type { CampaignState } from './components/campaign-mode';
 import type { AgentMessage } from '@/lib/ai-agents';
 
@@ -70,12 +70,19 @@ function CrisisSimulationContent() {
     lat: number;
     lng: number;
     label: string;
+    zoom: number;
     offsetLat?: number;
     offsetLng?: number;
     zIndex?: number;
     highlightRadius?: number;
     highlightColor?: string;
+    highlightMessage?: string;
+    effectType?: MarkerEffectType;
+    emotion?: string;
   }>>([]);
+
+  // 地图对话气泡
+  const [storyBubbles, setStoryBubbles] = useState<StoryBubbleData[]>([]);
 
   // AI参谋方案发送到会议的桥接状态
   const [advisorMessages, setAdvisorMessages] = useState<AgentMessage[]>([]);
@@ -179,13 +186,22 @@ function CrisisSimulationContent() {
     lat: number;
     lng: number;
     label: string;
+    zoom: number;
     offsetLat?: number;
     offsetLng?: number;
     zIndex?: number;
     highlightRadius?: number;
     highlightColor?: string;
+    highlightMessage?: string;
+    effectType?: MarkerEffectType;
+    emotion?: string;
   }>) => {
     setLocationMarkers(markers);
+  }, []);
+
+  // 处理对话气泡变化
+  const handleStoryBubblesChange = useCallback((bubbles: StoryBubbleData[]) => {
+    setStoryBubbles(bubbles);
   }, []);
 
   return (
@@ -266,6 +282,7 @@ function CrisisSimulationContent() {
             flowLines={campaignFlowLines}
             movingResources={campaignMovingResources}
             locationMarkers={locationMarkers}
+            storyBubbles={storyBubbles}
           />
         </div>
 
@@ -279,6 +296,7 @@ function CrisisSimulationContent() {
               onOpenAdvisor={() => setShowCopilot(true)}
               externalMessages={advisorMessages}
               onLocationMarkersChange={handleLocationMarkersChange}
+              onStoryBubblesChange={handleStoryBubblesChange}
             />
           ) : (
             <CampaignMode

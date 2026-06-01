@@ -62,37 +62,6 @@ interface CampaignModeProps {
   onStateChange?: (state: CampaignState) => void;
 }
 
-// 打字机效果组件
-function TypewriterText({ text, speed = 50 }: { text: string; speed?: number }) {
-  const [displayText, setDisplayText] = useState('');
-  const [isComplete, setIsComplete] = useState(false);
-
-  useEffect(() => {
-    setDisplayText('');
-    setIsComplete(false);
-    let index = 0;
-
-    const timer = setInterval(() => {
-      if (index < text.length) {
-        setDisplayText(text.slice(0, index + 1));
-        index++;
-      } else {
-        setIsComplete(true);
-        clearInterval(timer);
-      }
-    }, speed);
-
-    return () => clearInterval(timer);
-  }, [text, speed]);
-
-  return (
-    <span className="font-mono">
-      {displayText}
-      {!isComplete && <span className="animate-pulse">▋</span>}
-    </span>
-  );
-}
-
 // 角色行动气泡组件
 function RoleActionBubble({ actions }: { actions: RoleAction[] }) {
   const [visibleActions, setVisibleActions] = useState<RoleAction[]>([]);
@@ -425,7 +394,7 @@ export default function CampaignMode({ disasterCase, onComplete, onStateChange }
                 <span className="text-xs text-slate-500">决策点 {currentDecisionIndex + 1}/{disasterCase.decisionPoints.length}</span>
               </div>
               <p className="text-sm text-slate-200 leading-relaxed">
-                <TypewriterText text={narration} speed={30} />
+                {narration}
               </p>
             </div>
           </motion.div>
