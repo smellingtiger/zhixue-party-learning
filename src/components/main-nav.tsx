@@ -17,9 +17,7 @@ import {
   ChevronUp,
   Play,
   LogOut,
-  ShieldAlert,
-  Mic,
-  Bot
+  ShieldAlert
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -34,9 +32,7 @@ const navItems = [
   { id: 'aiclass', name: 'AI智能组班', href: '/training-candidates', icon: Users },
   { id: 'knowledge', name: '知识库', href: '/knowledge-base', icon: Library },
   { id: 'ai-profile', name: 'AI画像', href: '/ai-profile', icon: PenTool },
-  { id: 'speech-writer', name: '发言稿编写', href: '/speech-writer', icon: Mic },
   { id: 'safety', name: '安全应急培训', href: '/safety', icon: ShieldAlert },
-  { id: 'lesson-prep', name: '备课智能体', href: '/lesson-prep', icon: Bot },
 ];
 
 export function MainNav() {
@@ -140,6 +136,28 @@ export function MainNav() {
           </div>
           
           <div className="flex items-center gap-4">
+            {/* 收起状态：导航栏右侧显示搜索框 */}
+            <AnimatePresence>
+              {!isExpanded && showExpandedContent && (
+                <motion.div
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 'auto' }}
+                  exit={{ opacity: 0, width: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="relative overflow-hidden"
+                >
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
+                  <input 
+                    type="text"
+                    placeholder="搜索内容..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-4 py-2 w-48 lg:w-64 rounded-lg text-sm bg-white/20 border border-white/30 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
             <Button 
               variant="ghost" 
               size="icon" 

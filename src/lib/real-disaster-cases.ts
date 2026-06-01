@@ -1,13 +1,13 @@
 /**
  * 真实历史灾害案例数据库
  * 基于公开报道和官方通报整理
- * 用于应急哨兵系统的真实场景推演
+ * 用于危机模拟推演系统的真实场景训练
  */
 
 export interface RealFacility {
   id: string;
   name: string;
-  type: 'hospital' | 'fire_station' | 'police_station' | 'shelter' | 'command_center' | 'school' | 'army_base' | 'airport';
+  type: 'hospital' | 'fire_station' | 'police_station' | 'shelter' | 'command_center' | 'school' | 'army_base' | 'airport' | 'transport';
   lat: number;
   lng: number;
   capacity?: string;
@@ -17,12 +17,13 @@ export interface RealFacility {
 export interface RescueForce {
   id: string;
   name: string;
-  type: 'fire_brigade' | 'armed_police' | 'army' | 'militia' | 'medical_team' | 'engineering' | 'volunteer';
+  type: 'fire_brigade' | 'armed_police' | 'army' | 'militia' | 'medical_team' | 'engineering' | 'volunteer' | '消防' | '武警' | '应急' | '医疗';
   lat: number;
   lng: number;
   arrivalTime?: string;
   description: string;
   strength?: string;
+  equipment?: string[];
 }
 
 export interface DecisionPoint {
@@ -38,15 +39,36 @@ export interface TimelineEvent {
   source?: string;
 }
 
+// 等待期剧本片段（用于填充决策间隔）
+export interface ScriptScene {
+  id: string;
+  title: string;
+  duration: number; // 秒
+  triggerAfterDecision: number; // 在第几个决策后触发，-1表示推演开始时
+  lines: ScriptLine[];
+  backgroundImage?: string; // 背景图URL
+  ambientSound?: string; // 环境音效
+}
+
+export interface ScriptLine {
+  speaker: string;
+  text: string;
+  delay: number; // 该行出现前的延迟（秒）
+  highlight?: boolean; // 是否高亮
+  soundEffect?: string; // 音效
+}
+
 export interface RealDisasterCase {
   id: string;
   name: string;
-  type: 'fire' | 'flood' | 'earthquake' | 'typhoon' | 'chemical' | 'explosion' | 'forest_fire';
+  type: 'fire' | 'flood' | 'earthquake' | 'typhoon' | 'chemical' | 'explosion' | 'forest_fire' | '内涝';
   date: string;
+  level?: string;
   location: {
     name: string;
     lat: number;
     lng: number;
+    address?: string;
   };
   severity: 'low' | 'medium' | 'high' | 'critical';
   casualties: {
@@ -66,6 +88,26 @@ export interface RealDisasterCase {
     center: { lat: number; lng: number };
     radius: number;
     level: 'high' | 'medium' | 'low';
+  }[];
+  // 等待期剧本
+  scriptScenes?: ScriptScene[];
+  weather?: {
+    temperature?: number;
+    windSpeed?: number;
+    windDirection?: string;
+    humidity?: number;
+    visibility?: number;
+  };
+  environmentalRisks?: {
+    type: string;
+    description: string;
+    probability: string;
+    impact: string;
+  }[];
+  mediaReports?: {
+    time: string;
+    source: string;
+    content: string;
   }[];
 }
 
@@ -157,6 +199,56 @@ export const tianjinExplosion: RealDisasterCase = {
     '企业瞒报、谎报危险品储存情况',
     '应急响应机制不够完善，初期决策困难',
     '需要建立危化品事故专业处置队伍',
+  ],
+  scriptScenes: [
+    {
+      id: 'scene-opening',
+      title: '深夜的警报',
+      duration: 20,
+      triggerAfterDecision: -1,
+      lines: [
+        { speaker: '系统', text: '2015年8月12日 23:30', delay: 0, highlight: true },
+        { speaker: '值班员', text: '（电话铃声）天津港消防支队，请讲。', delay: 2 },
+        { speaker: '报警人', text: '瑞海公司仓库着火了！火势很大，里面有化学品！', delay: 4, highlight: true },
+        { speaker: '值班员', text: '明白，立即调派最近的消防中队前往处置。', delay: 7 },
+        { speaker: '系统', text: '【23:34】第一次爆炸发生，相当于3吨TNT', delay: 10, highlight: true },
+        { speaker: '现场', text: '（巨大的爆炸声，玻璃碎裂声）', delay: 12, soundEffect: 'explosion' },
+        { speaker: '系统', text: '【23:34:40】第二次爆炸，相当于21吨TNT', delay: 14, highlight: true },
+        { speaker: '系统', text: '周边3公里建筑玻璃全部震碎，现场通讯中断', delay: 17 },
+      ],
+    },
+    {
+      id: 'scene-command-center',
+      title: '指挥中心的凌晨',
+      duration: 25,
+      triggerAfterDecision: 0,
+      lines: [
+        { speaker: '系统', text: '凌晨1:00 天津市应急指挥中心', delay: 0, highlight: true },
+        { speaker: '值班长', text: '报告！天津港发生特大爆炸，已确认有消防员失联！', delay: 2, highlight: true },
+        { speaker: '副市长', text: '立即启动一级响应，通知所有相关部门负责人到场！', delay: 5 },
+        { speaker: '消防指挥', text: '现场火势失控，仓库区还有大量危化品，存在二次爆炸风险。', delay: 8 },
+        { speaker: '安监部门', text: '瑞海公司申报的货物清单与实际严重不符，我们不清楚里面到底有什么。', delay: 12, highlight: true },
+        { speaker: '副市长', text: '不管里面有什么，救人是第一位的。但必须确保救援人员安全。', delay: 16 },
+        { speaker: '系统', text: '【情报】北京军区某防化部队已接到命令，正在集结', delay: 20 },
+        { speaker: '秘书', text: '领导，媒体已经开始报道，网络上视频已经传开了。', delay: 23 },
+      ],
+    },
+    {
+      id: 'scene-media-storm',
+      title: '社交媒体风暴',
+      duration: 20,
+      triggerAfterDecision: 2,
+      lines: [
+        { speaker: '系统', text: '爆炸2小时后 社交媒体态势', delay: 0, highlight: true },
+        { speaker: '微博热搜', text: '#天津爆炸# 阅读量突破1亿', delay: 2 },
+        { speaker: '网友视频', text: '（手机拍摄：蘑菇云从地面升起，冲击波横扫街道）', delay: 4 },
+        { speaker: '网友评论', text: '这到底是什么爆炸？威力这么大？', delay: 7 },
+        { speaker: '央视记者', text: '我们现在距离爆炸中心约2公里，仍能感受到热浪...', delay: 10 },
+        { speaker: '系统', text: '【上级来电】要求1小时内召开新闻发布会', delay: 13, highlight: true },
+        { speaker: '宣传部', text: '目前信息还不完整，发布什么内容？怎么回应？', delay: 16 },
+        { speaker: '系统', text: '舆情指数正在快速上升...', delay: 18 },
+      ],
+    },
   ],
 };
 
@@ -580,6 +672,6 @@ export function caseToMapEntities(caseData: RealDisasterCase): any[] {
 }
 
 // 获取危险区域配置
-export function getDangerZones(caseData: RealDisasterCase): { center: { lat: number; lng: number }; radius: number; level: string }[] {
+export function getDangerZones(caseData: RealDisasterCase): { center: { lat: number; lng: number }; radius: number; level: 'high' | 'medium' | 'low' }[] {
   return caseData.dangerZones || [];
 }

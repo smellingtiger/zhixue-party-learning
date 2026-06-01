@@ -63,20 +63,10 @@ export default function DigitalAvatar({ chapterContents, currentChapterIndex, au
   const chapterId = CHAPTER_IDS[currentChapterIndex] || `chapter${currentChapterIndex}`;
   const audioFilePrefix = courseName && (courseName.includes('乡村振兴') || courseName.includes('rural')) ? 'rural-' : '';
 
-  const audioDirMap: Record<string, string> = {
-    '9': '/audio',
-    '10': '/audio/typhoon',
-    '11': '/audio/typhoon-command',
-    '12': '/audio/earthquake-command',
-    '13': '/audio/earthquake',
-    '14': '/audio/forest-fire',
-    '15': '/audio/forest-fire',
-    '17': '/audio/cold-wave',
-  };
-
+  // Determine audio URL strategy: page-based (e.g., 10-0-0.mp3) or chapter-based (e.g., preface.mp3)
   const usePageBasedAudio = !!courseId;
   const audioDir = usePageBasedAudio
-    ? (audioDirMap[courseId || ''] || `/audio/${courseId || 'unknown'}`)
+    ? (courseId === '11' ? '/audio/typhoon-command' : '/audio/typhoon')
     : '/audio';
   const audioKey = usePageBasedAudio
     ? `${courseId}-${currentChapterIndex}-${currentPageIndex}`

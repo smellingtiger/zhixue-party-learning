@@ -117,54 +117,21 @@ def load_nas_mapping():
 
 # 加载应急课程远程视频映射
 _emergency_video_cache = None
-_emergency_video_by_name_cache = None
-_emergency_video_by_cleaned_name_cache = None
 def load_emergency_video_mapping():
-    global _emergency_video_cache, _emergency_video_by_name_cache, _emergency_video_by_cleaned_name_cache
+    global _emergency_video_cache
     if _emergency_video_cache is None:
         if EMERGENCY_VIDEO_MAPPING_FILE.exists():
             try:
                 data = json.loads(EMERGENCY_VIDEO_MAPPING_FILE.read_text(encoding="utf-8"))
                 _emergency_video_cache = {}
-                _emergency_video_by_name_cache = {}
-                _emergency_video_by_cleaned_name_cache = {}
                 for item in data.get("matched", []):
-                    code = item["course_code"]
-                    _emergency_video_cache[code] = item
-                    name = item.get("chinese_name", "")
-                    if name:
-                        _emergency_video_by_name_cache[name] = item
-                        # 同时建立清洗后名称的索引（解决数字前缀导致匹配失败的问题）
-                        cleaned = clean_course_title(name)
-                        if cleaned:
-                            _emergency_video_by_cleaned_name_cache[cleaned] = item
+                    _emergency_video_cache[item["course_code"]] = item
                 print(f"已加载 {len(_emergency_video_cache)} 个课程的远程视频URL")
-                print(f"  原始名称索引: {len(_emergency_video_by_name_cache)} 个")
-                print(f"  清洗后名称索引: {len(_emergency_video_by_cleaned_name_cache)} 个")
             except:
                 _emergency_video_cache = {}
-                _emergency_video_by_name_cache = {}
-                _emergency_video_by_cleaned_name_cache = {}
         else:
             _emergency_video_cache = {}
-            _emergency_video_by_name_cache = {}
-            _emergency_video_by_cleaned_name_cache = {}
     return _emergency_video_cache
-
-def get_emergency_video_by_name(name: str):
-    """按中文名查找应急视频（支持精确匹配和清洗后名称匹配）"""
-    mapping = load_emergency_video_mapping()
-    # 先尝试精确匹配原始名称
-    if _emergency_video_by_name_cache is not None:
-        result = _emergency_video_by_name_cache.get(name)
-        if result:
-            return result
-    # 再尝试匹配清洗后的名称（去除数字前缀等）
-    if _emergency_video_by_cleaned_name_cache is not None:
-        result = _emergency_video_by_cleaned_name_cache.get(name)
-        if result:
-            return result
-    return None
 
 app = FastAPI(title=SERVER_TITLE, version="1.0.0")
 
@@ -201,18 +168,6 @@ class CourseDoc:
             pass
         self._raw_code = self.filepath.stem
         return self._raw_code
-
-    def _get_title_from_txt(self) -> str:
-        """从TXT文件中获取课程名称"""
-        try:
-            text = self.filepath.read_text(encoding="utf-8")
-            for line in text.split("\n")[:6]:
-                m = re.search(r"【课程名称】(.+)", line)
-                if m:
-                    return m.group(1).strip()
-        except Exception:
-            pass
-        return ""
 
     def _load_processed(self) -> Optional[dict]:
         """尝试加载已处理的JSON文件（包含清洗+分段+标题）"""
@@ -273,11 +228,6 @@ class CourseDoc:
             current_title = self._parsed.get("title", "")
             if current_title and current_title in name_mapping:
                 self._parsed["title"] = name_mapping[current_title]
-            elif current_title and not re.search(r'[\u4e00-\u9fff]', current_title):
-                # 如果processed的title是编码（不含中文），尝试从TXT文件获取中文名称
-                txt_name = self._get_title_from_txt()
-                if txt_name:
-                    self._parsed["title"] = txt_name
             
             # 清洗标题：删除数字前缀，确保第一个字是中文
             self._parsed["title"] = clean_course_title(self._parsed.get("title", ""))
@@ -479,18 +429,9 @@ class CourseDoc:
 
     def to_dict(self):
         course_code = self.get_course_code()
-        course_title = self.title
-        
-        has_video = False
-        
-        # 1. 先按编码匹配NAS映射（党政课程主要来源）
         nas_mapping = load_nas_mapping()
-        if course_code in nas_mapping:
-            has_video = True
-        
-        # 2. 如果没有NAS映射，尝试按中文名匹配应急视频映射（党政和应急课程通用）
-        if not has_video:
-            has_video = get_emergency_video_by_name(course_title) is not None
+        emergency_map = load_emergency_video_mapping()
+        has_video = course_code in nas_mapping or course_code in emergency_map
         
         return {
             "id": self.id,
@@ -565,30 +506,16 @@ def should_filter_emergency_doc(filepath: Path) -> bool:
     if course_code in name_mapping:
         return False
     
-    # 检查是否有视频链接（按中文名匹配）
-    if get_emergency_video_by_name(course_code) is not None:
+    # 检查是否有视频链接
+    emergency_map = load_emergency_video_mapping()
+    if course_code in emergency_map:
         return False
     
     # 无中文名映射且无视频链接，应该过滤
     return True
 
 
-# 文档列表缓存
-_docs_cache = {}  # {"party": [...], "emergency": [...], "all": [...]}
-_docs_cache_time = None
-CACHE_TTL_SECONDS = 300  # 5分钟缓存
-
 def scan_all_docs(knowledge_base: str = None) -> list[CourseDoc]:
-    global _docs_cache, _docs_cache_time
-    
-    # 检查缓存是否有效
-    now = datetime.now()
-    if _docs_cache_time and (now - _docs_cache_time).total_seconds() < CACHE_TTL_SECONDS:
-        cache_key = knowledge_base if knowledge_base else "all"
-        if cache_key in _docs_cache:
-            return _docs_cache[cache_key]
-    
-    # 缓存过期或不存在，重新扫描
     docs = []
     bases_to_scan = KNOWLEDGE_BASES if knowledge_base is None else {knowledge_base: KNOWLEDGE_BASES.get(knowledge_base, {"dir": None})}
 
@@ -603,22 +530,11 @@ def scan_all_docs(knowledge_base: str = None) -> list[CourseDoc]:
                 continue
             docs.append(CourseDoc(f, knowledge_base=kb_key))
 
-    # 更新缓存
-    _docs_cache_time = now
-    if knowledge_base:
-        _docs_cache[knowledge_base] = docs
-    else:
-        _docs_cache["all"] = docs
-        # 同时缓存单个知识库
-        for kb_key in KNOWLEDGE_BASES:
-            _docs_cache[kb_key] = [d for d in docs if d.knowledge_base == kb_key]
-
     return docs
 
 
 def get_doc_by_id(doc_id: str) -> Optional[CourseDoc]:
-    all_docs = scan_all_docs()  # 使用缓存
-    for d in all_docs:
+    for d in scan_all_docs():
         if d.id == doc_id:
             return d
     return None
@@ -641,9 +557,6 @@ async def list_files(
 ):
     docs = scan_all_docs(knowledge_base)
 
-    # 分类统计基于全部文档（缓存），在筛选前计算
-    categories, category_counts = get_categories(docs)
-
     if category:
         docs = [d for d in docs if d.category == category]
 
@@ -657,6 +570,10 @@ async def list_files(
         docs.sort(key=lambda d: d.size, reverse=True)
     else:
         docs.sort(key=lambda d: d.title)
+
+    # 分类统计始终基于当前知识库的全部文档
+    all_docs = scan_all_docs(knowledge_base)
+    categories, category_counts = get_categories(all_docs)
 
     return {
         "files": [d.to_dict() for d in docs],
@@ -744,8 +661,15 @@ async def get_doc_video(doc_id: str):
             "nas_path": item["nas_path"],
         }
     
-    # 2. 检查应急课程远程视频映射（按中文名查找）
-    emergency_item = get_emergency_video_by_name(course_title)
+    # 2. 检查应急课程远程视频映射（按编码或中文名查找）
+    emergency_map = load_emergency_video_mapping()
+    emergency_item = emergency_map.get(course_code)
+    if not emergency_item:
+        # 尝试用中文名反向查找
+        for code, item in emergency_map.items():
+            if item.get("chinese_name") == course_title:
+                emergency_item = item
+                break
     
     if emergency_item:
         return {
@@ -889,7 +813,7 @@ async def server_info(knowledge_base: Optional[str] = Query(None)):
 
     cache_stats = video_cache.get_cache_stats()
 
-    # 统计各知识库的文件数（使用缓存，不重复扫描）
+    # 统计各知识库的文件数
     kb_stats = {}
     for kb_key in KNOWLEDGE_BASES:
         kb_docs = scan_all_docs(kb_key)
@@ -917,15 +841,6 @@ async def server_info(knowledge_base: Optional[str] = Query(None)):
 async def cache_stats():
     """视频缓存状态"""
     return video_cache.get_cache_stats()
-
-
-@app.post("/api/cache/refresh")
-async def refresh_cache():
-    """刷新文档列表缓存（上传新文件后调用）"""
-    global _docs_cache, _docs_cache_time
-    _docs_cache = {}
-    _docs_cache_time = None
-    return {"status": "ok", "message": "缓存已刷新"}
 
 
 HTML_TEMPLATE = r"""<!DOCTYPE html>
@@ -978,7 +893,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Serif SC',san
 .course-grid-card-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .course-grid-card-meta{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--text-muted)}
 .course-grid-card-badge{padding:2px 8px;border-radius:4px;background:var(--bg);color:var(--text-muted)}
-.video-badge{background:#dcfce7;color:#16a34a;font-weight:600}
 .course-grid-empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted)}
 .sort-btn{padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:none;font-size:13px;color:var(--text-muted);cursor:pointer;transition:.15s}
 .sort-btn:hover{border-color:var(--primary);color:var(--primary)}
@@ -1135,12 +1049,13 @@ async function loadInfo(){
 
 async function switchKB(kb,btn){
   curKB=kb;
+  totalAll=0;
   var btns=document.querySelectorAll('.kb-tab');
   btns.forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
   curCat=''; curId=null;
-  await loadInfo();
-  await loadFiles();
+  showWelcome();
+  await Promise.all([loadFiles(), loadInfo()]);
   showWelcome();
 }
 

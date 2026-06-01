@@ -85,17 +85,11 @@ export async function loadCourseScript(courseName?: string, courseId?: string): 
       scriptFile = '/course-scripts/typhoon-command-script.json';
     } else if (courseName?.includes('地震应急处置') || courseName?.includes('地震岗位')) {
       scriptFile = '/course-scripts/earthquake-command-script.json';
-    } else if (courseName?.includes('森林火灾') && courseName?.includes('科普')) {
-      scriptFile = '/course-scripts/forest-fire-knowledge-script.json';
     } else if (courseName?.includes('森林火灾')) {
       scriptFile = '/course-scripts/forest-fire-command-script.json';
     } else if (courseName?.includes('寒潮岗位') || courseName?.includes('寒潮指挥')) {
       scriptFile = '/course-scripts/cold-wave-command-script.json';
-    } else if (courseName?.includes('寒潮') && courseName?.includes('科普')) {
-      scriptFile = '/course-scripts/cold-wave-knowledge-script.json';
-    } else if (courseName?.includes('地震') && courseName?.includes('科普')) {
-      scriptFile = '/course-scripts/earthquake-knowledge-script.json';
-    } else if ((courseName?.includes('台风') || courseName?.includes('防灾减灾知识科普')) && !courseName?.includes('地震')) {
+    } else if (courseName?.includes('台风') || courseName?.includes('防灾减灾知识科普')) {
       scriptFile = '/course-scripts/typhoon-script.json';
     } else if (courseName?.includes('具身智能')) {
       scriptFile = '/course-scripts/script.json';

@@ -6,92 +6,40 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import {
   Shield,
+  Map,
   BookOpen,
   Users,
-  Route,
-  CheckCircle,
-  Truck,
+  MessageSquare,
   ArrowRight,
   AlertTriangle,
   X,
-  Cloud,
-  Flame,
-  Activity,
-  Lock,
+  Zap,
 } from 'lucide-react';
 
-const disasterCategories = [
-  {
-    id: 'natural',
-    name: '自然灾害',
-    icon: Cloud,
-    color: 'from-blue-600 to-cyan-500',
-    border: 'border-blue-400/60',
-    bg: 'bg-blue-500/20',
-    disasters: [
-      { id: 'typhoon', name: '台风', image: '/knowledge-images/台风.png', description: '台风防御与应对' },
-      { id: 'flood', name: '洪涝', image: '/knowledge-images/内涝.png', description: '洪涝灾害防御' },
-      { id: 'earthquake', name: '地震', image: '/knowledge-images/地震.png', description: '地震应急避险知识' },
-      { id: 'landslide', name: '滑坡泥石流', image: '/knowledge-images/滑坡泥石流.jpg', description: '地质灾害防范' },
-      { id: 'cold-wave', name: '寒潮', image: '/knowledge-images/寒潮.png', description: '寒潮防护与应对' },
-      { id: 'drought', name: '干旱', image: '/knowledge-images/干旱.jpg', description: '干旱灾害应对' },
-      { id: 'forest-fire', name: '森林火灾', image: '/knowledge-images/火灾.png', description: '森林火灾预防与扑救' },
-    ],
-  },
-  {
-    id: 'accident',
-    name: '事故灾难',
-    icon: Flame,
-    color: 'from-orange-600 to-red-500',
-    border: 'border-orange-400/60',
-    bg: 'bg-orange-500/20',
-    disasters: [
-      { id: 'fire', name: '火灾', image: '/knowledge-images/火灾事故.jpg', description: '火灾预防与逃生' },
-      { id: 'chemical', name: '危化品事故', image: '/knowledge-images/危险品事故.jpg', description: '危险化学品安全' },
-      { id: 'traffic', name: '交通事故', image: '/knowledge-images/交通事故.png', description: '交通安全应急' },
-      { id: 'mine', name: '矿山事故', image: '/knowledge-images/矿山事故.png', description: '矿山安全应急' },
-      { id: 'construction', name: '建筑坍塌', image: '/knowledge-images/建筑坍塌.png', description: '建筑施工安全' },
-      { id: 'power', name: '大面积停电', image: '/knowledge-images/大面积停电.png', description: '电力应急响应' },
-      { id: 'pollution', name: '环境污染', image: '/knowledge-images/环境污染.png', description: '环境污染应急' },
-    ],
-  },
-  {
-    id: 'public-health',
-    name: '公共卫生事件',
-    icon: Activity,
-    color: 'from-red-600 to-pink-500',
-    border: 'border-red-400/60',
-    bg: 'bg-red-500/20',
-    disasters: [
-      { id: 'epidemic', name: '传染病疫情', image: '/knowledge-images/传染病疫情.png', description: '传染病防控' },
-      { id: 'food-safety', name: '食品安全', image: '/knowledge-images/食品安全.png', description: '食品安全应急' },
-      { id: 'animal-epidemic', name: '动物疫情', image: '/knowledge-images/动物疫情.png', description: '动物疫情防控' },
-      { id: 'occupational', name: '职业中毒', image: '/knowledge-images/职业中毒.png', description: '职业卫生安全' },
-      { id: 'drug-safety', name: '药品安全', image: '/knowledge-images/药品安全.png', description: '药品安全应急' },
-    ],
-  },
-  {
-    id: 'social-security',
-    name: '社会安全事件',
-    icon: Lock,
-    color: 'from-purple-600 to-indigo-500',
-    border: 'border-purple-400/60',
-    bg: 'bg-purple-500/20',
-    disasters: [
-      { id: 'terrorist', name: '恐怖袭击', image: '/knowledge-images/恐怖袭击.png', description: '反恐应急处置' },
-      { id: 'cyber-attack', name: '网络安全', image: '/knowledge-images/网络安全.png', description: '网络安全事件' },
-      { id: 'stampede', name: '踩踏事故', image: '/knowledge-images/踩踏事件.png', description: '公共场所安全' },
-      { id: 'economic', name: '经济安全', image: '/knowledge-images/经济安全.png', description: '经济风险防范' },
-    ],
-  },
+const disasterTypes = [
+  { id: 'waterlogging', name: '内涝', image: '/knowledge-images/内涝.png', description: '城市内涝防灾减灾' },
+  { id: 'typhoon', name: '台风', image: '/knowledge-images/台风.png', description: '台风防御与应对' },
+  { id: 'earthquake', name: '地震', image: '/knowledge-images/地震.png', description: '地震应急避险知识' },
+  { id: 'forest-fire', name: '森林火灾', image: '/knowledge-images/火灾.png', description: '森林火灾预防与扑救' },
+  { id: 'cold-wave', name: '寒潮', image: '/knowledge-images/寒潮.png', description: '寒潮防护与应对' },
 ];
-
-const allDisasters = disasterCategories.flatMap(cat => cat.disasters.map(d => ({ ...d, category: cat.id, categoryName: cat.name })));
 
 const courseCards = (selectedDisasterId: string) => [
   {
+    id: 'knowledge-graph',
+    title: '知识图谱',
+    description: '系统化的安全知识体系图谱，全面了解各类灾害的成因、影响与应对措施',
+    icon: Map,
+    color: 'from-blue-600 via-blue-500 to-cyan-500',
+    hoverShadow: 'hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]',
+    hoverBorder: 'hover:border-blue-300/80',
+    iconBg: 'bg-blue-500/40',
+    iconColor: 'text-blue-200',
+    href: '/safety/disaster-graph',
+  },
+  {
     id: 'knowledge-intro',
-    title: '通识教育',
+    title: '知识科普介绍课程',
     description: '防灾减灾科普知识，帮助您掌握基本的防灾理论与实操技能',
     icon: BookOpen,
     color: 'from-emerald-600 via-emerald-500 to-green-500',
@@ -112,7 +60,7 @@ const courseCards = (selectedDisasterId: string) => [
   },
   {
     id: 'command-course',
-    title: '岗位指挥',
+    title: '岗位指挥课程',
     description: '针对各岗位的应急指挥培训，提升灾情应对的组织协调与决策能力',
     icon: Users,
     color: 'from-purple-600 via-purple-500 to-pink-500',
@@ -132,67 +80,28 @@ const courseCards = (selectedDisasterId: string) => [
     })(),
   },
   {
-    id: 'dispatch-plan',
-    title: '调度方案',
-    description: '科学制定应急调度方案，合理调配资源，确保救援工作高效有序进行',
-    icon: Route,
-    color: 'from-blue-600 via-blue-500 to-cyan-500',
-    hoverShadow: 'hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]',
-    hoverBorder: 'hover:border-blue-300/80',
-    iconBg: 'bg-blue-500/40',
-    iconColor: 'text-blue-200',
-    href: (() => {
-      const paths: Record<string, string> = {
-        flood: '/safety/dispatch-plan?disaster=flood',
-        typhoon: '/safety/dispatch-plan?disaster=typhoon',
-        earthquake: '/safety/dispatch-plan?disaster=earthquake',
-        'forest-fire': '/safety/dispatch-plan?disaster=forest-fire',
-        'cold-wave': '/safety/dispatch-plan?disaster=cold-wave',
-      };
-      return paths[selectedDisasterId] || '/safety/dispatch-plan?disaster=flood';
-    })(),
-  },
-  {
-    id: 'decision-response',
-    title: '决策响应',
-    description: '基于灾情分析和态势感知，快速响应并做出科学决策，有效控制灾情发展',
-    icon: CheckCircle,
+    id: 'quiz-interactive',
+    title: '岗位答题互动',
+    description: '通过互动答题检验学习成果，巩固应急知识，提升实战应对水平',
+    icon: MessageSquare,
     color: 'from-orange-600/80 via-orange-500/70 to-yellow-500/70',
     hoverShadow: 'hover:shadow-[0_0_30px_rgba(249,115,22,0.3)]',
     hoverBorder: 'hover:border-orange-300/60',
     iconBg: 'bg-orange-500/30',
     iconColor: 'text-orange-300',
-    href: (() => {
-      const paths: Record<string, string> = {
-        flood: '/safety/decision-response?disaster=flood',
-        typhoon: '/safety/decision-response?disaster=typhoon',
-        earthquake: '/safety/decision-response?disaster=earthquake',
-        'forest-fire': '/safety/decision-response?disaster=forest-fire',
-        'cold-wave': '/safety/decision-response?disaster=cold-wave',
-      };
-      return paths[selectedDisasterId] || '/safety/decision-response?disaster=flood';
-    })(),
+    href: '/safety/quiz-interactive',
   },
   {
-    id: 'logistics-support',
-    title: '后勤保障',
-    description: '全面统筹物资储备、运输保障与后勤服务，为应急救援提供坚实后盾',
-    icon: Truck,
-    color: 'from-red-600/90 via-orange-500/80 to-yellow-500/70',
-    hoverShadow: 'hover:shadow-[0_0_30px_rgba(248,113,113,0.4)]',
-    hoverBorder: 'hover:border-red-300/60',
-    iconBg: 'bg-red-500/30',
-    iconColor: 'text-red-200',
-    href: (() => {
-      const paths: Record<string, string> = {
-        flood: '/safety/logistics-support?disaster=flood',
-        typhoon: '/safety/logistics-support?disaster=typhoon',
-        earthquake: '/safety/logistics-support?disaster=earthquake',
-        'forest-fire': '/safety/logistics-support?disaster=forest-fire',
-        'cold-wave': '/safety/logistics-support?disaster=cold-wave',
-      };
-      return paths[selectedDisasterId] || '/safety/logistics-support?disaster=flood';
-    })(),
+    id: 'sentinel',
+    title: '危机模拟推演',
+    description: '基于真实灾害案例的沉浸式决策训练系统 · 态势感知 + 多路径推演 + 智能复盘',
+    icon: Zap,
+    color: 'from-blue-600/90 via-indigo-500/80 to-violet-500/70',
+    hoverShadow: 'hover:shadow-[0_0_30px_rgba(99,102,241,0.4)]',
+    hoverBorder: 'hover:border-indigo-300/60',
+    iconBg: 'bg-indigo-500/30',
+    iconColor: 'text-indigo-200',
+    href: '/safety/sentinel',
   },
 ];
 
@@ -200,12 +109,25 @@ export default function SafetyPage() {
   const router = useRouter();
   const [selectedDisaster, setSelectedDisaster] = useState('');
   const [showDisasterPrompt, setShowDisasterPrompt] = useState(false);
-  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
-  const selectedDisasterData = allDisasters.find(d => d.id === selectedDisaster);
+  const selectedDisasterData = disasterTypes.find(d => d.id === selectedDisaster);
 
   const handleNavigateWithDisaster = (href: string) => {
-    router.push(href);
+    const disasterName = disasterTypes.find(d => d.id === selectedDisaster)?.name || '地震';
+    const disasterId = selectedDisaster || 'flood';
+
+    if (href === '/safety/disaster-graph') {
+      localStorage.setItem('selectedDisaster', disasterName);
+      router.push(`${href}?disaster=${encodeURIComponent(disasterName)}`);
+    } else if (href === '/safety/quiz-interactive') {
+      localStorage.setItem('selectedDisaster', disasterName);
+      router.push(`${href}?disaster=${encodeURIComponent(disasterName)}`);
+    } else if (href === '/safety/sentinel') {
+      localStorage.setItem('selectedDisaster', disasterName);
+      router.push(`${href}?disaster=${encodeURIComponent(disasterId)}`);
+    } else {
+      router.push(href);
+    }
   };
 
   const handleCardClick = (href: string) => {
@@ -214,10 +136,6 @@ export default function SafetyPage() {
       return;
     }
     handleNavigateWithDisaster(href);
-  };
-
-  const toggleCategory = (categoryId: string) => {
-    setExpandedCategory(expandedCategory === categoryId ? null : categoryId);
   };
 
   return (
@@ -252,113 +170,53 @@ export default function SafetyPage() {
               >
                 <div className="inline-flex items-center gap-2 mb-2">
                   <Shield className="w-5 h-5 text-yellow-300" />
-                  <h3 className="text-xl font-bold text-white">突发事件应急培训 · 四大类课程模块</h3>
+                  <h3 className="text-xl font-bold text-white">自然灾害防护 · 五大课程模块</h3>
                   <Shield className="w-5 h-5 text-yellow-300" />
                 </div>
                 <p className="text-white/70 max-w-2xl mx-auto text-sm mb-8">
-                  按照我国突发事件应急管理体系，涵盖自然灾害、事故灾难、公共卫生事件、社会安全事件四大类，提供系统化的培训课程
+                  针对不同类型的自然灾害，提供系统化的培训课程，帮助您掌握防灾减灾知识与应急技能
                 </p>
               </motion.div>
 
-              {/* 可折叠的灾害分类 */}
-              {disasterCategories.map((category, catIdx) => {
-                const Icon = category.icon;
-                const isExpanded = expandedCategory === category.id;
-                const hasSelected = category.disasters.some(d => d.id === selectedDisaster);
-                
-                return (
-                  <motion.div
-                    key={category.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.55 + catIdx * 0.05 }}
-                    className="mb-3"
-                  >
-                    {/* 分类标题按钮 */}
-                    <button
-                      onClick={() => toggleCategory(category.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-sm transition-all duration-300 ${
-                        isExpanded
-                          ? 'bg-white/30 border-white/70 shadow-lg'
-                          : 'bg-white/20 border-white/40 hover:bg-white/25'
-                      } ${hasSelected && !isExpanded ? 'border-yellow-300/60 bg-yellow-300/10' : ''}`}
+              {/* 灾害类型选择 - 5种 */}
+              <div className="grid grid-cols-5 gap-3 mb-8">
+                {disasterTypes.map((disaster, index) => {
+                  const isSelected = selectedDisaster === disaster.id;
+                  return (
+                    <motion.div
+                      key={disaster.id}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.6 + index * 0.05, type: 'spring', stiffness: 200 }}
+                      whileHover={{ y: -4, scale: 1.02 }}
+                      onClick={() => setSelectedDisaster(disaster.id)}
+                      className={`group cursor-pointer relative overflow-hidden rounded-xl backdrop-blur-sm border transition-all duration-500 ${
+                        isSelected
+                          ? 'bg-white/50 border-white/80 shadow-[0_0_20px_rgba(255,255,255,0.4)] saturate-100'
+                          : 'bg-white/20 border-white/50 hover:border-white/70 hover:bg-white/30 hover:saturate-150 saturate-[0.6]'
+                      }`}
                     >
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300 bg-gradient-to-br ${category.color} ${isExpanded ? 'scale-110' : ''}`}>
-                        <Icon className="w-5 h-5 text-white" />
+                      <div className="relative w-full aspect-[4/3] overflow-hidden">
+                        <img
+                          src={disaster.image}
+                          alt={disaster.name}
+                          className={`w-full h-full object-cover transition-all duration-500 ${
+                            isSelected ? 'saturate-125 scale-105' : 'saturate-100 group-hover:saturate-125 group-hover:scale-105'
+                          }`}
+                        />
+                        <div className={`absolute inset-0 transition-all duration-500 ${
+                          isSelected ? 'bg-black/10' : 'bg-black/30 group-hover:bg-black/10'
+                        }`} />
                       </div>
-                      <div className="flex-1 text-left">
-                        <h4 className={`text-base font-bold transition-colors ${
-                          isExpanded ? 'text-white' : hasSelected ? 'text-yellow-300' : 'text-white/80'
-                        }`}>{category.name}</h4>
-                        <p className="text-xs text-white/60">{category.disasters.length} 种灾害类型</p>
+                      <div className="relative z-10 px-2 py-3">
+                        <h4 className={`text-sm font-bold transition-all duration-300 ${
+                          isSelected ? 'text-white scale-105' : 'text-white/90 group-hover:text-white'
+                        }`} style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>{disaster.name}</h4>
                       </div>
-                      <motion.div
-                        animate={{ rotate: isExpanded ? 180 : 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="w-5 h-5 text-white/70"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="m6 9 6 6 6-6"/>
-                        </svg>
-                      </motion.div>
-                    </button>
-
-                    {/* 展开的灾害卡片 */}
-                    <AnimatePresence>
-                      {isExpanded && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.3, ease: 'easeInOut' }}
-                          className="overflow-hidden"
-                        >
-                          <div className="pt-3 pb-1">
-                            <div className="grid grid-cols-7 gap-3">
-                              {category.disasters.map((disaster, index) => {
-                                const isSelected = selectedDisaster === disaster.id;
-                                return (
-                                  <motion.div
-                                    key={disaster.id}
-                                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    transition={{ delay: index * 0.05 }}
-                                    whileHover={{ y: -4, scale: 1.02 }}
-                                    onClick={() => setSelectedDisaster(disaster.id)}
-                                    className={`group cursor-pointer relative overflow-hidden rounded-xl backdrop-blur-sm border transition-all duration-500 ${
-                                      isSelected
-                                        ? 'bg-white/50 border-white/80 shadow-[0_0_20px_rgba(255,255,255,0.4)] saturate-100'
-                                        : 'bg-white/20 border-white/50 hover:border-white/70 hover:bg-white/30 hover:saturate-150 saturate-[0.6]'
-                                    }`}
-                                  >
-                                    <div className="relative w-full aspect-[4/3] overflow-hidden">
-                                      <img
-                                        src={disaster.image}
-                                        alt={disaster.name}
-                                        className={`w-full h-full object-cover transition-all duration-500 ${
-                                          isSelected ? 'saturate-125 scale-105' : 'saturate-100 group-hover:saturate-125 group-hover:scale-105'
-                                        }`}
-                                      />
-                                      <div className={`absolute inset-0 transition-all duration-500 ${
-                                        isSelected ? 'bg-black/10' : 'bg-black/30 group-hover:bg-black/10'
-                                      }`} />
-                                    </div>
-                                    <div className="relative z-10 px-2 py-3">
-                                      <h5 className={`text-sm font-bold transition-all duration-300 ${
-                                        isSelected ? 'text-white scale-105' : 'text-white/90 group-hover:text-white'
-                                      }`} style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>{disaster.name}</h5>
-                                    </div>
-                                  </motion.div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                );
-              })}
+                    </motion.div>
+                  );
+                })}
+              </div>
 
               {/* 当前选中的灾害提示 */}
               <motion.div
@@ -371,7 +229,7 @@ export default function SafetyPage() {
                   <>
                     <Shield className="w-4 h-4 text-yellow-300" />
                     <span className="text-sm text-white/90">
-                      当前选择：<span className="font-bold text-white">{selectedDisasterData?.name}</span>（{selectedDisasterData?.categoryName}）- {selectedDisasterData?.description}
+                      当前选择：<span className="font-bold text-white">{selectedDisasterData?.name}</span> - {selectedDisasterData?.description}
                     </span>
                   </>
                 ) : (
@@ -471,7 +329,7 @@ export default function SafetyPage() {
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">请先选择灾难主题</h3>
               <p className="text-gray-500 mb-6 leading-relaxed">
-                请在上方选择一个灾害类型后，再进入对应的课程模块学习
+                请在上方选择一个自然灾害类型后，再进入对应的课程模块学习
               </p>
               <Button
                 onClick={() => setShowDisasterPrompt(false)}

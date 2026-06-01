@@ -124,13 +124,13 @@ export const generateSensorData = (disasterType: string, count: number = 8): Sen
 
     return {
       id: `sensor-${type}-${idx}`,
-      type: type as any,
+      type: type as SensorData['type'],
       location: loc,
       value: Math.round(value * 10) / 10,
       unit,
-      status,
+      status: status as SensorData['status'],
       timestamp: new Date(),
-      trend
+      trend: trend as SensorData['trend']
     };
   });
 };
@@ -147,11 +147,11 @@ export const generateKeyMetrics = (disasterType: string, severity: string): KeyM
 
   const disasterSpecific: Record<string, KeyMetric[]> = {
     'flood': [
-      { id: 'water-level', name: '最高积水', value: Math.round(60 * severityMultiplier), unit: 'cm', status: severity === 'critical' ? 'critical' : 'warning', trend: 'rising' },
+      { id: 'water-level', name: '最高积水', value: Math.round(60 * severityMultiplier), unit: 'cm', status: severity === 'critical' ? 'critical' : 'warning', trend: 'up' },
       { id: 'shelters-open', name: '开放避难所', value: Math.floor(5 * severityMultiplier), status: 'good', trend: 'stable' }
     ],
     'typhoon': [
-      { id: 'wind-speed', name: '最大风力', value: Math.round(25 + severityMultiplier * 5), unit: 'm/s', status: severity === 'critical' ? 'critical' : 'warning', trend: 'rising' },
+      { id: 'wind-speed', name: '最大风力', value: Math.round(25 + severityMultiplier * 5), unit: 'm/s', status: severity === 'critical' ? 'critical' : 'warning', trend: 'up' },
       { id: 'warning-level', name: '预警等级', value: severity === 'critical' ? '红色' : severity === 'high' ? '橙色' : '黄色', status: severity === 'critical' ? 'critical' : 'warning', trend: 'stable' }
     ],
     'earthquake': [
@@ -163,7 +163,7 @@ export const generateKeyMetrics = (disasterType: string, severity: string): KeyM
       { id: 'firefighters', name: '投入人员', value: Math.floor(50 * severityMultiplier), status: 'good', trend: 'up' }
     ],
     'cold-wave': [
-      { id: 'min-temp', name: '最低温度', value: Math.round(-5 - severityMultiplier * 5), unit: '°C', status: severity === 'critical' ? 'critical' : 'warning', trend: 'falling' },
+      { id: 'min-temp', name: '最低温度', value: Math.round(-5 - severityMultiplier * 5), unit: '°C', status: severity === 'critical' ? 'critical' : 'warning', trend: 'down' },
       { id: 'power-recovery', name: '电力恢复率', value: Math.floor(80 - severityMultiplier * 10), unit: '%', status: 'good', trend: 'up' }
     ]
   };
