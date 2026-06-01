@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Play, AlertTriangle, CheckCircle, XCircle, ArrowRight, RotateCcw, Trophy, ArrowLeft } from 'lucide-react';
+import { Loader2, Play, AlertTriangle, CheckCircle, XCircle, ArrowRight, RotateCcw, Trophy, ArrowLeft, Maximize2, Minimize2 } from 'lucide-react';
 
 interface Role {
   id: string;
@@ -257,9 +257,11 @@ export default function QuizInteractiveContent({ disasterName }: { disasterName:
   const [dialogueIdx, setDialogueIdx] = useState(0);
   const [showDialogueNext, setShowDialogueNext] = useState(false);
   const [alarmIntensity, setAlarmIntensity] = useState<'none'| 'full' | 'flash' | 'idle'>('idle');
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const contentRef = useRef<HTMLDivElement>(null);
   const alarmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fullscreenRef = useRef<HTMLDivElement>(null);
 
   const gameStateRef = useRef({
     scenario: null as Scenario | null,
@@ -539,6 +541,24 @@ export default function QuizInteractiveContent({ disasterName }: { disasterName:
     setAlarmIntensity('idle');
   };
 
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      fullscreenRef.current?.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
   const getLevelColor = (level: string) => {
     switch (level) {
       case 'IV': return 'bg-blue-500/20 text-blue-300 border-blue-500/50';
@@ -738,7 +758,16 @@ export default function QuizInteractiveContent({ disasterName }: { disasterName:
         }
       `}</style>
 
-      <div className={`aspect-video max-h-[700px] overflow-auto bg-gradient-to-br ${theme.bgGradient} text-white relative`}>
+      <div ref={fullscreenRef} className={`w-full min-h-[600px] overflow-auto bg-gradient-to-br ${theme.bgGradient} text-white relative`}>
+        {/* 全屏按钮 */}
+        <button
+          onClick={toggleFullscreen}
+          className="absolute top-3 right-3 z-50 w-10 h-10 flex items-center justify-center rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white/80 hover:text-white hover:bg-white/20 transition-all"
+          title={isFullscreen ? '退出全屏' : '进入全屏'}
+        >
+          {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+        </button>
+
         {/* 粒子特效层 */}
         {showParticles && (
           <div className="absolute inset-0 pointer-events-none z-10 overflow-hidden rounded-t-lg">
@@ -853,13 +882,17 @@ export default function QuizInteractiveContent({ disasterName }: { disasterName:
 
           {/* 开始界面 */}
           {phase === 'idle' && (
-            <Card className={`bg-slate-900/60 ${theme.cardBorder} backdrop-blur`}>
-              <CardContent className="p-8 md:p-12 text-center">
+            <div className="bg-slate-900/70 border-2 border-slate-700/50 backdrop-blur-xl"
+                 style={{
+                   borderRadius: '0',
+                   boxShadow: '0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)'
+                 }}>
+              <div className="p-8 md:p-12 text-center">
                 <div className="mb-6">
                   <AlertTriangle className="w-20 h-20 mx-auto mb-4 text-yellow-500" />
                 </div>
-                <h2 className="text-xl md:text-2xl font-bold mb-3">应急指挥沉浸式模拟训练</h2>
-                <p className="text-slate-400 mb-2 text-sm md:text-base">
+                <h2 className="text-xl md:text-2xl font-black mb-3 tracking-wider">应急指挥沉浸式模拟训练</h2>
+                <p className="text-slate-400 mb-2 text-sm md:text-base font-medium">
                   系统将模拟真实应急场景，AI考官化身通讯员，<br className="hidden md:block" />
                   以第一人称剧情引导您完成应急决策训练
                 </p>
@@ -868,7 +901,7 @@ export default function QuizInteractiveContent({ disasterName }: { disasterName:
                   <div className="mt-6 space-y-4">
                     <div className="flex items-center justify-center gap-3">
                       <Loader2 className="w-5 h-5 animate-spin text-blue-400" />
-                      <span className="text-blue-400 text-sm">正在预加载演练场景...</span>
+                      <span className="text-blue-400 text-sm font-bold">正在预加载演练场景...</span>
                     </div>
                     <div className="w-full max-w-xs mx-auto h-1.5 bg-slate-800 rounded-full overflow-hidden">
                       <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 transition-all duration-[3000ms] ease-linear"
@@ -878,31 +911,35 @@ export default function QuizInteractiveContent({ disasterName }: { disasterName:
                   </div>
                 ) : (
                   <Button onClick={handleStart}
-                    className="mt-6 px-8 py-6 text-lg bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 gap-2"
-                    style={{ borderRadius: '0', boxShadow: '2px 2px 0 0 #000', animation: 'alert-button-pulse 2s ease-in-out infinite' }}
+                    className="mt-6 px-8 py-6 text-lg bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 gap-2 font-black tracking-wider"
+                    style={{ borderRadius: '0', boxShadow: '4px 4px 0 0 #000', animation: 'alert-button-pulse 2s ease-in-out infinite' }}
                   >
-                    ⚠️ 开始应急演练
+                    开始应急演练
                   </Button>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {/* 错误界面 */}
           {phase === 'error' && (
-            <Card className="bg-slate-900/60 border-red-900/40 backdrop-blur">
-              <CardContent className="p-8 md:p-12 text-center">
+            <div className="bg-slate-900/70 border-2 border-red-700/50 backdrop-blur-xl"
+                 style={{
+                   borderRadius: '0',
+                   boxShadow: '0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)'
+                 }}>
+              <div className="p-8 md:p-12 text-center">
                 <AlertTriangle className="w-20 h-20 mx-auto mb-4 text-red-500" />
-                <h2 className="text-xl md:text-2xl font-bold mb-3">演练异常</h2>
-                <p className="text-slate-400 mb-6">{errorMessage}</p>
+                <h2 className="text-xl md:text-2xl font-black mb-3 tracking-wider">演练异常</h2>
+                <p className="text-slate-400 mb-6 font-medium">{errorMessage}</p>
                 <Button onClick={handleRestart}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3"
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 font-black tracking-wider"
                   style={{ borderRadius: '0' }}
                 >
                   重新开始
                 </Button>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {/* NPC对话界面 */}
@@ -1019,87 +1056,123 @@ export default function QuizInteractiveContent({ disasterName }: { disasterName:
           {/* 答题界面 */}
           {phase === 'question' && selectedRole && (
             <div className="space-y-4 mt-2">
-              {/* 题目卡片 */}
-              <Card className={`${theme.cardBorder} backdrop-blur`}>
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-                      <span className="text-white font-bold">{currentQuestion}</span>
-                    </div>
-                    <div className="flex-1 pt-1">
-                      <h3 className="text-white font-bold text-base leading-relaxed">{questionText}</h3>
-                    </div>
-                  </div>
+              {/* 题头标签条 */}
+              <div className="bg-black/90 backdrop-blur-xl border border-white/10 px-5 py-2.5 flex items-center justify-between"
+                   style={{
+                     borderRadius: '0',
+                     boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 20px rgba(0,0,0,0.5)'
+                   }}>
+                <span className="text-yellow-400 font-black text-xs tracking-wider">
+                  第 {currentQuestion}/{TOTAL_QUESTIONS} 题
+                </span>
+                <span className="text-gray-300 text-xs font-bold tracking-wide">{selectedRole.name} · {selectedRole.department}</span>
+              </div>
 
-                  {/* 选项列表 */}
-                  <div className="space-y-3 mt-6">
-                    {options.map((option, idx) => {
-                      const isSelected = selectedOption === option.id;
-                      return (
-                        <button key={option.id}
-                          onClick={() => handleSelectOption(option.id)}
-                          disabled={isSubmitting || !!selectedOption}
-                          className={`w-full p-4 text-left border-2 transition-all flex items-center gap-4 ${
-                            isSelected
-                              ? `${theme.buttonColor} text-white border-transparent scale-[1.02]`
-                              : 'bg-slate-800/60 border-slate-700 hover:border-slate-500 hover:bg-slate-800'
-                          }`}
-                          style={{ borderRadius: '12px' }}
-                        >
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 ${
-                            isSelected ? 'bg-white/20' : 'bg-slate-700 text-slate-400'
-                          }`}>
-                            {isSelected ? '✓' : OPTION_LABELS[idx]}
-                          </div>
-                          <span className="text-sm md:text-base font-medium">{option.text}</span>
-                        </button>
-                      );
-                    })}
+              {/* 题目主体 — 深色毛玻璃卡片 */}
+              <div className="bg-slate-900/90 backdrop-blur-2xl border border-slate-700/50 p-5 mt-px"
+                   style={{
+                     borderRadius: '0',
+                     boxShadow: '0 12px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.1)'
+                   }}>
+                {/* 进度条 */}
+                <div className="w-full bg-slate-800/60 h-2 mb-4 overflow-hidden" style={{ borderRadius: '0' }}>
+                  <div
+                    className={`h-full bg-gradient-to-r ${theme.progressGradient} transition-all duration-500 shadow-lg`}
+                    style={{ width: `${(currentQuestion / TOTAL_QUESTIONS) * 100}%`, borderRadius: '0' }}
+                  />
+                </div>
+                {/* 题目序号 + 文字 */}
+                <div className="flex items-start gap-4">
+                  <div className="shrink-0 w-10 h-10 rounded-none flex items-center justify-center font-black text-sm bg-gradient-to-br from-blue-600 to-purple-600 text-white border-2 border-white/20"
+                       style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+                    {currentQuestion}
                   </div>
+                  <p className="text-white font-black text-base leading-relaxed tracking-wide pt-1">{questionText}</p>
+                </div>
+              </div>
 
-                  {isSubmitting && (
-                    <div className="flex items-center justify-center gap-2 mt-4 p-3 bg-slate-800/40 rounded-xl">
-                      <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
-                      <span className="text-sm text-slate-400">AI正在评估答案...</span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              {/* 选项容器 — 深色半透明毛玻璃 */}
+              <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-700/40 p-4 space-y-2.5 mt-px"
+                   style={{
+                     borderRadius: '0',
+                     boxShadow: '0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)'
+                   }}>
+                {options.map((option, idx) => {
+                  const isSelected = selectedOption === option.id;
+                  return (
+                    <button key={option.id}
+                      onClick={() => handleSelectOption(option.id)}
+                      disabled={isSubmitting || !!selectedOption}
+                      className={`w-full p-4 text-left border-2 transition-all duration-200 flex items-center gap-4 group disabled:cursor-not-allowed ${
+                        isSelected
+                          ? `${theme.buttonColor} text-white border-transparent scale-[1.01] shadow-lg`
+                          : 'border-slate-600/50 bg-slate-800/60 hover:border-slate-400 hover:bg-slate-800 hover:scale-[1.005]'
+                      }`}
+                      style={{ borderRadius: '0', boxShadow: isSelected ? `0 8px 24px ${theme.buttonHover}` : 'none' }}
+                    >
+                      <div className={`w-10 h-10 rounded-none flex items-center justify-center font-black text-sm shrink-0 border-2 transition-all ${
+                        isSelected 
+                          ? 'bg-white/20 border-white/40 scale-110' 
+                          : 'border-slate-500/50 bg-slate-700/60 text-slate-400 group-hover:border-slate-300'
+                      }`} style={{ borderRadius: '0' }}>
+                        {isSelected ? '✓' : OPTION_LABELS[idx]}
+                      </div>
+                      <span className="text-sm md:text-base font-semibold leading-relaxed">{option.text}</span>
+                    </button>
+                  );
+                })}
+
+                {isSubmitting && (
+                  <div className="flex items-center justify-center gap-2 mt-3 p-3 bg-slate-800/60 border border-slate-700/50" style={{ borderRadius: '0' }}>
+                    <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
+                    <span className="text-sm text-slate-300 font-bold">AI正在评估答案...</span>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
           {/* 反馈界面 */}
           {phase === 'feedback' && (
             <div className="mt-2">
-              {/* 反馈气泡 */}
-              <Card className={`w-full max-w-lg border-2 mb-4 ${
-                feedbackIsCorrect ? theme.correctColor : theme.wrongColor
-              }`}>
-                <CardContent className="p-5">
+              {/* 反馈卡片 — 深色毛玻璃风格 */}
+              <div className={`w-full max-w-lg border-2 mb-4 ${
+                feedbackIsCorrect 
+                  ? 'border-green-600/60 bg-green-950/60 backdrop-blur-xl' 
+                  : 'border-red-600/60 bg-red-950/60 backdrop-blur-xl'
+              }`}
+                   style={{
+                     borderRadius: '0',
+                     boxShadow: '0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)'
+                   }}>
+                <div className="p-5">
                   <div className="flex items-center gap-2 mb-3">
                     {feedbackIsCorrect ? (
-                      <><CheckCircle className="w-5 h-5 text-green-400" /><span className="text-green-400 font-bold">回答正确！</span></>
+                      <><CheckCircle className="w-5 h-5 text-green-400" /><span className="text-green-400 font-black text-lg">回答正确！</span></>
                     ) : (
-                      <><XCircle className="w-5 h-5 text-red-400" /><span className="text-red-400 font-bold">回答有误</span></>
+                      <><XCircle className="w-5 h-5 text-red-400" /><span className="text-red-400 font-black text-lg">回答有误</span></>
                     )}
                   </div>
-                  <div className="bg-slate-900/80 rounded-lg p-3 mb-3">
-                    <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">{feedbackExplanation}</p>
+                  <div className="bg-slate-900/80 border border-slate-700/40 rounded-none p-3 mb-3"
+                       style={{ boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.3)' }}>
+                    <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap font-medium">{feedbackExplanation}</p>
                   </div>
                   {situationUpdate && (
-                    <div className="bg-amber-950/30 border border-amber-700/30 rounded-lg p-3 mb-3">
-                      <p className="text-amber-400 text-xs font-medium mb-1">📛 最新情况</p>
-                      <p className="text-amber-300 text-xs">{situationUpdate}</p>
+                    <div className="bg-amber-950/40 border border-amber-600/40 rounded-none p-3 mb-3"
+                         style={{ boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.2)' }}>
+                      <p className="text-amber-400 text-xs font-black mb-1 tracking-wider"> 最新情况</p>
+                      <p className="text-amber-300 text-xs font-medium">{situationUpdate}</p>
                     </div>
                   )}
                   <Button onClick={handleFeedbackNext}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white py-3 font-black tracking-wider"
+                    style={{ borderRadius: '0', boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}
                   >
-                    {situationUpdate ? '查看新情况' : '继续'}
+                    {situationUpdate ? '查看新情况' : '继续下一题'}
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           )}
 
@@ -1118,8 +1191,12 @@ export default function QuizInteractiveContent({ disasterName }: { disasterName:
                   <span className="text-xs text-slate-300 whitespace-nowrap">{NPC_NAME}</span>
                 </div>
               </div>
-              <Card className="w-full max-w-lg bg-slate-900/70 border-slate-800 mb-4">
-                <CardContent className="p-8 text-center">
+              <div className="w-full max-w-lg bg-slate-900/70 border-2 border-slate-700/50 backdrop-blur-xl mb-4"
+                   style={{
+                     borderRadius: '0',
+                     boxShadow: '0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)'
+                   }}>
+                <div className="p-8 text-center">
                   <div className={`w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center ${
                     score >= 4 ? 'bg-green-500/20' : score >= 3 ? 'bg-yellow-500/20' : 'bg-red-500/20'
                   }`}>
@@ -1150,8 +1227,8 @@ export default function QuizInteractiveContent({ disasterName }: { disasterName:
                   >
                     <RotateCcw className="w-4 h-4 mr-2" />重新训练
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           )}
 

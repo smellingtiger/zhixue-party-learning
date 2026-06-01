@@ -96,7 +96,7 @@ export default function CommandCoursePage() {
         )}
         {activeTab === 'test' && <TestTab disaster={disaster} disasterName={disasterName} />}
         {activeTab === 'interaction' && (
-          <div className="border-2 border-black bg-black overflow-hidden" style={{ boxShadow: '4px 4px 0 0 #000', borderRadius: '0' }}>
+          <div className="rounded-xl overflow-hidden shadow-lg bg-gradient-to-br from-slate-950 via-gray-900 to-slate-900">
             <QuizInteractiveContent disasterName={disasterName} />
           </div>
         )}
