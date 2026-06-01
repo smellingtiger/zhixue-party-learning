@@ -45,7 +45,21 @@ app.prepare().then(() => {
         parsedUrl.pathname?.startsWith('/api/tts/') ||
         parsedUrl.pathname?.startsWith('/api/llm') ||
         parsedUrl.pathname?.startsWith('/api/knowledge-base/') ||
-        parsedUrl.pathname?.startsWith('/api/knowledge-base');
+        parsedUrl.pathname?.startsWith('/api/knowledge-base') ||
+        parsedUrl.pathname?.startsWith('/api/speech-writer') ||
+        parsedUrl.pathname?.startsWith('/api/content-audit') ||
+        parsedUrl.pathname?.startsWith('/api/lesson-prep') ||
+        parsedUrl.pathname?.startsWith('/api/course-outline-gen') ||
+        parsedUrl.pathname?.startsWith('/api/disaster-knowledge-graph') ||
+        parsedUrl.pathname?.startsWith('/api/rescue-plan') ||
+        parsedUrl.pathname?.startsWith('/api/emergency-qa') ||
+        parsedUrl.pathname?.startsWith('/api/sentinel-chat') ||
+        parsedUrl.pathname?.startsWith('/api/role-chat') ||
+        parsedUrl.pathname?.startsWith('/api/generate-course') ||
+        parsedUrl.pathname?.startsWith('/api/training') ||
+        parsedUrl.pathname?.startsWith('/api/user/diagnostic') ||
+        parsedUrl.pathname?.startsWith('/api/admin') ||
+        parsedUrl.pathname?.startsWith('/api/emergency-documents');
 
       // 视频路由代理到8080端口
       const isVideoRoute = parsedUrl.pathname?.startsWith('/api/video');

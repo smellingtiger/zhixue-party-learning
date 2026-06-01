@@ -1,6 +1,6 @@
 const SILICONFLOW_API_URL = 'https://api.siliconflow.cn/v1/chat/completions';
 const SILICONFLOW_API_KEY = 'sk-benvwygtccjxvhrnbjqbztiopkroriorvfllywtkzidbwlwb';
-const SILICONFLOW_MODEL = 'deepseek-ai/DeepSeek-V3';
+const SILICONFLOW_MODEL = 'deepseek-ai/DeepSeek-V4-Flash';
 
 function log(phase: string, msg: string, data?: unknown) {
   const ts = new Date().toISOString().substring(11, 23);
