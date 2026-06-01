@@ -560,7 +560,7 @@ function DisasterGraphContent() {
           <Button variant="outline" onClick={() => router.push('/safety')} className="gap-2 border-red-400 bg-white hover:bg-red-50 text-red-700 font-medium shadow-sm">
             <ArrowLeft className="w-4 h-4" />返回安全培训
           </Button>
-        </div>
+        </motion.div>
 
         <motion.div initial={{ opacity: 0, y: -15 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">

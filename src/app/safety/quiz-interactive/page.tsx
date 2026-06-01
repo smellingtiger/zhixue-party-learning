@@ -748,11 +748,60 @@ function EmergencyTrainingContent() {
         }
       `}</style>
 
-      <div className={`h-full overflow-auto bg-gradient-to-br ${theme.bgGradient} text-white relative`}>
+      <div className="container mx-auto px-4 py-8">
+        {/* 窗口容器 */}
+        <div className="border-2 border-black overflow-hidden" style={{ boxShadow: '4px 4px 0 0 #000', borderRadius: '0' }}>
+          {/* 窗口标题栏 */}
+          <div className="bg-gray-900 border-b-2 border-black px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-red-500" />
+              <div className="w-3 h-3 rounded-full bg-yellow-500" />
+              <div className="w-3 h-3 rounded-full bg-green-500" />
+            </div>
+            <span className="text-white font-bold text-sm">互动答题系统</span>
+            <div className="w-16" />
+          </div>
+
+          <div className={`bg-gradient-to-br ${theme.bgGradient} text-white relative`}>
         {/* 返回导航按钮 */}
         <div className="absolute top-4 left-4 z-50">
           <Button
-            onClick={() => router.push('/safety')}
+            onClick={() => {
+              const params = new URLSearchParams(window.location.search);
+              const disasterName = params.get('disaster') || '';
+              const disasterMap: Record<string, string> = {
+                '防汛': 'flood',
+                '防台风': 'typhoon',
+                '防震': 'earthquake',
+                '森林防火': 'forest-fire',
+                '防寒潮': 'cold-wave',
+                '火灾': 'fire',
+                '危化品事故': 'chemical',
+                '交通事故': 'traffic',
+                '矿山事故': 'mine',
+                '建筑坍塌': 'construction',
+                '大面积停电': 'power',
+                '环境污染': 'pollution',
+                '传染病疫情': 'epidemic',
+                '食品安全': 'food-safety',
+                '动物疫情': 'animal-epidemic',
+                '职业中毒': 'occupational',
+                '药品安全': 'drug-safety',
+                '恐怖袭击': 'terrorist',
+                '网络安全': 'cyber-attack',
+                '踩踏事故': 'stampede',
+                '经济安全': 'economic',
+                '内涝': 'flood',
+                '台风': 'typhoon',
+                '地震': 'earthquake',
+                '森林火灾': 'forest-fire',
+                '寒潮': 'cold-wave',
+                '滑坡泥石流': 'landslide',
+                '干旱': 'drought',
+              };
+              const disasterKey = disasterMap[disasterName] || 'flood';
+              router.push(`/safety/command-course?disaster=${disasterKey}`);
+            }}
             variant="outline"
             className="bg-slate-800/80 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white backdrop-blur-sm"
           >
@@ -1316,7 +1365,7 @@ function EmergencyTrainingContent() {
         <div className="max-w-5xl mx-auto p-4 md:p-6 relative z-10 pt-16" ref={contentRef}>
           {/* ========== 标题 ========== */}
           <div className="text-center mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold mb-1">应急指挥演练培训系统</h1>
+            <h1 className="text-2xl md:text-3xl font-bold mb-1">互动答题</h1>
             <p className="text-slate-500 text-sm">沉浸式训练 · 角色扮演 · 实战决策</p>
           </div>
 
@@ -1755,6 +1804,8 @@ function EmergencyTrainingContent() {
               </span>
             </div>
           )}
+        </div>
+          </div>
         </div>
       </div>
     </>

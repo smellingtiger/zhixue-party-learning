@@ -2,104 +2,30 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import type { CommandManualData, DepartmentSOP } from './types';
-import { floodCommandManualData } from './flood-command-manual-data';
-import { typhoonCommandManualData } from './typhoon-command-manual-data';
-import { earthquakeCommandManualData } from './earthquake-command-manual-data';
-import { forestFireCommandManualData } from './forest-fire-command-manual-data';
-import { coldWaveCommandManualData } from './cold-wave-command-manual-data';
 import { Button } from '@/components/ui/button';
-import {
-  ArrowLeft,
-  Shield,
-  AlertTriangle,
-  Users,
-  ChevronRight,
-  ExternalLink,
-  CheckCircle2,
-  Sparkles,
-} from 'lucide-react';
+import { ArrowLeft, Shield, Activity, MessageSquare, FileText, Sparkles } from 'lucide-react';
+import { disasterTestQuestions, type TestQuestionData } from './test-questions';
+import QuizInteractiveContent from '@/components/QuizInteractiveContent';
+import SimulationDrill from './simulation-drill';
 
-const levelColors: Record<string, { bg: string; text: string; border: string; light: string; headerBg: string; tabBg: string; tabActive: string }> = {
-  IV: {
-    bg: 'bg-blue-600',
-    text: 'text-blue-600',
-    border: 'border-blue-600',
-    light: 'bg-blue-50',
-    headerBg: 'bg-gradient-to-r from-blue-600 to-blue-500',
-    tabBg: 'bg-blue-500 border-blue-600 text-white',
-    tabActive: 'bg-blue-600 border-blue-700 text-white',
-  },
-  III: {
-    bg: 'bg-yellow-600',
-    text: 'text-yellow-600',
-    border: 'border-yellow-600',
-    light: 'bg-yellow-50',
-    headerBg: 'bg-gradient-to-r from-yellow-600 to-yellow-500',
-    tabBg: 'bg-yellow-500 border-yellow-600 text-white',
-    tabActive: 'bg-yellow-600 border-yellow-700 text-white',
-  },
-  II: {
-    bg: 'bg-orange-600',
-    text: 'text-orange-600',
-    border: 'border-orange-600',
-    light: 'bg-orange-50',
-    headerBg: 'bg-gradient-to-r from-orange-600 to-orange-500',
-    tabBg: 'bg-orange-500 border-orange-600 text-white',
-    tabActive: 'bg-orange-600 border-orange-700 text-white',
-  },
-  I: {
-    bg: 'bg-red-600',
-    text: 'text-red-600',
-    border: 'border-red-600',
-    light: 'bg-red-50',
-    headerBg: 'bg-gradient-to-r from-red-600 to-red-500',
-    tabBg: 'bg-red-500 border-red-600 text-white',
-    tabActive: 'bg-red-600 border-red-700 text-white',
-  },
-};
-
-const levelLabels: Record<string, string> = {
-  IV: 'Ⅳ级',
-  III: 'Ⅲ级',
-  II: 'Ⅱ级',
-  I: 'Ⅰ级',
-};
-
-const disasterDataMap: Record<string, CommandManualData> = {
-  flood: floodCommandManualData,
-  typhoon: typhoonCommandManualData,
-  earthquake: earthquakeCommandManualData,
-  'forest-fire': forestFireCommandManualData,
-  'cold-wave': coldWaveCommandManualData,
+const disasterNames: Record<string, string> = {
+  flood: '防汛',
+  typhoon: '防台风',
+  earthquake: '防震',
+  'forest-fire': '森林防火',
+  'cold-wave': '防寒潮',
 };
 
 export default function CommandCoursePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const disaster = searchParams.get('disaster') || 'flood';
-
-  const data = disasterDataMap[disaster] || floodCommandManualData;
-  const levels = data.responseLevels;
-
-  const [activeLevelIndex, setActiveLevelIndex] = useState(0);
-  const [selectedDept, setSelectedDept] = useState<DepartmentSOP | null>(null);
-
-  const activeLevel = levels[activeLevelIndex];
-  const colors = levelColors[activeLevel.level];
-
-  const handleSelectDept = (dept: DepartmentSOP) => {
-    setSelectedDept(dept);
-  };
-
-  const handleBackToDept = () => {
-    setSelectedDept(null);
-  };
+  const disasterName = disasterNames[disaster] || '防汛';
+  const [activeTab, setActiveTab] = useState<'simulation' | 'interaction' | 'test'>('simulation');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-gray-50 to-slate-200">
+    <div className="h-full overflow-auto bg-gradient-to-br from-slate-100 via-gray-50 to-slate-200">
       <div className="container mx-auto px-4 py-8">
-        {/* 返回按钮 */}
         <div className="mb-6">
           <Button
             variant="outline"
@@ -112,216 +38,358 @@ export default function CommandCoursePage() {
           </Button>
         </div>
 
-        {/* 顶部标题 */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-3">
-            <Shield className={`w-8 h-8 ${colors.text}`} />
-            <h1 className="text-3xl font-black text-gray-900">岗位指挥操作手册</h1>
-            <Shield className={`w-8 h-8 ${colors.text}`} />
+            <Shield className="w-8 h-8 text-purple-600" />
+            <h1 className="text-3xl font-black text-gray-900">{disasterName}岗位指挥</h1>
+            <Shield className="w-8 h-8 text-purple-600" />
           </div>
-          <p className="text-gray-600 text-base">
-            {data.disasterName}灾害应急 · 分岗位SOP速查手册
-          </p>
+          <p className="text-gray-600 text-base">模拟演练 · 互动答题 · AI测试</p>
         </div>
 
-        {/* 第一步：响应等级标签页 */}
-        <div className="border-2 border-black bg-white mb-6" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-          <div className="bg-gray-900 border-b-2 border-black px-6 py-3">
-            <h2 className="text-white font-black text-lg flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-yellow-400" />
-              步骤一：选择应急响应等级
-            </h2>
-          </div>
-          <div className="p-4">
-            <div className="grid grid-cols-4 gap-3">
-              {levels.map((level, idx) => {
-                const lc = levelColors[level.level];
-                const isActive = idx === activeLevelIndex;
-                return (
-                  <button
-                    key={level.level}
-                    onClick={() => { setActiveLevelIndex(idx); setSelectedDept(null); }}
-                    className={`border-2 border-black p-4 text-center font-black text-lg transition-all duration-300 ${
-                      isActive
-                        ? `${lc.tabActive} scale-105`
-                        : `${lc.tabBg} opacity-70 hover:opacity-100 hover:scale-102`
-                    }`}
-                    style={{ borderRadius: '0', boxShadow: isActive ? '4px 4px 0 0 #000' : '2px 2px 0 0 #000' }}
-                  >
-                    <div className="text-2xl mb-1">{levelLabels[level.level]}</div>
-                    <div className="text-sm font-bold">{level.label.replace('级响应', '')}</div>
-                    <div className="text-xs mt-1 opacity-80">{level.departments.length}个岗位</div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* 触发条件 */}
-            <div className={`mt-4 border-2 border-black`} style={{ borderRadius: '0' }}>
-              <div className={`${colors.headerBg} border-b-2 border-black px-4 py-2 flex items-center gap-2`}>
-                <AlertTriangle className="w-4 h-4 text-white" />
-                <span className="font-black text-white text-sm">触发条件</span>
-                <span className="ml-auto bg-white text-black text-xs font-black px-2 py-0.5 border border-black">
-                  {activeLevel.conditionLogic}
-                </span>
-              </div>
-              <div className={`p-4 ${colors.light}`}>
-                <ul className="space-y-2">
-                  {activeLevel.conditions.map((cond, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-gray-800">
-                      <span className={`${colors.bg} text-white w-5 h-5 flex items-center justify-center text-xs flex-shrink-0 font-black border border-black/30`}>
-                        {i + 1}
-                      </span>
-                      {cond}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
+        <div className="flex gap-4 mb-6">
+          <button
+            onClick={() => setActiveTab('simulation')}
+            className={`flex-1 p-4 border-2 border-black transition-all duration-300 flex items-center justify-center gap-3 ${
+              activeTab === 'simulation'
+                ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white scale-105'
+                : 'bg-white hover:bg-gray-50'
+            }`}
+            style={{ borderRadius: '0', boxShadow: activeTab === 'simulation' ? '4px 4px 0 0 #000' : '2px 2px 0 0 #000' }}
+          >
+            <Activity className="w-6 h-6" />
+            <span className="font-black text-lg">模拟演练</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('interaction')}
+            className={`flex-1 p-4 border-2 border-black transition-all duration-300 flex items-center justify-center gap-3 ${
+              activeTab === 'interaction'
+                ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white scale-105'
+                : 'bg-white hover:bg-gray-50'
+            }`}
+            style={{ borderRadius: '0', boxShadow: activeTab === 'interaction' ? '4px 4px 0 0 #000' : '2px 2px 0 0 #000' }}
+          >
+            <MessageSquare className="w-6 h-6" />
+            <span className="font-black text-lg">互动答题</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('test')}
+            className={`flex-1 p-4 border-2 border-black transition-all duration-300 flex items-center justify-center gap-3 ${
+              activeTab === 'test'
+                ? 'bg-gradient-to-r from-orange-600 to-orange-500 text-white scale-105'
+                : 'bg-white hover:bg-gray-50'
+            }`}
+            style={{ borderRadius: '0', boxShadow: activeTab === 'test' ? '4px 4px 0 0 #000' : '2px 2px 0 0 #000' }}
+          >
+            <FileText className="w-6 h-6" />
+            <span className="font-black text-lg">AI测试</span>
+          </button>
         </div>
 
-        {/* 第二步：岗位选择 / 第三步：操作手册 */}
-        {!selectedDept ? (
-          /* 步骤二：岗位列表 */
-          <div className="border-2 border-black bg-white mb-6" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-            <div className={`${colors.headerBg} border-b-2 border-black px-6 py-3`}>
-              <h2 className="text-white font-black text-lg flex items-center gap-2">
-                <Users className="w-5 h-5" />
-                步骤二：选择您的岗位（共{activeLevel.departments.length}个）
-              </h2>
-            </div>
-            <div className="p-4">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {activeLevel.departments.map((dept, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleSelectDept(dept)}
-                    className={`border-2 border-black p-4 text-left group transition-all duration-300 hover:-translate-y-1 bg-white`}
-                    style={{ borderRadius: '0', boxShadow: '3px 3px 0 0 #000' }}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className={`w-8 h-8 ${colors.bg} text-white font-black flex items-center justify-center text-sm border border-black`}>
-                        {idx + 1}
-                      </span>
-                      {dept.isNew && (
-                        <span className="relative group">
-                          <span className="text-[11px] font-black bg-gradient-to-r from-orange-500 to-red-500 text-white px-2 py-0.5 border border-black inline-flex items-center gap-1">
-                            <Sparkles className="w-2.5 h-2.5" />
-                            NEW
-                          </span>
-                          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 border border-black whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                            本响应等级新增岗位
-                          </span>
-                        </span>
-                      )}
-                    </div>
-                    <div className="font-black text-sm text-gray-900 group-hover:underline">{dept.name}</div>
-                    <div className="text-xs text-gray-500 mt-1">{dept.sopTable.length}项操作指令</div>
-                    <div className="flex items-center gap-1 mt-3 text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span className={colors.text + ' font-bold'}>查看手册</span>
-                      <ChevronRight className={`w-3 h-3 ${colors.text}`} />
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* 步骤三：操作手册详情 */
-          <div className="border-2 border-black bg-white mb-6" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-            <div className={`${colors.headerBg} border-b-2 border-black px-6 py-4`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-3 mb-1">
-                    <Button
-                      variant="outline"
-                      onClick={handleBackToDept}
-                      className="border-2 border-white/30 bg-white/10 text-white hover:bg-white/20 font-bold text-sm"
-                      style={{ borderRadius: '0' }}
-                    >
-                      <ArrowLeft className="w-4 h-4 mr-1" />
-                      返回岗位列表
-                    </Button>
-                    <span className="text-white/60 text-sm">
-                      {levelLabels[activeLevel.level]}响应
-                    </span>
-                  </div>
-                  <h2 className="text-white font-black text-2xl">{selectedDept.name}</h2>
-                  <p className="text-white/70 text-sm mt-1">{activeLevel.label} · {selectedDept.sopTable.length}项操作指令</p>
-                </div>
-              </div>
-            </div>
-
-            {/* SOP操作手册表格 */}
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-gray-900 text-white">
-                    <th className="border-2 border-black px-4 py-3 text-left font-black text-sm w-12">#</th>
-                    <th className="border-2 border-black px-4 py-3 text-left font-black text-sm w-40">动作</th>
-                    <th className="border-2 border-black px-4 py-3 text-left font-black text-sm">执行内容</th>
-                    <th className="border-2 border-black px-4 py-3 text-left font-black text-sm w-36">阈值/时限</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedDept.sopTable.map((row, idx) => (
-                    <tr key={idx} className={`${idx % 2 === 0 ? 'bg-white' : colors.light} hover:bg-gray-100 transition-colors`}>
-                      <td className="border-2 border-black px-4 py-3 text-center font-black text-gray-500">{idx + 1}</td>
-                      <td className="border-2 border-black px-4 py-3">
-                        <span className={`inline-block ${colors.bg} text-white text-xs font-black px-2 py-1 border border-black`}>
-                          {row.action}
-                        </span>
-                      </td>
-                      <td className="border-2 border-black px-4 py-3 text-sm text-gray-800 leading-relaxed">{row.content}</td>
-                      <td className="border-2 border-black px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 text-xs font-bold ${colors.text}`}>
-                          <CheckCircle2 className="w-3 h-3" />
-                          {row.threshold}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* 来源依据 */}
-            {selectedDept.sourceNote && (
-              <div className="border-t-2 border-gray-200 p-4">
-                <div className="flex items-start gap-2 text-sm text-gray-500">
-                  <ExternalLink className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                  <span>{selectedDept.sourceNote}</span>
-                </div>
-              </div>
-            )}
+        {activeTab === 'simulation' && disaster === 'flood' && <SimulationDrill disaster={disaster} disasterName={disasterName} />}
+        {activeTab === 'simulation' && disaster !== 'flood' && (
+          <div className="border-2 border-black bg-white p-12 text-center" style={{ boxShadow: '4px 4px 0 0 #000', borderRadius: '0' }}>
+            <Sparkles className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+            <h3 className="text-xl font-black text-gray-900 mb-2">功能开发中</h3>
+            <p className="text-gray-500">{disasterName}模拟演练功能正在开发中，敬请期待！</p>
           </div>
         )}
-
-        {/* 底部：权威文献参考 */}
-        <div className="border-2 border-black bg-gray-900 text-white" style={{ boxShadow: '4px 4px 0 0 #000' }}>
-          <div className="bg-gray-800 border-b-2 border-black px-6 py-3 flex items-center gap-2">
-            <ExternalLink className="w-4 h-4 text-yellow-400" />
-            <h3 className="font-black text-sm text-yellow-400">权威文献参考依据</h3>
+        {activeTab === 'test' && <TestTab disaster={disaster} disasterName={disasterName} />}
+        {activeTab === 'interaction' && (
+          <div className="border-2 border-black bg-black overflow-hidden" style={{ boxShadow: '4px 4px 0 0 #000', borderRadius: '0' }}>
+            <QuizInteractiveContent disasterName={disasterName} />
           </div>
-          <div className="p-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {data.references.map((ref, i) => (
-                <a
-                  key={i}
-                  href={ref.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-start gap-2 text-sm text-gray-300 hover:text-white transition-colors group"
-                >
-                  <span className="w-5 h-5 bg-gray-700 text-gray-400 flex items-center justify-center text-[10px] font-black flex-shrink-0 mt-0.5 border border-gray-600 group-hover:bg-yellow-600 group-hover:text-white group-hover:border-yellow-500 transition-colors">
-                    {i + 1}
-                  </span>
-                  <span className="group-hover:underline">{ref.title}</span>
-                </a>
-              ))}
+        )}
+      </div>
+    </div>
+  );
+}
+
+// AI测试 Tab
+interface TestQuestion {
+  id: string;
+  type: 'single' | 'true_false';
+  question: string;
+  options: { id: string; label: string; text: string }[];
+  correctAnswer: string;
+  score: number;
+  explanation: string;
+}
+
+interface TestResult {
+  score: number;
+  totalScore: number;
+  answers: { 
+    questionId: string; 
+    question: string;
+    userAnswer: string; 
+    userAnswerText: string;
+    correctAnswer: string; 
+    correctAnswerText: string;
+    isCorrect: boolean; 
+    score: number;
+    explanation: string;
+  }[];
+  completedAt: Date;
+}
+
+function TestTab({ disaster, disasterName }: { disaster: string; disasterName: string }) {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [testGenerated, setTestGenerated] = useState(false);
+  const [testQuestions, setTestQuestions] = useState<TestQuestion[]>([]);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [result, setResult] = useState<TestResult | null>(null);
+
+  const generateTest = async () => {
+    setIsGenerating(true);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    const questionsForDisaster = disasterTestQuestions[disasterName];
+    if (!questionsForDisaster || questionsForDisaster.length === 0) {
+      // Fallback to generic questions if no specific questions available
+      setIsGenerating(false);
+      return;
+    }
+
+    const generatedQuestions: TestQuestion[] = questionsForDisaster.map(q => ({
+      ...q,
+      type: q.type as 'single' | 'true_false',
+    }));
+
+    setTestQuestions(generatedQuestions);
+    setTestGenerated(true);
+    setIsGenerating(false);
+  };
+
+  const handleAnswerSelect = (questionId: string, optionId: string) => {
+    if (isSubmitted) return;
+    setAnswers({ ...answers, [questionId]: optionId });
+  };
+
+  const handleSubmit = () => {
+    setIsSubmitted(true);
+    let totalScore = 0;
+    const answerDetails = testQuestions.map(q => {
+      const userAnswer = answers[q.id] || '';
+      const isCorrect = userAnswer === q.correctAnswer;
+      const score = isCorrect ? q.score : 0;
+      totalScore += score;
+      const userOption = q.options.find(o => o.id === userAnswer);
+      const correctOption = q.options.find(o => o.id === q.correctAnswer);
+      return { 
+        questionId: q.id, 
+        question: q.question,
+        userAnswer, 
+        userAnswerText: userOption?.text || '未作答',
+        correctAnswer: q.correctAnswer, 
+        correctAnswerText: correctOption?.text || '',
+        isCorrect, 
+        score,
+        explanation: q.explanation,
+      };
+    });
+    setResult({ score: totalScore, totalScore: 100, answers: answerDetails, completedAt: new Date() });
+  };
+
+  const handleRetry = () => {
+    setTestGenerated(false);
+    setTestQuestions([]);
+    setAnswers({});
+    setIsSubmitted(false);
+    setResult(null);
+  };
+
+  if (isGenerating) {
+    return (
+      <div className="border-2 border-black bg-white" style={{ boxShadow: '4px 4px 0 0 #000', borderRadius: '0' }}>
+        <div className="p-12 text-center">
+          <Sparkles className="w-16 h-16 mx-auto mb-4 text-orange-500 animate-pulse" />
+          <h3 className="text-xl font-black text-gray-900 mb-2">AI正在生成试卷...</h3>
+          <p className="text-gray-500">正在根据{disasterName}岗位指挥知识点生成测试题目</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!testGenerated) {
+    return (
+      <div className="border-2 border-black bg-white" style={{ boxShadow: '4px 4px 0 0 #000', borderRadius: '0' }}>
+        <div className="bg-gradient-to-r from-orange-600 to-orange-500 border-b-2 border-black p-6 text-white">
+          <h3 className="text-xl font-black flex items-center gap-2">
+            <FileText className="w-6 h-6" />
+            AI智能测试
+          </h3>
+          <p className="text-white/90 text-sm mt-1">根据{disasterName}岗位指挥知识点自动生成测试试卷</p>
+        </div>
+        <div className="p-12 text-center">
+          <FileText className="w-20 h-20 mx-auto mb-4 text-gray-300" />
+          <h4 className="text-lg font-black text-gray-900 mb-2">准备好开始测试了吗？</h4>
+          <p className="text-gray-500 mb-6">AI将生成{disasterName}岗位指挥相关的测试试卷，满分100分</p>
+          <Button
+            onClick={generateTest}
+            className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 gap-2 px-8 py-6 text-lg"
+            style={{ borderRadius: '0', boxShadow: '2px 2px 0 0 #000' }}
+          >
+            <Sparkles className="w-5 h-5" />
+            生成试卷
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (result) {
+    return (
+      <div className="border-2 border-black bg-white" style={{ boxShadow: '4px 4px 0 0 #000', borderRadius: '0' }}>
+        <div className="bg-gradient-to-r from-orange-600 to-orange-500 border-b-2 border-black p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-2xl font-black">测试完成！</h3>
+              <p className="text-white/90 mt-2">{disasterName}岗位指挥 - AI测试</p>
+            </div>
+            <div className="text-right">
+              <div className="text-5xl font-black">{result.score}分</div>
+              <div className="text-sm text-white/80">满分 {result.totalScore} 分</div>
             </div>
           </div>
+        </div>
+        <div className="p-6 space-y-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center p-4 bg-green-50 border-2 border-green-200">
+              <div className="text-3xl font-black text-green-600">{result.answers.filter(a => a.isCorrect).length}</div>
+              <div className="text-sm text-green-700 font-bold">答对</div>
+            </div>
+            <div className="text-center p-4 bg-red-50 border-2 border-red-200">
+              <div className="text-3xl font-black text-red-600">{result.answers.filter(a => !a.isCorrect).length}</div>
+              <div className="text-sm text-red-700 font-bold">答错</div>
+            </div>
+            <div className="text-center p-4 bg-blue-50 border-2 border-blue-200">
+              <div className="text-3xl font-black text-blue-600">{result.score}分</div>
+              <div className="text-sm text-blue-700 font-bold">总分</div>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <h4 className="font-black text-gray-900 text-lg flex items-center gap-2">
+              <span>答题详情</span>
+            </h4>
+            {result.answers.map((detail, idx) => (
+              <div key={detail.questionId} className={`border-2 border-black ${detail.isCorrect ? 'bg-green-50' : 'bg-red-50'}`}>
+                {/* 题号和对错标记 */}
+                <div className={`border-b-2 border-black px-4 py-2 flex items-center justify-between ${detail.isCorrect ? 'bg-green-600' : 'bg-red-600'}`}>
+                  <span className="text-white font-black text-sm">第 {idx + 1} 题</span>
+                  <span className="text-white font-bold text-sm">
+                    {detail.isCorrect ? '✓ 正确' : '✗ 错误'} +{detail.score}分
+                  </span>
+                </div>
+                
+                <div className="p-4 space-y-3">
+                  {/* 题目 */}
+                  <div className="font-bold text-gray-900 text-sm">{detail.question}</div>
+                  
+                  {/* 答案对比 */}
+                  <div className={`p-3 border-2 border-black ${detail.isCorrect ? 'border-green-600 bg-green-100' : 'border-red-600 bg-red-100'}`}>
+                    {!detail.isCorrect ? (
+                      <div className="space-y-1 text-sm">
+                        <div className="text-red-700">
+                          <span className="font-bold">您的答案：</span>
+                          <span className="font-bold text-red-600">{detail.userAnswerText}</span>
+                        </div>
+                        <div className="text-green-700">
+                          <span className="font-bold">正确答案：</span>
+                          <span className="font-bold text-green-600">{detail.correctAnswerText}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-green-700 text-sm">
+                        <span className="font-bold">您的答案：</span>
+                        <span className="font-bold text-green-600">{detail.userAnswerText}</span>
+                        <span className="ml-2 text-green-500">（正确）</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* 答案解析 */}
+                  <div className="border-2 border-black bg-blue-50 p-3">
+                    <div className="font-bold text-blue-800 text-sm mb-1 flex items-center gap-1">
+                      <span>📖 答案解析</span>
+                    </div>
+                    <p className="text-gray-800 text-sm leading-relaxed">{detail.explanation}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-end pt-4 border-t-2 border-gray-200">
+            <Button
+              onClick={handleRetry}
+              className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 gap-2"
+              style={{ borderRadius: '0', boxShadow: '2px 2px 0 0 #000' }}
+            >
+              重新测试
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="border-2 border-black bg-white" style={{ boxShadow: '4px 4px 0 0 #000', borderRadius: '0' }}>
+      <div className="bg-gradient-to-r from-orange-600 to-orange-500 border-b-2 border-black p-6 text-white">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xl font-black flex items-center gap-2">
+              <FileText className="w-6 h-6" />
+              AI智能测试
+            </h3>
+            <p className="text-white/90 text-sm mt-1">{disasterName}岗位指挥知识测试</p>
+          </div>
+          <span className="text-white font-bold">满分100分</span>
+        </div>
+      </div>
+      <div className="p-6 space-y-6">
+        {testQuestions.map((question, qIndex) => (
+          <div key={question.id} className="border-2 border-black">
+            <div className="bg-gray-900 border-b-2 border-black px-4 py-3">
+              <span className="text-white font-black">第 {qIndex + 1} 题 · {question.score}分</span>
+            </div>
+            <div className="p-4">
+              <h4 className="text-lg font-bold text-gray-900 mb-4">{question.question}</h4>
+              <div className="space-y-3">
+                {question.options.map(option => {
+                  const isSelected = answers[question.id] === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      onClick={() => handleAnswerSelect(question.id, option.id)}
+                      className={`w-full p-4 text-left border-2 transition-all flex items-center gap-3 ${
+                        isSelected ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-orange-300 hover:bg-gray-50'
+                      }`}
+                      style={{ borderRadius: '0', boxShadow: '2px 2px 0 0 #000' }}
+                    >
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm flex-shrink-0 ${
+                        isSelected ? 'bg-orange-600 text-white' : 'bg-gray-200 text-gray-600'
+                      }`}>
+                        {isSelected ? '✓' : option.label}
+                      </div>
+                      <span className="text-base font-medium text-gray-800">{option.text}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        ))}
+        <div className="flex justify-center pt-4 border-t-2 border-gray-200">
+          <Button
+            onClick={handleSubmit}
+            className="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 gap-2 px-8 py-6 text-lg"
+            style={{ borderRadius: '0', boxShadow: '2px 2px 0 0 #000' }}
+            disabled={Object.keys(answers).length < testQuestions.length}
+          >
+            提交答卷
+          </Button>
         </div>
       </div>
     </div>

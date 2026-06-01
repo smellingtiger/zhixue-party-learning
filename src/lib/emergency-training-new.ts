@@ -426,7 +426,8 @@ export const scenarioDutyMaps: ScenarioDutyMap[] = [
       { roleId: 'health-bureau', coreResponsibility: '全面启动火场大规模医疗救治体系', specificActions: ['在火场周边建立多个野战医疗救治点', '协调省内外烧伤救治专家和军队医疗力量参与救治', '建立空中医疗转运通道，快速转运危重伤员'], timeLimit: '野战医疗点在总动员令发布后2小时内建立运转', indicators: ['医疗救治点覆盖率100%', '专家和军队医疗力量到位率100%', '空中转运通道建立时效≤4h'] },
       { roleId: 'traffic-bureau', coreResponsibility: '全域交通最高级别管控，保障国家级救援力量通行', specificActions: ['对火场周边实施全域最高级别交通管控', '为国家救援车队和航空消防力量建立专属通道', '协调铁路、航空部门保障扑火人员和物资快速投送'], timeLimit: '交通管控方案在总动员令发布后30分钟内全面实施', indicators: ['交通管控覆盖率100%', '国家级救援通道畅通率100%', '人员和物资快速投送效率达标'] },
       { roleId: 'street-office', coreResponsibility: '组织辖区全员疏散，建立大规模安置和后勤保障体系', specificActions: ['组织火场周边全部居民强制疏散转移至安全区域', '协助建立和管理大规模灾民安置点', '组织全社会力量为扑火队伍提供全方位后勤支持'], timeLimit: '总动员令发布后3小时内完成全员疏散', indicators: ['辖区人员疏散完成率≥98%', '安置点基本生活保障率100%', '扑火后勤支持保障率≥95%'] }
-  ]
+    ]
+  }
 ];
 
 export function getDutiesByScenario(scenarioId: string): ScenarioDutyMap | undefined {
